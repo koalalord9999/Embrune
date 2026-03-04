@@ -1,4 +1,3 @@
-
 import { POI, SkillName, ToolType } from '../../types';
 
 export const sunbrightPlainsPois: Record<string, POI> = {
@@ -195,7 +194,7 @@ export const sunbrightPlainsPois: Record<string, POI> = {
         id: 'sp_maple_grove',
         name: 'Maple Grove',
         description: 'A quiet grove of maple trees. Excellent for woodcutting.',
-        connections: ['sp_rocky_outcrop'],
+        connections: ['sp_rocky_outcrop', 'sp_ancient_monolith'],
         activities: [
             { type: 'skilling', id: 'sp_maple_1', name: 'Chop Maple', skill: SkillName.Woodcutting, requiredLevel: 45, loot: [{ itemId: 'maple_logs', chance: 1, xp: 100 }], resourceCount: { min: 2, max: 35 }, respawnTime: 30000, gatherTime: 4000 },
             { type: 'skilling', id: 'sp_maple_2', name: 'Chop Maple', skill: SkillName.Woodcutting, requiredLevel: 45, loot: [{ itemId: 'maple_logs', chance: 1, xp: 100 }], resourceCount: { min: 2, max: 35 }, respawnTime: 30000, gatherTime: 4000 },
@@ -220,5 +219,25 @@ export const sunbrightPlainsPois: Record<string, POI> = {
         activities: [],
         regionId: 'sunbright_plains',
         x: 1650, y: 1280,
+    },
+    sp_ancient_monolith: {
+        id: 'sp_ancient_monolith',
+        name: 'Ancient Monolith',
+        description: 'A single, massive stone covered in faint, eroded carvings. It hums with a barely perceptible energy. Small, empty fire pits surround its base.',
+        connections: ['sp_maple_grove'],
+        activities: [
+            {
+                type: 'npc',
+                name: 'Ancient Monolith',
+                icon: 'https://api.iconify.design/game-icons:standing-stones.svg',
+                startNode: 'monolith_default',
+            },
+            { type: 'npc', name: 'Empty Fire Pit', icon: 'https://api.iconify.design/game-icons:fire-pit.svg' },
+            { type: 'npc', name: 'Empty Fire Pit', icon: 'https://api.iconify.design/game-icons:fire-pit.svg' },
+            { type: 'npc', name: 'Empty Fire Pit', icon: 'https://api.iconify.design/game-icons:fire-pit.svg' },
+            { type: 'npc', name: 'Empty Fire Pit', icon: 'https://api.iconify.design/game-icons:fire-pit.svg' },
+        ],
+        regionId: 'sunbright_plains',
+        x: 1580, y: 1390,
     },
 };

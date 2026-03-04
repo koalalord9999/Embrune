@@ -1,4 +1,3 @@
-
 import { POI, SkillName } from '../../types';
 import { CIVILLIAN_DIALOGUE } from '../../constants/dialogue';
 import { BANKER_ZAHRA_DIALOGUE, BARKEEP_ZALE_DIALOGUE, KHALID_DIALOGUE, ZAFIRA_DIALOGUE, CAPTAIN_OMAR_DIALOGUE } from '../dialogues/fouthiaDialogues';
@@ -212,7 +211,23 @@ export const fouthiaPois: Record<string, POI> = {
         connections: ['fouthia_back_alleys'],
         activities: [
             { type: 'shop', shopId: 'fouthia_alchemist' },
-            { type: 'npc', name: 'Zafira the Alchemist', icon: '/assets/npcChatHeads/herbalist_anise.png', dialogue: ZAFIRA_DIALOGUE, startNode: 'start' }
+            {
+                type: 'npc',
+                name: 'Zafira the Alchemist',
+                icon: '/assets/npcChatHeads/herbalist_anise.png',
+                dialogue: ZAFIRA_DIALOGUE,
+                startNode: 'start',
+                questTopics: ['the_sorcerers_trial'],
+                conditionalGreetings: [
+                    { 
+                        text: "You're back! And you haven't exploded! A pity, but a successful experiment nonetheless. Is that my little creation? It looks... bored.",
+                        check: { requirements: [
+                            { type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 12 },
+                            { type: 'items', items: [{ itemId: 'tempered_core', quantity: 1 }] }
+                        ]}
+                    },
+                ],
+            }
         ],
         regionId: 'fouthia',
         x: 100, y: 300, type: 'internal',

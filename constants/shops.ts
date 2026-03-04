@@ -1,4 +1,3 @@
-
 import { Shop } from '../types';
 
 export const SHOPS: Record<string, Shop> = {
@@ -28,6 +27,8 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'cheese', quantity: 50, priceModifier: 2.0 },
             { itemId: 'pineapple', quantity: 20, priceModifier: 4.0 },
             { itemId: 'red_berries', quantity: 50, priceModifier: 1.2 },
+            { itemId: 'throwing_flask', quantity: 150, priceModifier: 1.0 },
+            { itemId: 'rendering_kit', quantity: 1, priceModifier: 1.0 },
         ]
     },
     meadowdale_fishing: {
@@ -69,6 +70,8 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'bronze_pickaxe', quantity: 10, priceModifier: 1.1 },
             { itemId: 'bronze_sword', quantity: 10, priceModifier: 1.1},
             { itemId: 'wooden_shield', quantity: 10, priceModifier: 1.1},
+            { itemId: 'throwing_flask', quantity: 150, priceModifier: 1.0 },
+            { itemId: 'rendering_kit', quantity: 1, priceModifier: 1.0 },
         ]
     },
     oakhaven_crafting: {
@@ -120,6 +123,8 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'iron_arrow', quantity: 1000, priceModifier: 1.1 },
             { itemId: 'vial', quantity: 1000, priceModifier: 1.0 },
             { itemId: 'rope', quantity: 100, priceModifier: 1.0 },
+            { itemId: 'throwing_flask', quantity: 150, priceModifier: 1.0 },
+            { itemId: 'rendering_kit', quantity: 1, priceModifier: 1.0 },
         ]
     },
     graces_garments: {
@@ -213,7 +218,9 @@ export const SHOPS: Record<string, Shop> = {
     slayer_master_shop: {
         id: 'slayer_master_shop',
         name: 'Slayer Rewards',
-        inventory: []
+        inventory: [
+            { itemId: 'x_mix', quantity: 1000, priceModifier: 1.0 },
+        ]
     },
     isle_of_whispers_general: {
         id: 'isle_of_whispers_general',
@@ -244,6 +251,8 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'steel_arrow', quantity: 500, priceModifier: 1.1 },
             { itemId: 'cooked_beef', quantity: 50, priceModifier: 1.0 },
             { itemId: 'pineapple', quantity: 10, priceModifier: 5.0 },
+            { itemId: 'throwing_flask', quantity: 150, priceModifier: 1.0 },
+            { itemId: 'rendering_kit', quantity: 1, priceModifier: 1.0 },
         ]
     },
     fouthia_armorer: {

@@ -1,5 +1,3 @@
-
-
 export enum SkillName {
   Attack = "Attack",
   Strength = "Strength",
@@ -61,11 +59,13 @@ export enum WeaponType {
     Battleaxe = "Battleaxe",
     Warhammer = "Warhammer",
     Spear = "Spear",
+    Whip = "Whip",
     Bow = "Bow",
     Crossbow = "Crossbow",
     Arrow = "Arrow",
     Bolt = "Bolt",
     Staff = "Staff",
+    Thrown = "Thrown",
 }
 
 export enum MonsterType {

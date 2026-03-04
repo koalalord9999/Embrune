@@ -14,6 +14,11 @@ export const getDisplayName = (slot: InventorySlot | null): string => {
     const item = ITEMS[slot.itemId];
     if (!item) return "Unknown Item";
 
+    if (slot.itemId === 'rendering_kit' && slot.filled && typeof slot.doses === 'number') {
+        const fatName = ITEMS[slot.filled]?.name.replace(' Fat', '').replace('rich animal', 'Rich Animal');
+        return `Filled Rendering Kit (${fatName} ${slot.doses})`;
+    }
+
     if (item.consumable?.teleportOptions && typeof slot.charges === 'number') {
         if (item.destroyOnEmpty === false && slot.charges === 0) {
             return item.name;

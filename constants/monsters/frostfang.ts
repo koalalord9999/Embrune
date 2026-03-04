@@ -1,4 +1,3 @@
-
 import { Monster, MonsterType, SkillName } from '@/types';
 
 export const frostfang: Monster[] = [
@@ -36,6 +35,7 @@ export const frostfang: Monster[] = [
             { itemId: 'frostfang_key', chance: 0.001953125, minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Beast], attackSpeed: 6, respawnTime: 45000, aggressive: true, attackStyle: 'crush', customMaxHit: 14,
+        fireWeakness: 0.5,
     },
     {
         id: 'ice_imp', name: 'Ice Imp', level: 69, maxHp: 40, attack: 1, magic: 70, strength: 1, defence: 55,
@@ -53,6 +53,7 @@ export const frostfang: Monster[] = [
             { itemId: 'frostfang_key', chance: 0.001953125, minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Demon], attackSpeed: 3, respawnTime: 20000, aggressive: true, attackStyle: 'magic', customMaxHit: 9,
+        fireWeakness: 0.5,
     },
     {
         id: 'rime_coated_serpent', name: 'Rime-Coated Serpent', level: 75, maxHp: 80, attack: 70, strength: 72, defence: 65,
@@ -73,6 +74,7 @@ export const frostfang: Monster[] = [
             { itemId: 'frostfang_key', chance: 0.001953125, minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Beast], attackSpeed: 4, respawnTime: 35000, aggressive: true, attackStyle: 'slash', customMaxHit: 12,
+        fireWeakness: 0.5,
     },
     {
         id: 'frost_golem', name: 'Frost Golem', level: 80, maxHp: 120, attack: 75, strength: 78, defence: 90,
@@ -91,6 +93,7 @@ export const frostfang: Monster[] = [
             { itemId: 'frostfang_key', chance: 0.001953125, minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Elemental, MonsterType.Armored], attackSpeed: 7, respawnTime: 60000, aggressive: true, attackStyle: 'crush', customMaxHit: 13,
+        fireWeakness: 0.5,
     },
     {
         id: 'yeti', name: 'Yeti', level: 85, maxHp: 130, attack: 80, strength: 85, defence: 75,
@@ -198,6 +201,7 @@ export const frostfang: Monster[] = [
             { itemId: 'frostfang_key', chance: 0.001953125, minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Beast], attackSpeed: 3, respawnTime: 28000, aggressive: true, attackStyle: 'ranged', customMaxHit: 9,
+        fireWeakness: 0.5,
     },
     {
         id: 'hoarfrost_nomad', name: 'Hoarfrost Nomad', level: 77, maxHp: 85, attack: 72, strength: 75, defence: 70,
@@ -230,7 +234,7 @@ export const frostfang: Monster[] = [
             { itemId: 'uncut_diamond', chance: '1/200' },
             { itemId: 'staff_of_aqua', chance: '1/128' },
         ],
-        elementalWeakness: 'fire',
+        fireWeakness: 0.5,
         tertiaryDrops: [
             { itemId: 'frostfang_key', chance: 0.001953125, minQuantity: 1, maxQuantity: 1 },
         ],
@@ -254,5 +258,6 @@ export const frostfang: Monster[] = [
             { itemId: 'frostfang_key', chance: 0.001953125, minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Dragon], attackSpeed: 5, respawnTime: 240000, aggressive: true, attackStyle: 'crush', customMaxHit: 16,
+        fireWeakness: 0.5,
     },
 ];

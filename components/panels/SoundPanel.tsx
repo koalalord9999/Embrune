@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { AUDIO_MANIFEST, SoundID } from '../../constants/audioManifest';
 import { useSoundEngine } from '../../hooks/useSoundEngine';
@@ -13,10 +14,10 @@ interface SoundPanelProps {
 }
 
 const SoundPanel: React.FC<SoundPanelProps> = ({ addLog, worldState, ui }) => {
-    const { play, playRecipe, getContextTime } = useSoundEngine(ui.masterVolume, ui.isMuted);
+    const { play, playRecipe, getContextTime } = useSoundEngine();
     
     // Pass undefined as regionId to prevent automatic track changes when opening this panel.
-    const { musicLibrary, playMusicSegment, stopMusic } = useMusicEngine(undefined, ui.masterVolume, ui.isMuted);
+    const { musicLibrary, playMusicSegment, stopMusic } = useMusicEngine(undefined);
 
     // Creator State
     const [type, setType] = useState<'osc' | 'noise'>('osc');

@@ -1,4 +1,3 @@
-
 import { Monster, MonsterType, SkillName } from '@/types';
 
 export const sunscorchedMonsters: Monster[] = [
@@ -59,6 +58,7 @@ export const sunscorchedMonsters: Monster[] = [
         stabDefence: 70, slashDefence: 70, crushDefence: 70, rangedDefence: 85, magicDefence: 95,
         iconUrl: 'https://api.iconify.design/game-icons:ifrit.svg',
         types: [MonsterType.Elemental, MonsterType.Demon], attackSpeed: 4, respawnTime: 90000, aggressive: true, attackStyle: 'magic', customMaxHit: 22,
+        fireImmunity: true,
         mainDrops: [{ itemId: 'ember_rune', chance: '1/1', minQuantity: 50, maxQuantity: 100 }, { itemId: 'uncut_ruby', chance: '1/64' }],
         guaranteedDrops: [{ itemId: 'ashes', minQuantity: 1, maxQuantity: 1 }],
     },

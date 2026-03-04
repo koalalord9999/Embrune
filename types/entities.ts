@@ -48,6 +48,7 @@ export interface EquipmentStats {
         chance: number; // e.g., 0.25 for a successful hit
         damage: number; // The initial damage per tick. The poison will wear off as this number decays to 0.
     };
+    isXFlask?: boolean;
 }
 
 
@@ -107,6 +108,9 @@ export interface InventorySlot {
   chargeProgress?: number;
   nameOverride?: string;
   statsOverride?: Partial<EquipmentStats>;
+  isAltered?: boolean;
+  filled?: string;
+  expiresAt?: number;
 }
 
 export interface Equipment {
@@ -164,6 +168,8 @@ export interface Monster {
   useWeightedMainDrops?: boolean;
   customMaxHit?: number;
   elementalWeakness?: SpellElement;
+  fireImmunity?: boolean;
+  fireWeakness?: number; // e.g., 0.25 for 25% extra damage from fire
   pickpocket?: { lootTableId: string; };
   elementalWeaknessCycle?: SpellElement[];
   maxTaskCount?: [number, number];
@@ -182,6 +188,10 @@ export interface ActiveStatModifier {
     nextDecayTimestamp: number;
 }
 
+export type MonsterStatusEffect =
+  | { type: 'poison'; damagePerTick: number; ticksApplied: number }
+  | { type: 'burn'; maxDamagePerTick: number; ticksRemaining: number };
+
 export interface ActiveBuff {
     id: number;
     type: 'recoil' | 'flat_damage' | 'poison_on_hit' | 'accuracy_boost' | 'evasion_boost' | 'damage_on_hit' | 'attack_speed_boost' | 'poison_immunity' | 'damage_reduction' | 'antifire' | 'stun' | 'poison' | 'stat_boost' | 'magic_damage_boost' | 'stamina';
@@ -197,4 +207,5 @@ export interface ActiveBuff {
     ticksApplied?: number;
     nextTickTimestamp?: number;
     source?: string; // ID of the spell or item that caused this buff
-}
+
+};

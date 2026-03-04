@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { InventorySlot, PlayerSkill, PlayerQuestState, CraftingContext } from '../../../types';
 import { MakeXPrompt, ContextMenuState, TooltipState } from '../../../hooks/useUIState';
@@ -16,6 +15,8 @@ import FletchingInterface from './subviews/FletchingInterface';
 import JewelryInterface from './subviews/JewelryInterface';
 import DoughMakingInterface from './subviews/DoughMakingInterface';
 import BookbindingInterface from './subviews/BookbindingInterface';
+import RenderingInterface from './subviews/RenderingInterface';
+import GlassblowingInterface from './subviews/GlassblowingInterface';
 
 type BarType = 'bronze_bar' | 'iron_bar' | 'steel_bar' | 'silver_bar' | 'mithril_bar' | 'adamantite_bar' | 'runic_bar';
 
@@ -37,6 +38,8 @@ export interface CraftingViewProps {
     setMakeXPrompt: (prompt: MakeXPrompt | null) => void;
     setTooltip: (tooltip: TooltipState | null) => void;
     onJewelryCraft?: (itemId: string, quantity: number) => void;
+    handleRendering?: (fatId: string, quantity: number) => void;
+    onGlassblow?: (itemId: string, quantity: number) => void;
 }
 
 const CraftingView: React.FC<CraftingViewProps> = (props) => {
@@ -54,6 +57,9 @@ const CraftingView: React.FC<CraftingViewProps> = (props) => {
             case 'fletching': return 'Fletching';
             case 'dough_making': return 'Make Dough';
             case 'bookbinding': return 'Bookbinding';
+            /* FIX: Enabled titles for rendering and glassblowing to resolve comparable type error */
+            case 'rendering': return 'Rendering Fat';
+            case 'glassblowing': return 'Glassblowing';
             default: return 'Crafting';
         }
     };
@@ -69,6 +75,9 @@ const CraftingView: React.FC<CraftingViewProps> = (props) => {
             case 'jewelry': return <JewelryInterface {...props} onCraftItem={onJewelryCraft!} />;
             case 'dough_making': return <DoughMakingInterface {...props} />;
             case 'bookbinding': return <BookbindingInterface {...props} />;
+            /* FIX: Enabled sub-interfaces for rendering and glassblowing to resolve comparable type error */
+            case 'rendering': return <RenderingInterface {...props} />;
+            case 'glassblowing': return <GlassblowingInterface {...props} onCraftItem={props.onGlassblow!} />;
             case 'fletching': {
                 return <FletchingInterface {...props} />;
             }

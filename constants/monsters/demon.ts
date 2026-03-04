@@ -1,4 +1,3 @@
-
 import { Monster, MonsterType, SkillName } from '@/types';
 
 export const demon: Monster[] = [
@@ -40,7 +39,8 @@ export const demon: Monster[] = [
             { itemId: 'gold_ore', chance: "1/12", minQuantity: 1, maxQuantity: 4, noted: true },
             { itemId: 'uncut_ruby', chance: "1/100", minQuantity: 1, maxQuantity: 1 },
         ],
-        types: [MonsterType.Demon, MonsterType.Elemental], attackSpeed: 2, respawnTime: 90000, aggressive: true, alwaysAggressive: true, attackStyle: 'ranged'
+        types: [MonsterType.Demon, MonsterType.Elemental], attackSpeed: 2, respawnTime: 90000, aggressive: true, alwaysAggressive: true, attackStyle: 'ranged',
+        fireImmunity: true,
     },
     {
         id: 'fire_fiend', name: 'Fire Fiend', level: 58, maxHp: 70, attack: 50, strength: 55, defence: 50,
@@ -60,6 +60,7 @@ export const demon: Monster[] = [
             { itemId: 'ember_talisman', chance: "1/256", minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Demon, MonsterType.Elemental], attackSpeed: 4, respawnTime: 45000, aggressive: true, attackStyle: 'crush',
+        fireImmunity: true,
     },
     {
         id: 'lesser_incubus', name: 'Lesser Incubus', level: 82, maxHp: 95, attack: 75, strength: 80, defence: 75,

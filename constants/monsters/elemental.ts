@@ -48,7 +48,8 @@ export const elemental: Monster[] = [
             { itemId: 'raw_tuna', chance: "1/10", minQuantity: 1, maxQuantity: 1, noted: true },
             { itemId: 'rock_salt', chance: "1/5", minQuantity: 1, maxQuantity: 3 },
         ],
-        types: [MonsterType.Elemental], attackSpeed: 4, respawnTime: 75000, aggressive: true, alwaysAggressive: true, attackStyle: 'magic'
+        types: [MonsterType.Elemental], attackSpeed: 4, respawnTime: 75000, aggressive: true, alwaysAggressive: true, attackStyle: 'magic',
+        fireWeakness: -0.5,
     },
     {
         id: 'cave_slime', name: 'Cave Slime', level: 3, maxHp: 10, attack: 2, strength: 2, defence: 2,
@@ -374,6 +375,7 @@ export const elemental: Monster[] = [
             { itemId: 'raw_sardine', chance: "1/5", minQuantity: 1, maxQuantity: 2, noted: true },
         ],
         tertiaryDrops: [{ itemId: 'nexus_talisman', chance: 1 / 128, minQuantity: 1, maxQuantity: 1 }],
-        types: [MonsterType.Elemental], attackSpeed: 4, respawnTime: 35000, aggressive: true, attackStyle: 'magic'
+        types: [MonsterType.Elemental], attackSpeed: 4, respawnTime: 35000, aggressive: true, attackStyle: 'magic',
+        fireWeakness: -0.5,
     },
 ];

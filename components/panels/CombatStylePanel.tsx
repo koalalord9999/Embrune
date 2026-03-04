@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CombatStance, Equipment, WeaponType } from '../../types';
 import { ITEMS } from '../../constants';
@@ -19,7 +20,7 @@ const CombatStylePanel: React.FC<CombatStylePanelProps> = ({ combatStance, setCo
         const itemData = weaponSlot ? ITEMS[weaponSlot.itemId] : null;
         const weaponType = itemData?.equipment?.weaponType ?? WeaponType.Unarmed;
 
-        if (weaponType === WeaponType.Bow || weaponType === WeaponType.Crossbow) {
+        if (weaponType === WeaponType.Bow || weaponType === WeaponType.Crossbow || weaponType === WeaponType.Thrown) {
             return {
                 stanceOptions: [CombatStance.RangedAccurate, CombatStance.RangedRapid, CombatStance.RangedDefence],
                 stanceLabels: {

@@ -10,4 +10,7 @@ export type CraftingContext =
   | { type: 'jewelry' }        // From using a furnace to craft jewelry
   | { type: 'fletching'; logId: string } // From using knife on logs
   | { type: 'dough_making' }
-  | { type: 'bookbinding' }; // From using the new workbench
+  | { type: 'bookbinding' }
+  /* ADDED 'rendering' and 'glassblowing' to fix comparable type errors in CraftingView and useItemActions */
+  | { type: 'rendering' }
+  | { type: 'glassblowing' };

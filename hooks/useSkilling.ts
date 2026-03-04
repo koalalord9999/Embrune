@@ -24,7 +24,8 @@ interface SkillingDependencies {
 export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>, deps: SkillingDependencies) => {
     const { addLog, skills, addXp, inventory, modifyItem, equipment, setEquipment, checkQuestProgressOnShear, hasItems } = deps;
     const ui = useUIState();
-    const { play } = useSoundEngine(ui.masterVolume, ui.isMuted);
+    // FIX: useSoundEngine hook expects 0 arguments.
+    const { play } = useSoundEngine();
     
     const [resourceNodeStates, setResourceNodeStates] = useState<Record<string, ResourceNodeState>>(initialNodeStates);
     const [activeSkilling, setActiveSkilling] = useState<{ nodeId: string; activity: SkillingActivity } | null>(null);

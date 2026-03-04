@@ -13,6 +13,7 @@ import { herbloreItems } from './items/herbloreItems';
 import { runes } from './items/runes';
 import { talismans } from './items/talismans';
 import { slayerGear } from './items/slayerGear';
+import { tools } from './items/tools';
 
 const allItemsUnsorted: Item[] = [
     ...armor,
@@ -27,6 +28,7 @@ const allItemsUnsorted: Item[] = [
     ...runes,
     ...talismans,
     ...slayerGear,
+    ...tools,
 ];
 
 // Sort the array alphabetically by item name for deterministic order if needed elsewhere

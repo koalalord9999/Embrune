@@ -1,8 +1,10 @@
+
 import React, { useEffect, useCallback, useState, useRef } from 'react';
 import { useSoundEngine } from './useSoundEngine';
 import { WorldState } from '../types';
 import { REGIONS } from '../constants';
 import * as TRACKS from '../components/music/index';
+import { useUIState } from './useUIState';
 
 export type MusicStyle = 'grand' | 'pastoral' | 'mystic' | 'industrial' | 'desolate' | 'eerie' | 'volcanic' | 'tutorial' | 'heroic';
 
@@ -70,13 +72,12 @@ MUSIC_TRACKS.forEach(track => {
 });
 
 export const useMusicEngine = (
-    regionId: string | undefined, 
-    volume: number, 
-    isMuted: boolean,
+    regionId?: string, 
     worldState?: WorldState,
     setWorldState?: React.Dispatch<React.SetStateAction<WorldState>>
 ) => {
-    const { playRecipe, stopAllMusic, setMusicVolume, getContextTime, initContext, isAudioActive } = useSoundEngine(volume, isMuted);
+    const ui = useUIState();
+    const { playRecipe, stopAllMusic, setMusicVolume, getContextTime, initContext, isAudioActive } = useSoundEngine();
     
     const [manualOverrideId, setManualOverrideId] = useState<string | null>(null);
     const [intendedTrackId, setIntendedTrackId] = useState<string | null>(null);
@@ -209,7 +210,7 @@ export const useMusicEngine = (
 
     // Unified Track Decision Logic
     useEffect(() => {
-        if (isMuted) {
+        if (ui.isMuted) {
             stopMusic();
             return;
         }
@@ -246,7 +247,7 @@ export const useMusicEngine = (
         if (intendedTrackId !== locationTrackId) {
             setIntendedTrackId(locationTrackId);
         }
-    }, [regionId, isMuted, manualOverrideId, stopMusic, intendedTrackId]);
+    }, [regionId, ui.isMuted, manualOverrideId, stopMusic, intendedTrackId]);
 
     // Playback Execution
     useEffect(() => {

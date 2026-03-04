@@ -1,4 +1,3 @@
-
 import { DialogueNode } from '../../types';
 
 export const BANKER_ZAHRA_DIALOGUE: Record<string, DialogueNode> = {
@@ -83,7 +82,22 @@ export const ZAFIRA_DIALOGUE: Record<string, DialogueNode> = {
     start: {
         npcName: 'Zafira the Alchemist',
         npcIcon: '/assets/npcChatHeads/herbalist_anise.png', // Re-using asset
-        text: "The desert provides all the remedies one needs, if you know where to look. I sell potions for sun-sickness, scorpion stings, and worse. What ails you?",
+        text: "*Zafira cackles, stirring a bubbling, purple concoction.* Careful where you step! Some of my experiments are a bit... energetic. Looking for a potion? Or perhaps something with a bit more... KABOOM?",
+        responses: [
+            { text: "Just browsing, thanks.", next: 'browse' },
+            { text: "What's that you're making?", next: 'making' },
+        ]
+    },
+    browse: {
+        npcName: 'Zafira the Alchemist',
+        npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+        text: "Suit yourself! Just don't touch anything. Or do! Spontaneous combustion is a leading cause of scientific discovery, you know!",
+        responses: []
+    },
+    making: {
+        npcName: 'Zafira the Alchemist',
+        npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+        text: "This? Oh, this is just a little something to help the guards' arrows go... farther. And louder. And brighter! It's mostly brimstone and wishful thinking.",
         responses: []
     }
 };

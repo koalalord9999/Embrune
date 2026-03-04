@@ -1,3 +1,4 @@
+
 import React, { useCallback, useMemo } from 'react';
 import { InventorySlot, Equipment, CombatStance, BankTab, EquipmentStats } from '../types';
 import { ITEMS, BANK_CAPACITY, INVENTORY_CAPACITY, MAX_BANK_TABS } from '../constants';
@@ -18,6 +19,16 @@ interface BankState {
     setBank: React.Dispatch<React.SetStateAction<BankTab[]>>;
 }
 
+/**
+ * Helper to 'snuff out' a lit fire pot if it's being deposited.
+ */
+const getSnuffedSlot = (slot: InventorySlot): InventorySlot => {
+    if (slot.itemId === 'fire_pot_lit') {
+        return { ...slot, itemId: 'fire_pot', expiresAt: undefined };
+    }
+    return slot;
+};
+
 export const useBank = (bankState: BankState, deps: BankDependencies) => {
     const { addLog, inventory, setInventory, equipment, setEquipment, modifyItem, setCombatStance, bankPlaceholders } = deps;
     const { bank, setBank } = bankState;
@@ -25,18 +36,22 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
     const totalBankedItems = useMemo(() => bank.reduce((total, tab) => total + tab.items.filter(item => item !== null && item.quantity > 0).length, 0), [bank]);
 
     const handleDeposit = useCallback((inventoryIndex: number, quantity: number | 'all', activeTabId: number) => {
-        const itemSlot = inventory[inventoryIndex];
-        if (!itemSlot) return;
+        const originalSlot = inventory[inventoryIndex];
+        if (!originalSlot) return;
+
+        // Snuff logic: Revert lit fire pot to un-lit before putting in bank
+        const itemSlot = getSnuffedSlot(originalSlot);
+
         const itemData = ITEMS[itemSlot.itemId];
         if (!itemData) return;
 
         const isSingleUnstackable = quantity === 1 && !itemData.stackable && !itemSlot.noted;
     
         let qtyToDeposit: number;
-        if (itemSlot.noted || itemData.stackable) {
-            qtyToDeposit = quantity === 'all' ? itemSlot.quantity : Math.min(quantity, itemSlot.quantity);
+        if (originalSlot.noted || ITEMS[originalSlot.itemId].stackable) {
+            qtyToDeposit = quantity === 'all' ? originalSlot.quantity : Math.min(quantity, originalSlot.quantity);
         } else {
-            const totalAvailable = inventory.reduce((count, s) => (s && s.itemId === itemSlot.itemId && !s.noted) ? count + s.quantity : count, 0);
+            const totalAvailable = inventory.reduce((count, s) => (s && s.itemId === originalSlot.itemId && !s.noted) ? count + s.quantity : count, 0);
             qtyToDeposit = quantity === 'all' ? totalAvailable : Math.min(quantity, totalAvailable);
         }
     
@@ -82,7 +97,8 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
             
             setInventory(prevInv => {
                 const newInv = [...prevInv];
-                if (itemSlot.noted || itemData.stackable) {
+                // Use originalSlot for inventory removal checks
+                if (originalSlot.noted || ITEMS[originalSlot.itemId].stackable) {
                     const slot = newInv[inventoryIndex];
                     if (slot) {
                         slot.quantity -= qtyToDeposit;
@@ -95,7 +111,7 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
                         let removedCount = 0;
                         for (let i = 0; i < newInv.length && removedCount < qtyToDeposit; i++) {
                             const s = newInv[i];
-                            if (s && s.itemId === itemSlot.itemId && !s.noted) {
+                            if (s && s.itemId === originalSlot.itemId && !s.noted) {
                                 newInv[i] = null;
                                 removedCount++;
                             }
@@ -124,6 +140,11 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
                 const existingSlot = targetTab.items[existingSlotIndex]!;
                 existingSlot.quantity = (existingSlot.quantity === 0 ? 0 : existingSlot.quantity) + qtyToDeposit;
             }
+
+            if (originalSlot.itemId === 'fire_pot_lit') {
+                addLog("The fire pot's embers are snuffed out as you put it in the bank.");
+            }
+
             return newBank;
         });
     }, [inventory, setInventory, totalBankedItems, addLog, setBank]);
@@ -217,19 +238,23 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
             const newBank = JSON.parse(JSON.stringify(prevBank));
             const indicesToClear: number[] = [];
             let currentBankedItems = totalBankedItems;
+            let potsSnuffed = 0;
 
             itemsToProcess.forEach(({ slot, index }) => {
-                const itemData = ITEMS[slot.itemId];
+                const effectiveSlot = getSnuffedSlot(slot);
+                if (slot.itemId === 'fire_pot_lit') potsSnuffed++;
+
+                const itemData = ITEMS[effectiveSlot.itemId];
                 let targetTab: BankTab | undefined;
                 let existingSlotIndex = -1;
 
                 for (const tab of newBank) {
                     const slotIndex = tab.items.findIndex((s: InventorySlot | null) => 
-                        s?.itemId === slot.itemId && 
-                        (!itemData.doseable || s?.doses === slot.doses) &&
-                        s?.charges === slot.charges &&
-                        s.nameOverride === slot.nameOverride &&
-                        JSON.stringify(s.statsOverride) === JSON.stringify(slot.statsOverride)
+                        s?.itemId === effectiveSlot.itemId && 
+                        (!itemData.doseable || s?.doses === effectiveSlot.doses) &&
+                        s?.charges === effectiveSlot.charges &&
+                        s.nameOverride === effectiveSlot.nameOverride &&
+                        JSON.stringify(s.statsOverride) === JSON.stringify(effectiveSlot.statsOverride)
                     );
                     if (slotIndex > -1) {
                         targetTab = tab;
@@ -254,13 +279,13 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
                     if (needsNewSlot) {
                         const emptySlotIndex = targetTab.items.findIndex((s: InventorySlot | null) => s === null);
                         if (emptySlotIndex > -1) {
-                            targetTab.items[emptySlotIndex] = { ...slot, noted: false };
+                            targetTab.items[emptySlotIndex] = { ...effectiveSlot, noted: false };
                         } else {
-                            targetTab.items.push({ ...slot, noted: false });
+                            targetTab.items.push({ ...effectiveSlot, noted: false });
                         }
                         currentBankedItems++;
                     } else {
-                        targetTab.items[existingSlotIndex].quantity += slot.quantity;
+                        targetTab.items[existingSlotIndex].quantity += effectiveSlot.quantity;
                     }
                     indicesToClear.push(index);
                 }
@@ -280,6 +305,11 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
             } else {
                 addLog("Your bank did not have space for any of your items.");
             }
+
+            if (potsSnuffed > 0) {
+                addLog("Your lit fire pots were snuffed out upon entering the bank.");
+            }
+
             return newBank;
         });
     }, [inventory, setInventory, totalBankedItems, addLog, setBank]);
@@ -298,19 +328,23 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
             const newBank = JSON.parse(JSON.stringify(prevBank));
             const equipmentToClear: (keyof Equipment)[] = [];
             let currentBankedItems = totalBankedItems;
+            let potsSnuffed = 0;
 
             itemsToProcess.forEach(({ slot, slotKey }) => {
-                const itemData = ITEMS[slot.itemId];
+                const effectiveSlot = getSnuffedSlot(slot);
+                if (slot.itemId === 'fire_pot_lit') potsSnuffed++;
+
+                const itemData = ITEMS[effectiveSlot.itemId];
                 let targetTab: BankTab | undefined;
                 let existingSlotIndex = -1;
 
                 for (const tab of newBank) {
                     const slotIndex = tab.items.findIndex((s: InventorySlot | null) => 
-                        s?.itemId === slot.itemId && 
-                        (!itemData.doseable || s.doses === slot.doses) &&
-                        s?.charges === slot.charges &&
-                        s.nameOverride === slot.nameOverride &&
-                        JSON.stringify(s.statsOverride) === JSON.stringify(slot.statsOverride)
+                        s?.itemId === effectiveSlot.itemId && 
+                        (!itemData.doseable || s.doses === effectiveSlot.doses) &&
+                        s?.charges === effectiveSlot.charges &&
+                        s.nameOverride === effectiveSlot.nameOverride &&
+                        JSON.stringify(s.statsOverride) === JSON.stringify(effectiveSlot.statsOverride)
                     );
                     if (slotIndex > -1) {
                         targetTab = tab;
@@ -335,13 +369,13 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
                     if (needsNewSlot) {
                         const emptySlotIndex = targetTab.items.findIndex((s: InventorySlot | null) => s === null);
                         if (emptySlotIndex > -1) {
-                            targetTab.items[emptySlotIndex] = { ...slot };
+                            targetTab.items[emptySlotIndex] = { ...effectiveSlot };
                         } else {
-                            targetTab.items.push({ ...slot });
+                            targetTab.items.push({ ...effectiveSlot });
                         }
                         currentBankedItems++;
                     } else {
-                        targetTab.items[existingSlotIndex].quantity += slot.quantity;
+                        targetTab.items[existingSlotIndex].quantity += effectiveSlot.quantity;
                     }
                     equipmentToClear.push(slotKey);
                 }
@@ -366,6 +400,11 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
             } else {
                  addLog("Your bank is full. No equipment was deposited.");
             }
+
+            if (potsSnuffed > 0) {
+                addLog("Your lit fire pots were snuffed out upon entering the bank.");
+            }
+
             return newBank;
         });
     }, [equipment, setEquipment, totalBankedItems, addLog, setCombatStance, setBank]);

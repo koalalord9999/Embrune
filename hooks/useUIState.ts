@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback } from 'react';
+
+import React, { useState, useMemo, useCallback, createContext, useContext } from 'react';
 import { ActivePanel, SkillName, InventorySlot, ActiveCraftingAction, DialogueNode, CraftingContext, Equipment, PlayerQuestState, Spell, Item, DialogueResponse, DialogueCheckRequirement, ActiveTutorialState } from '../types';
 import { ContextMenuOption } from '../components/common/ContextMenu';
 
@@ -69,7 +70,35 @@ export interface ActiveSingleAction {
 
 export type WithdrawMode = 1 | 5 | 10 | 'x' | 'all';
 
-export const useUIState = () => {
+// Helper for localStorage
+const createPersistentState = <T,>(key: string, defaultValue: T): [T, (value: React.SetStateAction<T>) => void] => {
+    const [value, setValue] = useState<T>(() => {
+        try {
+            const item = window.localStorage.getItem(key);
+            return item ? JSON.parse(item) : defaultValue;
+        } catch (error) {
+            console.error(`Error reading localStorage key “${key}”:`, error);
+            return defaultValue;
+        }
+    });
+
+    const setPersistentValue = (newValueAction: React.SetStateAction<T>) => {
+        // This allows using the functional update form of setState (e.g., setCounter(c => c + 1))
+        const newValue = newValueAction instanceof Function ? newValueAction(value) : newValueAction;
+        try {
+            window.localStorage.setItem(key, JSON.stringify(newValue));
+        } catch (error) {
+            console.error(`Error setting localStorage key “${key}”:`, error);
+        }
+        setValue(newValue);
+    };
+
+    return [value, setPersistentValue];
+};
+
+
+// Original hook logic, now internal
+const useUIStateInternal = () => {
     const [activePanel, setActivePanel] = useState<ActivePanel>(null);
     const [combatQueue, setCombatQueue] = useState<string[]>([]);
     const [isMandatoryCombat, setIsMandatoryCombat] = useState<boolean>(false);
@@ -112,32 +141,33 @@ export const useUIState = () => {
     const [activeBankTabId, setActiveBankTabId] = useState<number>(0);
     const [activeDungeonMap, setActiveDungeonMap] = useState<{ regionId: string; mapTitle: string } | null>(null);
 
-    // New states for Settings
-    const [showTooltips, setShowTooltips] = useState<boolean>(true);
-    const [showXpDrops, setShowXpDrops] = useState<boolean>(true);
-    const [confirmValuableDrops, setConfirmValuableDrops] = useState<boolean>(true);
-    const [valuableDropThreshold, setValuableDropThreshold] = useState<number>(1000);
-    const [showMinimapHealth, setShowMinimapHealth] = useState<boolean>(false);
-    const [showCombatPlayerHealth, setShowCombatPlayerHealth] = useState<boolean>(false);
-    const [showCombatEnemyHealth, setShowCombatEnemyHealth] = useState<boolean>(false);
-    const [showHitsplats, setShowHitsplats] = useState<boolean>(true);
-    const [isOneClickMode, setIsOneClickMode] = useState<boolean>(false);
-
-    // Audio Settings
-    const [masterVolume, setMasterVolume] = useState<number>(0.5);
-    const [isMuted, setIsMuted] = useState<boolean>(false);
-
-    // New state for bank quantity toggles (session-wide)
-    const [activeWithdrawMode, setActiveWithdrawMode] = useState<WithdrawMode>(1);
-    const [customWithdrawAmount, setCustomWithdrawAmount] = useState<number | null>(null);
-
-    // Dev Mode settings (session only, not persisted in game state)
+    // Persistent Settings
+    const [showTooltips, setShowTooltips] = createPersistentState<boolean>('settings_showTooltips', true);
+    const [showXpDrops, setShowXpDrops] = createPersistentState<boolean>('settings_showXpDrops', true);
+    const [confirmValuableDrops, setConfirmValuableDrops] = createPersistentState<boolean>('settings_confirmValuableDrops', true);
+    const [valuableDropThreshold, setValuableDropThreshold] = createPersistentState<number>('settings_valuableDropThreshold', 1000);
+    const [showMinimapHealth, setShowMinimapHealth] = createPersistentState<boolean>('settings_showMinimapHealth', false);
+    const [showCombatPlayerHealth, setShowCombatPlayerHealth] = createPersistentState<boolean>('settings_showCombatPlayerHealth', false);
+    const [showCombatEnemyHealth, setShowCombatEnemyHealth] = createPersistentState<boolean>('settings_showCombatEnemyHealth', false);
+    const [showHitsplats, setShowHitsplats] = createPersistentState<boolean>('settings_showHitsplats', true);
+    const [isOneClickMode, setIsOneClickMode] = createPersistentState<boolean>('settings_isOneClickMode', false);
+    const [masterVolume, setMasterVolume] = createPersistentState<number>('settings_masterVolume', 1);
+    const [musicVolume, setMusicVolume] = createPersistentState<number>('settings_musicVolume', 1);
+    const [sfxVolume, setSfxVolume] = createPersistentState<number>('settings_sfxVolume', 1);
+    const [ambientVolume, setAmbientVolume] = createPersistentState<number>('settings_ambientVolume', 1);
+    const [isMuted, setIsMuted] = createPersistentState<boolean>('settings_isMuted', false);
+    
+    // Non-persistent dev settings
     const [xpMultiplier, setXpMultiplier] = useState<number>(1);
     const [combatSpeedMultiplier, setCombatSpeedMultiplier] = useState<number>(1);
     const [isPlayerInvisible, setIsPlayerInvisible] = useState<boolean>(false);
     const [isAutoBankOn, setIsAutoBankOn] = useState<boolean>(false);
     const [isGodModeOn, setIsGodModeOn] = useState<boolean>(false);
     const [isPermAggroOn, setIsPermAggroOn] = useState<boolean>(false);
+
+    // New state for bank quantity toggles (session-wide)
+    const [activeWithdrawMode, setActiveWithdrawMode] = useState<WithdrawMode>(1);
+    const [customWithdrawAmount, setCustomWithdrawAmount] = useState<number | null>(null);
 
     const isBusy = useMemo(() => !!(
         activeShopId ||
@@ -275,6 +305,9 @@ export const useUIState = () => {
         showHitsplats, setShowHitsplats,
         isOneClickMode, setIsOneClickMode,
         masterVolume, setMasterVolume,
+        musicVolume, setMusicVolume,
+        sfxVolume, setSfxVolume,
+        ambientVolume, setAmbientVolume,
         isMuted, setIsMuted,
         activeWithdrawMode, setActiveWithdrawMode,
         customWithdrawAmount, setCustomWithdrawAmount,
@@ -294,4 +327,25 @@ export const useUIState = () => {
         closeCraftingView,
         closeAllModals,
     };
+};
+
+// --- Define Context ---
+type UIContextType = ReturnType<typeof useUIStateInternal>;
+const UIContext = createContext<UIContextType | null>(null);
+
+// --- Create Provider Component ---
+export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const uiState = useUIStateInternal();
+    // FIX: Replaced JSX with React.createElement to resolve parsing errors in a .ts file.
+    // A file containing JSX must have a .tsx extension.
+    return React.createElement(UIContext.Provider, { value: uiState }, children);
+};
+
+// --- Create Consumer Hook ---
+export const useUIState = () => {
+    const context = useContext(UIContext);
+    if (!context) {
+        throw new Error('useUIState must be used within a UIProvider');
+    }
+    return context;
 };

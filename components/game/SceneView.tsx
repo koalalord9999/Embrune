@@ -1,3 +1,4 @@
+
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { POI, POIActivity, PlayerQuestState, SkillName, InventorySlot, ResourceNodeState, PlayerRepeatableQuest, SkillRequirement, PlayerSkill, DialogueNode, GroundItem, DialogueResponse, Quest, BonfireActivity, DialogueAction, DialogueCheckRequirement, ThievingContainerState, Monster, WorldState, WeaponType, Equipment } from '../../types';
 import { MONSTERS, QUESTS, SHOPS, ITEMS, REGIONS, FIREMAKING_RECIPES, SKILL_ICONS, THIEVING_CONTAINER_TARGETS, THIEVING_STALL_TARGETS } from '../../constants';
@@ -211,22 +212,28 @@ const ActionableButton: React.FC<{
         case 'spinning_wheel': text = 'Use Spinning Wheel'; break;
         case 'water_source': text = activity.name; break;
         case 'milking': text = 'Milk a Cow'; break;
-        case 'windmill': text = 'Windmill Actions'; break;
         case 'ancient_chest': text = activity.name; break;
         case 'ladder': text = activity.name; break;
         case 'cut_cactus': text = activity.name; break;
     }
 
-    const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
-        if (isOneClickMode) {
-            onLongPress(e);
-            return;
-        }
+    const hasContextMenu = (activity.type === 'npc' || activity.type === 'furnace' || activity.type === 'anvil');
+    
+    const handleActualClick = () => {
         ui.setTooltip(null);
         handleActivityClick(activity);
     };
 
     const onLongPress = (e: React.MouseEvent | React.TouchEvent) => {
+        if (!hasContextMenu) {
+            // In one-click mode, a single tap registers as a long press.
+            // If there's no context menu, we should treat it as a single tap.
+            if (isOneClickMode) {
+                handleActualClick();
+            }
+            return;
+        }
+
         let eventForMenu: React.MouseEvent | React.Touch;
         if ('touches' in e && e.touches.length > 0) {
             eventForMenu = e.touches[0];
@@ -288,12 +295,6 @@ const ActionableButton: React.FC<{
             ];
         } else if (activity.type === 'anvil') {
             options = [{ label: 'Smith', onClick: () => { ui.openCraftingView({ type: 'anvil' }); setContextMenu(null); } }];
-        } else if (activity.type === 'windmill') {
-            options = [
-                { label: 'Collect Flour', onClick: () => { worldActions.handleCollectFlour(); setContextMenu(null); } },
-                { label: 'Mill Wheat', onClick: () => { worldActions.handleMillWheat(); setContextMenu(null); } },
-                { label: 'Churn Cheese', onClick: () => { worldActions.handleChurn(); setContextMenu(null); } }, // New Action
-            ];
         }
         
         if (options.length > 0) {
@@ -301,12 +302,12 @@ const ActionableButton: React.FC<{
         }
     }
     
-    const hasContextMenu = (activity.type === 'npc' || activity.type === 'furnace' || activity.type === 'anvil' || activity.type === 'windmill');
-
-    const customHandlers = hasContextMenu ? useLongPress({
+    // Call hook unconditionally
+    const customHandlers = useLongPress({
         onLongPress,
-        onClick: handleClick
-    }) : { onClick: handleClick };
+        onClick: handleActualClick,
+        isOneClickMode: isOneClickMode,
+    });
     
     const tutorialId = `activity-button-${index}`;
 
@@ -417,6 +418,79 @@ const BonfireButton: React.FC<{
         >
             <img src={SKILL_ICONS.Firemaking} alt="Bonfire" className="w-6 h-6 filter invert" />
             <span className="text-xs font-bold">{formatTime(timeLeft)}</span>
+        </Button>
+    );
+};
+
+const WindmillButton: React.FC<{
+    activity: Extract<POIActivity, { type: 'windmill' }>;
+    index: number;
+    sceneProps: SceneViewProps;
+}> = ({ activity, index, sceneProps }) => {
+    const { hasItems, worldState, worldActions, setContextMenu, isOneClickMode, setTooltip, skills, isTouchSimulationEnabled } = sceneProps;
+    const isTouchDevice = useIsTouchDevice(isTouchSimulationEnabled);
+
+    const hasWheat = hasItems([{ itemId: 'wheat', quantity: 1 }]);
+    const hasFlourInHopper = worldState.windmillFlour > 0;
+    const hasMilk = hasItems([{ itemId: 'bucket_of_milk', quantity: 1 }]);
+    const cookingLevel = skills.find(s => s.name === SkillName.Cooking)?.currentLevel ?? 1;
+    const canChurn = hasMilk && cookingLevel >= 26;
+
+    let buttonText: string;
+    let defaultAction: () => void;
+
+    if (hasFlourInHopper) {
+        buttonText = `Collect Flour (${worldState.windmillFlour})`;
+        defaultAction = worldActions.handleCollectFlour;
+    } else if (hasWheat) {
+        buttonText = "Mill Wheat";
+        defaultAction = worldActions.handleMillWheat;
+    } else if (canChurn) {
+        buttonText = "Churn Cheese";
+        defaultAction = worldActions.handleChurn;
+    } else {
+        buttonText = "Collect Flour";
+        defaultAction = worldActions.handleCollectFlour;
+    }
+    
+    const onLongPress = (e: React.MouseEvent | React.TouchEvent) => {
+        let eventForMenu: React.MouseEvent | React.Touch;
+        if ('touches' in e) {
+            eventForMenu = e.touches[0] || e.changedTouches[0];
+        } else {
+            eventForMenu = e as React.MouseEvent;
+        }
+    
+        const options: ContextMenuOption[] = [
+            { label: 'Collect Flour', onClick: () => { worldActions.handleCollectFlour(); setContextMenu(null); }, disabled: !hasFlourInHopper },
+            { label: 'Mill Wheat', onClick: () => { worldActions.handleMillWheat(); setContextMenu(null); }, disabled: !hasWheat },
+            { label: 'Churn Cheese', onClick: () => { worldActions.handleChurn(); setContextMenu(null); }, disabled: !canChurn },
+        ];
+    
+        setContextMenu({ options, triggerEvent: eventForMenu, isTouchInteraction: isTouchDevice, title: 'Windmill Actions' });
+    };
+    
+    const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
+        // In one-click mode, useLongPress will call onLongPress instead of this.
+        setTooltip(null);
+        defaultAction();
+    };
+
+    const longPressHandlers = useLongPress({
+        onLongPress: onLongPress,
+        onClick: handleClick,
+        isOneClickMode: isOneClickMode, // Let the hook handle it
+    });
+    
+    const tutorialId = `activity-button-${index}`;
+
+    return (
+        <Button
+            data-tutorial-id={tutorialId}
+            className="w-full"
+            {...longPressHandlers}
+        >
+            {buttonText}
         </Button>
     );
 };
@@ -561,6 +635,10 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
             }
         }
         
+        if (activity.type === 'windmill') {
+            return <WindmillButton key={`${activity.type}-${index}`} activity={activity} index={index} sceneProps={props} />;
+        }
+
         if (activity.type === 'start_agility_course') {
             return (
                 <Button key={activity.courseId} onClick={() => agility.startCourse(activity.courseId)}>
@@ -1085,7 +1163,7 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                                         skills={skills}
                                         onStokeBonfire={onStokeBonfire}
                                         setContextMenu={setContextMenu}
-                                        isTouchDevice={isTouchSimulationEnabled}
+                                        isTouchDevice={isTouchDevice}
                                         onActivity={onActivity}
                                         setTooltip={setTooltip}
                                         isOneClickMode={isOneClickMode}

@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 // FIX: Import Equipment type.
-import { InventorySlot, PlayerSkill, SkillName, ActiveCraftingAction, Item, CraftingContext, POIActivity, EquipmentSlot, PlayerQuestState, Spell, Equipment, ActiveBuff, DialogueResponse, DialogueCheckRequirement, WeaponType, EquipmentStats, BonfireActivity } from '../types';
-import { ITEMS, FLETCHING_RECIPES, HERBLORE_RECIPES, HERBS, INVENTORY_CAPACITY, rollOnLootTable, LootRollResult, FIREMAKING_RECIPES, QUESTS, COOKING_RECIPES, SMELTING_RECIPES, GEM_CUTTING_RECIPES, REGIONS } from '../constants';
+import { InventorySlot, PlayerSkill, SkillName, ActiveCraftingAction, Item, CraftingContext, POIActivity, EquipmentSlot, PlayerQuestState, Spell, Equipment, ActiveBuff, DialogueResponse, DialogueCheckRequirement, WeaponType, EquipmentStats, BonfireActivity, WorldState } from '../types';
+import { ITEMS, FLETCHING_RECIPES, HERBLORE_RECIPES, HERBS, INVENTORY_CAPACITY, rollOnLootTable, LootRollResult, FIREMAKING_RECIPES, QUESTS, COOKING_RECIPES, SMELTING_RECIPES, GEM_CUTTING_RECIPES, REGIONS, RENDERING_RECIPES, FIRE_FLASK_DATA } from '../constants';
 import { POIS } from '../data/pois';
 // FIX: Import ContextMenuOption from its source file instead of re-exporting from useUIState.
 import { MakeXPrompt, useUIState, ConfirmationPrompt } from './useUIState';
@@ -29,6 +29,7 @@ interface UseItemActionsProps {
     addBuff: (buff: Omit<ActiveBuff, 'id' | 'durationRemaining'>) => void;
     curePoison: () => void;
     setInventory: React.Dispatch<React.SetStateAction<(InventorySlot | null)[]>>;
+    setEquipment: React.Dispatch<React.SetStateAction<Equipment>>;
     skills: (PlayerSkill & { currentLevel: number; })[];
     inventory: (InventorySlot | null)[];
     activeCraftingAction: ActiveCraftingAction | null;
@@ -54,8 +55,11 @@ interface UseItemActionsProps {
     onResponse: (response: DialogueResponse) => void;
     handleDialogueCheck: (requirements: DialogueCheckRequirement[]) => boolean;
     crafting: CraftingHandlers;
-    setEquipment: React.Dispatch<React.SetStateAction<Equipment>>;
     navigation: ReturnType<typeof useNavigation>;
+    rangeCooldowns: Record<string, number>;
+    setRangeCooldowns: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+    worldState: WorldState;
+    setWorldState: React.Dispatch<React.SetStateAction<WorldState>>;
 }
 
 const MULTI_BITE_FOODS: Record<string, string> = {
@@ -72,7 +76,7 @@ const MULTI_BITE_FOODS: Record<string, string> = {
 };
 
 export const useItemActions = (props: UseItemActionsProps) => {
-    const { addLog, currentHp, maxHp, setCurrentHp, currentPrayer, maxPrayer, setCurrentPrayer, setRunEnergy, applyStatModifier, setInventory, setEquipment, skills, inventory, activeCraftingAction, setActiveCraftingAction, hasItems, modifyItem, addXp, openCraftingView, itemToUse, setItemToUse, addBuff, curePoison, setMakeXPrompt, startQuest, currentPoiId, playerQuests, isStunned, setActiveDungeonMap, confirmValuableDrops, valuableDropThreshold, ui, equipment, onResponse, handleDialogueCheck, crafting, isBusy, navigation } = props;
+    const { addLog, currentHp, maxHp, setCurrentHp, currentPrayer, maxPrayer, setCurrentPrayer, setRunEnergy, applyStatModifier, setInventory, setEquipment, skills, inventory, activeCraftingAction, setActiveCraftingAction, hasItems, modifyItem, addXp, openCraftingView, itemToUse, setItemToUse, addBuff, curePoison, setMakeXPrompt, startQuest, currentPoiId, playerQuests, isStunned, setActiveDungeonMap, confirmValuableDrops, valuableDropThreshold, ui, equipment, onResponse, handleDialogueCheck, crafting, isBusy, navigation, rangeCooldowns, setRangeCooldowns, worldState, setWorldState } = props;
     const { setActiveDialogue, setContextMenu } = ui;
     const handleTeleport = useCallback((
         itemSlot: InventorySlot,
@@ -119,6 +123,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 });
             } else {
                 const slotKey = slotIdentifier as keyof Equipment;
+                setEquipment(prev => ({ ...prev, [slotKey]: null }));
                 setEquipment(prev => {
                     const newEq = { ...prev };
                     const slot = newEq[slotKey];
@@ -259,16 +264,16 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 }
             }
             const energyPotionMatch = itemId.match(/^energy_potion/);
-            const superEnergyPotionMatch = itemId.match(/^super_energy_potion/);
-            const staminaPotionMatch = itemId.match(/^stamina_potion/);
+            const super_energy_potionMatch = itemId.match(/^super_energy_potion/);
+            const stamina_potionMatch = itemId.match(/^stamina_potion/);
 
             if (energyPotionMatch) {
                 setRunEnergy(prev => Math.min(100, prev + 20));
                 addLog('You drink some of the potion and restore 20 run energy.');
-            } else if (superEnergyPotionMatch) {
+            } else if (super_energy_potionMatch) {
                 setRunEnergy(prev => Math.min(100, prev + 40));
                 addLog('You drink some of the potion and restore 40 run energy.');
-            } else if (staminaPotionMatch) {
+            } else if (stamina_potionMatch) {
                 setRunEnergy(prev => Math.min(100, prev + 40));
                 addBuff({
                     type: 'stamina',
@@ -499,6 +504,68 @@ export const useItemActions = (props: UseItemActionsProps) => {
         const { item: usedItem } = used;
         const usedItemData = ITEMS[usedItem.itemId];
 
+        // --- Monolith Puzzle ---
+        const MONOLITH_LOGS = ['logs', 'oak_logs', 'willow_logs', 'maple_logs', 'yew_logs', 'feywood_logs'];
+        if (activity.type === 'npc' && activity.name === 'Empty Fire Pit' && currentPoiId === 'sp_ancient_monolith' && MONOLITH_LOGS.includes(usedItem.itemId)) {
+            if (!hasItems([{ itemId: 'tinderbox', quantity: 1 }])) {
+                addLog("You need a tinderbox to light a fire.");
+                return;
+            }
+            if (worldState.monolithFire && worldState.monolithFire.expiresAt > Date.now()) {
+                addLog("There is already a fire burning.");
+                return;
+            }
+
+            modifyItem(usedItem.itemId, -1);
+            setWorldState(ws => ({
+                ...ws,
+                monolithFire: {
+                    poiId: currentPoiId,
+                    logType: usedItem.itemId,
+                    expiresAt: Date.now() + 120000 // 2 minutes
+                }
+            }));
+            addLog(`You light a small fire with the ${usedItemData.name}.`);
+            return;
+        }
+
+        if ((activity.type === 'cooking_range' || activity.type === 'bonfire') && usedItem.itemId === 'rendering_kit') {
+            /* FIX: Pass 'rendering' context to resolve comparability error */
+            openCraftingView({ type: 'rendering' });
+            return;
+        }
+
+        if (activity.type === 'cooking_range' && usedItem.itemId === 'throwing_flask') {
+            const now = Date.now();
+            const cooldown = rangeCooldowns[currentPoiId];
+    
+            if (cooldown && now < cooldown) {
+                const timeLeft = Math.ceil((cooldown - now) / 1000);
+                addLog(`This range is still greasy. You should wait another ${timeLeft} seconds.`);
+                return;
+            }
+    
+            const freeSlots = inventory.filter(s => s === null).length;
+            const hasStack = inventory.some(s => s?.itemId === 'refined_grease_flask');
+            if (freeSlots < 1 && !hasStack) {
+                addLog("You don't have enough inventory space.");
+                return;
+            }
+    
+            modifyItem('throwing_flask', -1, true);
+            modifyItem('refined_grease_flask', 1, false, { bypassAutoBank: true });
+            addXp(SkillName.Cooking, 5);
+            addLog("You scoop some grease from the range into a flask.");
+            
+            // Set cooldown for 10 minutes (600,000 ms)
+            setRangeCooldowns(prev => ({
+                ...prev,
+                [currentPoiId]: now + 600000
+            }));
+    
+            return;
+        }
+
         const getItemCount = (itemId: string): number => {
             if (ITEMS[itemId]?.stackable || (inventory.find(slot => slot?.itemId === itemId)?.noted)) {
                 return inventory.find(slot => slot?.itemId === itemId)?.quantity ?? 0;
@@ -524,7 +591,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                         ui.setActiveCraftingAction({
                             recipeId: 'holy_paste',
                             recipeType: 'offering',
-                            totalQuantity: Math.ceil(actualQuantity / 5), // Batches of 5
+                            totalQuantity: Math.ceil(actualQuantity / 25), // Batches of 5
                             completedQuantity: 0,
                             successfulQuantity: 0,
                             startTime: Date.now(),
@@ -692,7 +759,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
         }
 
         addLog("Nothing interesting happens.");
-    }, [inventory, addLog, setMakeXPrompt, crafting, modifyItem, currentPrayer, setCurrentPrayer, addXp, ui, hasItems]);
+    }, [inventory, addLog, setMakeXPrompt, crafting, modifyItem, currentPrayer, setCurrentPrayer, addXp, ui, hasItems, openCraftingView, rangeCooldowns, setRangeCooldowns, currentPoiId]);
 
     const handleUseItemOn = useCallback((used: { item: InventorySlot, index: number }, target: { item: InventorySlot, index: number }) => {
         try {
@@ -703,6 +770,114 @@ export const useItemActions = (props: UseItemActionsProps) => {
             const targetId = target.item.itemId;
             const usedItemData = ITEMS[usedId];
             const targetItem = ITEMS[targetId];
+            const usedSlot = used.item;
+            const targetSlot = target.item;
+            const usedIndex = used.index;
+            const targetIndex = target.index;
+
+            const isXMixFlask = (usedId === 'x_mix' && FIRE_FLASK_DATA[targetId]) || (targetId === 'x_mix' && FIRE_FLASK_DATA[usedId]);
+            if (isXMixFlask) {
+                const flaskSlot = usedId === 'x_mix' ? target : used;
+                const flaskItemData = ITEMS[flaskSlot.item.itemId];
+            
+                if (flaskSlot.item.statsOverride?.isXFlask) {
+                    addLog("This flask has already been mixed.");
+                    return;
+                }
+            
+                modifyItem('x_mix', -1, true);
+                modifyItem(flaskSlot.item.itemId, -1, true);
+            
+                const newName = `${flaskItemData.name} (LX)`;
+                const newStatsOverride = { ...flaskSlot.item.statsOverride, isXFlask: true };
+                
+                modifyItem(flaskSlot.item.itemId, 1, false, {
+                    nameOverride: newName,
+                    statsOverride: newStatsOverride,
+                    bypassAutoBank: true,
+                });
+            
+                addXp(SkillName.Herblore, 10);
+                addLog(`You mix the strange powder into the flask, creating a potent ${newName}.`);
+                return;
+            }
+
+            const isFirePotLighting = (usedId === 'tinderbox' && targetId === 'fire_pot') || (targetId === 'tinderbox' && usedId === 'fire_pot');
+            if (isFirePotLighting) {
+                const firemakingLevel = skills.find(s => s.name === SkillName.Firemaking)?.currentLevel ?? 1;
+                if (firemakingLevel < 1) { addLog("You need a Firemaking level of 1 to light this."); return; }
+                
+                // Check for uniqueness
+                const hasLitPot = inventory.some(s => s?.itemId === 'fire_pot_lit') || equipment.ammo?.itemId === 'fire_pot_lit';
+                if (hasLitPot) {
+                    addLog("You already have a lit fire pot. You cannot manage another one.");
+                    return;
+                }
+
+                modifyItem('fire_pot', -1, true);
+                
+                const FIRE_POT_DURATION = 3600000; // 1 hour in ms
+                modifyItem('fire_pot_lit', 1, false, { expiresAt: Date.now() + FIRE_POT_DURATION, bypassAutoBank: true });
+                
+                addLog("You light the fire pot. It will burn for one hour.");
+                return;
+            }
+            
+            const fatIds = new Set(['animal_fat', 'tallow', 'rich_animal_fat', 'beast_fat', 'titan_fat', 'dragon_fat']);
+            if ((usedId === 'rendering_kit' && fatIds.has(targetId)) || (targetId === 'rendering_kit' && fatIds.has(usedId))) {
+                addLog("You need a heat source to render fat. Try using this on a cooking range or a bonfire.");
+                return;
+            }
+
+            if ((targetId === 'molten_glass' && usedId === 'glassblowing_apparatus') || (usedId === 'molten_glass' && targetId === 'glassblowing_apparatus')) {
+                /* FIX: Pass 'glassblowing' context to resolve comparability error */
+                openCraftingView({ type: 'glassblowing' });
+                return;
+            }
+
+            if ((usedId === 'rendering_kit' && usedSlot.filled && targetId === 'throwing_flask_fused') || (targetId === 'rendering_kit' && targetSlot.filled && usedId === 'throwing_flask_fused')) {
+                const kitSlot = (usedId === 'rendering_kit') ? usedSlot : targetSlot;
+                const kitIndex = (usedId === 'rendering_kit') ? usedIndex : targetIndex;
+                const recipe = RENDERING_RECIPES.find(r => r.fatId === kitSlot.filled);
+                if (!recipe) { addLog("The oil in your kit seems unusable."); return; }
+
+                modifyItem('throwing_flask_fused', -1, true);
+                modifyItem(recipe.flaskId, 1, false, { bypassAutoBank: true });
+
+                const newDoses = (kitSlot.doses ?? 1) - 1;
+                if (newDoses > 0) {
+                    setInventory(prev => {
+                        const newInv = [...prev];
+                        newInv[kitIndex] = { ...kitSlot, doses: newDoses };
+                        return newInv;
+                    });
+                } else {
+                    setInventory(prev => {
+                        const newInv = [...prev];
+                        newInv[kitIndex] = { itemId: 'rendering_kit', quantity: 1 };
+                        return newInv;
+                    });
+                }
+                addLog(`You fill the flask with the flammable oil.`);
+                return;
+            }
+
+            if ((usedId === 'knife' && targetId === 'ball_of_wool') || (targetId === 'knife' && usedId === 'ball_of_wool')) {
+                modifyItem('ball_of_wool', -1, true);
+                modifyItem('wool_string', 10, false, { bypassAutoBank: true });
+                addXp(SkillName.Fletching, 2);
+                addLog("You carefully cut the wool into 10 strings.");
+                return;
+            }
+
+            if ((usedId === 'wool_string' && targetId === 'throwing_flask') || (targetId === 'wool_string' && usedId === 'throwing_flask')) {
+                modifyItem('wool_string', -1, true);
+                modifyItem('throwing_flask', -1, true);
+                modifyItem('throwing_flask_fused', 1, false, { bypassAutoBank: true });
+                addXp(SkillName.Fletching, 1);
+                addLog("You attach the string to the flask, creating a fuse.");
+                return;
+            }
 
             const isStaminaCrafting = (usedId === 'agility_paste' && targetId === 'super_energy_potion_3') || (targetId === 'agility_paste' && usedId === 'super_energy_potion_3');
             if (isStaminaCrafting) {
@@ -1421,7 +1596,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
         } finally {
             setItemToUse(null);
         }
-    }, [skills, inventory, addLog, setActiveCraftingAction, hasItems, modifyItem, addXp, setMakeXPrompt, activeCraftingAction, currentPoiId, openCraftingView, setInventory, setItemToUse, itemToUse, playerQuests, startQuest, equipment, onResponse, handleDialogueCheck, ui, crafting, isBusy, isStunned, setRunEnergy]);
+    }, [skills, inventory, addLog, setActiveCraftingAction, hasItems, modifyItem, addXp, setMakeXPrompt, activeCraftingAction, currentPoiId, openCraftingView, setInventory, setItemToUse, itemToUse, playerQuests, startQuest, equipment, onResponse, handleDialogueCheck, ui, crafting, isBusy, isStunned, setRunEnergy, navigation, rangeCooldowns, setRangeCooldowns]);
     
     const handleExamine = useCallback((item: Item) => {
         addLog(`${item.description}`);

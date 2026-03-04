@@ -1,2 +1,2 @@
-export const GAME_VERSION = "0.2.5.1 (ALPHA)";
+export const GAME_VERSION = "0.2.6 (FINAL)";
 //config

@@ -1,26 +1,28 @@
+
 import { useCallback, useRef, useEffect, useState } from 'react';
-import { AUDIO_MANIFEST, SoundID } from '../constants/audioManifest';
+import { AUDIO_MANIFEST, SOUND_CATEGORIES, SoundCategory, SoundID } from '../constants/audioManifest';
 import { createWhiteNoiseBuffer, createBrownNoiseBuffer } from '../utils/audioSynth';
+import { useUIState } from './useUIState';
 
 export let globalAudioContext: AudioContext | null = null;
 let masterGain: GainNode | null = null;
+let musicGain: GainNode | null = null;
+let sfxGain: GainNode | null = null;
+let ambientGain: GainNode | null = null;
 
-// Track the current active music gain node
-let activeMusicGain: GainNode | null = null;
 const activeMusicNodes = new Set<AudioScheduledSourceNode>();
 
-export const useSoundEngine = (volume: number = 0.5, isMuted: boolean = false) => {
+export const useSoundEngine = () => {
+    const ui = useUIState();
     const [isAudioActive, setIsAudioActive] = useState(false);
     const contextRef = useRef<AudioContext | null>(null);
 
-    // Synchronize local state with global context state
     useEffect(() => {
         const update = () => {
             const active = globalAudioContext?.state === 'running';
             setIsAudioActive(active);
         };
 
-        // Poll for context creation and state changes
         const interval = setInterval(update, 500);
         
         if (globalAudioContext) {
@@ -39,6 +41,15 @@ export const useSoundEngine = (volume: number = 0.5, isMuted: boolean = false) =
         if (!globalAudioContext) {
             globalAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             masterGain = globalAudioContext.createGain();
+            
+            musicGain = globalAudioContext.createGain();
+            sfxGain = globalAudioContext.createGain();
+            ambientGain = globalAudioContext.createGain();
+
+            musicGain.connect(masterGain);
+            sfxGain.connect(masterGain);
+            ambientGain.connect(masterGain);
+
             masterGain.connect(globalAudioContext.destination);
         }
         
@@ -48,60 +59,21 @@ export const useSoundEngine = (volume: number = 0.5, isMuted: boolean = false) =
 
         contextRef.current = globalAudioContext;
         
-        if (masterGain) {
-            masterGain.gain.setTargetAtTime(isMuted ? 0 : volume, globalAudioContext.currentTime, 0.05);
-        }
-    }, [volume, isMuted]);
+    }, []);
 
     useEffect(() => {
-        if (globalAudioContext && masterGain) {
-            masterGain.gain.setTargetAtTime(isMuted ? 0 : volume, globalAudioContext.currentTime, 0.05);
+        if (globalAudioContext && masterGain && musicGain && sfxGain && ambientGain) {
+            const finalMasterVol = ui.isMuted ? 0 : Math.pow(ui.masterVolume, 2);
+            masterGain.gain.setTargetAtTime(finalMasterVol, globalAudioContext.currentTime, 0.05);
+
+            musicGain.gain.setTargetAtTime(Math.pow(ui.musicVolume, 2), globalAudioContext.currentTime, 0.05);
+            sfxGain.gain.setTargetAtTime(Math.pow(ui.sfxVolume, 2), globalAudioContext.currentTime, 0.05);
+            ambientGain.gain.setTargetAtTime(Math.pow(ui.ambientVolume, 2), globalAudioContext.currentTime, 0.05);
         }
-    }, [volume, isMuted]);
+    }, [ui.isMuted, ui.masterVolume, ui.musicVolume, ui.sfxVolume, ui.ambientVolume]);
 
-    const getMusicGain = useCallback(() => {
-        if (!globalAudioContext || !masterGain) return null;
-        if (!activeMusicGain) {
-            activeMusicGain = globalAudioContext.createGain();
-            activeMusicGain.connect(masterGain);
-            activeMusicGain.gain.setValueAtTime(0, globalAudioContext.currentTime);
-        }
-        return activeMusicGain;
-    }, []);
-
-    const setMusicVolume = useCallback((targetVolume: number, fadeSeconds: number = 0.1) => {
-        const mGain = getMusicGain();
-        if (!globalAudioContext || !mGain) return;
-        
-        const now = globalAudioContext.currentTime;
-        mGain.gain.cancelScheduledValues(now);
-        mGain.gain.setValueAtTime(mGain.gain.value, now);
-        mGain.gain.linearRampToValueAtTime(targetVolume, now + fadeSeconds);
-    }, [getMusicGain]);
-
-    const stopAllMusic = useCallback((fadeSeconds: number = 0.5) => {
-        if (!globalAudioContext || !activeMusicGain) return;
-
-        const now = globalAudioContext.currentTime;
-        const nodeToOrphan = activeMusicGain;
-        
-        // Unset global ref immediately so new tracks get a fresh node
-        activeMusicGain = null;
-
-        // Fade out and disconnect the old node
-        nodeToOrphan.gain.cancelScheduledValues(now);
-        nodeToOrphan.gain.setValueAtTime(nodeToOrphan.gain.value, now);
-        nodeToOrphan.gain.linearRampToValueAtTime(0, now + fadeSeconds);
-
-        setTimeout(() => {
-            nodeToOrphan.disconnect();
-            // Clear tracking set as nodes are now orphaned and silent
-            activeMusicNodes.clear();
-        }, (fadeSeconds * 1000) + 100);
-    }, []);
-
-    const playRecipe = useCallback((recipe: string, baseStartTime?: number, category: 'sfx' | 'music' = 'sfx') => {
-        if (!globalAudioContext || !masterGain || isMuted) return;
+    const playRecipe = useCallback((recipe: string, baseStartTime?: number, category: SoundCategory | 'music' = 'sfx') => {
+        if (!globalAudioContext || !masterGain || ui.isMuted) return;
 
         let recipeString = recipe;
         let timeOffsetMs = 0;
@@ -131,11 +103,17 @@ export const useSoundEngine = (volume: number = 0.5, isMuted: boolean = false) =
         nodeGain.gain.linearRampToValueAtTime(vol, now + attack);
         nodeGain.gain.exponentialRampToValueAtTime(0.001, now + attack + decay);
         
-        if (category === 'music') {
-            const mGain = getMusicGain();
-            if (mGain) nodeGain.connect(mGain);
+        let targetGainNode: GainNode | null = null;
+        switch(category) {
+            case 'sfx': targetGainNode = sfxGain; break;
+            case 'ambient': targetGainNode = ambientGain; break;
+            case 'music': targetGainNode = musicGain; break;
+        }
+
+        if (targetGainNode) {
+            nodeGain.connect(targetGainNode);
         } else {
-            nodeGain.connect(masterGain);
+            nodeGain.connect(masterGain); // Fallback
         }
 
         let sourceNode: AudioScheduledSourceNode;
@@ -173,9 +151,8 @@ export const useSoundEngine = (volume: number = 0.5, isMuted: boolean = false) =
 
         sourceNode.start(now);
         sourceNode.stop(now + duration + 0.1);
-    }, [isMuted, getMusicGain]);
+    }, [ui.isMuted]);
 
-    // FIX: Define getContextTime before it is used by the play function.
     const getContextTime = useCallback(() => globalAudioContext?.currentTime ?? 0, []);
 
     const play = useCallback((soundId: SoundID) => {
@@ -185,15 +162,41 @@ export const useSoundEngine = (volume: number = 0.5, isMuted: boolean = false) =
         if (!isAudioActive) initContext();
         if (globalAudioContext?.state !== 'running') return;
     
+        const category = SOUND_CATEGORIES[soundId];
+
         if (typeof recipeOrRecipes === 'string') {
-            playRecipe(recipeOrRecipes, undefined, 'sfx');
+            playRecipe(recipeOrRecipes, undefined, category);
         } else if (Array.isArray(recipeOrRecipes)) {
             const baseTime = getContextTime();
             recipeOrRecipes.forEach(recipe => {
-                playRecipe(recipe, baseTime, 'sfx');
+                playRecipe(recipe, baseTime, category);
             });
         }
     }, [playRecipe, isAudioActive, initContext, getContextTime]);
+    
+    const setMusicVolume = useCallback((targetVolume: number, fadeSeconds: number = 0.1) => {
+        if (!globalAudioContext || !musicGain) return;
+        const now = globalAudioContext.currentTime;
+        musicGain.gain.cancelScheduledValues(now);
+        musicGain.gain.setValueAtTime(musicGain.gain.value, now);
+        // Fade to the target volume relative to the user's setting.
+        const finalVolume = targetVolume * Math.pow(ui.musicVolume, 2);
+        musicGain.gain.linearRampToValueAtTime(finalVolume, now + fadeSeconds);
+    }, [ui.musicVolume]);
+
+    const stopAllMusic = useCallback((fadeSeconds: number = 0.5) => {
+        if (!globalAudioContext || !musicGain) return;
+
+        const now = globalAudioContext.currentTime;
+        musicGain.gain.cancelScheduledValues(now);
+        musicGain.gain.setValueAtTime(musicGain.gain.value, now);
+        musicGain.gain.linearRampToValueAtTime(0, now + fadeSeconds);
+
+        activeMusicNodes.forEach(node => {
+            try { node.stop(now + fadeSeconds); } catch(e) {}
+        });
+        activeMusicNodes.clear();
+    }, []);
 
     return { 
         play, 
@@ -202,7 +205,6 @@ export const useSoundEngine = (volume: number = 0.5, isMuted: boolean = false) =
         setMusicVolume, 
         initContext, 
         isAudioActive,
-        // FIX: Export the function variable instead of a new inline function.
         getContextTime,
         isContextRunning: () => globalAudioContext?.state === 'running'
     };

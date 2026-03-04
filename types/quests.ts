@@ -36,7 +36,7 @@ export type QuestRequirement =
 
 export type DialogueAction =
   | { type: 'give_item'; itemId: string; quantity: number; noted?: boolean }
-  | { type: 'take_item'; itemId: string; quantity: number }
+  | { type: 'take_item'; itemId: string; quantity: number | 'all' }
   | { type: 'give_coins'; amount: number }
   | { type: 'take_coins'; amount: number }
   | { type: 'give_xp'; skill: SkillName; amount: number }
@@ -54,15 +54,21 @@ export type DialogueAction =
   | { type: 'tan_all_hides' }
   | { type: 'add_log'; message: string }
   | { type: 'restore_prayer' }
-  | { type: 'open_make_x_for_grinding'; itemId: 'consecrated_bones' | 'consecrated_big_bones' | 'consecrated_dragon_bones' };
+  | { type: 'open_make_x_for_grinding'; itemId: 'consecrated_bones' | 'consecrated_big_bones' | 'consecrated_dragon_bones' }
+  // FIX: Added new action types for quest-specific variable management.
+  | { type: 'set_variable'; name: string; value: any }
+  | { type: 'increment_variable'; name: string; amount: number }
+  | { type: 'start_destruction_trial_heat' };
 
 export type DialogueCheckRequirement = 
-    | { type: 'items'; items: { itemId: string, quantity: number, operator?: 'gte' | 'lt' | 'eq' }[] }
+    | { type: 'items'; items: { itemId: string, quantity: number, operator?: 'gte' | 'lt' | 'eq', nameOverride?: string }[] }
     | { type: 'coins'; amount: number }
     | { type: 'skill'; skill: SkillName; level: number }
-    | { type: 'world_state'; property: 'windmillFlour'; value: number; operator?: 'gte' | 'eq' }
+    | { type: 'world_state'; property: 'windmillFlour' | 'monolithFire' | 'monolithLogType'; value: any; operator?: 'gte' | 'eq' }
     // --- FIX: Added 'operator' to quest check requirement to support flexible stage comparisons ---
-    | { type: 'quest'; questId: QuestId; status: 'not_started' | 'in_progress' | 'completed'; stage?: number; operator?: 'gte' | 'lt' | 'eq' };
+    | { type: 'quest'; questId: QuestId; status: 'not_started' | 'in_progress' | 'completed'; stage?: number; operator?: 'gte' | 'lt' | 'eq' }
+    // FIX: Added new check type for quest-specific variables.
+    | { type: 'variable'; name: string; value: any; operator: 'eq' | 'lt' | 'gte' };
 
 export interface DialogueCheck {
     requirements: DialogueCheckRequirement[];

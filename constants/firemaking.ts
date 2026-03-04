@@ -8,3 +8,13 @@ export const FIREMAKING_RECIPES = [
     { logId: 'driftwood_logs', level: 5, xp: 45, heat: 35, tier: 1 },
     { logId: 'mahogany_logs', level: 50, xp: 157.5, heat: 80, tier: 4 },
 ];
+
+export const FIRE_FLASK_DATA: Record<string, { baseDot: number }> = {
+    'refined_grease_flask': { baseDot: 1 },
+    'animal_fat_flask': { baseDot: 2 },
+    'tallow_flask': { baseDot: 3 },
+    'rich_animal_fat_flask': { baseDot: 4 },
+    'beast_fat_flask': { baseDot: 5 },
+    'titan_fat_flask': { baseDot: 6 },
+    'dragon_fat_flask': { baseDot: 8 },
+};

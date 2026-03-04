@@ -1,5 +1,33 @@
-
 import { CookingRecipe, CraftingRecipe, JewelryRecipe, SkillName } from '../types';
+
+export interface RenderingRecipe {
+    fatId: string;
+    level: number;
+    xp: number;
+    flaskId: string; // The resulting unlit flask ID.
+}
+
+export const RENDERING_RECIPES: RenderingRecipe[] = [
+    { fatId: 'animal_fat', level: 10, xp: 15, flaskId: 'animal_fat_flask' },
+    { fatId: 'tallow', level: 20, xp: 25, flaskId: 'tallow_flask' },
+    { fatId: 'rich_animal_fat', level: 30, xp: 35, flaskId: 'rich_animal_fat_flask' },
+    { fatId: 'beast_fat', level: 40, xp: 45, flaskId: 'beast_fat_flask' },
+    { fatId: 'titan_fat', level: 50, xp: 55, flaskId: 'titan_fat_flask' },
+    { fatId: 'dragon_fat', level: 60, xp: 65, flaskId: 'dragon_fat_flask' },
+];
+
+export const GLASSBLOWING_RECIPES: CraftingRecipe[] = [
+    { itemId: 'beer_glass', level: 1, xp: 20, ingredients: [{ itemId: 'molten_glass', quantity: 1 }] },
+    { itemId: 'vial', level: 8, xp: 30, ingredients: [{ itemId: 'molten_glass', quantity: 1 }] },
+    { itemId: 'throwing_flask', level: 12, xp: 40, ingredients: [{ itemId: 'molten_glass', quantity: 1 }] },
+    { itemId: 'glass_bowl', level: 17, xp: 50, ingredients: [{ itemId: 'molten_glass', quantity: 1 }] },
+    { itemId: 'glass_jar', level: 24, xp: 60, ingredients: [{ itemId: 'molten_glass', quantity: 1 }] },
+    { itemId: 'un_tuned_orb', level: 38, xp: 70, ingredients: [{ itemId: 'molten_glass', quantity: 1 }] },
+];
+
+export const MISC_FURNACE_RECIPES: CraftingRecipe[] = [
+    { itemId: 'molten_glass', level: 1, xp: 15, ingredients: [{ itemId: 'bucket_of_sand', quantity: 1 }, { itemId: 'soda_ash', quantity: 1 }] },
+];
 
 export const SMITHING_RECIPES = [
   // Bronze
@@ -125,6 +153,7 @@ export const SPECIAL_SMITHING_RECIPES = [
 
 export const COOKING_RECIPES: CookingRecipe[] = [
     // Basic
+    { itemId: 'soda_ash', level: 1, xp: 10, ingredients: [{ itemId: 'seaweed', quantity: 1 }], burntItemId: 'ashes', alwaysSucceeds: true },
     { itemId: 'bread', level: 1, xp: 30, ingredients: [{ itemId: 'bread_dough', quantity: 1 }], burntItemId: 'burnt_food',},
     { itemId: 'scrambled_eggs', level: 1, xp: 30, ingredients: [{ itemId: 'eggs', quantity: 1 }], burntItemId: 'burnt_food',},
     { itemId: 'cooked_shrimp', level: 1, xp: 30, ingredients: [{ itemId: 'raw_shrimp', quantity: 1 }], burntItemId: 'burnt_food',},

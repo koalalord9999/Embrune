@@ -192,12 +192,8 @@ const SaveSlotScreen: React.FC<SaveSlotScreenProps> = ({ slots, onSelectSlot, on
                                 <Button onClick={() => onSelectSlot(selectedSlotId)} size="md" variant="primary">Play</Button>
                                 <div className="flex justify-between items-center w-full max-w-xs">
                                     <div className="flex gap-2">
-                                        {(selectedSlot.metadata.playerType === PlayerType.Cheats || selectedSlot.metadata.playerType === PlayerType.TechDemo) && (
-                                            <Button onClick={() => onExport(selectedSlotId)} size="sm" variant="secondary">Export</Button>
-                                        )}
-                                        {(selectedSlot.metadata.playerType === PlayerType.Cheats) && (
-                                            <Button onClick={() => onImport(selectedSlotId)} size="sm" variant="secondary">Import</Button>
-                                        )}
+                                        <Button onClick={() => onExport(selectedSlotId)} size="sm" variant="secondary">Export</Button>
+                                        <Button onClick={() => onImport(selectedSlotId)} size="sm" variant="secondary">Import</Button>
                                         <Button onClick={() => setConfirmDelete(selectedSlotId)} size="sm" variant="secondary">Delete</Button>
                                     </div>
                                     <a

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useUIState } from './hooks/useUIState';
 import { useSaveSlotManager } from './hooks/useSaveSlotManager';
@@ -40,7 +41,7 @@ const App: React.FC = () => {
         refreshSlots,
     } = useSaveSlotManager(ui);
     
-    const { initContext } = useSoundEngine(ui.masterVolume, ui.isMuted);
+    const { initContext } = useSoundEngine();
 
     const [appState, setAppState] = useState<AppState>('LOADING_DB');
     const [loadedAssets, setLoadedAssets] = useState<Record<string, string> | null>(null);
@@ -52,7 +53,7 @@ const App: React.FC = () => {
 
     // Music System for Menus
     const isMenu = ['SLOT_SELECTION', 'GAME_MODE_SELECTION', 'USERNAME_PROMPT'].includes(appState);
-    useMusicEngine(isMenu ? 'login' : undefined, ui.masterVolume, ui.isMuted);
+    useMusicEngine(isMenu ? 'login' : undefined);
 
     const gameContainerStyle = useMemo(() => (
         loadedAssets?.embrune_splash

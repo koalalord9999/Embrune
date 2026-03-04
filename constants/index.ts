@@ -1,3 +1,4 @@
+
 export * from './game';
 export * from './items';
 export * from './monsters';
@@ -27,3 +28,4 @@ export * from './loot/thievingStalls';
 export * from './pilfering';
 export * from '../data/pois/pilfering';
 export * from '../data/agility_courses';
+export * from './audioManifest';

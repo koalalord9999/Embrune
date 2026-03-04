@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useSoundEngine } from '../../hooks/useSoundEngine';
 import { useUIState } from '../../hooks/useUIState';
@@ -9,8 +10,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', size = 'md', className, onClick, ...props }) => {
-    const ui = useUIState();
-    const { play, initContext } = useSoundEngine(ui.masterVolume, ui.isMuted);
+    const { play, initContext } = useSoundEngine();
 
     const baseClasses = 'font-bold rounded-md shadow-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800';
     

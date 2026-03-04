@@ -17,7 +17,6 @@ import { useGameSession } from '../../hooks/useGameSession';
 import { useItemActions } from '../../hooks/useItemActions';
 import { useAgility } from '../../hooks/useAgility';
 import { SkillName, InventorySlot, CombatStance, POIActivity, GroundItem, Spell, BonfireActivity, DialogueCheckRequirement, DialogueAction, BankTab, WorldState, PlayerRepeatableQuest, ActiveBuff, DialogueResponse, Monster, MonsterType, SpellElement, PlayerType, POI, Equipment } from '../../types';
-// FIX: Import SHOPS from the main constants barrel file instead of the POIs file.
 import { POIS, SHOPS } from '../../constants';
 import CraftingProgressView from '../views/crafting/CraftingProgressView';
 import CombatView from '../views/CombatView';
@@ -48,7 +47,6 @@ type GroundItemActivity = Extract<POIActivity, { type: 'ground_item' }>;
 interface MainViewControllerProps {
     ui: ReturnType<typeof useUIState>;
     addLog: (message: string) => void;
-    // FIX: char prop type now includes setCombatStance to match what's passed from Game.tsx
     char: ReturnType<typeof useCharacter> & { setCombatStance: React.Dispatch<React.SetStateAction<CombatStance>> };
     inv: ReturnType<typeof useInventory>;
     quests: ReturnType<typeof useQuests>;
@@ -315,6 +313,8 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
             setMakeXPrompt={ui.setMakeXPrompt}
             setTooltip={ui.setTooltip}
             onJewelryCraft={onJewelryCraft}
+            handleRendering={crafting.handleRendering}
+            onGlassblow={crafting.handleGlassblowing}
         />;
         
         if (ui.activeQuestBoardId) return <QuestBoardView 

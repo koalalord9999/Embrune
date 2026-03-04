@@ -1,6 +1,3 @@
-
-
-
 import { POI, SkillName } from '../../types';
 
 export const dwarvenOutpostPois: Record<string, POI> = {
@@ -29,8 +26,12 @@ export const dwarvenOutpostPois: Record<string, POI> = {
                 pickpocket: { lootTableId: 'pickpocket_dwarf_table' },
                 attackableMonsterId: 'dwarf',
                 startNode: 'durin_default',
-                questTopics: ['the_arcane_awakening', 'depths_of_despair'],
+                questTopics: ['the_arcane_awakening', 'depths_of_despair', 'the_sorcerers_trial'],
                 conditionalGreetings: [
+                    // The Sorcerer's Trial
+                    { text: "By my beard... what is that volatile-looking thing you're carrying? Get it away from my forge!", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 11 }, { type: 'items', items: [{ itemId: 'unstable_core', quantity: 1 }] }] } },
+                    { text: "My boys are working on that core of yours. It's a stubborn piece of work. Give 'em some time.", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 11 }, { type: 'world_state', property: 'destructionTrialProgress' as any, value: 'started', operator: 'eq' as any }] } },
+
                     // Depths of Despair (HIGHEST PRIORITY)
                     { text: "The tremors... they've stopped! By my ancestors, you're back! Did you find the source? Tell me everything!", check: { requirements: [{ type: 'quest', questId: 'depths_of_despair', status: 'in_progress', stage: 3 }] } },
                     { text: "The shaking has gotten worse! What are you doing back here? You must be close to the source. Get back down there and put a stop to it!", check: { requirements: [{ type: 'quest', questId: 'depths_of_despair', status: 'in_progress', stage: 2 }] } },

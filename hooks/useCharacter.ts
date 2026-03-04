@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { PlayerSkill, SkillName, CombatStance, Spell, WorldState, Prayer, PrayerType, ActiveStatModifier, ActiveBuff, Equipment, Item } from '../types';
 import { XP_TABLE, PRAYERS, ITEMS } from '../constants';
@@ -661,6 +662,18 @@ export const useCharacter = (
         addLog(`DEV: Set ${skillName} to level ${clampedLevel}.`);
     }, [addLog, setCurrentHp, setCurrentPrayer]);
 
+    const setAllSkillsLevel = useCallback((level: number) => {
+        const clampedLevel = Math.max(1, Math.min(99, level));
+        const newXp = XP_TABLE[clampedLevel - 1] ?? 0;
+    
+        setSkills(prevSkills => prevSkills.map(skill => ({ ...skill, level: clampedLevel, xp: newXp })));
+        
+        setCurrentHp(clampedLevel);
+        setCurrentPrayer(clampedLevel);
+    
+        addLog(`DEV: All skills set to level ${clampedLevel}.`);
+    }, [addLog, setCurrentHp, setCurrentPrayer]);
+
     return {
         skills: skillsWithCurrentLevels, 
         getEffectiveLevel,
@@ -692,6 +705,7 @@ export const useCharacter = (
         autocastSpell,
         setAutocastSpell,
         setSkillLevel,
+        setAllSkillsLevel,
         isStunned,
         isPoisoned,
         globalActionCooldown,

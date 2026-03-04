@@ -75,7 +75,13 @@ export const wyrmwoodGrovePois: Record<string, POI> = {
                     { text: "The chapel sent you about the oil, I presume?", check: { requirements: [{ type: 'quest', questId: 'the_saints_first_step', status: 'in_progress', stage: 3 }] } },
                     { text: "Have you gathered the herbs?", check: { requirements: [{ type: 'quest', questId: 'the_saints_first_step', status: 'in_progress', stage: 4 }] } },
                 ]
-            }
+            },
+            {
+                type: 'npc',
+                name: 'Hermit Mage',
+                icon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+                startNode: 'tst_hermit_start',
+            },
         ], 
         regionId: 'wyrmwood_grove', 
         x: 1735, 

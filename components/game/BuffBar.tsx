@@ -1,15 +1,14 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { ActiveStatModifier, ActiveBuff, SkillName } from '../../types';
-import { SKILL_ICONS, getSkillColorClass } from '../../constants';
+import { ActiveStatModifier, ActiveBuff, SkillName, Item } from '../../types';
+import { SKILL_ICONS, getSkillColorClass, ITEMS, getIconClassName } from '../../constants';
 
 interface BuffBarProps {
     statModifiers: ActiveStatModifier[];
-    activeBuffs: ActiveBuff[];
+    activeBuffs: (ActiveBuff | any)[]; // Use 'any' to allow for custom buff structures
 }
 
 interface DisplayBuff {
-    id: number;
+    id: number | string;
     iconUrl: string;
     value: string;
     valueColor?: string;
@@ -68,7 +67,7 @@ const BuffIcon: React.FC<{ buff: DisplayBuff }> = ({ buff }) => {
                 <img 
                     src={buff.iconUrl} 
                     alt="buff icon" 
-                    className={`w-full h-full filter invert ${buff.iconClassName || 'opacity-60'}`}
+                    className={`w-full h-full ${buff.iconClassName || 'filter invert opacity-60'}`}
                 />
             )}
             <span className={`absolute text-lg font-bold ${valueColor}`} style={{ textShadow: '1px 1px 2px black' }}>
@@ -107,7 +106,6 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
             let expiresAt = Date.now() + buff.durationRemaining;
             
             // Specific logic for Poison
-            // Instead of using durationRemaining (which is infinite), we use the next tick time for the countdown
             if (buff.type === 'poison') {
                 expiresAt = buff.nextTickTimestamp ?? (Date.now() + 15000);
             }
@@ -239,10 +237,23 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                         colorClass: 'bg-purple-900/50'
                     });
                     break;
+                case 'item_expiry': {
+                    const item = ITEMS[buff.itemId];
+                    if (item) {
+                        buffs.push({
+                            id: buff.id,
+                            iconUrl: item.iconUrl,
+                            value: '',
+                            expiresAt: Date.now() + buff.durationRemaining,
+                            iconClassName: getIconClassName(item),
+                        });
+                    }
+                    break;
+                }
             }
         });
 
-        return buffs.sort((a, b) => b.expiresAt - a.expiresAt);
+        return buffs.sort((a, b) => a.expiresAt - b.expiresAt);
     }, [statModifiers, activeBuffs]);
 
     const showExpandButton = allBuffs.length > 4 && !isExpanded;

@@ -1,6 +1,7 @@
+
 import React, { useCallback, useEffect, useRef } from 'react';
 import { PlayerSkill, SkillName, InventorySlot, ActiveCraftingAction, Equipment, WorldState } from '../types';
-import { ITEMS, SMITHING_RECIPES, COOKING_RECIPES, INVENTORY_CAPACITY, CRAFTING_RECIPES, FLETCHING_RECIPES, GEM_CUTTING_RECIPES, SPINNING_RECIPES, HERBLORE_RECIPES, JEWELRY_CRAFTING_RECIPES, DOUGH_RECIPES, RUNECRAFTING_RECIPES, FIREMAKING_RECIPES, SPECIAL_SMITHING_RECIPES } from '../constants';
+import { ITEMS, SMITHING_RECIPES, COOKING_RECIPES, INVENTORY_CAPACITY, CRAFTING_RECIPES, FLETCHING_RECIPES, GEM_CUTTING_RECIPES, SPINNING_RECIPES, HERBLORE_RECIPES, JEWELRY_CRAFTING_RECIPES, DOUGH_RECIPES, RUNECRAFTING_RECIPES, FIREMAKING_RECIPES, SPECIAL_SMITHING_RECIPES, RENDERING_RECIPES, GLASSBLOWING_RECIPES, MISC_FURNACE_RECIPES } from '../constants';
 import { POIS } from '../data/pois';
 import { useSoundEngine } from './useSoundEngine';
 import { useUIState } from './useUIState';
@@ -31,14 +32,14 @@ interface UseCraftingProps {
     currentPrayer: number;
     setCurrentPrayer: (updater: React.SetStateAction<number>) => void;
     setIsResting: React.Dispatch<React.SetStateAction<boolean>>;
+    setInventory: React.Dispatch<React.SetStateAction<(InventorySlot | null)[]>>;
 }
 
 type BarType = 'bronze_bar' | 'iron_bar' | 'steel_bar' | 'silver_bar' | 'gold_bar' | 'mithril_bar' | 'adamantite_bar' | 'runic_bar';
 
 export const useCrafting = (props: UseCraftingProps) => {
-    const { skills, hasItems, addLog, setActiveCraftingAction, inventory, modifyItem, addXp, checkQuestProgressOnSpin, checkQuestProgressOnSmith, checkQuestProgressOnOffer, activeCraftingAction, advanceTutorial, closeCraftingView, setWindmillFlour, equipment, setEquipment, worldState, setWorldState, onCreateBonfire, onRefreshBonfire, isInCombat, currentPrayer, setCurrentPrayer, setIsResting } = props;
-    const ui = useUIState();
-    const { play } = useSoundEngine(ui.masterVolume, ui.isMuted);
+    const { skills, hasItems, addLog, setActiveCraftingAction, inventory, modifyItem, addXp, checkQuestProgressOnSpin, checkQuestProgressOnSmith, checkQuestProgressOnOffer, activeCraftingAction, advanceTutorial, closeCraftingView, setWindmillFlour, equipment, setEquipment, worldState, setWorldState, onCreateBonfire, onRefreshBonfire, isInCombat, currentPrayer, setCurrentPrayer, setIsResting, setInventory } = props;
+    const { play } = useSoundEngine();
 
     const completeCraftingItem = useCallback((action: ActiveCraftingAction): { success: boolean; wasItemMade: boolean; logMessage?: string } => {
         let recipe: any;
@@ -75,6 +76,57 @@ export const useCrafting = (props: UseCraftingProps) => {
         }
 
         switch(action.recipeType) {
+            case 'furnace-misc': {
+                recipe = MISC_FURNACE_RECIPES.find(r => r.itemId === action.recipeId);
+                if (recipe) {
+                    ingredients = recipe.ingredients;
+                    xp = { skill: SkillName.Crafting, amount: recipe.xp ?? 0 };
+                    levelReq = { skill: SkillName.Crafting, level: recipe.level ?? 1 };
+                }
+                break;
+            }
+            case 'glassblowing': {
+                recipe = GLASSBLOWING_RECIPES.find(r => r.itemId === action.recipeId);
+                if (recipe) {
+                    if (!hasItems([{ itemId: 'glassblowing_apparatus', quantity: 1 }])) {
+                        return { success: false, wasItemMade: false, logMessage: "You need a glassblowing apparatus." };
+                    }
+                    ingredients = recipe.ingredients;
+                    xp = { skill: SkillName.Crafting, amount: recipe.xp ?? 0 };
+                    levelReq = { skill: SkillName.Crafting, level: recipe.level ?? 1 };
+                }
+                break;
+            }
+            case 'rendering': {
+                const recipe = RENDERING_RECIPES.find(r => r.fatId === action.recipeId);
+                if (!recipe) return { success: false, wasItemMade: false, logMessage: "Invalid rendering recipe." };
+                const cookingLevel = skills.find(s => s.name === SkillName.Cooking)?.currentLevel ?? 1;
+                if (cookingLevel < recipe.level) {
+                    return { success: false, wasItemMade: false, logMessage: `You need a Cooking level of ${recipe.level}.` };
+                }
+
+                const kitIndex = inventory.findIndex(s => s?.itemId === 'rendering_kit' && !s.filled);
+                if (kitIndex === -1) {
+                    return { success: false, wasItemMade: false, logMessage: "You need an empty rendering kit." };
+                }
+                if (!hasItems([{ itemId: recipe.fatId, quantity: 1 }])) {
+                    return { success: false, wasItemMade: false, logMessage: "You ran out of fat." };
+                }
+
+                modifyItem(recipe.fatId, -1, true);
+                addXp(SkillName.Cooking, recipe.xp);
+
+                setInventory(prev => {
+                    const newInv = [...prev];
+                    const kitToFill = newInv[kitIndex];
+                    if (kitToFill) {
+                        newInv[kitIndex] = { ...kitToFill, filled: recipe.fatId, doses: 4 };
+                    }
+                    return newInv;
+                });
+                
+                return { success: true, wasItemMade: true, logMessage: `You render the fat into a flammable oil, filling your kit.` };
+            }
             case 'smithing-special':
                 recipe = SPECIAL_SMITHING_RECIPES.find(r => r.itemId === action.recipeId);
                 if (recipe) {
@@ -91,7 +143,7 @@ export const useCrafting = (props: UseCraftingProps) => {
                     return { success: false, wasItemMade: false, logMessage: "You ran out of ingredients." };
                 }
                 const dustCount = getItemCount('sacred_dust');
-                const dustToUse = Math.min(5, dustCount);
+                const dustToUse = Math.min(25, dustCount);
             
                 modifyItem('anointing_oil', -1, true);
                 modifyItem('sacred_dust', -dustToUse, true);
@@ -108,11 +160,11 @@ export const useCrafting = (props: UseCraftingProps) => {
                 }
 
                 const pasteCount = getItemCount('holy_paste');
-                const totalItems = action.payload?.totalItems ?? (action.totalQuantity * 5); // Fallback if totalItems isn't passed
-                const itemsAlreadyProcessed = action.completedQuantity * 5; // Assumes each previous batch was a full 5
+                const totalItems = action.payload?.totalItems ?? (action.totalQuantity * 25); // Fallback if totalItems isn't passed
+                const itemsAlreadyProcessed = action.completedQuantity * 25; // Assumes each previous batch was a full 5
                 const itemsLeftToProcess = totalItems - itemsAlreadyProcessed;
 
-                const pasteToUse = Math.min(5, pasteCount, itemsLeftToProcess);
+                const pasteToUse = Math.min(25, pasteCount, itemsLeftToProcess);
 
                 if (pasteToUse <= 0) {
                     return { success: false, wasItemMade: false, logMessage: "You ran out of holy paste." };
@@ -410,7 +462,7 @@ export const useCrafting = (props: UseCraftingProps) => {
                 recipe.ingredients.forEach(ing => modifyItem(ing.itemId, -ing.quantity, true));
 
                 const successChance = Math.min(0.95, 0.5 + (cookingLevel - recipe.level) * 0.02);
-                if (Math.random() < successChance) {
+                if (recipe.alwaysSucceeds || Math.random() < successChance) {
                     modifyItem(recipe.itemId, 1, true, { bypassAutoBank: true });
                     addXp(SkillName.Cooking, recipe.xp);
                     
@@ -520,7 +572,7 @@ export const useCrafting = (props: UseCraftingProps) => {
         if (xp.amount > 0) {
             let totalXp = xp.amount;
             if (ring?.itemId === 'ring_of_mastery' && (ring.charges ?? 0) > 0) {
-                if (Math.random() < 0.15) { // 15% chance for double xp
+                 if (Math.random() < 0.15) {
                     totalXp *= 2;
                     const newCharges = (ring.charges ?? 1) - 1;
                     if (newCharges > 0) {
@@ -570,7 +622,7 @@ export const useCrafting = (props: UseCraftingProps) => {
         }
 
         return { success: true, wasItemMade: true };
-    }, [hasItems, modifyItem, addXp, inventory, checkQuestProgressOnSpin, checkQuestProgressOnSmith, advanceTutorial, closeCraftingView, setWindmillFlour, equipment, skills, setEquipment, setWorldState, onCreateBonfire, onRefreshBonfire, checkQuestProgressOnOffer, currentPrayer, setCurrentPrayer, play]);
+    }, [hasItems, modifyItem, addXp, inventory, checkQuestProgressOnSpin, checkQuestProgressOnSmith, advanceTutorial, closeCraftingView, setWindmillFlour, equipment, skills, setEquipment, setWorldState, onCreateBonfire, onRefreshBonfire, checkQuestProgressOnOffer, currentPrayer, setCurrentPrayer, play, setInventory]);
 
     const completeCraftingItemRef = useRef(completeCraftingItem);
     useEffect(() => {
@@ -580,7 +632,7 @@ export const useCrafting = (props: UseCraftingProps) => {
     useEffect(() => {
         if (!activeCraftingAction) return;
 
-        if (['smithing-item', 'smithing-bar', 'smithing-special'].includes(activeCraftingAction.recipeType)) {
+        if (['smithing-item', 'smithing-bar', 'smithing-special', 'furnace-misc'].includes(activeCraftingAction.recipeType)) {
              const playRandomSound = (baseId: string, count: number) => {
                 const randomIndex = Math.floor(Math.random() * count) + 1;
                 play(`${baseId}_${randomIndex}` as SoundID);
@@ -640,7 +692,7 @@ export const useCrafting = (props: UseCraftingProps) => {
                 const finalItem = ITEMS[nextAction.recipeId];
                 const successfulCount = nextAction.successfulQuantity ?? 0;
                 
-                if (activeCraftingAction.recipeType !== 'firemaking-light') {
+                if (activeCraftingAction.recipeType !== 'firemaking-light' && activeCraftingAction.recipeType !== 'rendering') {
                     if (successfulCount > 0) {
                         let totalItemsMade = successfulCount;
                         const action = activeCraftingAction;
@@ -704,12 +756,27 @@ export const useCrafting = (props: UseCraftingProps) => {
         });
     }, [isInCombat, addLog, setActiveCraftingAction, setIsResting]);
 
+    const handleRendering = useCallback((fatId: string, quantity: number) => {
+        createTimedAction(fatId, 'rendering', quantity, 1800);
+    }, [createTimedAction]);
+
+    const handleGlassblowing = useCallback((itemId: string, quantity: number) => {
+        createTimedAction(itemId, 'glassblowing', quantity, 1800);
+    }, [createTimedAction]);
+
     const handleCrafting = useCallback((itemId: string, quantity: number) => {
         createTimedAction(itemId, 'crafting', quantity, 1800);
     }, [createTimedAction]);
     
     const handleJewelryCrafting = useCallback((itemId: string, quantity: number) => {
-        createTimedAction(itemId, 'jewelry', quantity, 1800);
+        const jewelryRecipe = JEWELRY_CRAFTING_RECIPES.find(r => r.itemId === itemId);
+        const miscRecipe = MISC_FURNACE_RECIPES.find(r => r.itemId === itemId);
+    
+        if (jewelryRecipe) {
+            createTimedAction(itemId, 'jewelry', quantity, 1800);
+        } else if (miscRecipe) {
+            createTimedAction(itemId, 'furnace-misc', quantity, 1800);
+        }
     }, [createTimedAction]);
 
     const handleDoughMaking = useCallback((recipeId: string, quantity: number) => {
@@ -835,5 +902,7 @@ export const useCrafting = (props: UseCraftingProps) => {
         handleInstantRunecrafting,
         handleStokeBonfire,
         handleDoughMaking,
+        handleRendering,
+        handleGlassblowing,
     };
 };

@@ -108,8 +108,17 @@ export const useInventory = (
         slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean },
     ) => {
         if (itemId === 'coins') {
-            setCoins(c => c + quantity);
-            if (quantity < 0 && !quiet) addLog(`Lost ${Math.abs(quantity)} coins.`);
+            setCoins(c => {
+                const currentCoins = c;
+                const newCoins = Math.max(0, currentCoins + quantity);
+                if (quantity < 0 && !quiet) {
+                    const amountLost = currentCoins - newCoins;
+                    if (amountLost > 0) {
+                        addLog(`Lost ${amountLost.toLocaleString()} coins.`);
+                    }
+                }
+                return newCoins;
+            });
             return;
         }
 
@@ -146,6 +155,7 @@ export const useInventory = (
                 
                 const finalDoses = slotOverrides?.doses ?? itemData.initialDoses;
                 const finalCharges = slotOverrides?.charges ?? itemData.charges;
+                const finalExpiresAt = slotOverrides?.expiresAt;
 
                 if (isNoted || itemData.stackable) {
                     const existingStack = newInv.find(i => 
@@ -163,7 +173,7 @@ export const useInventory = (
                             if (!quiet) addLog(`Your inventory is full. Could not pick up ${itemData.name}.`);
                             return prevInv;
                         }
-                        newInv[emptySlotIndex] = { itemId, quantity, doses: finalDoses, charges: finalCharges, noted: isNoted || undefined, nameOverride, statsOverride };
+                        newInv[emptySlotIndex] = { itemId, quantity, doses: finalDoses, charges: finalCharges, noted: isNoted || undefined, nameOverride, statsOverride, expiresAt: finalExpiresAt };
                     }
                 } else { // NOT STACKABLE
                     let added = 0;
@@ -176,7 +186,7 @@ export const useInventory = (
                             }
                             break; // Stop adding
                         }
-                        newInv[emptySlotIndex] = { itemId, quantity: 1, doses: finalDoses, charges: finalCharges, noted: false, nameOverride, statsOverride };
+                        newInv[emptySlotIndex] = { itemId, quantity: 1, doses: finalDoses, charges: finalCharges, noted: false, nameOverride, statsOverride, expiresAt: finalExpiresAt };
                         added++;
                     }
                 }
@@ -350,7 +360,7 @@ export const useInventory = (
         // --- Stance change for weapons ---
         if (slotKey === 'weapon') {
             const newWeaponType = itemData.equipment.weaponType;
-            const isRanged = newWeaponType === WeaponType.Bow || newWeaponType === WeaponType.Crossbow;
+            const isRanged = newWeaponType === WeaponType.Bow || newWeaponType === WeaponType.Crossbow || newWeaponType === WeaponType.Thrown;
             const currentIsRanged = [CombatStance.RangedAccurate, CombatStance.RangedRapid, CombatStance.RangedDefence].includes(combatStance);
             if (isRanged && !currentIsRanged) setCombatStance(CombatStance.RangedAccurate);
             else if (!isRanged && currentIsRanged) setCombatStance(CombatStance.Accurate);
@@ -420,7 +430,7 @@ export const useInventory = (
         }
     
         if (slotKey === 'weapon') {
-            if (itemData?.equipment?.weaponType === WeaponType.Bow || itemData?.equipment?.weaponType === WeaponType.Crossbow) setCombatStance(CombatStance.Accurate);
+            if (itemData?.equipment?.weaponType === WeaponType.Bow || itemData?.equipment?.weaponType === WeaponType.Crossbow || itemData?.equipment?.weaponType === WeaponType.Thrown) setCombatStance(CombatStance.Accurate);
         }
         
         modifyItem(
@@ -434,6 +444,7 @@ export const useInventory = (
                 nameOverride: itemToUnequip.nameOverride,
                 statsOverride: itemToUnequip.statsOverride,
                 bypassAutoBank: true,
+                expiresAt: itemToUnequip.expiresAt,
             }
         );
         setEquipment(prev => ({ ...prev, [slotKey]: null }));
@@ -453,7 +464,15 @@ export const useInventory = (
                 // Sanity check to make sure the item is still there
                 if (itemToDrop && itemToDrop.itemId === slot.itemId) {
                     newInv[inventoryIndex] = null;
-                    onItemDropped({ ...itemToDrop, quantity: 1 });
+                    
+                    // Revert lit fire pot on drop
+                    let finalItemToDrop = { ...itemToDrop, quantity: 1 };
+                    if (finalItemToDrop.itemId === 'fire_pot_lit') {
+                        finalItemToDrop.itemId = 'fire_pot';
+                        finalItemToDrop.expiresAt = undefined;
+                    }
+
+                    onItemDropped(finalItemToDrop);
                     addLog(`You drop ${itemData.name}.`);
                 }
                 return newInv;
@@ -468,7 +487,7 @@ export const useInventory = (
         if (slot.noted || itemData.stackable) {
             totalInInventory = slot.quantity;
             qtyToDrop = quantity === 'all' ? totalInInventory : Math.min(Number(quantity), totalInInventory);
-        } else { // Unstackable, not noted
+        } else { // Unstackable, non-noted
             totalInInventory = inventory.filter(s => s?.itemId === slot.itemId && !s.noted).length;
             qtyToDrop = quantity === 'all' ? totalInInventory : Math.min(Number(quantity), totalInInventory);
         }
@@ -481,7 +500,8 @@ export const useInventory = (
             charges: slot.charges,
             noted: slot.noted,
             nameOverride: slot.nameOverride,
-            statsOverride: slot.statsOverride
+            statsOverride: slot.statsOverride,
+            expiresAt: slot.expiresAt
         });
     
         // Add the items to the ground
@@ -490,7 +510,13 @@ export const useInventory = (
         } else {
             // Drop unstackable items one by one
             for (let i = 0; i < qtyToDrop; i++) {
-                onItemDropped({ ...slot, quantity: 1, noted: false });
+                // Revert lit fire pot on drop
+                let itemToDrop = { ...slot, quantity: 1, noted: false };
+                if (itemToDrop.itemId === 'fire_pot_lit') {
+                    itemToDrop.itemId = 'fire_pot';
+                    itemToDrop.expiresAt = undefined;
+                }
+                onItemDropped(itemToDrop);
             }
         }
         addLog(`You drop ${qtyToDrop > 1 ? `${qtyToDrop}x ` : ''}${itemData.name}.`);
@@ -551,8 +577,21 @@ export const useInventory = (
 
     const handleConsumeAmmo = useCallback(() => {
         setEquipment(prev => {
-            if (!prev.ammo) return prev;
+            const currentWeapon = prev.weapon ? ITEMS[prev.weapon.itemId] : null;
+            
+            // Handle Thrown weapons (consume from weapon slot)
+            if (currentWeapon?.equipment?.weaponType === WeaponType.Thrown) {
+                if (!prev.weapon) return prev;
+                const newWeapon = { ...prev.weapon, quantity: prev.weapon.quantity - 1 };
+                if (newWeapon.quantity <= 0) {
+                    addLog(`You have run out of ${ITEMS[newWeapon.itemId].name}!`);
+                    return { ...prev, weapon: null };
+                }
+                return { ...prev, weapon: newWeapon };
+            }
 
+            // Handle standard ammo (Arrows/Bolts)
+            if (!prev.ammo) return prev;
             const consumedAmmoSlot = prev.ammo;
             if (Math.random() < 0.8) { // 80% chance to recover arrow
                 onItemDropped({ ...consumedAmmoSlot, quantity: 1 });

@@ -1,4 +1,3 @@
-
 import { Monster, MonsterType, SkillName, SpellElement } from '@/types';
 
 export const dragons: Monster[] = [
@@ -38,6 +37,7 @@ export const dragons: Monster[] = [
             { itemId: 'deathscythe_hide', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'dragon_fat', chance: '1/2', minQuantity: 2, maxQuantity: 5 },
             { itemId: 'runic_platebody', chance: "1/64", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'runic_platelegs', chance: "1/64", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'runic_kiteshield', chance: "1/128", minQuantity: 1, maxQuantity: 1 },
@@ -66,6 +66,7 @@ export const dragons: Monster[] = [
             { itemId: 'emberscale_hide', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'dragon_fat', chance: '1/2', minQuantity: 2, maxQuantity: 5 },
             { itemId: 'adamantite_platebody', chance: "1/64", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'runic_sword', chance: "1/128", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'runic_scimitar', chance: "1/128", minQuantity: 1, maxQuantity: 1 },
@@ -83,6 +84,7 @@ export const dragons: Monster[] = [
             { itemId: 'coins', chance: "1/1", minQuantity: 900, maxQuantity: 1000 },
         ],
         types: [MonsterType.Dragon], attackSpeed: 5, respawnTime: 160000, aggressive: true, attackStyle: 'slash',
+        fireImmunity: true,
         maxTaskCount: [10, 25],
     },
     {
@@ -94,6 +96,7 @@ export const dragons: Monster[] = [
             { itemId: 'frost_hide', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'dragon_fat', chance: '1/2', minQuantity: 2, maxQuantity: 5 },
             { itemId: 'adamantite_sword', chance: "1/64", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'mithril_platebody', chance: "1/128", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'adamantite_axe', chance: "1/32", minQuantity: 1, maxQuantity: 1 },
@@ -109,6 +112,7 @@ export const dragons: Monster[] = [
             { itemId: 'coins', chance: "1/1", minQuantity: 700, maxQuantity: 800 },
         ],
         types: [MonsterType.Dragon], attackSpeed: 5, respawnTime: 140000, aggressive: true, attackStyle: 'slash',
+        fireWeakness: 0.5,
     },
     {
         id: 'grove_dragon', name: 'Grove Dragon', level: 75, maxHp: 80, attack: 60, strength: 70, defence: 75,
@@ -119,6 +123,7 @@ export const dragons: Monster[] = [
             { itemId: 'grove_hide', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'dragon_fat', chance: '1/2', minQuantity: 2, maxQuantity: 5 },
             { itemId: 'mithril_sword', chance: "1/64", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'mithril_legs', chance: "1/128", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'mithril_axe', chance: "1/32", minQuantity: 1, maxQuantity: 1 },
@@ -134,5 +139,6 @@ export const dragons: Monster[] = [
             { itemId: 'coins', chance: "1/1", minQuantity: 500, maxQuantity: 600 },
         ],
         types: [MonsterType.Dragon], attackSpeed: 5, respawnTime: 120000, aggressive: true, attackStyle: 'slash',
+        fireWeakness: 0.5,
     },
 ];

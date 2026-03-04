@@ -1,4 +1,3 @@
-
 import { Monster, MonsterType, SkillName } from '@/types';
 
 export const beasts: Monster[] = [
@@ -13,6 +12,7 @@ export const beasts: Monster[] = [
             { itemId: 'raw_lobster', chance: "1/5", minQuantity: 1, maxQuantity: 1, noted: true },
             { itemId: 'hex_rune', chance: "1/4", minQuantity: 10, maxQuantity: 20 },
             { itemId: 'raw_eel', chance: "1/8", minQuantity: 1, maxQuantity: 2, noted: true },
+            { itemId: 'beast_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
         ],
         tertiaryDrops: [
             { itemId: 'nexus_talisman', chance: 0.0078125, minQuantity: 1, maxQuantity: 1 },
@@ -44,6 +44,7 @@ export const beasts: Monster[] = [
             { itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'rich_animal_fat', chance: '1/3', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'stone_rune', chance: "1/5", minQuantity: 2, maxQuantity: 8 },
             { itemId: 'raw_beef', chance: "1/4", minQuantity: 1, maxQuantity: 1, noted: true },
             { itemId: 'oak_logs', chance: "1/8", minQuantity: 1, maxQuantity: 3, noted: true },
@@ -85,6 +86,7 @@ export const beasts: Monster[] = [
             { itemId: 'serpents_egg', chance: "1/60", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'anima_rune', chance: "1/60", minQuantity: 1, maxQuantity: 2 },
             { tableId: 'affinity_robes_table', chance: "1/128", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'rich_animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Beast], attackSpeed: 4, respawnTime: 90000, aggressive: true, attackStyle: 'slash',
         specialAttacks: [
@@ -102,6 +104,7 @@ export const beasts: Monster[] = [
             { itemId: 'coal', chance: "1/5", minQuantity: 3, maxQuantity: 9, noted: true },
             { itemId: 'mithril_ore', chance: "1/20", minQuantity: 1, maxQuantity: 5, noted: true },
             { itemId: 'stone_rune', chance: "1/4", minQuantity: 10, maxQuantity: 20 },
+            { itemId: 'beast_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Beast], attackSpeed: 4, respawnTime: 30000, aggressive: true, attackStyle: 'stab',
     },
@@ -115,6 +118,7 @@ export const beasts: Monster[] = [
             { itemId: 'feathers', minQuantity: 1, maxQuantity: 20 },
         ],
         mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'eggs', chance: "1/4", minQuantity: 1, maxQuantity: 1 },
         ],
         tertiaryDrops: [
@@ -131,6 +135,10 @@ export const beasts: Monster[] = [
             { itemId: 'bones', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'cowhide', minQuantity: 1, maxQuantity: 1 },
         ],
+        mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'tallow', chance: '1/20', minQuantity: 1, maxQuantity: 1 },
+        ],
         tertiaryDrops: [
             { itemId: 'gust_talisman', chance: 0.03125, minQuantity: 1, maxQuantity: 1 },
         ],
@@ -144,6 +152,7 @@ export const beasts: Monster[] = [
             { itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'beast_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'crystal_shard', chance: "1/4", minQuantity: 1, maxQuantity: 2 },
             { itemId: 'resonating_crystal', chance: "1/50", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'uncut_sapphire', chance: "1/20", minQuantity: 1, maxQuantity: 1 },
@@ -160,6 +169,7 @@ export const beasts: Monster[] = [
             { itemId: 'scuttler_shell_fragment', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'beast_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'astral_rune', chance: "1/10", minQuantity: 3, maxQuantity: 8 },
             { itemId: 'crystalline_chitin', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'binding_rune', chance: "1/8", minQuantity: 5, maxQuantity: 15 },
@@ -175,6 +185,7 @@ export const beasts: Monster[] = [
             { itemId: 'crystal_shard', minQuantity: 5, maxQuantity: 10 },
         ],
         mainDrops: [
+            { itemId: 'beast_fat', chance: '1/2', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'aether_rune', chance: "1/3", minQuantity: 15, maxQuantity: 30 },
             { tableId: 'gem_table', chance: "1/8", minQuantity: 1, maxQuantity: 1, noted: true },
             { tableId: 'robes_of_power_table', chance: "1/128", minQuantity: 1, maxQuantity: 1 },
@@ -191,6 +202,7 @@ export const beasts: Monster[] = [
         iconUrl: 'https://api.iconify.design/game-icons:spider-alt.svg',
         guaranteedDrops: [{ itemId: 'spider_silk', minQuantity: 1, maxQuantity: 1 }],
         mainDrops: [
+            { itemId: 'beast_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'crystal_shard', chance: '1/2', minQuantity: 1, maxQuantity: 2 },
             { itemId: 'astral_rune', chance: '1/5', minQuantity: 3, maxQuantity: 8 },
             { itemId: 'rune_essence', chance: '1/3', minQuantity: 10, maxQuantity: 25, noted: true },
@@ -207,6 +219,7 @@ export const beasts: Monster[] = [
             { itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'beast_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'hex_rune', chance: "1/12", minQuantity: 5, maxQuantity: 10 },
             { itemId: 'uncut_diamond', chance: "1/500", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'uncut_emerald', chance: "1/80", minQuantity: 1, maxQuantity: 1 },
@@ -219,6 +232,7 @@ export const beasts: Monster[] = [
         stabDefence: 30, slashDefence: 35, crushDefence: 32, rangedDefence: 25, magicDefence: 20,
         iconUrl: 'https://api.iconify.design/game-icons:sea-serpent.svg',
         mainDrops: [
+            { itemId: 'rich_animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'raw_eel', chance: "1/4", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'nexus_rune', chance: "1/3", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'anima_rune', chance: "1/8", minQuantity: 1, maxQuantity: 1 },
@@ -236,6 +250,7 @@ export const beasts: Monster[] = [
             { itemId: 'raw_tuna', minQuantity: 1, maxQuantity: 2, noted: true },
         ],
         mainDrops: [
+            { itemId: 'rich_animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'eldritch_pearl', chance: "1/32", minQuantity: 1, maxQuantity: 1 },
             { tableId: 'gem_table', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'raw_tuna', chance: "1/5", minQuantity: 1, maxQuantity: 1, noted: true },
@@ -253,6 +268,7 @@ export const beasts: Monster[] = [
             { itemId: 'giant_crab_meat', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'aqua_rune', chance: "1/2", minQuantity: 10, maxQuantity: 25 },
             { itemId: 'astral_rune', chance: "1/5", minQuantity: 2, maxQuantity: 6 },
             { itemId: 'nexus_rune', chance: "1/10", minQuantity: 4, maxQuantity: 12 },
@@ -303,6 +319,7 @@ export const beasts: Monster[] = [
             { itemId: 'bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'binding_rune', chance: "1/20", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'fishing_bait', chance: "1/8", minQuantity: 1, maxQuantity: 4 },
             { itemId: 'grimy_coin_pouch', chance: "1/30", minQuantity: 1, maxQuantity: 1 },
@@ -317,6 +334,7 @@ export const beasts: Monster[] = [
             { itemId: 'spider_silk', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'spider_eggs', chance: "1/10", minQuantity: 1, maxQuantity: 3 },
             { itemId: 'binding_rune', chance: "1/50", minQuantity: 1, maxQuantity: 2 },
             { itemId: 'coal', chance: "1/20", minQuantity: 1, maxQuantity: 2, noted: true },
@@ -351,6 +369,7 @@ export const beasts: Monster[] = [
             { itemId: 'bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'beast_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'spider_eye', chance: '1/5', minQuantity: 1, maxQuantity: 2 },
             { itemId: 'spider_silk', chance: '1/3', minQuantity: 2, maxQuantity: 5, noted: true },
             { itemId: 'mithril_sword', chance: '1/32' },
@@ -384,6 +403,7 @@ export const beasts: Monster[] = [
             { itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'rich_animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'adamantite_arrow', chance: "1/2", minQuantity: 10, maxQuantity: 25 },
             { itemId: 'aqua_rune', chance: "1/3", minQuantity: 30, maxQuantity: 50 },
             { itemId: 'mithril_bar', chance: "1/20", minQuantity: 1, maxQuantity: 2, noted: true },
@@ -401,6 +421,7 @@ export const beasts: Monster[] = [
             { itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'verdant_rune', chance: "1/3", minQuantity: 15, maxQuantity: 30 },
             { itemId: 'nexus_rune', chance: "1/8", minQuantity: 5, maxQuantity: 15 },
             { itemId: 'raw_beef', chance: "1/5", minQuantity: 1, maxQuantity: 1, noted: true },
@@ -416,6 +437,7 @@ export const beasts: Monster[] = [
             { itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'gust_rune', chance: "1/4", minQuantity: 5, maxQuantity: 10 },
             { itemId: 'stone_rune', chance: "1/4", minQuantity: 5, maxQuantity: 10 },
             { itemId: 'iron_ore', chance: "1/12", minQuantity: 1, maxQuantity: 1, noted: true },
@@ -470,6 +492,7 @@ export const beasts: Monster[] = [
         stabDefence: 20, slashDefence: 20, crushDefence: 25, rangedDefence: 15, magicDefence: 10,
         iconUrl: 'https://api.iconify.design/game-icons:lizardman.svg',
         mainDrops: [
+            { itemId: 'beast_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'uncut_emerald', chance: "3/100", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'yew_logs', chance: "1/6", minQuantity: 1, maxQuantity: 3 },
             { itemId: 'stone_rune', chance: "2/5", minQuantity: 10, maxQuantity: 25 },
@@ -488,6 +511,7 @@ export const beasts: Monster[] = [
             { itemId: 'bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'binding_rune', chance: "1/2", minQuantity: 1, maxQuantity: 2 },
             { itemId: 'coins', chance: "1/4", minQuantity: 1, maxQuantity: 5 },
             { itemId: 'fishing_bait', chance: "1/10", minQuantity: 1, maxQuantity: 2 },
@@ -499,6 +523,7 @@ export const beasts: Monster[] = [
         stabDefence: 45, slashDefence: 45, crushDefence: 40, rangedDefence: 30, magicDefence: 10,
         iconUrl: 'https://api.iconify.design/game-icons:trilobite.svg',
         mainDrops: [
+            { itemId: 'rich_animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'nexus_rune', chance: "1/6", minQuantity: 8, maxQuantity: 18 },
             { itemId: 'hex_rune', chance: "1/8", minQuantity: 5, maxQuantity: 10 },
             { itemId: 'raw_eel', chance: "1/8", minQuantity: 1, maxQuantity: 1 },
@@ -510,6 +535,7 @@ export const beasts: Monster[] = [
         id: 'treant_sapling', name: 'Treant Sapling', level: 17, maxHp: 38, attack: 15, strength: 18, defence: 15,
         stabDefence: 5, slashDefence: 20, crushDefence: 20, rangedDefence: 10, magicDefence: 5,
         iconUrl: 'https://api.iconify.design/game-icons:evil-tree.svg',
+        fireWeakness: 0.5,
         guaranteedDrops: [
             { itemId: 'willow_logs', minQuantity: 1, maxQuantity: 3 },
         ],
@@ -541,6 +567,7 @@ export const beasts: Monster[] = [
             { itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'beast_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'verdant_rune', chance: "3/20", minQuantity: 3, maxQuantity: 8 },
             { itemId: 'fey_dust', chance: "1/10", minQuantity: 1, maxQuantity: 2 },
             { itemId: 'anima_rune', chance: "1/50", minQuantity: 1, maxQuantity: 1 },
@@ -560,6 +587,7 @@ export const beasts: Monster[] = [
             { itemId: 'bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'stone_rune', chance: "1/5", minQuantity: 1, maxQuantity: 4 },
             { itemId: 'boar_tusk', chance: "1/12", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'oak_logs', chance: "1/15", minQuantity: 1, maxQuantity: 1, noted: true },
@@ -578,6 +606,7 @@ export const beasts: Monster[] = [
             { itemId: 'wolf_pelt', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'animal_fat', chance: '1/4', minQuantity: 1, maxQuantity: 1 },
             { itemId: 'gust_rune', chance: "1/8", minQuantity: 2, maxQuantity: 6 },
             { itemId: 'frost_berries', chance: "1/30", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'big_bones', chance: "1/20", minQuantity: 1, maxQuantity: 1 },

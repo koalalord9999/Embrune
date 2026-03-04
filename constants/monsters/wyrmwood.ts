@@ -1,4 +1,3 @@
-
 import { Monster, MonsterType, SkillName } from '@/types';
 
 export const wyrmwoodMonsters: Monster[] = [
@@ -26,6 +25,7 @@ export const wyrmwoodMonsters: Monster[] = [
         types: [MonsterType.Humanoid], attackSpeed: 4, respawnTime: 35000, aggressive: false, attackStyle: 'ranged', customMaxHit: 9,
         mainDrops: [{ itemId: 'willow_logs', chance: '1/2', noted: true }, { tableId: 'herb_table', chance: '1/4' }, { itemId: 'enchanted_bark', chance: '1/10' }],
         guaranteedDrops: [{ itemId: 'bones', minQuantity: 1, maxQuantity: 1 }],
+        fireWeakness: 0.5,
     },
     {
         id: 'bramble_lurker', name: 'Bramble Lurker', level: 65, maxHp: 80, attack: 58, strength: 55, defence: 65,
@@ -34,6 +34,7 @@ export const wyrmwoodMonsters: Monster[] = [
         types: [MonsterType.Beast], attackSpeed: 5, respawnTime: 40000, aggressive: false, attackStyle: 'stab', customMaxHit: 8,
         mainDrops: [{ itemId: 'yew_logs', chance: '1/8', noted: true }, { itemId: 'bloodroot_tendril', chance: '1/12' }],
         guaranteedDrops: [{ itemId: 'bones', minQuantity: 1, maxQuantity: 1 }],
+        fireWeakness: 0.5,
     },
     {
         id: 'feywood_stalker', name: 'Feywood Stalker', level: 68, maxHp: 75, attack: 62, strength: 60, defence: 60,
@@ -60,6 +61,7 @@ export const wyrmwoodMonsters: Monster[] = [
         types: [MonsterType.Beast], attackSpeed: 6, respawnTime: 60000, aggressive: true, attackStyle: 'crush', customMaxHit: 15,
         mainDrops: [{ itemId: 'yew_logs', chance: '1/2', minQuantity: 3, maxQuantity: 5, noted: true }, { itemId: 'uncut_ruby', chance: '1/64' }],
         guaranteedDrops: [{ itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 }],
+        fireWeakness: 0.5,
     },
     {
         id: 'raging_bear', name: 'Raging Bear', level: 82, maxHp: 110, attack: 80, strength: 85, defence: 70,

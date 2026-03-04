@@ -7,7 +7,6 @@ export const misc: Item[] = [
     { id: 'agility_paste', name: 'Agility Paste', description: 'A thick paste made from a secret formula. Used in creating Stamina potions.', stackable: true, value: 120, iconUrl: 'https://api.iconify.design/game-icons:goo-spurt.svg' },
     { id: 'beer_glass', name: 'Beer Glass', description: 'An empty beer glass.', stackable: false, value: 1, iconUrl: 'https://api.iconify.design/game-icons:beer-stein.svg' },
     { id: 'ashes', name: 'Ashes', description: 'A pile of ashes.', stackable: false, value: 1, iconUrl: 'https://api.iconify.design/game-icons:powder.svg' },
-    { id: 'fishing_bait', name: 'Fishing Bait', description: 'A wriggling worm, perfect for catching fish.', stackable: true, value: 1, iconUrl: 'https://api.iconify.design/game-icons:worms.svg' },
     { id: 'seeds', name: 'Seeds', description: "A random assortment of seeds, maybe I can turn them in somewhere? (But not yet)", stackable: true, value: 10, iconUrl: 'https://api.iconify.design/game-icons:plant-seed.svg' },
     { id: 'waterskin', name: 'Waterskin', description: 'A skin for carrying water. Can be filled at a water source or from a cactus.', stackable: false, value: 15, iconUrl: 'https://api.iconify.design/game-icons:waterskin.svg', material: 'leather', consumable: { healAmount: 1 }, doseable: true, maxDoses: 4 },
     
@@ -37,7 +36,6 @@ export const misc: Item[] = [
     { id: 'sirens_hair', name: "Siren's Hair", description: 'A lock of long, beautiful hair that seems to shimmer with its own light. It hums a faint, enchanting melody.', stackable: false, value: 0, iconUrl: 'https://api.iconify.design/game-icons:yarn.svg' },
     { id: 'slimy_egg_shells', name: 'Slimy Egg Shells', description: 'Fragments of a large, leathery egg. They are covered in swamp slime.', stackable: false, value: 1, iconUrl: 'https://api.iconify.design/game-icons:egg-eye.svg' },
     { id: 'serpents_egg', name: "Serpent's Egg", description: 'A large, leathery egg, surprisingly intact. It feels warm to the touch.', stackable: false, value: 0, iconUrl: 'https://api.iconify.design/game-icons:dinosaur-egg.svg' },
-    { id: 'tinderbox', name: 'Tinderbox', description: 'Used to light fires.', stackable: false, value: 1, iconUrl: 'https://api.iconify.design/game-icons:matchbox.svg' },
     { id: 'treasure_chest', name: 'Treasure Chest', description: 'A waterlogged chest, sealed tight. Opening it might reveal valuable treasures.', stackable: false, value: 500, iconUrl: 'https://api.iconify.design/game-icons:chest.svg', consumable: { special: 'treasure_chest' }},
     { id: 'goblin_champion_scroll', name: 'Goblin Champion Scroll', description: 'A rare scroll dropped by a goblin champion. A sign of great prowess.', stackable: false, value: 0, iconUrl: 'https://api.iconify.design/game-icons:scroll-unfurled.svg' },
     { id: 'reinforced_bridge_cable', name: 'Reinforced Bridge Cable', description: 'An incredibly strong cable, specially crafted to repair a bridge.', stackable: false, value: 0, iconUrl: 'https://api.iconify.design/game-icons:rope-coil.svg' },
@@ -70,8 +68,6 @@ export const misc: Item[] = [
     { id: 'silver_amulet_u', name: 'Silver Amulet (u)', description: 'An unstrung silver amulet. It needs a string.', stackable: false, value: 780, iconUrl: 'https://api.iconify.design/game-icons:gem-pendant.svg', material: 'silver' },
 
     // Herblore Items
-    { id: 'pestle_and_mortar', name: 'Pestle and Mortar', description: 'Used to grind ingredients for Herblore.', stackable: false, value: 100, iconUrl: 'https://api.iconify.design/game-icons:apothecary.svg' },
-    { id: 'pouch_cleanser', name: 'Pouch Cleanser', description: 'A special herbal concoction that can clean grime off items. Has 25 charges.', stackable: false, value: 300, iconUrl: 'https://api.iconify.design/game-icons:potion-ball.svg', charges: 25 },
     // Herblore Secondaries
     { id: 'spider_eggs', name: 'Spider Eggs', description: 'A clutch of spider eggs.', stackable: false, value: 5, iconUrl: 'https://api.iconify.design/game-icons:spider-alt.svg' },
     { id: 'boar_tusk', name: 'Boar Tusk', description: 'A sharp tusk from a wild boar.', stackable: false, value: 15, iconUrl: 'https://api.iconify.design/game-icons:ivory-tusks.svg' },
@@ -97,12 +93,6 @@ export const misc: Item[] = [
     { id: 'sunken_labyrinth_map', name: 'Sunken Labyrinth Map', description: 'A waterlogged map of the ancient labyrinth.', stackable: false, value: 1500, iconUrl: 'https://api.iconify.design/game-icons:treasure-map.svg', mappable: { regionId: 'sunken_labyrinth', mapTitle: 'Sunken Labyrinth' } },
     { id: 'magus_spire_map', name: 'Magus Spire Map', description: 'A map drawn on shimmering crystal film, showing the layout of the spire.', stackable: false, value: 2500, iconUrl: 'https://api.iconify.design/game-icons:treasure-map.svg', mappable: { regionId: 'magus_spire', mapTitle: 'Magus Spire' } },
     
-    // Thieving Items
-    { id: 'bobby_pin', name: 'Bobby Pin', description: 'A thin piece of metal, suitable for simple locks.', stackable: false, value: 5, iconUrl: 'https://api.iconify.design/game-icons:safety-pin.svg', lockpick: { level: 1, breakChance: 0.5, power: 0} },
-    { id: 'lockpick', name: 'Lockpick', description: 'A sturdy iron lockpick for more complex locks.', stackable: false, value: 50, iconUrl: 'https://api.iconify.design/game-icons:lockpicks.svg', lockpick: { level: 20, breakChance: 0.2, power: 5 } },
-    { id: 'diamond_lockpick', name: 'Diamond Lockpick', description: 'A masterfully crafted lockpick with a diamond tip. Very durable.', stackable: false, value: 5000, iconUrl: 'https://api.iconify.design/game-icons:lockpicks.svg', material: 'diamond', lockpick: { level: 50, breakChance: 0.05, power: 10 } },
-    { id: 'skeleton_key', name: 'Skeleton Key', description: 'An ancient, unbreakable key said to open any lock.', stackable: false, value: 100000, iconUrl: 'https://api.iconify.design/game-icons:skeleton-key.svg', lockpick: { level: 80, breakChance: 0, unbreakable: true, power: 15 } },
-
     // NEW QUEST ITEMS
     { id: 'blighted_soil', name: 'Blighted Soil', description: "A sample of soil from near Fitzwilliam's petunias. It feels unnaturally cold.", stackable: false, value: 0, iconUrl: 'https://api.iconify.design/game-icons:ground-sprout.svg' },
     { id: 'broken_barrow_key', name: 'Broken Barrow Key', description: 'Two halves of an ancient, broken key. It feels heavy with purpose.', stackable: false, value: 0, iconUrl: 'https://api.iconify.design/game-icons:key.svg', material: 'uncut-emerald' },

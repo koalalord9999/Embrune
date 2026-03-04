@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
 import Button from '../common/Button';
 import { useUIState } from '../../hooks/useUIState';
+import { useSoundEngine } from '../../hooks/useSoundEngine';
 
 interface SettingsViewProps {
     onResetGame: () => void;
@@ -64,42 +66,15 @@ const TabButton: React.FC<TabButtonProps> = ({ label, isActive, onClick }) => (
 );
 
 const SettingsView: React.FC<SettingsViewProps> = ({ onResetGame, onExportGame, onImportGame, onClose, isDevMode, onToggleDevPanel, isTouchSimulationEnabled, onToggleTouchSimulation, ui, bankPlaceholders, handleToggleBankPlaceholders }) => {
-    const [activeTab, setActiveTab] = useState<SettingTab>('Video');
+    const [activeTab, setActiveTab] = useState<SettingTab>('Audio');
     const [quality, setQuality] = useState<'Low' | 'Medium' | 'High'>('High');
+    const { play, initContext } = useSoundEngine();
 
-    // Local state to prevent UI jitter on re-render from parent
-    const [localShowTooltips, setLocalShowTooltips] = useState(ui.showTooltips);
-    const [localShowXpDrops, setLocalShowXpDrops] = useState(ui.showXpDrops);
-    const [localConfirmValuableDrops, setLocalConfirmValuableDrops] = useState(ui.confirmValuableDrops);
-    const [localShowMinimapHealth, setLocalShowMinimapHealth] = useState(ui.showMinimapHealth);
-    const [localShowCombatPlayerHealth, setLocalShowCombatPlayerHealth] = useState(ui.showCombatPlayerHealth);
-    const [localShowCombatEnemyHealth, setLocalShowCombatEnemyHealth] = useState(ui.showCombatEnemyHealth);
-    const [localShowHitsplats, setLocalShowHitsplats] = useState(ui.showHitsplats);
-    const [localIsOneClickMode, setLocalIsOneClickMode] = useState(ui.isOneClickMode);
-    const [localBankPlaceholders, setLocalBankPlaceholders] = useState(bankPlaceholders);
-
-    const createToggleHandler = <T extends boolean>(
-        localSetter: React.Dispatch<React.SetStateAction<T>>,
-        parentSetter: (value: T) => void
-    ) => {
-        return () => {
-            localSetter(prev => {
-                const newValue = !prev as T;
-                parentSetter(newValue);
-                return newValue;
-            });
-        };
+    const handleAmbientChange = () => {
+        initContext();
+        play('UI_CLICK');
     };
-
-    const handleBankPlaceholderToggle = () => {
-        setLocalBankPlaceholders(prev => {
-            const newValue = !prev;
-            // The parent handler toggles the state, so we just call it.
-            handleToggleBankPlaceholders(); 
-            return newValue;
-        });
-    };
-
+    
     const renderTabContent = () => {
         switch (activeTab) {
             case 'Video': return (
@@ -108,22 +83,22 @@ const SettingsView: React.FC<SettingsViewProps> = ({ onResetGame, onExportGame, 
                         <QualitySelector value={quality} onChange={setQuality} />
                     </SettingRow>
                     <SettingRow label="Show Tooltips" description="Display helpful popups when hovering over items and UI elements.">
-                        <ToggleButton enabled={localShowTooltips} onClick={createToggleHandler(setLocalShowTooltips, ui.setShowTooltips)} />
+                        <ToggleButton enabled={ui.showTooltips} onClick={() => ui.setShowTooltips(!ui.showTooltips)} />
                     </SettingRow>
                     <SettingRow label="Show XP Drops" description="Display experience gains on-screen.">
-                        <ToggleButton enabled={localShowXpDrops} onClick={createToggleHandler(setLocalShowXpDrops, ui.setShowXpDrops)} />
+                        <ToggleButton enabled={ui.showXpDrops} onClick={() => ui.setShowXpDrops(!ui.showXpDrops)} />
                     </SettingRow>
                     <SettingRow label="Show Hitsplats" description="Display damage numbers in combat.">
-                        <ToggleButton enabled={localShowHitsplats} onClick={createToggleHandler(setLocalShowHitsplats, ui.setShowHitsplats)} />
+                        <ToggleButton enabled={ui.showHitsplats} onClick={() => ui.setShowHitsplats(!ui.showHitsplats)} />
                     </SettingRow>
                     <SettingRow label="Player Health in Combat" description="Show player's HP numbers in the combat view.">
-                        <ToggleButton enabled={localShowCombatPlayerHealth} onClick={createToggleHandler(setLocalShowCombatPlayerHealth, ui.setShowCombatPlayerHealth)} />
+                        <ToggleButton enabled={ui.showCombatPlayerHealth} onClick={() => ui.setShowCombatPlayerHealth(!ui.showCombatPlayerHealth)} />
                     </SettingRow>
                     <SettingRow label="Enemy Health in Combat" description="Show enemy's HP numbers in the combat view.">
-                        <ToggleButton enabled={localShowCombatEnemyHealth} onClick={createToggleHandler(setLocalShowCombatEnemyHealth, ui.setShowCombatEnemyHealth)} />
+                        <ToggleButton enabled={ui.showCombatEnemyHealth} onClick={() => ui.setShowCombatEnemyHealth(!ui.showCombatEnemyHealth)} />
                     </SettingRow>
                     <SettingRow label="Player Health on Minimap" description="Show player's HP numbers on the minimap orb.">
-                        <ToggleButton enabled={localShowMinimapHealth} onClick={createToggleHandler(setLocalShowMinimapHealth, ui.setShowMinimapHealth)} />
+                        <ToggleButton enabled={ui.showMinimapHealth} onClick={() => ui.setShowMinimapHealth(!ui.showMinimapHealth)} />
                     </SettingRow>
                 </div>
             );
@@ -144,18 +119,56 @@ const SettingsView: React.FC<SettingsViewProps> = ({ onResetGame, onExportGame, 
                             <span className="text-xs font-mono w-8">{Math.round(ui.masterVolume * 100)}%</span>
                         </div>
                     </SettingRow>
+                    <SettingRow label="Music Volume" description="Adjust the volume of background music.">
+                        <div className="flex items-center gap-2">
+                            <input 
+                                type="range" 
+                                min="0" max="1" step="0.05"
+                                value={ui.musicVolume}
+                                onChange={(e) => ui.setMusicVolume(parseFloat(e.target.value))}
+                                className="w-40 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-600" 
+                            />
+                            <span className="text-xs font-mono w-8">{Math.round(ui.musicVolume * 100)}%</span>
+                        </div>
+                    </SettingRow>
+                    <SettingRow label="SFX Volume" description="Adjust the volume of sound effects like combat and skilling.">
+                        <div className="flex items-center gap-2">
+                            <input 
+                                type="range" 
+                                min="0" max="1" step="0.05"
+                                value={ui.sfxVolume}
+                                onChange={(e) => ui.setSfxVolume(parseFloat(e.target.value))}
+                                className="w-40 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-600" 
+                            />
+                            <span className="text-xs font-mono w-8">{Math.round(ui.sfxVolume * 100)}%</span>
+                        </div>
+                    </SettingRow>
+                    <SettingRow label="Ambient Volume" description="Adjust the volume of ambient sounds and UI clicks.">
+                        <div className="flex items-center gap-2">
+                            <input 
+                                type="range" 
+                                min="0" max="1" step="0.05"
+                                value={ui.ambientVolume}
+                                onChange={(e) => ui.setAmbientVolume(parseFloat(e.target.value))}
+                                onMouseUp={handleAmbientChange}
+                                onTouchEnd={handleAmbientChange}
+                                className="w-40 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-600" 
+                            />
+                            <span className="text-xs font-mono w-8">{Math.round(ui.ambientVolume * 100)}%</span>
+                        </div>
+                    </SettingRow>
                 </div>
             );
             case 'Gameplay': return (
                 <div>
                     <SettingRow label="Bank Placeholders" description="Leave a 0-stack placeholder in the bank when withdrawing all of an item.">
-                         <ToggleButton enabled={localBankPlaceholders} onClick={handleBankPlaceholderToggle} />
+                         <ToggleButton enabled={bankPlaceholders} onClick={handleToggleBankPlaceholders} />
                     </SettingRow>
                     <SettingRow label="One-Click Mode" description="Makes single-clicks act like long-presses for context menus.">
-                        <ToggleButton enabled={localIsOneClickMode} onClick={createToggleHandler(setLocalIsOneClickMode, ui.setIsOneClickMode)} />
+                        <ToggleButton enabled={ui.isOneClickMode} onClick={() => ui.setIsOneClickMode(!ui.isOneClickMode)} />
                     </SettingRow>
                     <SettingRow label="Confirm Valuable Drops" description={`Show a confirmation before dropping items worth over ${ui.valuableDropThreshold.toLocaleString()} coins.`}>
-                        <ToggleButton enabled={localConfirmValuableDrops} onClick={createToggleHandler(setLocalConfirmValuableDrops, ui.setConfirmValuableDrops)} />
+                        <ToggleButton enabled={ui.confirmValuableDrops} onClick={() => ui.setConfirmValuableDrops(!ui.confirmValuableDrops)} />
                     </SettingRow>
                     {isDevMode && (
                         <SettingRow label="Simulate Touch" description="Force touch-based controls for testing on desktop.">
@@ -166,13 +179,9 @@ const SettingsView: React.FC<SettingsViewProps> = ({ onResetGame, onExportGame, 
             );
             case 'Account': return (
                 <div className="space-y-4 pt-4">
-                     {isDevMode && (
-                        <>
-                            <Button onClick={onExportGame} variant="secondary" className="w-full">Export Save</Button>
-                            <Button onClick={onImportGame} variant="secondary" className="w-full">Import Save</Button>
-                        </>
-                    )}
-                     <Button onClick={onResetGame} variant="secondary" className="w-full">New Game (Reset Progress)</Button>
+                    <Button onClick={onExportGame} variant="secondary" className="w-full">Export Save</Button>
+                    <Button onClick={onImportGame} variant="secondary" className="w-full">Import Save</Button>
+                    <Button onClick={onResetGame} variant="secondary" className="w-full">New Game (Reset Progress)</Button>
                 </div>
             );
         }

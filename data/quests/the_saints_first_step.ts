@@ -1,3 +1,4 @@
+
 import { Quest, SkillName } from '../../types';
 
 export const theSaintsFirstStep: Quest = {
@@ -10,23 +11,23 @@ export const theSaintsFirstStep: Quest = {
         "I have consecrated the bones. Now I must grind them into 100 Sacred Dust using the Reliquary Grinder in the chapel.", // 1
         "I have the Sacred Dust. I should show it to Brother Thaddeus.", // 2
         "Thaddeus told me to seek out Sister Seraphina, a hermit in the Wyrmwood Grove, to obtain Anointing Oil.", // 3
-        "I found Sister Seraphina. She needs 5 Marleaf to brew the oil for me.", // 4
-        "I have gathered the Marleaf. I should return to Sister Seraphina.", // 5
+        "I have the marleaf. I should return to Sister Seraphina.", // 4
+        "The herbs were grimy. I need to clean them and return to Sister Seraphina.", // 5
         "I have the Anointing Oil. I need to mix it with the Sacred Dust to create Holy Paste.", // 6
         "I've created the Holy Paste. I must now offer all 25 pieces of it at the Chapel Altar.", // 7
         "I have completed the offering and received a vision. I should return to Brother Thaddeus to complete my lesson." // 8
     ],
     completionSummary: "I learned the art of Intercession from Brother Thaddeus, a slow but rewarding method of training Prayer. By consecrating bones, grinding them, and anointing the dust, I created a holy offering. Thaddeus was pleased and spoke of greater trials ahead to commune with the gods themselves.",
     stages: [
-        { description: "Consecrate 5 Big Bones, then speak to Brother Thaddeus.", requirement: { type: 'talk', poiId: 'sanctity_chapel', npcName: 'Brother Thaddeus' } },
-        { description: "Grind 5 Consecrated Big Bones into Sacred Dust.", requirement: { type: 'gather', items: [{ itemId: 'sacred_dust', quantity: 100 }] } },
-        { description: "Return to Brother Thaddeus with the Sacred Dust.", requirement: { type: 'talk', poiId: 'sanctity_chapel', npcName: 'Brother Thaddeus' } },
-        { description: "Speak to Sister Seraphina in the Wyrmwood Grove.", requirement: { type: 'talk', poiId: 'wg_secluded_clearing', npcName: 'Sister Seraphina' } },
-        { description: "Gather 5 Marleaf for Sister Seraphina.", requirement: { type: 'gather', items: [{ itemId: 'grimy_marleaf', quantity: 5 }] } },
-        { description: "Return the 5 Clean Marleaf to Sister Seraphina.", requirement: { type: 'talk', poiId: 'wg_secluded_clearing', npcName: 'Sister Seraphina' } },
-        { description: "Create 25 Holy Paste by combining Sacred Dust and Anointing Oil.", requirement: { type: 'gather', items: [{ itemId: 'holy_paste', quantity: 25 }] } },
-        { description: "Offer 25 Holy Paste at the Chapel Altar.", requirement: { type: 'offer', itemId: 'holy_paste', quantity: 25, poiId: 'sanctity_chapel', npcName: 'Altar' } },
-        { description: "Return to Brother Thaddeus.", requirement: { type: 'talk', poiId: 'sanctity_chapel', npcName: 'Brother Thaddeus' } }
+        { description: "Consecrate 5 Big Bones, then speak to Brother Thaddeus.", requirement: { type: 'talk', poiId: 'sanctity_chapel', npcName: 'Brother Thaddeus' } }, // 0
+        { description: "Grind 5 Consecrated Big Bones into Sacred Dust.", requirement: { type: 'gather', items: [{ itemId: 'sacred_dust', quantity: 100 }] } }, // 1
+        { description: "Return to Brother Thaddeus with the Sacred Dust.", requirement: { type: 'talk', poiId: 'sanctity_chapel', npcName: 'Brother Thaddeus' } }, // 2
+        { description: "Speak to Sister Seraphina in the Wyrmwood Grove.", requirement: { type: 'talk', poiId: 'wg_secluded_clearing', npcName: 'Sister Seraphina' } }, // 3
+        { description: "Gather 5 Grimy Marleaf and return to Sister Seraphina.", requirement: { type: 'talk', poiId: 'wg_secluded_clearing', npcName: 'Sister Seraphina' } }, // 4
+        { description: "Clean the 5 Grimy Marleaf and bring them to Sister Seraphina.", requirement: { type: 'talk', poiId: 'wg_secluded_clearing', npcName: 'Sister Seraphina' } }, // 5
+        { description: "Create 25 Holy Paste by combining Sacred Dust and Anointing Oil.", requirement: { type: 'gather', items: [{ itemId: 'holy_paste', quantity: 25 }] } }, // 6
+        { description: "Offer 25 Holy Paste at the Chapel Altar.", requirement: { type: 'offer', itemId: 'holy_paste', quantity: 25, poiId: 'sanctity_chapel', npcName: 'Altar' } }, // 7
+        { description: "Return to Brother Thaddeus.", requirement: { type: 'talk', poiId: 'sanctity_chapel', npcName: 'Brother Thaddeus' } } // 8
     ],
     rewards: {
         xp: [{ skill: SkillName.Prayer, amount: 2000 }],
@@ -79,7 +80,14 @@ export const theSaintsFirstStep: Quest = {
             npcName: 'Sister Seraphina',
             response: {
                 text: "I have the herbs you requested.",
-                check: { requirements: [{ type: 'quest', questId: 'the_saints_first_step', status: 'in_progress', stage: 5 }], successNode: 'tfs_seraphina_has_marleaf', failureNode: '' }
+                check: { requirements: [{ type: 'quest', questId: 'the_saints_first_step', status: 'in_progress', stage: 4 }], successNode: 'tfs_seraphina_stage4_router', failureNode: '' }
+            }
+        },
+        {
+            npcName: 'Sister Seraphina',
+            response: {
+                text: "I've cleaned the herbs.",
+                check: { requirements: [{ type: 'quest', questId: 'the_saints_first_step', status: 'in_progress', stage: 5 }], successNode: 'tfs_seraphina_stage5_router', failureNode: '' }
             }
         }
     ],
@@ -304,14 +312,13 @@ export const theSaintsFirstStep: Quest = {
         tfs_seraphina_task: {
             npcName: 'Sister Seraphina',
             npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
-            text: "I can. But you must first prove you respect the earth from which all things grow. Bring me 5 Marleaf. They grow in dark places, often carried by creatures of the deep. It is a humble task, but a necessary one.",
+            text: "I can. But you must first prove you respect the earth from which all things grow. Bring me 5 Grimy Marleaf. They grow in dark places, often carried by creatures of the deep. It is a humble task, but a necessary one.",
             responses: [
                 { text: "I will gather the herbs.", actions: [{ type: 'advance_quest', questId: 'the_saints_first_step' }] },
             ],
             conditionalResponses: [
                 {
                     text: "I know a bit about herbs. That Marleaf is going to be burned for its medicinal aroma?",
-                    // FIX: Added failureNode to satisfy the DialogueCheck type.
                     check: { requirements: [{ type: 'skill', skill: SkillName.Herblore, level: 45 }], successNode: 'tfs_seraphina_herblore_skip', failureNode: '' }
                 }
             ]
@@ -324,19 +331,69 @@ export const theSaintsFirstStep: Quest = {
                 { text: "Thank you, Sister.", actions: [{ type: 'give_item', itemId: 'anointing_oil', quantity: 5 }, { type: 'advance_quest', questId: 'the_saints_first_step', quantity: 3 }] }
             ]
         },
-        tfs_seraphina_has_marleaf: {
+        tfs_seraphina_stage4_router: {
             npcName: 'Sister Seraphina',
-            npcIcon: 'https://api.iconify.design/game-icons:woman-elf-face.svg',
-            text: "You have the herbs. Good. Now, have you cleaned them? The earth provides, but we must show it respect by preparing its gifts properly.",
+            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            text: "Let's see what you've brought...",
+            responses: [],
+            conditionalResponses: [
+                {
+                    text: '',
+                    check: { requirements: [{ type: 'items', items: [{ itemId: 'clean_marleaf', quantity: 5 }] }], successNode: 'tfs_seraphina_give_oil_from_stage4' }
+                },
+                {
+                    text: '',
+                    check: { requirements: [{ type: 'items', items: [{ itemId: 'grimy_marleaf', quantity: 5 }] }], successNode: 'tfs_seraphina_herb_is_grimy' }
+                },
+                {
+                    text: '',
+                    check: { requirements: [], successNode: 'tfs_seraphina_still_gathering' }
+                }
+            ]
+        },
+        tfs_seraphina_stage5_router: {
+            npcName: 'Sister Seraphina',
+            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            text: "Have you cleaned the herbs as I asked?",
+            responses: [],
+            conditionalResponses: [
+                {
+                    text: '',
+                    check: { requirements: [{ type: 'items', items: [{ itemId: 'clean_marleaf', quantity: 5 }] }], successNode: 'tfs_seraphina_give_oil' }
+                },
+                {
+                    text: '',
+                    check: { requirements: [], successNode: 'tfs_seraphina_herb_is_still_grimy' }
+                }
+            ]
+        },
+        tfs_seraphina_still_gathering: {
+            npcName: 'Sister Seraphina',
+            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            text: "You don't seem to have the herbs I need. I need 5 Grimy Marleaf from the creatures in the dark caves.",
+            responses: []
+        },
+        tfs_seraphina_herb_is_still_grimy: {
+            npcName: 'Sister Seraphina',
+            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            text: "The herbs are still grimy. Please clean them before I can prepare the oil.",
+            responses: []
+        },
+        tfs_seraphina_give_oil_from_stage4: {
+            npcName: 'Sister Seraphina',
+            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            text: "Ah, you've already cleaned them! Excellent foresight. Here is your Anointing Oil. Use it well. Combine it with your Sacred Dust to create the Holy Paste for your offering.",
             responses: [
-                { text: "(Give her the Clean Marleaf)", check: { requirements: [{ type: 'items', items: [{ itemId: 'clean_marleaf', quantity: 5 }] }], successNode: 'tfs_seraphina_give_oil', failureNode: 'tfs_seraphina_herb_is_grimy' } }
+                { text: "Thank you, Sister.", actions: [{ type: 'take_item', itemId: 'clean_marleaf', quantity: 5 }, { type: 'give_item', itemId: 'anointing_oil', quantity: 5 }, { type: 'advance_quest', questId: 'the_saints_first_step', quantity: 2 }] }
             ]
         },
         tfs_seraphina_herb_is_grimy: {
             npcName: 'Sister Seraphina',
-            npcIcon: 'https://api.iconify.design/game-icons:woman-elf-face.svg',
+            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
             text: "They are still covered in grime. You must clean them first before I can use them. It is a simple but important part of the process.",
-            responses: []
+            responses: [
+                { text: "I'll clean them now.", actions: [{ type: 'advance_quest', questId: 'the_saints_first_step' }] }
+            ]
         },
         tfs_seraphina_give_oil: {
             npcName: 'Sister Seraphina',

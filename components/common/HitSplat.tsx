@@ -7,20 +7,31 @@ interface HitSplatProps {
     isPoison?: boolean;
     isMagic?: boolean;
     isDragonfire?: boolean;
+    isBurn?: boolean;
+    isHeal?: boolean;
     delay?: number; // Optional delay before showing
 }
 
-const HitSplat: React.FC<HitSplatProps> = ({ damage, isMaxHit = false, isPoison = false, isMagic = false, isDragonfire = false, delay = 0 }) => {
+const HitSplat: React.FC<HitSplatProps> = ({ damage, isMaxHit = false, isPoison = false, isMagic = false, isDragonfire = false, isBurn = false, isHeal = false, delay = 0 }) => {
     const isMiss = damage === 'miss' || damage === 0;
     const text = isMiss ? '0' : String(damage);
 
     const splatColorClass = useMemo(() => {
+        if (isHeal) return 'hitsplat-green';
         if (isMaxHit && typeof damage === 'number' && damage >= 2) return 'hitsplat-orange';
         if (isMiss) return 'hitsplat-blue';
         if (isPoison) return 'hitsplat-green';
+        if (isBurn) return 'hitsplat-burn';
         if (isDragonfire) return 'hitsplat-dragonfire';
         return 'hitsplat-red';
-    }, [isMiss, isMaxHit, isPoison, isDragonfire, damage]);
+    }, [isMiss, isMaxHit, isPoison, isDragonfire, isBurn, damage, isHeal]);
+
+    const splatIconUrl = useMemo(() => {
+        if (isBurn) {
+            return 'https://api.iconify.design/game-icons:flame.svg';
+        }
+        return 'https://api.iconify.design/game-icons:gooey-impact.svg';
+    }, [isBurn]);
 
     const [style, setStyle] = useState<React.CSSProperties>({ 
         top: '50%', 
@@ -57,9 +68,14 @@ const HitSplat: React.FC<HitSplatProps> = ({ damage, isMaxHit = false, isPoison 
         };
     }, [delay]);
 
+    const splatStyle: React.CSSProperties = {
+        maskImage: `url('${splatIconUrl}')`,
+        WebkitMaskImage: `url('${splatIconUrl}')`,
+    };
+
     return (
         <div className="hitsplat-container" style={style}>
-            <div className={`hitsplat-splat ${splatColorClass}`}></div>
+            <div className={`hitsplat-splat ${splatColorClass}`} style={splatStyle}></div>
             <span className="hitsplat-text">{text}</span>
         </div>
     );

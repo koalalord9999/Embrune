@@ -175,6 +175,23 @@ export interface WorldState {
     depletedHouses?: string[];
     nextHouseResetTimestamp?: number;
     dehydrationLevel: number;
-    // FIX: Add unlockedMusicTracks to WorldState
     unlockedMusicTracks: string[];
+    monolithFire?: {
+        poiId: string;
+        logType: string;
+        expiresAt: number;
+    } | null;
+    eventNextTrigger?: {
+        galeSwept?: number;
+        isleOfWhispers?: number;
+        volcanicVents?: number;
+    };
+    destructionTrialProgress?: {
+        heat?: 'started' | 'completed';
+        pressure?: 'started' | 'completed';
+        silence?: 'started' | 'completed';
+        heatEndTime?: number;
+        pressureStartTime?: number;
+        silenceStartTime?: number;
+    };
 }

@@ -76,12 +76,15 @@ export const embrune101: Quest = {
     },
     dialogueEntryPoints: [
         { npcName: 'Leo the Guide', response: { text: "I'm ready to begin my training.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 0 }], successNode: 'in_progress_embrune_101_0', failureNode: '' } } },
-        { npcName: 'Survival Guide', response: { text: "Leo sent me to find you.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 1 }], successNode: 'in_progress_embrune_101_1', failureNode: '' } } },
+        { npcName: 'Survival Guide', response: { text: "Leo sent me to find you.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 1 }], successNode: 'in_progress_embrune_101_1_router', failureNode: '' } } },
         { npcName: 'Survival Guide', response: { text: "How's my progress?", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 2 }], successNode: 'survival_stage_2_router', failureNode: '' } } },
         { npcName: 'Survival Guide', response: { text: "I'm having trouble with the cooking...", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 3 }, { type: 'items', items: [{ itemId: 'cooked_shrimp', quantity: 0, operator: 'eq' }] }], successNode: 'shrimp_missing_router', failureNode: '' } } },
         { npcName: 'Survival Guide', response: { text: "I've cooked the shrimp!", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 3 }, { type: 'items', items: [{ itemId: 'cooked_shrimp', quantity: 1 }] }], successNode: 'in_progress_embrune_101_3', failureNode: '' } } },
+        { npcName: 'Survival Guide', response: { text: "I found this apple, what is it for?", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 4, operator: 'gte' }, { type: 'items', items: [{ itemId: 'apple', quantity: 1 }] }], successNode: 'survival_apple_easter_egg', failureNode: '' } } },
         { npcName: 'Baker', response: { text: "The Survival Guide sent me.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 4 }], successNode: 'in_progress_embrune_101_4', failureNode: '' } } },
         { npcName: 'Baker', response: { text: "I'm having trouble making the dough...", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 5 }], successNode: 'baker_stage_5_router', failureNode: '' } } },
+        { npcName: 'Baker', response: { text: "I think I made the wrong dough... what is Pie Dough for?", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 5, operator: 'gte' }, { type: 'items', items: [{ itemId: 'pie_dough', quantity: 1 }] }], successNode: 'baker_easter_egg_pie_dough', failureNode: '' } } },
+        { npcName: 'Baker', response: { text: "I think I made the wrong dough... what is a Pizza Base for?", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 5, operator: 'gte' }, { type: 'items', items: [{ itemId: 'pizza_base', quantity: 1 }] }], successNode: 'baker_easter_egg_pizza_base', failureNode: '' } } },
         { npcName: 'Baker', response: { text: "I've baked the bread!", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 6 }, { type: 'items', items: [{ itemId: 'bread', quantity: 1 }] }], successNode: 'in_progress_embrune_101_6', failureNode: 'baker_stage_6_router' } } },
         { npcName: 'Information Guide', response: { text: "The Baker sent me to learn about my journal.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 7 }], successNode: 'in_progress_embrune_101_7', failureNode: '' } } },
         { npcName: 'Mining Guide', response: { text: "The Information Guide sent me to the mines.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 8 }], successNode: 'in_progress_embrune_101_8', failureNode: '' } } },
@@ -138,16 +141,33 @@ export const embrune101: Quest = {
                 { text: "On second thought, I'll do the tutorial." }
             ]
         },
-        in_progress_embrune_101_1: {
+        in_progress_embrune_101_1_router: {
+            npcName: 'Survival Guide',
+            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            text: "Let's see if you're equipped for the task.",
+            responses: [],
+            conditionalResponses: [
+                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'bronze_axe', quantity: 0, operator: 'eq' }] }], successNode: 'survival_guide_give_tools', failureNode: '' } },
+                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'bronze_axe', quantity: 1, operator: 'gte' }] }], successNode: 'in_progress_embrune_101_1_text', failureNode: '' } }
+            ]
+        },
+        in_progress_embrune_101_1_text: {
             npcName: 'Survival Guide',
             npcIcon: '/assets/npcChatHeads/survival_guide.png',
             text: "An adventurer who can't feed themselves is a dead adventurer. Your first task: chop a tree for logs, and catch a raw shrimp from the fishing spot. Come back to me when you have both.",
             responses: [
-                { text: "How do I gather things?", next: 'survival_how_to' }
-            ],
+                { text: "How do I gather things?", next: 'survival_how_to' },
+                { text: "I'll get to it.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }
+            ]
+        },
+        baker_default: {
+            npcName: 'Baker',
+            npcIcon: '/assets/npcChatHeads/baker.png',
+            text: "Nothing warms the soul like a fresh loaf of bread!",
+            responses: [],
             conditionalResponses: [
-                { text: "I don't have the tools for that.", check: { requirements: [{ type: 'items', items: [{ itemId: 'bronze_axe', quantity: 0, operator: 'eq' }] }], successNode: 'survival_guide_give_tools', failureNode: '' } },
-                { text: "I found this apple in a tree... is it edible?", check: { requirements: [{ type: 'items', items: [{ itemId: 'apple', quantity: 1 }] }], successNode: 'survival_apple_easter_egg', failureNode: '' } }
+                { text: "I made this, but it doesn't look like bread dough.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 5, operator: 'gte' }, { type: 'items', items: [{ itemId: 'pie_dough', quantity: 1 }] }], successNode: 'baker_easter_egg_pie_dough', failureNode: '' } },
+                { text: "What about this dough?", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 5, operator: 'gte' }, { type: 'items', items: [{ itemId: 'pizza_base', quantity: 1 }] }], successNode: 'baker_easter_egg_pizza_base', failureNode: '' } }
             ]
         },
         survival_apple_easter_egg: {
@@ -178,7 +198,6 @@ export const embrune101: Quest = {
             text: "Let's see where you're at...",
             responses: [{ text: "I'll figure it out." }],
             conditionalResponses: [
-                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'apple', quantity: 1 }] }], successNode: 'survival_apple_easter_egg', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'bronze_axe', quantity: 0, operator: 'eq' }, { itemId: 'tinderbox', quantity: 0, operator: 'eq' }, { itemId: 'small_fishing_net', quantity: 0, operator: 'eq' }] }], successNode: 'survival_give_all_tools', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'bronze_axe', quantity: 0, operator: 'eq' }] }], successNode: 'survival_give_axe', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'tinderbox', quantity: 0, operator: 'eq' }] }], successNode: 'survival_give_tinderbox', failureNode: '' } },
@@ -207,7 +226,7 @@ export const embrune101: Quest = {
             npcName: 'Survival Guide',
             npcIcon: '/assets/npcChatHeads/survival_guide.png',
             text: "Ouch, you burnt the shrimp! Don't worry, even master chefs burn a dish now and then. As you practice and your Cooking level increases, the chance of burning food goes down significantly. I'll take that charred mess off your hands—you'll need to catch another shrimp and try again.",
-            responses: [{ text: "Thanks, I'll try again.", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 35 }], next: 'survival_stage_2_router' }]
+            responses: [{ text: "Thanks, I'll try again.", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 'all' }], next: 'survival_stage_2_router' }]
         },
         survival_need_logs_with_shrimp: {
             npcName: 'Survival Guide',
@@ -228,7 +247,7 @@ export const embrune101: Quest = {
             npcName: 'Survival Guide',
             npcIcon: '/assets/npcChatHeads/survival_guide.png',
             text: "Well done! You've cooked your first meal. Survival is key. I'll take that burnt food off your hands if you have any. Now, head north to the village and speak to the Baker. He'll teach you about more advanced cooking.",
-            responses: [{ text: "Thank you, I'll head there now.", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 35 }, { type: 'advance_quest', questId: 'embrune_101' }] }],
+            responses: [{ text: "Thank you, I'll head there now.", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 'all' }, { type: 'advance_quest', questId: 'embrune_101' }] }],
             conditionalResponses: [
                 { text: "I found this apple in a tree... is it edible?", check: { requirements: [{ type: 'items', items: [{ itemId: 'apple', quantity: 1 }] }], successNode: 'survival_apple_easter_egg', failureNode: '' } }
             ]
@@ -257,8 +276,8 @@ export const embrune101: Quest = {
             text: "Let's see what you've got in your pack...",
             responses: [{ text: "Nevermind, I'll figure it out." }],
             conditionalResponses: [
-                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'pie_dough', quantity: 1 }] }], successNode: 'baker_easter_egg_pie_dough', failureNode: '' } },
-                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'pizza_base', quantity: 1 }] }], successNode: 'baker_easter_egg_pizza_base', failureNode: '' } },
+                { text: "I made this, but it doesn't look like bread dough.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 5, operator: 'gte' }, { type: 'items', items: [{ itemId: 'pie_dough', quantity: 1 }] }], successNode: 'baker_easter_egg_pie_dough', failureNode: '' } },
+                { text: "What about this dough?", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 5, operator: 'gte' }, { type: 'items', items: [{ itemId: 'pizza_base', quantity: 1 }] }], successNode: 'baker_easter_egg_pizza_base', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'bucket', quantity: 0, operator: 'eq' }, { itemId: 'bucket_of_water', quantity: 0, operator: 'eq' }] }], successNode: 'baker_guide_no_bucket', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'flour', quantity: 1, operator: 'gte' }, { itemId: 'bucket_of_water', quantity: 1, operator: 'gte' }] }], successNode: 'baker_guide_flour_and_water', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'flour', quantity: 1, operator: 'gte' }, { itemId: 'bucket', quantity: 1, operator: 'gte' }] }], successNode: 'baker_guide_flour_and_empty', failureNode: '' } },
@@ -299,7 +318,7 @@ export const embrune101: Quest = {
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'bread_dough', quantity: 0, operator: 'eq' }] }], successNode: 'baker_stage_5_router', failureNode: '' } },
             ]
         },
-        baker_burnt_bread: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "Oh no! You left it on the range too long! Don't worry, even master bakers burn a loaf. Remake the dough and try again.", responses: [{ text: "(Listen to instructions)", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 35 }], next: 'baker_stage_5_router' }] },
+        baker_burnt_bread: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "Oh no! You left it on the range too long! Don't worry, even master bakers burn a loaf. Remake the dough and try again.", responses: [{ text: "(Listen to instructions)", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 'all' }], next: 'baker_stage_5_router' }] },
         baker_has_dough_instruction: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "You have the dough! 'Use' it on my cooking range to bake it into a fresh loaf.", highlight: 'activity-button-3', responses: [{ text: "Right." }] },
 
         in_progress_embrune_101_6: {
@@ -312,6 +331,18 @@ export const embrune101: Quest = {
             npcName: 'Information Guide',
             npcIcon: '/assets/npcChatHeads/information_guide.png',
             text: "Pay attention! This magical journal you carry is your most vital tool. Let's take a look at the different panels on your sidebar. Which one should we start with?",
+            responses: [
+                { text: "Explain the Quest Journal.", next: 'info_quests_1' },
+                { text: "Explain the Equipment Panel.", next: 'info_equipment_1' },
+                { text: "Explain the Skills Window.", next: 'info_skills_1' },
+                { text: "Explain the Inventory.", next: 'info_inventory_1' },
+                { text: "I'm finished with the tour.", next: 'info_tour_end' }
+            ]
+        },
+        info_guide_hub: {
+            npcName: 'Information Guide',
+            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            text: "What else would you like to know about the sidebar?",
             responses: [
                 { text: "Explain the Quest Journal.", next: 'info_quests_1' },
                 { text: "Explain the Equipment Panel.", next: 'info_equipment_1' },
@@ -338,6 +369,7 @@ export const embrune101: Quest = {
             highlight: 'side-panel-button-quests',
             responses: [
                 { text: "Explain the Equipment Panel.", next: 'info_equipment_1' },
+                { text: "(Ask about another topic)", next: 'info_guide_hub' },
                 { text: "I've heard enough about the sidebar.", next: 'info_orbs' }
             ]
         },
@@ -359,6 +391,7 @@ export const embrune101: Quest = {
             highlight: 'side-panel-button-equipment',
             responses: [
                 { text: "Explain the Skills Window.", next: 'info_skills_1' },
+                { text: "(Ask about another topic)", next: 'info_guide_hub' },
                 { text: "I've heard enough about the sidebar.", next: 'info_orbs' }
             ]
         },
@@ -376,10 +409,11 @@ export const embrune101: Quest = {
         info_skills_2: {
             npcName: 'Information Guide',
             npcIcon: '/assets/npcChatHeads/information_guide.png',
-            text: "Hovering over a skill will show you a detailed tooltip with your total experience and how much you need for the next level. If you click on a skill, it will open a guide showing everything you can do at your current level!",
+            text: "Right-clicking an item (or long-pressing on a magical scroll-slab) will reveal a context menu with more information and actions. Clicking a skill will open a detailed guide showing everything you can do at your current level!",
             highlight: 'side-panel-button-skills',
             responses: [
                 { text: "Explain the Inventory.", next: 'info_inventory_1' },
+                { text: "(Ask about another topic)", next: 'info_guide_hub' },
                 { text: "I've heard enough about the sidebar.", next: 'info_orbs' }
             ]
         },
@@ -396,17 +430,18 @@ export const embrune101: Quest = {
         info_inventory_2: {
             npcName: 'Information Guide',
             npcIcon: '/assets/npcChatHeads/information_guide.png',
-            text: "Almost every item in your pack has multiple functions. Right-clicking an item (or long-pressing on a magical scroll-slab) will reveal a context menu with options like 'Use', 'Equip', or 'Examine'.",
+            text: "Almost every item in your pack has multiple functions. Right-clicking an item or long-pressing will reveal a context menu with options like 'Use', 'Equip', or 'Examine'.",
             highlight: 'side-panel-button-inventory',
             responses: [
                 { text: "Ready to hear about the orbs.", next: 'info_orbs' },
+                { text: "(Ask about another topic)", next: 'info_guide_hub' },
                 { text: "I'm finished with the tour.", next: 'info_tour_end' }
             ]
         },
         info_orbs: {
             npcName: 'Information Guide',
             npcIcon: '/assets/npcChatHeads/information_guide.png',
-            text: "Finally, keep an eye on the orbs surrounding your map. These are your vitals: Red for Health, Blue for Prayer, and Yellow for Run Energy. Toggle run on to move twice as fast, but use it wisely!",
+            text: "Finally, keep an eye on the orbs surrounding your map. These are your vitals: Red for Health, Blue for Prayer, and Yellow for Run Energy. Toggle run on to move instantly between locations, this does cost some Run Energy.",
             highlight: ['hp-orb', 'run-energy-orb'],
             responses: [
                 { text: "I understand everything now.", next: 'info_tour_end' }
@@ -436,18 +471,35 @@ export const embrune101: Quest = {
             text: "Let me check your pack and your tools.",
             responses: [{ text: "Okay." }],
             conditionalResponses: [
-                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'uncut_sapphire', quantity: 1, operator: 'gte' }] }], successNode: 'mining_conf_gem', failureNode: '' } },
-                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'uncut_emerald', quantity: 1, operator: 'gte' }] }], successNode: 'mining_conf_gem', failureNode: '' } },
-                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'uncut_ruby', quantity: 1, operator: 'gte' }] }], successNode: 'mining_conf_gem', failureNode: '' } },
-                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'uncut_diamond', quantity: 1, operator: 'gte' }] }], successNode: 'mining_conf_gem', failureNode: '' } },
-                { text: '', check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 11 }, { type: 'items', items: [{ itemId: 'bronze_pickaxe', quantity: 0, operator: 'eq' }, { itemId: 'hammer', quantity: 0, operator: 'eq' }] }], successNode: 'mining_give_both_tools', failureNode: '' } },
+                // Stage 11: Check for bar FIRST
+                { text: '', check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 11 }, { type: 'items', items: [{ itemId: 'bronze_bar', quantity: 1, operator: 'gte' }] }], successNode: 'mining_instruction_smith', failureNode: '' } },
+                { text: '', check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 11 }, { type: 'items', items: [{ itemId: 'bronze_bar', quantity: 0, operator: 'eq' }] }], successNode: 'mining_need_bar', failureNode: '' } },
+                // Tool checks
+                { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'bronze_pickaxe', quantity: 0, operator: 'eq' }, { itemId: 'hammer', quantity: 0, operator: 'eq' }] }], successNode: 'mining_give_both_tools', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'bronze_pickaxe', quantity: 0, operator: 'eq' }] }], successNode: 'mining_give_pickaxe', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 11 }, { type: 'items', items: [{ itemId: 'hammer', quantity: 0, operator: 'eq' }] }], successNode: 'mining_give_hammer', failureNode: '' } },
-                { text: '', check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 11 }, { type: 'items', items: [{ itemId: 'bronze_bar', quantity: 0, operator: 'eq' }] }], successNode: 'mining_need_bar', failureNode: '' } },
+                // Ore checks (fallback)
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'copper_ore', quantity: 0, operator: 'eq' }, { itemId: 'tin_ore', quantity: 0, operator: 'eq' }] }], successNode: 'mining_need_both_ores', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'copper_ore', quantity: 0, operator: 'eq' }] }], successNode: 'mining_need_copper', failureNode: '' } },
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'tin_ore', quantity: 0, operator: 'eq' }] }], successNode: 'mining_need_tin', failureNode: '' } },
+                // Final instruction if ores are present
                 { text: '', check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 10 }, { type: 'items', items: [{ itemId: 'copper_ore', quantity: 1, operator: 'gte' }, { itemId: 'tin_ore', quantity: 1, operator: 'gte' }] }], successNode: 'mining_instruction_smelt', failureNode: '' } },
+            ]
+        },
+        mining_instruction_smith: {
+            npcName: 'Mining Guide',
+            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            text: "You have the Bronze bar. Now, take it to the anvil and use your hammer to smith a Bronze Dagger.",
+            highlight: 'activity-button-4',
+            responses: [{ text: "On it." }]
+        },
+        mining_default: {
+            npcName: 'Mining Guide',
+            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            text: "The ring of a hammer, the heat of the forge... that's the life for me.",
+            responses: [],
+            conditionalResponses: [
+                { text: "I found this shiny rock while mining...", check: { requirements: [{ type: 'items', items: [{ itemId: 'uncut_sapphire', quantity: 1 }] }], successNode: 'mining_conf_gem', failureNode: '' } }
             ]
         },
         mining_conf_gem: {
@@ -477,9 +529,9 @@ export const embrune101: Quest = {
         mining_smelt_info: {
             npcName: 'Mining Guide',
             npcIcon: '/assets/npcChatHeads/mining_guide.png',
-            text: "Use the furnace once you have the ores. After that, take the bar to the anvil and use your hammer. Here, take this hammer too.",
+            text: "Use the furnace once you have the ores. After that, take the bar to the anvil and use your hammer.",
             responses: [
-                { text: "Got it.", actions: [{ type: 'give_item', itemId: 'bronze_pickaxe', quantity: 1 }, { type: 'give_item', itemId: 'hammer', quantity: 1 }, { type: 'advance_quest', questId: 'embrune_101' }] }
+                { text: "Got it.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }
             ]
         },
         dagger_missing_check: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "You don't have the Bronze Dagger. If you lost your materials, you'll need to mine more ore and smelt a new bar.", responses: [{ text: "Okay." }] },

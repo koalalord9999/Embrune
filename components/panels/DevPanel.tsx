@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import Button from '../common/Button';
 import { useInventory } from '../../hooks/useInventory';
 import { Item, SkillName, ToolType } from '../../types';
@@ -96,6 +97,7 @@ interface CheatsComponentProps {
     onKillMonster: () => void;
     onAddCoins: (amount: number) => void;
     onSetSkillLevel: (skill: SkillName, level: number) => void;
+    onMaxCharacter: () => void;
     isGodModeOn: boolean;
     setIsGodModeOn: (isOn: boolean) => void;
 }
@@ -105,11 +107,19 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
     instantRespawnCounter, setInstantRespawnCounter, isInCombat,
     isPermAggroOn, onTogglePermAggro, isPlayerInvisible, setIsPlayerInvisible, isAutoBankOn, setIsAutoBankOn,
     xpMultiplier, setXpMultiplier,
-    onHealPlayer, onKillMonster, onAddCoins, onSetSkillLevel, isGodModeOn, setIsGodModeOn
+    onHealPlayer, onKillMonster, onAddCoins, onSetSkillLevel, onMaxCharacter, isGodModeOn, setIsGodModeOn
 }) => {
     const [skillToSet, setSkillToSet] = useState<SkillName | ''>('');
     const [levelToSet, setLevelToSet] = useState(1);
     const [coinAmount, setCoinAmount] = useState(1000000);
+    const levelInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (skillToSet && levelInputRef.current) {
+            levelInputRef.current.focus();
+            levelInputRef.current.select();
+        }
+    }, [skillToSet]);
 
     return (
         <div className="p-2 space-y-4">
@@ -119,6 +129,7 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
                 <div className="grid grid-cols-2 gap-2">
                     <Button size="sm" onClick={onHealPlayer}>Heal Player</Button>
                     <Button size="sm" onClick={onKillMonster} disabled={!isInCombat}>Kill Monster</Button>
+                    <Button size="sm" onClick={onMaxCharacter} className="col-span-2">Max Character</Button>
                 </div>
             </div>
             
@@ -126,7 +137,13 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
             <div>
                 <label className="block text-sm font-semibold mb-1">Add Coins</label>
                 <div className="flex gap-2">
-                    <input type="number" value={coinAmount} onChange={e => setCoinAmount(parseInt(e.target.value, 10) || 0)} className="w-full p-1 text-base bg-gray-800 border border-gray-600 rounded text-center"/>
+                    <input
+                        type="number"
+                        value={coinAmount}
+                        onChange={e => setCoinAmount(parseInt(e.target.value, 10) || 0)}
+                        className="w-full p-1 text-base bg-gray-800 border border-gray-600 rounded text-center"
+                        onKeyDown={e => e.key === 'Enter' && onAddCoins(coinAmount)}
+                    />
                     <Button size="sm" onClick={() => onAddCoins(coinAmount)}>Add</Button>
                 </div>
             </div>
@@ -139,7 +156,16 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
                         <option value="">Select Skill</option>
                         {ALL_SKILLS.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
                     </select>
-                    <input type="number" min="1" max="99" value={levelToSet} onChange={e => setLevelToSet(parseInt(e.target.value, 10) || 1)} className="w-20 p-1 text-base bg-gray-800 border border-gray-600 rounded text-center"/>
+                    <input
+                        ref={levelInputRef}
+                        type="number"
+                        min="1"
+                        max="99"
+                        value={levelToSet}
+                        onChange={e => setLevelToSet(parseInt(e.target.value, 10) || 1)}
+                        className="w-20 p-1 text-base bg-gray-800 border border-gray-600 rounded text-center"
+                        onKeyDown={e => { if (e.key === 'Enter' && skillToSet) onSetSkillLevel(skillToSet, levelToSet); }}
+                    />
                     <Button size="sm" onClick={() => { if (skillToSet) { onSetSkillLevel(skillToSet, levelToSet); } }} disabled={!skillToSet}>Set</Button>
                 </div>
             </div>
@@ -432,6 +458,7 @@ interface DevPanelProps {
     onKillMonster: () => void;
     onAddCoins: (amount: number) => void;
     onSetSkillLevel: (skill: SkillName, level: number) => void;
+    onMaxCharacter: () => void;
     isGodModeOn: boolean;
     setIsGodModeOn: (isOn: boolean) => void;
 

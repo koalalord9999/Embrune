@@ -49,7 +49,30 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
         return requirements.every(req => {
             switch (req.type) {
                 case 'items':
-                    return inv.hasItems(req.items);
+                    return req.items.every(itemReq => {
+                        const totalQuantity = inv.inventory.reduce((acc, slot) => {
+                            if (slot && slot.itemId === itemReq.itemId) {
+                                // If nameOverride is required, check it.
+                                if (itemReq.nameOverride) {
+                                    if (slot.nameOverride === itemReq.nameOverride) {
+                                        return acc + slot.quantity;
+                                    }
+                                } else {
+                                    // If no nameOverride is specified, count any item with this ID.
+                                    return acc + slot.quantity;
+                                }
+                            }
+                            return acc;
+                        }, 0);
+    
+                        const operator = itemReq.operator ?? 'gte';
+                        switch (operator) {
+                            case 'gte': return totalQuantity >= itemReq.quantity;
+                            case 'lt': return totalQuantity < itemReq.quantity;
+                            case 'eq': return totalQuantity === itemReq.quantity;
+                            default: return totalQuantity >= itemReq.quantity;
+                        }
+                    });
                 case 'coins':
                     return inv.coins >= req.amount;
                 case 'skill':
@@ -58,13 +81,24 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     const { level } = skill;
                     return level >= req.level;
                 case 'world_state':
+                    const operator = req.operator ?? 'gte';
                     if (req.property === 'windmillFlour') {
-                        const operator = req.operator ?? 'gte';
                         if (operator === 'gte') {
                             return worldState.windmillFlour >= req.value;
                         } else { // 'eq'
                             return worldState.windmillFlour === req.value;
                         }
+                    }
+                    if (req.property === 'monolithFire') {
+                        // Check if fire exists and is not expired
+                        const fireExists = !!worldState.monolithFire && worldState.monolithFire.expiresAt > Date.now();
+                        return fireExists === req.value;
+                    }
+                    if (req.property === 'monolithLogType') {
+                        const fire = worldState.monolithFire;
+                        if (!fire || fire.expiresAt <= Date.now()) return false; // No active fire
+                        // Only 'eq' makes sense here
+                        return fire.logType === req.value;
                     }
                     return false;
                 case 'quest':
@@ -87,20 +121,55 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                             return !!playerQuest && playerQuest.isComplete;
                     }
                     return false; // Should not be reached
+                // FIX: Added new check type for quest-specific variables.
+                case 'variable': {
+                    const variableValue = (questLogic as any).getQuestVariable(req.name) ?? 0;
+                    switch (req.operator) {
+                        case 'eq': return variableValue === req.value;
+                        case 'lt': return variableValue < req.value;
+                        case 'gte': return variableValue >= req.value;
+                        default: return false;
+                    }
+                }
             }
         });
-    }, [inv, char, worldState, quests.playerQuests]);
+    }, [inv, char, worldState, quests.playerQuests, questLogic]);
 
     const handleDialogueAction = useCallback((actions: DialogueAction[]) => {
         for (const action of actions) {
+            let success = true;
             switch (action.type) {
                 case 'give_item': {
                     inv.modifyItem(action.itemId, action.quantity, false, { bypassAutoBank: true, noted: action.noted });
                     break;
                 }
-                case 'take_item':
-                    inv.modifyItem(action.itemId, -action.quantity, true);
+                case 'take_item': {
+                    const quantity = action.quantity;
+                    if (quantity === 'all') {
+                        const totalQuantity = inv.inventory.reduce((acc, slot) => {
+                            if (slot && slot.itemId === action.itemId) {
+                                return acc + slot.quantity;
+                            }
+                            return acc;
+                        }, 0);
+
+                        if (totalQuantity > 0) {
+                            inv.modifyItem(action.itemId, -totalQuantity, true);
+                        }
+                        // Always succeeds, even if 0 items are taken.
+                    } else {
+                        if (inv.hasItems([{ itemId: action.itemId, quantity: quantity }])) {
+                            inv.modifyItem(action.itemId, -quantity, true);
+                        } else {
+                            const item = ITEMS[action.itemId];
+                            const itemName = item ? item.name : 'the required item';
+                            const quantityText = quantity > 1 ? `${quantity}x ` : '';
+                            addLog(`You do not have ${quantityText}${itemName}.`);
+                            success = false;
+                        }
+                    }
                     break;
+                }
                 case 'give_coins':
                     inv.modifyItem('coins', action.amount, false);
                     break;
@@ -232,7 +301,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         break;
                     } 
 
-                    inv.modifyItem('coins', -totalCost, true);
+                    inv.modifyItem('coins', -totalCost);
                     let totalTanned = 0;
 
                     hidesToTan.forEach(hide => {
@@ -275,6 +344,38 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     ui.setActiveDialogue(null);
                     break;
                 }
+                // FIX: Added new action types for quest-specific variable management.
+                case 'set_variable': {
+                    (questLogic as any).setQuestVariable(action.name, action.value);
+                    break;
+                }
+                case 'increment_variable': {
+                    (questLogic as any).incrementQuestVariable(action.name, action.amount);
+                    break;
+                }
+                case 'start_destruction_trial_heat': {
+                    if (inv.coins < 15000) {
+                        addLog("You don't have enough coins.");
+                        success = false;
+                        break;
+                    }
+                    inv.modifyItem('coins', -15000, true);
+                    inv.modifyItem('unstable_core', -1, true);
+                    setWorldState(ws => ({
+                        ...ws,
+                        destructionTrialProgress: {
+                            ...ws.destructionTrialProgress,
+                            heat: 'started',
+                            heatEndTime: Date.now() + 120000 // 2 minutes
+                        }
+                    }));
+                    addLog("You hand the unstable core and 15,000 coins to Durin. He nods grimly and tells his apprentices to get the tongs. This will take about two minutes.");
+                    break;
+                }
+            }
+
+            if (!success) {
+                break; // Stop processing subsequent actions in this chain.
             }
         }
     }, [quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session.currentPoiId]);
@@ -291,8 +392,10 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                 }
             }
 
-            if (nextNodeKey !== undefined) {
+            if (nextNodeKey !== undefined && nextNodeKey !== '') {
                 setActiveDialogue(prev => prev ? { ...prev, currentNodeKey: nextNodeKey } : null);
+            } else if (nextNodeKey === '') {
+                // Do nothing, let the check act as a filter.
             } else {
                 // Default to closing dialogue if no specific branch is provided (e.g. simple visibility gating)
                 setActiveDialogue(null);

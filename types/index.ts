@@ -10,6 +10,7 @@ export type {
   Monster,
   ActiveStatModifier,
   ActiveBuff,
+  MonsterStatusEffect,
 } from './entities';
 export * from './quests';
 export * from './world';

@@ -448,6 +448,7 @@ export const humanoids: Monster[] = [
             { itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 },
         ],
         mainDrops: [
+            { itemId: 'titan_fat', chance: '1/50', minQuantity: 1, maxQuantity: 3 },
             { itemId: 'stone_rune', chance: "1/4", minQuantity: 5, maxQuantity: 15 },
             { tableId: 'herb_table', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'iron_warhammer', chance: "1/100", minQuantity: 1, maxQuantity: 1 },

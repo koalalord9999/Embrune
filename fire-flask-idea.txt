@@ -1,0 +1,90 @@
+# Fire Flasks Feature Checklist & Status
+
+This document outlines the implementation status of the Fire Flasks feature, comparing the original design document to the current codebase.
+
+### Core Mechanic & Combat Role
+**[COMPLETE]** The core damage mechanics for Fire Flasks are now implemented.
+
+- **Weapon Type & Combat Handling:** `[COMPLETE]`
+  - Fire Flasks are correctly defined as `WeaponType.Thrown`.
+  - The combat logic in `CombatView.tsx` recognizes thrown weapons and correctly requires a `fire_pot_lit` to be equipped in the ammo slot.
+  - Ranged combat styles are now correctly applied to thrown weapons.
+
+- **Ranged Skill Scaling (Accuracy):** `[COMPLETE]`
+  - The accuracy (hit chance) of throwing a flask correctly scales with the player's Ranged skill.
+
+- **Firemaking Skill Scaling (Damage):** `[COMPLETE]`
+  - The damage calculation for both initial impact and DOT now correctly incorporates the player's Firemaking level and the flask's tier.
+
+- **Initial Impact Damage:** `[COMPLETE]`
+  - A successful hit now deals initial impact damage that is slightly higher than the DOT's damage per tick.
+
+- **Damage-over-Time (DoT) Effect:** `[COMPLETE]`
+  - A successful hit applies a 'burn' status effect, which deals damage every game tick for 5 ticks.
+  - The burn effect is guaranteed to apply on a successful accuracy roll, even if the initial impact is low.
+
+- **Visual Burning Effect:** `[PARTIAL]`
+  - An initial "fireball" animation plays upon throwing the flask.
+  - Burn DOT ticks now show as fiery-colored hitsplats.
+  - **Missing Feature:** There is no persistent visual effect (e.g., burning at the monster's feet) to indicate a successful DoT application.
+
+**Bugs & Notes:**
+- The critical bug affecting all ranged damage calculations has been fixed. All ranged and thrown weapons now correctly calculate damage based on Ranged stats.
+- The core damage mechanics are now fully functional as per the design.
+
+---
+
+### Creation Process
+**[PARTIAL]** The multi-step crafting process is almost entirely implemented, with one minor feature missing.
+
+- **Obtain Flasks:** `[COMPLETE]`
+  - 'Throwing Flasks' are craftable via Glassblowing and are available in various general stores.
+
+- **Create Fuses:** `[COMPLETE]`
+  - Players can correctly create 'Wool String' by using a Knife on a Ball of Wool.
+  - 'Wool String' can be successfully used on a 'Throwing Flask' to create a 'Fused Throwing Flask'.
+
+- **Render Contents:** `[PARTIAL]`
+  - All tiers of 'Fat' are correctly dropped by their respective monsters.
+  - The 'Rendering Kit' item exists.
+  - Using the kit at a fire source correctly opens the 'Rendering' crafting interface.
+  - The rendering process correctly consumes fat and fills a Fused Throwing Flask with the appropriate oil and doses.
+  - **Missing Feature:** The small chance to take burn damage while rendering is not implemented.
+
+- **Arming Flasks:** `[COMPLETE]`
+  - Players can create a 'Fire Pot' and light it with a 'Tinderbox'.
+  - The resulting 'Lit Fire Pot' can be equipped in the ammo slot and is correctly consumed/checked for during combat.
+
+**Bugs & Notes:**
+- The creation process is well-implemented. The only missing piece is the minor chance to take damage during rendering.
+
+---
+
+### Fire Flask Tiers & Ingredients
+**[COMPLETE]** All planned tiers of Fire Flasks and their corresponding ingredients are present in the game's data files.
+
+- All flask items from 'Refined Grease' to 'Dragon Fat' are defined with correct stats and level requirements.
+- The `RENDERING_RECIPES` correctly map each type of fat to its resulting flask.
+- All 'Fat' items are correctly included in monster loot tables.
+
+**Bugs & Notes:**
+- This section is fully implemented as designed.
+
+---
+
+### Combat Application: Strengths & Weaknesses
+**[PARTIAL]** Fire weakness has been implemented, but immunity and the 'X Mix' are still missing.
+
+- **Strengths (Fire Vulnerability):** `[COMPLETE]`
+  - The combat logic now correctly increases both initial and DOT damage against monsters with the `fireWeakness` property.
+
+- **Weaknesses (Fire Immunity/Healing):** `[INCOMPLETE]`
+  - There is no logic to reduce, nullify, or heal damage for fire-based or water-based creatures.
+
+- **Overcoming Weakness (The "X Mix"):** `[INCOMPLETE]`
+  - The 'X Mix' item exists and is sold by the Slayer Master.
+  - However, there is **no logic** implemented to use the 'X Mix' on a flask to create an 'X Flask'.
+  - Consequently, there is no combat logic to handle the special properties of 'X Flasks'.
+
+**Bugs & Notes:**
+- Fire vulnerability is working correctly. The next steps will be to implement fire immunity and the 'X Mix' mechanic.

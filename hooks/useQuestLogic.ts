@@ -1,5 +1,4 @@
 
-
 import React, { useCallback } from 'react';
 import { PlayerQuestState, SkillName, InventorySlot } from '../types';
 import { ITEMS, MONSTERS } from '../constants';
@@ -147,6 +146,12 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
                     const newProgress = q.progress + quantity;
                     if (newProgress >= stage.requirement.quantity) {
                         addLog(`Quest updated: ${questData.name} - stage completed!`);
+                        
+                        // Add vision for 'the_saints_first_step'
+                        if (q.questId === 'the_saints_first_step' && q.currentStage === 7) {
+                            addLog("As the last of the holy smoke clears, a vision flashes in your mind: three paths diverge before you - one of steel, one of shadow, and one of starlight. A voice whispers, 'The trials await.'");
+                        }
+                        
                         return { ...q, currentStage: q.currentStage + 1, progress: 0 };
                     }
                     addLog(`Quest progress: Offered ${newProgress}/${stage.requirement.quantity}.`);

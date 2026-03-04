@@ -271,12 +271,6 @@ export const useSaveSlotManager = (ui: ReturnType<typeof useUIState>) => {
     const importToSlot = useCallback((slotId: number, data: string): boolean => {
         const parsedData = parseAndValidateSave(data);
         if (parsedData) {
-            const isProduction = process.env.NODE_ENV === 'production';
-            if (isProduction && (parsedData.playerType === PlayerType.Normal || parsedData.playerType === PlayerType.Hardcore)) {
-                alert("What's this? A wolf in sheep's clothing! Messing with save files to bypass Normal or Hardcore restrictions is strictly forbidden. Only 'Cheats' mode characters can be imported. Your import has been denied, you cheeky adventurer!");
-                return false; // Indicate failure
-            }
-
             const hydratedData = hydrateGameState(parsedData);
             ui.setConfirmationPrompt({
                 message: `Are you sure you want to import this save into Slot ${slotId + 1}? This will overwrite any existing data in this slot.`,

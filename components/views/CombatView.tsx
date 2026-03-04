@@ -1,13 +1,20 @@
+
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Monster, PlayerSkill, SkillName, Equipment, CombatStance, WeaponType, MonsterType, InventorySlot, WeightedDrop, Spell, MonsterSpecialAttack, SpellElement, Item } from '../../types';
-import { MONSTERS, ITEMS, rollOnLootTable, REGIONS, LootRollResult, getIconClassName, AMMO_TIER_LEVELS, QUESTS, POIS } from '../../constants';
+import { Monster, PlayerSkill, SkillName, Equipment, CombatStance, WeaponType, MonsterType, InventorySlot, WeightedDrop, Spell, MonsterSpecialAttack, SpellElement, Item, MonsterStatusEffect } from '../../types';
+import { MONSTERS, ITEMS, rollOnLootTable, LootRollResult, REGIONS, getIconClassName, QUESTS, POIS } from '../../constants';
 import Button from '../common/Button';
 import ProgressBar from '../common/ProgressBar';
 import { ActiveBuff } from '../../types';
 import AttackAnimationEngine from '../game/AttackAnimationEngine';
 import { useInventory } from '../../hooks/useInventory';
 import { useUIState } from '../../hooks/useUIState';
-import HitSplat from '../common/HitSplat'; // Import external component
+import HitSplat from '../common/HitSplat';
+import { DamageCalculationResult, calculateAccuracy } from './combat/combatUtils';
+import { calculateMeleeDamage } from './combat/meleeCalc';
+import { calculateRangedDamage } from './combat/rangedCalc';
+import { calculateFlaskDamage } from './combat/flaskCalc';
+import { calculateMagicDamage } from './combat/magicCalc';
+
 
 interface CombatViewProps {
     monsterQueue: string[];
@@ -36,7 +43,7 @@ interface CombatViewProps {
     inv: ReturnType<typeof useInventory>;
     ui: ReturnType<typeof useUIState>;
     killTrigger: number;
-    applyStatModifier: (skill: SkillName, value: number, duration: number, baseLevelOnConsumption: number) => void;
+    applyStatModifier: (skill: SkillName, value: number, baseLevelOnConsumption: number) => void;
     isStunned: boolean;
     addBuff: (buff: Omit<ActiveBuff, 'id' | 'durationRemaining'>) => void;
     showPlayerHealthNumbers: boolean;
@@ -49,12 +56,6 @@ interface CombatViewProps {
     runEnergy: number;
     setRunEnergy: React.Dispatch<React.SetStateAction<number>>;
     playerCombatLevel: number;
-}
-
-interface MonsterStatusEffect {
-    type: 'poison';
-    damagePerTick: number;
-    ticksApplied: number;
 }
 
 const SmoothCombatCooldownBar: React.FC<{ label: string, nextAttackTime: number, attackSpeedTicks: number, combatSpeedMultiplier: number, color: string }> = ({ label, nextAttackTime, attackSpeedTicks, combatSpeedMultiplier, color }) => {
@@ -106,237 +107,13 @@ const parseChance = (chance: number | string): number => {
     return 0; // fallback
 };
 
-const calculateAccuracy = (attackStat: number, defenceStat: number, accuracyBoost: number = 0) => {
-    const attackRoll = attackStat + 8;
-    const defenceRoll = defenceStat + 8;
-    let hitChance = attackRoll > defenceRoll ? 1 - (defenceRoll / (2 * attackRoll)) : attackRoll / (2 * defenceRoll);
-    hitChance = Math.max(0.01, Math.min(0.99, hitChance));
-    hitChance *= (1 + accuracyBoost / 100); // Apply percentage boost
-    return Math.min(1, hitChance);
-};
-
-const playerAttack = (
-    playerStats: any,
-    combatStance: CombatStance,
-    playerMaxHit: number,
-    monster: Monster,
-    monsterHp: number,
-    activeBuffs: ActiveBuff[],
-    addHitSplat: (damage: number | 'miss', options?: { isMaxHit?: boolean, isPoison?: boolean, isMagic?: boolean, isDragonfire?: boolean }) => void,
-    setMonsterHp: React.Dispatch<React.SetStateAction<number>>,
-    handleMonsterDefeated: (attackStyle: 'melee' | 'ranged' | 'magic') => void,
-    addXp: (skill: SkillName, amount: number) => void,
-    setAnimationTriggers: React.Dispatch<React.SetStateAction<any[]>>,
-    weaponSlot: InventorySlot | null,
-    ammoSlot: InventorySlot | null,
-    autocastSpell: Spell | null,
-    lastSpellCast: Spell | null,
-    playerWeapon: { speed: number, type: WeaponType },
-    setMonsterStatus: React.Dispatch<React.SetStateAction<MonsterStatusEffect[]>>,
-    monsterStatus: MonsterStatusEffect[],
-    addLog: (message: string) => void,
-    combatSpeedMultiplier: number,
-    showHitsplats: boolean,
-    onConsumeAmmo: () => void,
-    getEffectiveLevel: (skill: SkillName) => number
-) => {
-    let playerDamage = 0;
-    let successfulHit = false;
-    let attackStyle: 'melee' | 'ranged' | 'magic' = 'melee';
-
-    const isRangedWeapon = playerWeapon.type === WeaponType.Bow || playerWeapon.type === WeaponType.Crossbow;
-
-    if (isRangedWeapon) {
-        if (!ammoSlot || ammoSlot.quantity <= 0) {
-            addLog("You have no ammo equipped!");
-            return;
-        }
-
-        const weaponData = ITEMS[weaponSlot!.itemId];
-        const ammoData = ITEMS[ammoSlot.itemId];
-
-        if (weaponData?.equipment?.weaponType === WeaponType.Bow && ammoData?.equipment?.weaponType !== WeaponType.Arrow) {
-            addLog("You can only fire arrows with a bow.");
-            return;
-        }
-        if (weaponData?.equipment?.weaponType === WeaponType.Crossbow && ammoData?.equipment?.weaponType !== WeaponType.Bolt) {
-            addLog("You can only fire bolts with a crossbow.");
-            return;
-        }
-
-        if (weaponData?.equipment?.ammoTier) {
-            const weaponMaxTier = AMMO_TIER_LEVELS[weaponData.equipment.ammoTier];
-            const ammoTier = AMMO_TIER_LEVELS[ammoData.material as string];
-            if (ammoTier > weaponMaxTier) {
-                addLog(`Your ${weaponData.name} cannot fire ${ammoData.name}.`);
-                return;
-            }
-        }
-        
-        onConsumeAmmo();
-        attackStyle = 'ranged';
-        let effectiveRanged = getEffectiveLevel(SkillName.Ranged);
-        let effectiveDefence = getEffectiveLevel(SkillName.Defence);
-        if (combatStance === CombatStance.RangedAccurate) effectiveRanged += 3;
-        if (combatStance === CombatStance.RangedDefence) effectiveDefence += 3;
-        const accuracyBuff = activeBuffs.find(b => b.type === 'accuracy_boost' && (b.style === 'ranged' || b.style === 'all'));
-        const totalRangedAttack = effectiveRanged + playerStats.rangedAttack;
-        
-        // Symmetrical defence calculation for ranged
-        const totalMonsterRangedDefence = monster.defence + monster.rangedDefence;
-        const accuracy = calculateAccuracy(totalRangedAttack, totalMonsterRangedDefence, accuracyBuff?.value);
-        
-        let potentialDamage = 0;
-        if (Math.random() < accuracy) { 
-            potentialDamage = Math.floor(Math.random() * (playerMaxHit + 1));
-            successfulHit = true;
-        }
-        playerDamage = Math.min(potentialDamage, monsterHp);
-    } else { // Melee
-        attackStyle = 'melee';
-        let effectiveAttack = getEffectiveLevel(SkillName.Attack);
-        let effectiveDefence = getEffectiveLevel(SkillName.Defence);
-        if (combatStance === CombatStance.Accurate) effectiveAttack += 3;
-        if (combatStance === CombatStance.Defensive) effectiveDefence += 3;
-
-        let playerAttackStyle: 'stab' | 'slash' | 'crush' = 'crush';
-        switch (playerWeapon.type) {
-            case WeaponType.Dagger: playerAttackStyle = 'stab'; break; case WeaponType.Sword: playerAttackStyle = 'slash'; break; case WeaponType.Scimitar: playerAttackStyle = 'slash'; break; case WeaponType.Axe: playerAttackStyle = 'slash'; break; case WeaponType.Battleaxe: playerAttackStyle = 'slash'; break; case WeaponType.Mace: playerAttackStyle = 'crush'; break; case WeaponType.Warhammer: playerAttackStyle = 'crush'; break; case WeaponType.Unarmed: playerAttackStyle = 'crush'; break; case WeaponType.Staff: playerAttackStyle = 'crush'; break;
-        }
-
-        let attackBonus = 0;
-        let monsterDefenceBonus = 0;
-        switch (playerAttackStyle) {
-            case 'stab':
-                attackBonus = playerStats.stabAttack;
-                monsterDefenceBonus = monster.stabDefence;
-                break;
-            case 'slash':
-                attackBonus = playerStats.slashAttack;
-                monsterDefenceBonus = monster.slashDefence;
-                break;
-            case 'crush':
-                attackBonus = playerStats.crushAttack;
-                monsterDefenceBonus = monster.crushDefence;
-                break;
-        }
-        const totalAttack = effectiveAttack + attackBonus;
-        // Symmetrical defence calculation: monster defence level + monster defence bonus
-        const totalMonsterDefence = monster.defence + monsterDefenceBonus;
-
-        const accuracyBuff = activeBuffs.find(b => b.type === 'accuracy_boost' && (b.style === 'melee' || b.style === 'all'));
-        const accuracy = calculateAccuracy(totalAttack, totalMonsterDefence, accuracyBuff?.value);
-        
-        let potentialDamage = 0;
-        if (Math.random() < accuracy) {
-            potentialDamage = Math.floor(Math.random() * (playerMaxHit + 1));
-            successfulHit = true;
-        }
-        playerDamage = Math.min(potentialDamage, monsterHp);
-    }
-    
-    // Apply flat damage bonus if buff is active
-    const flatDamageBuff = activeBuffs.find(b => b.type === 'flat_damage' && (b.style === 'all' || (b.style === 'melee' && !isRangedWeapon) || (b.style === 'ranged' && isRangedWeapon)));
-    if (flatDamageBuff && successfulHit) {
-        playerDamage += flatDamageBuff.value;
-    }
-    
-    // Apply damage on hit if buff is active
-    const damageOnHitBuff = activeBuffs.find(b => b.type === 'damage_on_hit' && (b.style === 'all' || (b.style === 'melee' && !isRangedWeapon) || (b.style === 'ranged' && isRangedWeapon)));
-    if (damageOnHitBuff && successfulHit) {
-        playerDamage += damageOnHitBuff.value;
-    }
-
-    // Clamp damage again after flat bonuses to ensure no overkill
-    playerDamage = Math.min(playerDamage, monsterHp);
-
-    const isMax = successfulHit && playerDamage > 0 && playerDamage === playerMaxHit && playerMaxHit >= 2;
-
-    if (playerDamage > 0) {
-        addXp(SkillName.Hitpoints, Math.round(playerDamage * 1.33));
-        if (isRangedWeapon) {
-            if (combatStance === CombatStance.RangedDefence) { addXp(SkillName.Ranged, playerDamage * 2); addXp(SkillName.Defence, playerDamage * 2); }
-            else addXp(SkillName.Ranged, playerDamage * 4);
-        } else {
-            if (combatStance === CombatStance.Accurate) addXp(SkillName.Attack, playerDamage * 4);
-            else if (combatStance === CombatStance.Aggressive) addXp(SkillName.Strength, playerDamage * 4);
-            else if (combatStance === CombatStance.Defensive) { addXp(SkillName.Defence, playerDamage * 4); }
-        }
-    }
-    addHitSplat(playerDamage > 0 ? playerDamage : 'miss', { isMaxHit: isMax });
-    
-    if (successfulHit) {
-        let playerAttackStyle: 'stab' | 'slash' | 'crush' = 'crush';
-        switch (playerWeapon.type) {
-            case WeaponType.Dagger: playerAttackStyle = 'stab'; break;
-            case WeaponType.Sword: playerAttackStyle = 'slash'; break;
-            case WeaponType.Scimitar: playerAttackStyle = 'slash'; break;
-            case WeaponType.Axe: playerAttackStyle = 'slash'; break;
-            case WeaponType.Battleaxe: playerAttackStyle = 'slash'; break;
-            case WeaponType.Mace: playerAttackStyle = 'crush'; break;
-            case WeaponType.Warhammer: playerAttackStyle = 'crush'; break;
-            case WeaponType.Unarmed: playerAttackStyle = 'crush'; break;
-            case WeaponType.Staff: playerAttackStyle = 'crush'; break;
-        }
-        setAnimationTriggers(prev => [...prev, {
-            id: Date.now() + Math.random(),
-            type: isRangedWeapon ? 'ranged' : playerAttackStyle,
-            source: 'player',
-            target: 'monster',
-            options: { arrowType: isRangedWeapon && ammoSlot ? ITEMS[ammoSlot.itemId].material : null }
-        }]);
-    }
-
-    // New combined poison logic
-    const weaponPoison = weaponSlot?.statsOverride?.poisoned;
-    const ammoPoison = isRangedWeapon && ammoSlot?.statsOverride?.poisoned;
-
-    // Ammo poison takes priority over weapon poison if both exist (e.g. poisoned bow with poisoned arrows)
-    const equipmentPoison = ammoPoison || weaponPoison;
-    const potionPoisonBuff = activeBuffs.find(b => b.type === 'poison_on_hit' && (b.style === 'all' || (b.style === 'melee' && !isRangedWeapon) || (b.style === 'ranged' && isRangedWeapon)));
-
-    let poisonToApply: { chance: number, damage: number } | null = null;
-
-    if (equipmentPoison) {
-        poisonToApply = { chance: equipmentPoison.chance, damage: equipmentPoison.damage };
-    }
-
-    if (potionPoisonBuff) {
-        const potionPoison = { chance: potionPoisonBuff.chance ?? 0.25, damage: potionPoisonBuff.value };
-        if (!poisonToApply || potionPoison.damage > poisonToApply.damage) {
-            poisonToApply = potionPoison;
-        }
-    }
-
-    if (poisonToApply && successfulHit) {
-        if (Math.random() < poisonToApply.chance) {
-            const existingStatus = monsterStatus.find(s => s.type === 'poison');
-            if (!existingStatus || existingStatus.damagePerTick < poisonToApply.damage) {
-                const initialDamage = poisonToApply.damage;
-                const poisonTickIntervalSeconds = (15000 / combatSpeedMultiplier) / 1000;
-                addLog(`You envenom the ${monster.name}. Next tick in ${poisonTickIntervalSeconds.toFixed(1)} seconds.`);
-                
-                const otherStatuses = monsterStatus.filter(s => s.type !== 'poison');
-                setMonsterStatus([...otherStatuses, { type: 'poison', damagePerTick: initialDamage, ticksApplied: 0 }]);
-            }
-        }
-    }
-
-    const newMonsterHp = Math.max(0, monsterHp - playerDamage);
-    setMonsterHp(newMonsterHp);
-
-    if (newMonsterHp <= 0) {
-        handleMonsterDefeated(attackStyle);
-    }
-};
-
 const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, playerSkills, playerHp, equipment, combatStance, setCombatStance, setPlayerHp, onCombatEnd, onFleeSuccess, addXp, addLoot, onDropLoot, isAutoBankOn, addLog, onPlayerDeath, onKill, onEncounterWin, onConsumeAmmo, activeBuffs, combatSpeedMultiplier, advanceTutorial, autocastSpell, inv, ui, killTrigger, applyStatModifier, isStunned, addBuff, showPlayerHealthNumbers, showEnemyHealthNumbers, showHitsplats, activePrayers, poisonEvent, getEffectiveLevel, playerQuests = [], runEnergy, setRunEnergy, playerCombatLevel }) => {
     const [currentMonsterIndex, setCurrentMonsterIndex] = useState(0);
     const currentInstanceId = monsterQueue[currentMonsterIndex];
     const monsterId = currentInstanceId.split(':')[1];
     const [monster, setMonster] = useState<Monster | null>(null);
     const [monsterHp, setMonsterHp] = useState(0);
-    const [hitSplats, setHitSplats] = useState<{ id: number; damage: number | 'miss'; target: 'player' | 'monster', isPoison?: boolean, isMagic?: boolean, isDragonfire?: boolean, isMaxHit?: boolean }[]>([]);
+    const [hitSplats, setHitSplats] = useState<{ id: number; damage: number | 'miss'; target: 'player' | 'monster', isPoison?: boolean, isMagic?: boolean, isDragonfire?: boolean, isMaxHit?: boolean, isBurn?: boolean }[]>([]);
     const [playerAttacking, setPlayerAttacking] = useState(false);
     const [monsterAttacking, setMonsterAttacking] = useState(false);
     const [monsterStatus, setMonsterStatus] = useState<MonsterStatusEffect[]>([]);
@@ -385,7 +162,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         return { speed: 4, type: WeaponType.Unarmed };
     }, [equipment.weapon]);
 
-    const addHitSplat = useCallback((damage: number | 'miss', target: 'player' | 'monster', options: { isPoison?: boolean, isMagic?: boolean, isDragonfire?: boolean, isMaxHit?: boolean } = {}) => {
+    const addHitSplat = useCallback((damage: number | 'miss', target: 'player' | 'monster', options: { isPoison?: boolean, isMagic?: boolean, isDragonfire?: boolean, isMaxHit?: boolean, isBurn?: boolean } = {}) => {
         const id = Date.now() + Math.random();
         setHitSplats(splats => [...splats, { id, damage, target, ...options }]);
         setTimeout(() => setHitSplats(splats => splats.filter(splat => splat.id !== id)), 1500);
@@ -400,7 +177,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
 
     useEffect(() => {
         const weaponType = playerWeapon.type;
-        const isRanged = weaponType === WeaponType.Bow || weaponType === WeaponType.Crossbow;
+        const isRanged = weaponType === WeaponType.Bow || weaponType === WeaponType.Crossbow || weaponType === WeaponType.Thrown;
         const isStaff = weaponType === WeaponType.Staff;
         const isAutocasting = isStaff && autocastSpell && (combatStance === CombatStance.Autocast || combatStance === CombatStance.DefensiveAutocast);
         let attackName = '';
@@ -421,6 +198,9 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
             setSpellInfo(queuedSpell);
         } else if (isAutocasting) {
             setSpellInfo(autocastSpell);
+        } else if (weaponType === WeaponType.Thrown) {
+            attackName = 'Thrown';
+            attackColor = 'bg-orange-700';
         } else if (isRanged) {
             attackName = 'Ranged';
             attackColor = 'bg-green-800';
@@ -696,13 +476,14 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
     }, [currentInstanceId, onKill, handleLootDistribution, defeatedInThisEncounter, currentMonsterIndex, monsterQueue, onEncounterWin, onCombatEnd]);
 
     const playerMaxHit = useMemo(() => {
-        // Ranged
         const weaponType = playerWeapon.type;
-        if (weaponType === WeaponType.Bow || weaponType === WeaponType.Crossbow) {
+        // Ranged (Bows, Crossbows, Thrown)
+        if (weaponType === WeaponType.Bow || weaponType === WeaponType.Crossbow || weaponType === WeaponType.Thrown) {
             let effectiveRanged = getEffectiveLevel(SkillName.Ranged);
             if (combatStance === CombatStance.RangedAccurate) effectiveRanged += 3;
             const rangedStrengthBonus = playerStats.rangedStrength;
-            return Math.ceil(0.5 + effectiveRanged * ((rangedStrengthBonus + 64) / 640));
+            let baseMaxHit = Math.ceil(effectiveRanged * ((rangedStrengthBonus + 64) / 640));
+            return baseMaxHit;
         }
 
         // Magic
@@ -719,16 +500,12 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         let effectiveStrength = getEffectiveLevel(SkillName.Strength);
         if (combatStance === CombatStance.Aggressive) effectiveStrength += 3;
         const equipmentStrengthBonus = playerStats.strengthBonus;
-        return Math.ceil(0.5 + effectiveStrength * ((equipmentStrengthBonus + 64) / 640));
-    }, [getEffectiveLevel, combatStance, playerStats, autocastSpell, queuedSpell, playerWeapon.type, activeBuffs]);
+        return Math.ceil(effectiveStrength * ((equipmentStrengthBonus + 64) / 640));
+    }, [getEffectiveLevel, combatStance, playerStats, autocastSpell, queuedSpell, playerWeapon.type, activeBuffs, equipment.weapon]);
 
     const monsterMaxHit = useMemo(() => {
         if (!monster) return 0;
     
-        if (monster.attackStyle === 'ranged') {
-            const monsterRangedStat = monster.ranged ?? monster.attack;
-            return monster.customMaxHit ?? Math.floor(monsterRangedStat / 6) + 1;
-        }
         if (monster.attackStyle === 'magic') {
             const monsterMagicStat = monster.magic ?? monster.attack;
             return monster.customMaxHit ?? Math.floor(monsterMagicStat / 6) + 1;
@@ -745,86 +522,82 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
     }, [monster]);
 
     const executeManualCast = useCallback((spell: Spell) => {
-        if (isStunned) return;
-        if (!monster) return;
+        if (isStunned || !monster) return;
 
         setPlayerAttacking(true);
         setTimeout(() => setPlayerAttacking(false), 300);
         setLastSpellCast(spell);
 
+        const magicLevel = playerSkills.find(s => s.name === SkillName.Magic)?.currentLevel ?? 1;
+        
+        const result = calculateMagicDamage(
+            spell, playerStats, monster, combatStance, getEffectiveLevel, activeBuffs, currentElementalWeakness,
+            equipment.weapon, invRef.current.hasItems, magicLevel
+        );
+
+        if (result.error) {
+            addLog(result.error);
+            return;
+        }
+        
         const equippedStaff = equipment.weapon ? ITEMS[equipment.weapon.itemId] : null;
         const providedRune = equippedStaff?.equipment?.providesRune;
         const runesNeeded = spell.runes.filter(r => r.itemId !== providedRune);
-        
-        if (!invRef.current.hasItems(runesNeeded)) {
-            addLog(`You don't have enough runes to cast ${spell.name}.`);
-            return;
-        }
-
         runesNeeded.forEach(r => invRef.current.modifyItem(r.itemId, -r.quantity, true));
 
-        const xpGains: Partial<Record<SkillName, number>> = {};
-        xpGains[SkillName.Magic] = (xpGains[SkillName.Magic] || 0) + spell.xp;
-
-        let effectiveMagic = getEffectiveLevel(SkillName.Magic);
-        let totalMagicAttack = (effectiveMagic * 2) + playerStats.magicAttack;
-        let damageMultiplier = 1.0;
+        if (result.logMessage) addLog(result.logMessage);
         
-        if (currentElementalWeakness && spell.element === currentElementalWeakness) {
-            addLog("Your spell hits a weak point!");
-            totalMagicAttack *= 3; // Massive accuracy boost
-            damageMultiplier = 2.0; // Double damage
-        }
-        
-        const totalMonsterMagicDefence = monster.defence + monster.magicDefence;
-        const accuracy = calculateAccuracy(totalMagicAttack, totalMonsterMagicDefence);
-        
-        let potentialPlayerDamage = 0;
-        if (Math.random() < accuracy) { 
-            const baseMaxHit = spell.maxHit ?? 0;
-            const magicBuff = activeBuffs.find(b => b.type === 'magic_damage_boost');
-            const buffBonus = magicBuff ? (magicBuff.value / 100) : 0;
-            const bonus = 1 + (playerStats.magicDamageBonus / 100) + buffBonus;
-            const maxHit = Math.floor(baseMaxHit * bonus * damageMultiplier);
-            potentialPlayerDamage = Math.floor(Math.random() * (maxHit + 1));
-        }
-        
-        let playerDamage = Math.min(potentialPlayerDamage, monsterHp);
-        
-        playerDamage = Math.min(playerDamage, monsterHp);
-        
-        const magicBuff = activeBuffs.find(b => b.type === 'magic_damage_boost');
-        const buffBonus = magicBuff ? (magicBuff.value / 100) : 0;
-        const maxHitWithoutCrit = Math.floor((spell.maxHit ?? 0) * (1 + (playerStats.magicDamageBonus / 100) + buffBonus));
-        const isMax = playerDamage > 0 && playerDamage === maxHitWithoutCrit && maxHitWithoutCrit >= 2;
-
-        const spellTier = spell.level > 80 ? 5 : spell.level > 60 ? 4 : spell.level > 40 ? 3 : spell.level > 20 ? 2 : 1;
-        setAnimationTriggers(prev => [...prev, { id: Date.now() + Math.random(), type: 'magic', source: 'player', target: 'monster', options: { spellTier, element: spell.element } }]);
-
-        if (playerDamage > 0) {
-            xpGains[SkillName.Hitpoints] = (xpGains[SkillName.Hitpoints] || 0) + playerDamage * 1.33;
-            xpGains[SkillName.Magic] = (xpGains[SkillName.Magic] || 0) + playerDamage * 2;
-        }
-
-        for (const skillName in xpGains) {
-            const totalXp = xpGains[skillName as SkillName];
+        for (const skillName in result.xpGains) {
+            const totalXp = result.xpGains[skillName as SkillName];
             if (totalXp && totalXp > 0) {
                 addXp(skillName as SkillName, Math.round(totalXp));
             }
         }
         
-        const newMonsterHp = Math.max(0, monsterHp - playerDamage);
+        const damageToDeal = Math.min(result.damage, monsterHp);
+        const newMonsterHp = Math.max(0, monsterHp - damageToDeal);
         setMonsterHp(newMonsterHp);
-        addHitSplat(playerDamage > 0 ? playerDamage : 'miss', 'monster', { isMaxHit: isMax, isMagic: true });
         
+        addHitSplat(damageToDeal > 0 ? damageToDeal : 'miss', 'monster', { isMaxHit: result.isMaxHit, isMagic: true });
+
+        if (result.animationOptions) {
+            const { type, ...options } = result.animationOptions;
+            setAnimationTriggers(prev => [...prev, {
+                id: Date.now() + Math.random(),
+                type,
+                source: 'player',
+                target: 'monster',
+                options,
+            }]);
+        }
+        
+        if (result.statusEffectsToApply.length > 0) {
+            setMonsterStatus(prev => {
+                let newStatus = [...prev];
+                result.statusEffectsToApply.forEach(newEffect => {
+                    const existingIndex = newStatus.findIndex(s => s.type === newEffect.type);
+                    if (existingIndex > -1) {
+                        const existingEffect = newStatus[existingIndex];
+                        if (newEffect.type === 'poison' && 'damagePerTick' in newEffect && 'damagePerTick' in existingEffect && newEffect.damagePerTick > existingEffect.damagePerTick) {
+                            newStatus[existingIndex] = newEffect;
+                        } else if (newEffect.type === 'burn' && 'maxDamagePerTick' in newEffect && 'maxDamagePerTick' in existingEffect && newEffect.maxDamagePerTick > existingEffect.maxDamagePerTick) {
+                            newStatus[existingIndex] = newEffect;
+                        }
+                    } else {
+                        newStatus.push(newEffect);
+                    }
+                });
+                return newStatus;
+            });
+        }
+
         if (newMonsterHp <= 0) {
             handleMonsterDefeated('magic');
         } else {
             const castTimeTicks = spell.castTime ?? 4;
             setNextPlayerAttackTime(Date.now() + castTimeTicks * gameTickMs);
         }
-
-    }, [monster, equipment.weapon, invRef, addLog, getEffectiveLevel, playerStats, monsterHp, addXp, isStunned, currentElementalWeakness, gameTickMs, handleMonsterDefeated, activeBuffs]);
+    }, [monster, equipment.weapon, invRef, addLog, getEffectiveLevel, playerStats, monsterHp, addXp, isStunned, currentElementalWeakness, gameTickMs, handleMonsterDefeated, activeBuffs, addHitSplat, playerSkills, combatStance]);
 
     const handleManualCast = useCallback((spell: Spell) => {
         if (isStunned) {
@@ -888,137 +661,96 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 setTimeout(() => setPlayerAttacking(false), 300);
                 
                 const isAutocasting = playerWeapon.type === WeaponType.Staff && autocastSpell && (combatStance === CombatStance.Autocast || combatStance === CombatStance.DefensiveAutocast);
-                let attackPerformedThisTick = false;
+                
+                let result: DamageCalculationResult | null = null;
+                let attackStyle: 'melee' | 'ranged' | 'magic' = 'melee';
                 
                 if (isAutocasting) {
-                    let attackStyle: 'melee' | 'ranged' | 'magic' = 'magic';
-                    const spell = autocastSpell!;
-                    // Use VISIBLE level for requirement check (playerSkills)
+                    attackStyle = 'magic';
                     const magicLevel = playerSkills.find(s => s.name === SkillName.Magic)?.currentLevel ?? 1;
-
-                    if (magicLevel < spell.level) {
-                        addLog(`Your Magic level is too low to continue casting ${spell.name}. You switch to melee combat.`);
-                        setCombatStance(CombatStance.Accurate);
+                    result = calculateMagicDamage(autocastSpell!, playerStats, monster, combatStance, getEffectiveLevel, activeBuffs, currentElementalWeakness, equipment.weapon, inv.hasItems, magicLevel);
+                    if (result.error) {
+                        addLog(result.error);
+                        setCombatStance(CombatStance.Accurate); // Revert to melee
+                        result = null; // Prevent processing
                     } else {
-                        const equippedStaff = equipment.weapon ? ITEMS[equipment.weapon.itemId] : null;
-                        const providedRune = equippedStaff?.equipment?.weaponType === WeaponType.Staff ? equippedStaff.equipment.providesRune : null;
-                        const runesNeeded = spell.runes.filter((r: { itemId: string; quantity: number }) => r.itemId !== providedRune);
+                         const equippedStaff = equipment.weapon ? ITEMS[equipment.weapon.itemId] : null;
+                        const providedRune = equippedStaff?.equipment?.providesRune ? equippedStaff.equipment.providesRune : null;
+                        const runesNeeded = autocastSpell!.runes.filter((r: { itemId: string; quantity: number }) => r.itemId !== providedRune);
+                        runesNeeded.forEach((r: {itemId: string, quantity: number}) => inv.modifyItem(r.itemId, -r.quantity, true));
+                    }
+                } 
+                
+                if (!result) {
+                    setLastSpellCast(null);
+                    const isRangedWeapon = playerWeapon.type === WeaponType.Bow || playerWeapon.type === WeaponType.Crossbow;
+                    const isThrownWeapon = playerWeapon.type === WeaponType.Thrown;
 
-                        if (!inv.hasItems(runesNeeded)) {
-                            addLog(`You run out of runes for ${spell.name}. Reverting to melee combat.`);
-                            setCombatStance(CombatStance.Accurate);
-                        } else {
-                            attackPerformedThisTick = true;
-                            setLastSpellCast(spell);
-                            runesNeeded.forEach((r: {itemId: string, quantity: number}) => inv.modifyItem(r.itemId, -r.quantity, true));
-
-                            const xpGains: Partial<Record<SkillName, number>> = {};
-                            xpGains[SkillName.Magic] = (xpGains[SkillName.Magic] || 0) + spell.xp;
-
-                            // Use EFFECTIVE level for accuracy
-                            let effectiveMagic = getEffectiveLevel(SkillName.Magic);
-                            let totalMagicAttack = (effectiveMagic * 2) + playerStats.magicAttack;
-                            let damageMultiplier = 1.0;
-
-                            if (currentElementalWeakness && spell.element === currentElementalWeakness) {
-                                addLog("Your spell hits a weak point!");
-                                totalMagicAttack *= 3;
-                                damageMultiplier = 2.0;
-                            }
-                            
-                            const totalMonsterMagicDefence = monster.defence + monster.magicDefence;
-                            const accuracy = calculateAccuracy(totalMagicAttack, totalMonsterMagicDefence);
-                            
-                            let potentialDamage = 0;
-                            let successfulHit = false; // Reset just in case
-                            if (Math.random() < accuracy) { 
-                                const baseMaxHit = spell.maxHit ?? 0;
-                                const magicBuff = activeBuffs.find(b => b.type === 'magic_damage_boost');
-                                const buffBonus = magicBuff ? (magicBuff.value / 100) : 0;
-                                const bonus = 1 + (playerStats.magicDamageBonus / 100) + buffBonus;
-                                const maxHit = Math.floor(baseMaxHit * bonus * damageMultiplier);
-                                potentialDamage = Math.floor(Math.random() * (maxHit + 1));
-                                successfulHit = true;
-                            }
-
-                            let playerDamage = Math.min(potentialDamage, monsterHp);
-                            
-                            playerDamage = Math.min(playerDamage, monsterHp);
-
-                            const baseMaxHit = spell.maxHit ?? 0;
-                            const magicBuff = activeBuffs.find(b => b.type === 'magic_damage_boost');
-                            const buffBonus = magicBuff ? (magicBuff.value / 100) : 0;
-                            const bonus = 1 + (playerStats.magicDamageBonus / 100) + buffBonus;
-                            const maxHit = Math.floor(baseMaxHit * bonus * damageMultiplier);
-                            const isMax = successfulHit && playerDamage > 0 && playerDamage === maxHit && maxHit >= 2;
-
-                            const spellTier = spell.level > 80 ? 5 : spell.level > 60 ? 4 : spell.level > 40 ? 3 : spell.level > 20 ? 2 : 1;
-                            setAnimationTriggers(prev => [...prev, { id: Date.now() + Math.random(), type: 'magic', source: 'player', target: 'monster', options: { spellTier, element: spell.element } }]);
-                            
-                            if (playerDamage > 0) {
-                                xpGains[SkillName.Hitpoints] = (xpGains[SkillName.Hitpoints] || 0) + playerDamage * 1.33;
-                                if (combatStance === CombatStance.DefensiveAutocast) {
-                                    xpGains[SkillName.Magic] = (xpGains[SkillName.Magic] || 0) + playerDamage * 1;
-                                    xpGains[SkillName.Defence] = (xpGains[SkillName.Defence] || 0) + playerDamage * 1;
-                                } else {
-                                    xpGains[SkillName.Magic] = (xpGains[SkillName.Magic] || 0) + playerDamage * 2;
-                                }
-                            }
-                            
-                            for (const skillName in xpGains) {
-                                const totalXp = xpGains[skillName as SkillName];
-                                if (totalXp && totalXp > 0) {
-                                    addXp(skillName as SkillName, Math.round(totalXp));
-                                }
-                            }
-
-                            // Apply poison from spell/buffs
-                            if (successfulHit) {
-                                 const equipmentPoison = equipment.weapon?.statsOverride?.poisoned;
-                                 const potionPoisonBuff = activeBuffs.find(b => b.type === 'poison_on_hit');
-                                 let poisonToApply: { chance: number, damage: number } | null = null;
-                                 if (equipmentPoison) {
-                                    poisonToApply = { chance: equipmentPoison.chance, damage: equipmentPoison.damage };
-                                 }
-                                 if (potionPoisonBuff) {
-                                    const potionPoison = { chance: potionPoisonBuff.chance ?? 0.25, damage: potionPoisonBuff.value };
-                                     if (!poisonToApply || potionPoison.damage > poisonToApply.damage) {
-                                         poisonToApply = potionPoison;
-                                     }
-                                 }
-                                 if (poisonToApply && Math.random() < poisonToApply.chance) {
-                                     const existingStatus = monsterStatus.find(s => s.type === 'poison');
-                                     if (!existingStatus || existingStatus.damagePerTick < poisonToApply.damage) {
-                                         const initialDamage = poisonToApply.damage;
-                                         const poisonTickIntervalSeconds = (15000 / combatSpeedMultiplier) / 1000;
-                                         addLog(`You envenom the ${monster.name}. Next tick in ${poisonTickIntervalSeconds.toFixed(1)} seconds.`);
-                                         const otherStatuses = monsterStatus.filter(s => s.type !== 'poison');
-                                         setMonsterStatus([...otherStatuses, { type: 'poison', damagePerTick: initialDamage, ticksApplied: 0 }]);
-                                     }
-                                 }
-                            }
-
-                            const newMonsterHp = Math.max(0, monsterHp - playerDamage);
-                            setMonsterHp(newMonsterHp);
-                            if (showHitsplats) addHitSplat(playerDamage > 0 ? playerDamage : 'miss', 'monster', { isMaxHit: isMax, isMagic: true });
-
-                            if (newMonsterHp <= 0) {
-                                handleMonsterDefeated(attackStyle);
-                            }
-                        }
+                    if (isThrownWeapon) {
+                        attackStyle = 'ranged';
+                        result = calculateFlaskDamage(playerStats, monster, getEffectiveLevel, playerMaxHit, equipment.weapon, equipment.ammo);
+                    } else if (isRangedWeapon) {
+                        attackStyle = 'ranged';
+                        result = calculateRangedDamage(playerStats, monster, combatStance, getEffectiveLevel, playerMaxHit, activeBuffs, equipment.weapon, equipment.ammo);
+                    } else {
+                        attackStyle = 'melee';
+                        result = calculateMeleeDamage(playerStats, monster, combatStance, getEffectiveLevel, playerMaxHit, activeBuffs, equipment.weapon, playerWeapon);
                     }
                 }
-                
-                if (!attackPerformedThisTick) {
-                    setLastSpellCast(null);
-                    playerAttack(
-                        playerStats, combatStance, playerMaxHit, monster, monsterHp, activeBuffs,
-                        (damage, options) => showHitsplats && addHitSplat(damage, 'monster', options),
-                        setMonsterHp, handleMonsterDefeated, addXp, setAnimationTriggers,
-                        equipment.weapon, equipment.ammo, autocastSpell, lastSpellCast, playerWeapon,
-                        setMonsterStatus, monsterStatus, addLog, combatSpeedMultiplier, showHitsplats,
-                        onConsumeAmmo, getEffectiveLevel
-                    );
+
+                // Unified Result Handling
+                if (result) {
+                    if (result.error) {
+                        addLog(result.error);
+                    } else {
+                        if (result.logMessage) addLog(result.logMessage);
+                        if (result.ammoConsumed) onConsumeAmmo();
+                        
+                        const damageToDeal = Math.min(result.damage, monsterHp);
+                        const newMonsterHp = Math.max(0, monsterHp - damageToDeal);
+                        setMonsterHp(newMonsterHp);
+                        
+                        if (showHitsplats) addHitSplat(result.successfulHit ? damageToDeal : 'miss', 'monster', { isMaxHit: result.isMaxHit, isMagic: attackStyle === 'magic' });
+                        if (result.successfulHit && result.animationOptions) {
+                            const { type, ...options } = result.animationOptions;
+                            setAnimationTriggers(prev => [...prev, {
+                                id: Date.now() + Math.random(),
+                                type,
+                                source: 'player',
+                                target: 'monster',
+                                options,
+                            }]);
+                        }
+
+                        for (const skillName in result.xpGains) {
+                            const totalXp = result.xpGains[skillName as SkillName];
+                            if (totalXp && totalXp > 0) addXp(skillName as SkillName, Math.round(totalXp));
+                        }
+
+                        if (result.statusEffectsToApply.length > 0) {
+                             setMonsterStatus(prev => {
+                                let newStatus = [...prev];
+                                result!.statusEffectsToApply.forEach(newEffect => {
+                                    const existingIndex = newStatus.findIndex(s => s.type === newEffect.type);
+                                    if (existingIndex > -1) {
+                                        const existingEffect = newStatus[existingIndex];
+                                        if (newEffect.type === 'poison' && 'damagePerTick' in newEffect && 'damagePerTick' in existingEffect && newEffect.damagePerTick > existingEffect.damagePerTick) {
+                                            newStatus[existingIndex] = newEffect;
+                                        } else if (newEffect.type === 'burn' && 'maxDamagePerTick' in newEffect && 'maxDamagePerTick' in existingEffect && newEffect.maxDamagePerTick > existingEffect.maxDamagePerTick) {
+                                            newStatus[existingIndex] = newEffect;
+                                        }
+                                    } else {
+                                        newStatus.push(newEffect);
+                                    }
+                                });
+                                return newStatus;
+                            });
+                        }
+
+                        if (newMonsterHp <= 0) {
+                            handleMonsterDefeated(attackStyle);
+                        }
+                    }
                 }
                 
                 const speedBuff = activeBuffs.find(b => b.type === 'attack_speed_boost');
@@ -1092,13 +824,13 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                             case 'stat_drain': {
                                 const skillToDrain = triggeredSpecial.skill;
                                 const skillData = playerSkills.find(s => s.name === skillToDrain);
-                                applyStatModifier(skillToDrain, triggeredSpecial.value, 60000, skillData?.level ?? 1);
+                                applyStatModifier(skillToDrain, triggeredSpecial.value, skillData?.level ?? 1);
                                 break;
                             }
                             case 'stat_drain_multi':
                                 triggeredSpecial.skills.forEach(drain => {
                                     const skillData = playerSkills.find(s => s.name === drain.skill);
-                                    applyStatModifier(drain.skill, drain.value, 60000, skillData?.level ?? 1);
+                                    applyStatModifier(drain.skill, drain.value, skillData?.level ?? 1);
                                 });
                                 break;
                             case 'elemental_shift':
@@ -1232,7 +964,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
             
                 if (newPlayerHp <= 0) {
                     setIsCombatEnding(true);
-                    setTimeout(() =>  1500);
+                    setTimeout(() => onPlayerDeath(), 1500);
                     combatFrameId = requestAnimationFrame(combatLoop);
                     return;
                 }
@@ -1293,59 +1025,77 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         currentMonsterIndex, nextPlayerAttackTime, nextMonsterAttackTime, activeBuffs, monsterStatus,
         handleLootDistribution, autocastSpell, inv, ui, onPlayerDeath, applyStatModifier, isStunned, addBuff,
         currentElementalWeakness, handleMonsterDefeated, playerMaxHit, lastSpellCast,
-        combatSpeedMultiplier, showHitsplats, activePrayers, getEffectiveLevel
+        combatSpeedMultiplier, showHitsplats, activePrayers, getEffectiveLevel, executeManualCast, addHitSplat
     ]);
     
     useEffect(() => {
         poisonTickCallback.current = () => {
-            const currentMonster = monster;
-            if (!currentMonster || isCombatEnding || monsterHp <= 0) return;
+            if (!monster || isCombatEnding || monsterHp <= 0) return;
     
-            const poison = monsterStatus.find(s => s.type === 'poison');
-            if (!poison) return;
-            
-            const damageToDeal = poison.damagePerTick;
-            if (damageToDeal <= 0) return;
-    
-            setMonsterHp(currentHp => {
-                if (currentHp <= 0) return 0;
-                const newHp = Math.max(0, currentHp - damageToDeal);
-                if (showHitsplats) {
-                    addHitSplat(damageToDeal, 'monster', { isPoison: true });
-                }
-                if (newHp <= 0 && currentHp > 0) {
-                    const isMagic = lastSpellCast !== null || (autocastSpell && (combatStance === 'Autocast' || combatStance === 'Defensive Cast'));
-                    const isRanged = playerWeapon.type === WeaponType.Bow;
-                    handleMonsterDefeated(isMagic ? 'magic' : isRanged ? 'ranged' : 'melee');
-                }
-                return newHp;
-            });
-    
-            setMonsterStatus(prevStatus => {
-                const currentPoison = prevStatus.find(s => s.type === 'poison');
-                if (!currentPoison) return prevStatus;
-    
-                const newTicksApplied = currentPoison.ticksApplied + 1;
-                
-                if (newTicksApplied >= 2) {
-                    const newDamage = currentPoison.damagePerTick - 1;
-                    if (newDamage <= 0) {
-                        addLog(`The poison on the ${currentMonster.name} has worn off.`);
-                        return prevStatus.filter(s => s.type !== 'poison');
+            const statusEffects = [...monsterStatus]; // Create a mutable copy
+
+            for (let i = statusEffects.length - 1; i >= 0; i--) {
+                const effect = statusEffects[i];
+                let removeEffect = false;
+                let damageToDeal = 0;
+
+                if (effect.type === 'poison') {
+                    damageToDeal = effect.damagePerTick;
+                    const newTicksApplied = effect.ticksApplied + 1;
+                    if (newTicksApplied >= 2) {
+                        const newDamage = effect.damagePerTick - 1;
+                        if (newDamage <= 0) {
+                            addLog(`The poison on the ${monster.name} has worn off.`);
+                            removeEffect = true;
+                        } else {
+                            statusEffects[i] = { ...effect, damagePerTick: newDamage, ticksApplied: 0 };
+                        }
+                    } else {
+                        statusEffects[i] = { ...effect, ticksApplied: newTicksApplied };
                     }
-                    return prevStatus.map(s => s.type === 'poison' ? { ...s, damagePerTick: newDamage, ticksApplied: 0 } : s);
-                } else {
-                    return prevStatus.map(s => s.type === 'poison' ? { ...s, ticksApplied: newTicksApplied } : s);
+                } else if (effect.type === 'burn') {
+                    damageToDeal = Math.floor(Math.random() * (effect.maxDamagePerTick + 1));
+                    if (damageToDeal > 0) {
+                        addXp(SkillName.Firemaking, damageToDeal * 4);
+                    }
+                    const newTicksRemaining = effect.ticksRemaining - 1;
+                    if (newTicksRemaining <= 0) {
+                        addLog(`The ${monster.name} stops burning.`);
+                        removeEffect = true;
+                    } else {
+                        statusEffects[i] = { ...effect, ticksRemaining: newTicksRemaining };
+                    }
                 }
-            });
+                
+                if (damageToDeal > 0) {
+                    setMonsterHp(currentHp => {
+                        if (currentHp <= 0) return 0;
+                        const newHp = Math.max(0, currentHp - damageToDeal);
+                        if (showHitsplats) {
+                            addHitSplat(damageToDeal, 'monster', { isPoison: effect.type === 'poison', isBurn: effect.type === 'burn' });
+                        }
+                        if (newHp <= 0 && currentHp > 0) {
+                            const isMagic = lastSpellCast !== null || (autocastSpell && (combatStance === 'Autocast' || combatStance === 'Defensive Cast'));
+                            const isRanged = playerWeapon.type === WeaponType.Bow || playerWeapon.type === WeaponType.Thrown;
+                            handleMonsterDefeated(isMagic ? 'magic' : isRanged ? 'ranged' : 'melee');
+                        }
+                        return newHp;
+                    });
+                }
+                
+                if (removeEffect) {
+                    statusEffects.splice(i, 1);
+                }
+            }
+            setMonsterStatus(statusEffects);
         };
     });
 
     useEffect(() => {
-        const poisonTickInterval = 15000 / combatSpeedMultiplier;
+        const tickInterval = 600 / combatSpeedMultiplier; // Standard game tick
         const timer = setInterval(() => {
             poisonTickCallback.current?.();
-        }, poisonTickInterval);
+        }, tickInterval);
 
         return () => clearInterval(timer);
     }, [combatSpeedMultiplier]);

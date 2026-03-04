@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { InventorySlot, GroundItem, WorldState } from '../types';
 import { ITEMS } from '../constants';
@@ -123,7 +122,8 @@ export const useGroundItems = (initialGroundItems: Record<string, GroundItem[]>,
                 noted: itemToPick.item.noted,
                 nameOverride: itemToPick.item.nameOverride,
                 statsOverride: itemToPick.item.statsOverride,
-                bypassAutoBank: true 
+                bypassAutoBank: true,
+                expiresAt: itemToPick.item.expiresAt
             }
         );
         
@@ -206,7 +206,7 @@ export const useGroundItems = (initialGroundItems: Record<string, GroundItem[]>,
         if (itemsToPickUp.length > 0) {
             const consolidatedPickups: Record<string, InventorySlot> = {};
             itemsToPickUp.forEach(item => {
-                const key = `${item.itemId}:${!!item.noted}:${item.doses ?? 'na'}:${item.nameOverride}:${JSON.stringify(item.statsOverride)}`;
+                const key = `${item.itemId}:${!!item.noted}:${item.doses ?? 'na'}:${item.nameOverride}:${JSON.stringify(item.statsOverride)}:${item.expiresAt ?? 'na'}`;
                 if (consolidatedPickups[key]) {
                     consolidatedPickups[key].quantity += item.quantity;
                 } else {
@@ -215,7 +215,6 @@ export const useGroundItems = (initialGroundItems: Record<string, GroundItem[]>,
             });
 
             Object.values(consolidatedPickups).forEach(item => {
-                // FIX: Update call signature to match new type.
                 inv.modifyItem(item.itemId, item.quantity, false, { 
                     doses: item.doses,
                     charges: item.charges,
@@ -223,6 +222,7 @@ export const useGroundItems = (initialGroundItems: Record<string, GroundItem[]>,
                     nameOverride: item.nameOverride,
                     statsOverride: item.statsOverride,
                     bypassAutoBank: true,
+                    expiresAt: item.expiresAt
                 });
             });
             

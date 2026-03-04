@@ -1,3 +1,4 @@
+
 /**
  * SFX Recipes for the Deterministic Sound Engine
  * Format: type:val|param:val|...
@@ -117,3 +118,33 @@ export const AUDIO_MANIFEST: Record<string, string | string[]> = {
 };
 
 export type SoundID = keyof typeof AUDIO_MANIFEST;
+export type SoundCategory = 'ambient' | 'sfx';
+
+export const SOUND_CATEGORIES: Record<SoundID, SoundCategory> = {
+    UI_CLICK: 'ambient',
+    UI_PANEL_OPEN: 'ambient',
+    UI_PANEL_CLOSE: 'ambient',
+    
+    COMBAT_HIT: 'sfx',
+    COMBAT_MISS: 'sfx',
+    COMBAT_DEATH: 'sfx',
+    COMBAT_PRAYER_FLICK: 'sfx',
+    
+    ITEM_PICKUP: 'sfx',
+    WOODCUTTING_CHOP_1: 'sfx',
+    WOODCUTTING_CHOP_2: 'sfx',
+    WOODCUTTING_CHOP_3: 'sfx',
+    MINING_TINK_1: 'sfx',
+    MINING_TINK_2: 'sfx',
+    MINING_TINK_3: 'sfx',
+    FISHING_SPLASH_1: 'sfx',
+    FISHING_SPLASH_2: 'sfx',
+    FISHING_SPLASH_3: 'sfx',
+    CRAFTING_SUCCESS: 'sfx',
+    SMITHING_HAMMER_1: 'sfx',
+    SMITHING_HAMMER_2: 'sfx',
+    SMITHING_HAMMER_3: 'sfx',
+    FIREMAKING_IGNITE: 'sfx',
+    
+    LEVEL_UP: 'sfx',
+};

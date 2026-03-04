@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useUIState } from '../../hooks/useUIState';
 import Button from './Button';
@@ -89,9 +90,9 @@ const GuidedTutorialOverlay: React.FC<GuidedTutorialOverlayProps> = ({ ui }) => 
     }, [targetRect]);
 
     return (
-        <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden">
+        <div className="fixed inset-0 z-[100] pointer-events-none">
             {/* Dark Overlay with Hole */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-auto z-[101]">
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-[101]">
                 <defs>
                     <mask id="tutorial-mask">
                         <rect width="100%" height="100%" fill="white" />
@@ -137,7 +138,7 @@ const GuidedTutorialOverlay: React.FC<GuidedTutorialOverlayProps> = ({ ui }) => 
                         <button onClick={handleSkip} className="text-gray-500 hover:text-white text-2xl font-bold leading-none">&times;</button>
                     </div>
                     
-                    <div className="text-gray-200 text-sm italic mb-6 leading-relaxed">
+                    <div className="text-gray-200 text-sm italic mb-6 leading-relaxed overflow-y-auto max-h-48">
                         {currentStep.description}
                     </div>
 

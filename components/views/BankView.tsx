@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { InventorySlot, Item, BankTab } from '../../types';
 import { ITEMS, BANK_CAPACITY, getIconClassName, MAX_BANK_TABS } from '../../constants';
@@ -387,13 +388,50 @@ const BankView: React.FC<BankViewProps> = (props) => {
         setTooltip(null);
     };
 
+    const handleStartTutorial = useCallback(() => {
+        ui.setActiveTutorial({
+            id: 'bank-tour',
+            currentStepIndex: 0,
+            steps: [
+                { targetId: 'bank-container', description: <p>Welcome to the <span className="text-yellow-400 font-bold">Bank of Embrune</span>! Here you can store your valuables safely. Even if you fall in battle, items kept here remain secure.</p> },
+                { targetId: 'bank-tabs', description: <p>These are your <span className="text-yellow-300 font-bold">Bank Tabs</span>. You can organize your items by dragging them into different tabs. You can have up to {MAX_BANK_TABS} tabs!</p> },
+                { targetId: 'bank-item-grid', description: <p>This is the <span className="text-yellow-300 font-bold">Main Vault</span>. It shows all the items in your current tab. Click an item to withdraw it, or drag to reorganize.</p> },
+                { targetId: 'bank-quantity-toggles', description: <p>Choose <span className="text-yellow-300 font-bold">how many</span> items you want to move at once. Select 1, 5, 10, or 'All'. Use 'X' to set a custom amount.</p> },
+                { targetId: 'bank-withdraw-mode', description: <p>You can withdraw items as physical objects or as <span className="text-yellow-300 font-bold">Bank Notes</span>. Notes stack in your bag, making them easier to carry in bulk!</p> },
+                { targetId: 'bank-search', description: <p>Need to find something specific? Use the <span className="text-yellow-300 font-bold">Search Bar</span> to filter items across all your tabs instantly.</p> },
+                { targetId: 'bank-deposit-backpack', description: <p>Need space? Click this to <span className="text-yellow-300 font-bold">deposit everything</span> currently in your inventory into the bank.</p> },
+                { targetId: 'bank-deposit-equipment', description: <p>Use this to quickly <span className="text-yellow-300 font-bold">deposit all equipped items</span>. Great for changing gear sets in a hurry!</p> },
+                { targetId: 'bank-placeholders', description: <p>This padlock icon toggles <span className="text-yellow-300 font-bold">Bank Placeholders</span>. When ON, withdrawing all of an item leaves a slot so your bank stays organized.</p> },
+                { targetId: 'bank-exit', description: <p>That's the basics! Click <span className="text-yellow-300 font-bold">Exit Bank</span> when you're finished to return to the world.</p> },
+            ]
+        });
+    }, [ui]);
+
     return (
         <div data-tut="bank-container" className={`flex flex-col h-full animate-fade-in text-gray-200`} onClick={() => setTooltip(null)}>
             <div className="flex justify-between items-start mb-2 pb-2 border-b-2 border-gray-600">
                 <h1 className="text-3xl font-bold text-yellow-400">Bank of Embrune</h1>
                 <div className="text-right">
                     <p className="text-gray-400">{totalBankedItems} / {BANK_CAPACITY} Slots Used</p>
-                    <Button data-tut="bank-exit" onClick={onClose} size="sm">Exit Bank</Button>
+                    <div className="flex gap-2 items-center mt-1">
+                        <Button
+                            onClick={handleStartTutorial}
+                            size="sm"
+                            variant="secondary"
+                            className="w-8 h-8 flex items-center justify-center font-bold text-lg"
+                            onMouseEnter={(e) => setTooltip({ content: 'Banking Tutorial', position: { x: e.clientX, y: e.clientY } })}
+                            onMouseLeave={() => setTooltip(null)}
+                            aria-label="Start banking tutorial"
+                        >
+                            ?
+                        </Button>
+                        <Button data-tut="bank-exit" onClick={() => {
+                            if (ui.activeTutorial?.id === 'bank-tour') {
+                                ui.setActiveTutorial(null);
+                            }
+                            onClose();
+                        }} size="sm">Exit Bank</Button>
+                    </div>
                 </div>
             </div>
             

@@ -23,6 +23,7 @@ export interface CookingRecipe {
     xp: number;
     ingredients: { itemId: string; quantity: number }[];
     burntItemId: string;
+    alwaysSucceeds?: boolean;
 }
 
 export interface CraftingRecipe {
@@ -53,7 +54,7 @@ export interface SkillGuideEntry {
 export interface ActiveCraftingAction {
     recipeId: string;
     // Distinguishes between different types of recipes that might share item IDs
-    recipeType: 'smithing-bar' | 'smithing-item' | 'smithing-special' | 'fletching-carve' | 'fletching-string' | 'fletching-headless' | 'fletching-tip' | 'crafting' | 'gem-cutting' | 'spinning' | 'cooking' | 'herblore-unfinished' | 'herblore-finished' | 'jewelry' | 'firemaking-light' | 'firemaking-stoke' | 'milling' | 'dough-making' | 'fletching-stock' | 'fletching-assembly' | 'fletching-feather' | 'consecration' | 'grinding' | 'paste-making' | 'offering';
+    recipeType: 'smithing-bar' | 'smithing-item' | 'smithing-special' | 'fletching-carve' | 'fletching-string' | 'fletching-headless' | 'fletching-tip' | 'crafting' | 'gem-cutting' | 'spinning' | 'cooking' | 'herblore-unfinished' | 'herblore-finished' | 'jewelry' | 'firemaking-light' | 'firemaking-stoke' | 'milling' | 'dough-making' | 'fletching-stock' | 'fletching-assembly' | 'fletching-feather' | 'consecration' | 'grinding' | 'paste-making' | 'offering' | 'rendering' | 'glassblowing' | 'furnace-misc';
     totalQuantity: number;
     completedQuantity: number;
     successfulQuantity?: number;

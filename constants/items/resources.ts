@@ -1,4 +1,3 @@
-
 import { Item } from '../../types';
 
 export const resources: Item[] = [
@@ -60,11 +59,9 @@ export const resources: Item[] = [
     { id: 'bones', name: 'Bones', description: 'A set of ordinary bones. Can be buried for Prayer experience.', stackable: false, value: 2, iconUrl: 'https://api.iconify.design/game-icons:crossed-bones.svg', buryable: { prayerXp: 5 } },
     { id: 'big_bones', name: 'Big Bones', description: 'Larger bones from a tougher creature. Can be buried for Prayer experience.', stackable: false, value: 10, iconUrl: 'https://api.iconify.design/game-icons:crossed-bones.svg', buryable: { prayerXp: 15 } },
     { id: 'dragon_bones', name: 'Dragon Bones', description: 'Large, scorched bones from a dragon. Bury them for a large amount of Prayer experience.', stackable: false, value: 200, iconUrl: 'https://api.iconify.design/game-icons:dinosaur-bones.svg', buryable: { prayerXp: 100 } },
-    { id: 'feathers', name: 'Feathers', description: 'A soft feather of an avian.', stackable: true, value: 1, iconUrl: 'https://api.iconify.design/game-icons:feather.svg' },
     { id: 'eggs', name: 'Chicken Egg', description: 'A fresh egg. A simple cooking ingredient.', stackable: false, value: 2, iconUrl: 'https://api.iconify.design/game-icons:egg-clutch.svg' },
     { id: 'cowhide', name: 'Cowhide', description: 'The unprocessed hide of a cow. It needs to be tanned.', stackable: false, value: 6, iconUrl: 'https://api.iconify.design/game-icons:animal-hide.svg' },
     { id: 'leather', name: 'Leather', description: 'A piece of tanned leather, ready for crafting.', stackable: false, value: 10, iconUrl: 'https://api.iconify.design/game-icons:animal-hide.svg', material: 'leather' },
-    { id: 'thread', name: 'Thread', description: 'A spool of sturdy thread.', stackable: true, value: 1, iconUrl: 'https://api.iconify.design/game-icons:sewing-string.svg' },
     { id: 'flax', name: 'Flax', description: 'A plant that can be spun into a bow string.', stackable: false, value: 1, iconUrl: 'https://api.iconify.design/game-icons:flax.svg' },
     { id: 'bow_string', name: 'Bow String', description: 'A string for a bow.', stackable: false, value: 5, iconUrl: 'https://api.iconify.design/game-icons:whiplash.svg' },
     { id: 'rope', name: 'Rope', description: 'A sturdy length of rope.', stackable: false, value: 15, iconUrl: 'https://api.iconify.design/game-icons:rope-coil.svg' },
@@ -131,4 +128,10 @@ export const resources: Item[] = [
     { id: 'mithril_bolts_unf', name: 'Mithril Bolts (unf)', description: 'Unfinished mithril bolts. They need feathers.', stackable: true, value: 12, iconUrl: 'https://api.iconify.design/game-icons:spears.svg', material: 'mithril' },
     { id: 'adamantite_bolts_unf', name: 'Adamantite Bolts (unf)', description: 'Unfinished adamantite bolts. They need feathers.', stackable: true, value: 20, iconUrl: 'https://api.iconify.design/game-icons:spears.svg', material: 'adamantite' },
     { id: 'runic_bolts_unf', name: 'Runic Bolts (unf)', description: 'Unfinished runic bolts. They need feathers.', stackable: true, value: 250, iconUrl: 'https://api.iconify.design/game-icons:spears.svg', material: 'runic' },
+    // Glassblowing Resources
+    { id: 'seaweed', name: 'Seaweed', description: 'A slimy piece of seaweed. Can be cooked into soda ash.', stackable: false, value: 1, iconUrl: 'https://api.iconify.design/game-icons:seaweed.svg', material: 'clean-herb' },
+    { id: 'soda_ash', name: 'Soda Ash', description: 'A key ingredient in glassmaking.', stackable: false, value: 5, iconUrl: 'https://api.iconify.design/game-icons:powder.svg' },
+    { id: 'bucket_of_sand', name: 'Bucket of Sand', description: 'A bucket filled with fine sand.', stackable: false, value: 3, iconUrl: 'https://api.iconify.design/game-icons:sand-bucket.svg', material: 'gold' },
+    { id: 'molten_glass', name: 'Molten Glass', description: 'A glowing glob of molten glass, ready to be shaped.', stackable: false, value: 20, iconUrl: 'https://api.iconify.design/game-icons:magma-ball.svg', material: 'rune-ember' },
+    { id: 'un_tuned_orb', name: 'Un-tuned Orb', description: 'A solid glass orb that hums with potential. It needs to be attuned at a magical altar.', stackable: false, value: 100, iconUrl: 'https://api.iconify.design/game-icons:crystal-ball.svg' },
 ];
