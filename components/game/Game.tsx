@@ -893,6 +893,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         else if (activity.type === 'thieving_pilfer') thievingPilfering.handlePilfer(activity);
         else if (activity.type === 'cut_cactus') worldActions.handleCutCactus();
         else if (activity.type === 'ground_item') skilling.handlePickupGroundItem(activity);
+        else if (activity.type === 'quest_board') ui.setActiveQuestBoardId(session.currentPoiId);
     }, [char, addLog, ui, slayer, worldActions, crafting, navigation, session, thieving, thievingPilfering, skilling]);
 
     useEffect(() => { if (ui.activePanel === null) ui.setActivePanel('inventory'); }, [ui]);
