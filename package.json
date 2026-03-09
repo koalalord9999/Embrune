@@ -1,23 +1,41 @@
 {
   "name": "embrune",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.2.6",
+  "author": "John Olivas",
+  "description": "Runescape clone, but text based lol",
+  "main": "main.cjs", 
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "package": "electron-builder build --win"
+  },
+  "build": {
+    "appId": "com.embrune.app",
+    "files": [
+      "dist/**/*",
+      "main.cjs",
+      "package.json"
+    ],
+      "win": {
+        "icon": "build/icon.ico"
+      },
+    "directories": {
+      "output": "dist-exe"
+    }
   },
   "dependencies": {
+    "@vitejs/plugin-react": "^5.1.1",
+    "path": "^0.12.7",
     "react": "^19.1.1",
     "react-dom": "^19.2.0",
-    "path": "^0.12.7",
-    "vite": "^7.2.4",
-    "@vitejs/plugin-react": "^5.1.1"
+    "vite": "^7.2.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "electron": "^40.7.0",
+    "electron-builder": "^26.8.1",
+    "electron-vite": "^5.0.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

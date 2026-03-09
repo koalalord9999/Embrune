@@ -1041,10 +1041,10 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     
     // Centralized death check
     useEffect(() => {
-        if (char.currentHp <= 0) {
+        if (char.currentHp <= 0 && !isInCombat) {
             handlePlayerDeath(gameState);
         }
-    }, [char.currentHp, gameState, handlePlayerDeath]);
+    }, [char.currentHp, gameState, handlePlayerDeath, isInCombat]);
 
     return (
         <div className="w-full h-full p-2 flex flex-col md:flex-row gap-2 relative overflow-y-auto md:overflow-hidden">

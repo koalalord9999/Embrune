@@ -18,6 +18,9 @@ export const useSaveGame = (gameState: any, slotId: number) => {
         saveTimeoutRef.current = window.setTimeout(() => {
             if (gameState) {
                 saveSlotState(slotId, gameState);
+                const dataStr = JSON.stringify(gameState);
+                const base64Str = btoa(dataStr);
+                localStorage.setItem(`embrune_slot_${slotId}`, 's4V' + base64Str);
             }
         }, 1000);
 

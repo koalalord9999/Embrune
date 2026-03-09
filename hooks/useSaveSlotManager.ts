@@ -234,7 +234,15 @@ export const useSaveSlotManager = (ui: ReturnType<typeof useUIState>) => {
     }, [refreshSlots]);
 
     const loadGameForSlot = useCallback(async (slotId: number): Promise<any | null> => {
-        const gameState = await loadSlotState(slotId);
+        let gameState = await loadSlotState(slotId);
+        
+        if (!gameState) {
+            const fallback = localStorage.getItem(`embrune_slot_${slotId}`);
+            if (fallback) {
+                gameState = parseAndValidateSave(fallback);
+            }
+        }
+        
         if (gameState) {
             setGameKey(k => k + 1);
             return hydrateGameState(gameState);
@@ -251,6 +259,7 @@ export const useSaveSlotManager = (ui: ReturnType<typeof useUIState>) => {
 
     const deleteCharacter = useCallback(async (slotId: number) => {
         await deleteSlot(slotId);
+        localStorage.removeItem(`embrune_slot_${slotId}`);
         await refreshSlots();
     }, [refreshSlots]);
 

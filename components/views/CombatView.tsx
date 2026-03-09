@@ -129,6 +129,13 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
     const [isPreparing, setIsPreparing] = useState(true);
     const [isCombatEnding, setIsCombatEnding] = useState(false);
     
+    useEffect(() => {
+        if (playerHp <= 0 && !isCombatEnding) {
+            setIsCombatEnding(true);
+            setTimeout(() => onPlayerDeath(), 1500);
+        }
+    }, [playerHp, isCombatEnding, onPlayerDeath]);
+    
     const playerAttackInProgress = useRef(false);
     const monsterAttackInProgress = useRef(false);
 
@@ -963,8 +970,6 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 setPlayerHp(newPlayerHp);
             
                 if (newPlayerHp <= 0) {
-                    setIsCombatEnding(true);
-                    setTimeout(() => onPlayerDeath(), 1500);
                     combatFrameId = requestAnimationFrame(combatLoop);
                     return;
                 }
