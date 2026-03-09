@@ -1,4 +1,0 @@
-- Introduced a variety of mob typings, like demon undead and dragon
-- Created a new dragon line, for future implementations
-- Created crafting recipes for the new dragonhides
-- Introduced dragon bones, as a new best training method for prayer.
