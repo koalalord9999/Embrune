@@ -1,2 +1,2 @@
-export const GAME_VERSION = "0.2.6.1 (HOTFIX)";
+export const GAME_VERSION = "0.2.6.2 (HOTFIX)";
 //config

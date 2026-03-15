@@ -1,30 +1,45 @@
 {
   "name": "embrune",
-  "version": "0.2.6",
+  "version": "0.0.7",
+  "repository": "koalalord9999/Embrune",
   "author": "John Olivas",
   "description": "Runescape clone, but text based lol",
-  "main": "main.cjs", 
+  "main": "main.cjs",
   "type": "module",
   "scripts": {
+    "dev": "vite",
+    "start": "vite",
     "build": "vite build",
-    "package": "electron-builder build --win"
+    "package": "electron-builder build --win --publish always",
+    "ship": "npm version patch && npm run build && npm run package"
   },
   "build": {
     "appId": "com.embrune.app",
+    "publish": {
+      "provider": "github",
+      "owner": "koalalord9999",
+      "repo": "Embrune"
+    },
     "files": [
       "dist/**/*",
       "main.cjs",
       "package.json"
     ],
-      "win": {
-        "icon": "build/icon.ico"
-      },
+    "extraMetadata": {
+      "dependencies": {
+        "electron-updater": "^6.8.3"
+      }
+    },
+    "win": {
+      "icon": "build/icon.ico"
+    },
     "directories": {
       "output": "dist-exe"
     }
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.1",
+    "electron-updater": "^6.8.3",
     "path": "^0.12.7",
     "react": "^19.1.1",
     "react-dom": "^19.2.0",
@@ -33,7 +48,7 @@
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
-    "electron": "^40.7.0",
+    "electron": "^41.0.2",
     "electron-builder": "^26.8.1",
     "electron-vite": "^5.0.0",
     "typescript": "~5.8.2",
