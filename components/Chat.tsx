@@ -52,10 +52,21 @@ export const Chat: React.FC<{ username: string }> = ({ username }) => {
       type = 'private';
     }
 
-    await fetch('/.netlify/functions/chat', {
-      method: 'POST',
-      body: JSON.stringify({ username, message: messageContent, type, recipient }),
-    });
+    try {
+      const response = await fetch('/.netlify/functions/chat', {
+        method: 'POST',
+        body: JSON.stringify({ username, message: messageContent, type, recipient }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to send message:', response.status, errorText);
+        alert(`Failed to send message: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Error sending message. Check console.');
+    }
 
     setInput('');
   };
