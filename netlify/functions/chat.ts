@@ -1,6 +1,7 @@
 import { Handler } from '@netlify/functions';
 import Pusher from 'pusher';
 const Filter = require('bad-words');
+const filter = new Filter();
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID || '',
@@ -9,8 +10,6 @@ const pusher = new Pusher({
   cluster: process.env.PUSHER_CLUSTER || '',
   useTLS: true,
 });
-
-const filter = new Filter();
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
