@@ -1,7 +1,7 @@
 import { Handler } from '@netlify/functions';
 import Pusher from 'pusher';
-const Filter = require('bad-words');
-const filter = new Filter.default();
+import * as Filter from 'bad-words';
+const filter = new (Filter as any).default();
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID || '',
