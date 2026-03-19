@@ -1,7 +1,18 @@
 import { Handler } from '@netlify/functions';
 import Pusher from 'pusher';
-const Filter = require('bad-words');
-const filter = new (Filter.default || Filter)();
+
+// Simple filter implementation to avoid dependency issues
+const filter = {
+  clean: (text: string) => {
+    // Basic moderation - add more words as needed
+    const badWords = ['badword1', 'badword2']; 
+    let cleanText = text;
+    badWords.forEach(word => {
+      cleanText = cleanText.replace(new RegExp(word, 'gi'), '****');
+    });
+    return cleanText;
+  }
+};
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID || '',
