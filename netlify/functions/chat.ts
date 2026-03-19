@@ -51,6 +51,7 @@ export const handler: Handler = async (event) => {
 
     return { statusCode: 200, body: 'Message sent' };
   } catch (error) {
-    return { statusCode: 500, body: 'Error sending message' };
+    console.error('Error in chat function:', error);
+    return { statusCode: 500, body: `Error sending message: ${error}` };
   }
 };
