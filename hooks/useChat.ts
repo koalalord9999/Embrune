@@ -44,7 +44,8 @@ export const useChat = (username: string) => {
     }
 
     try {
-      const response = await fetch('/.netlify/functions/chat', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
+      const response = await fetch(`${backendUrl}/.netlify/functions/chat`, {
         method: 'POST',
         body: JSON.stringify({ username, message: messageContent, type, recipient }),
       });

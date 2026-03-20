@@ -1,6 +1,6 @@
 {
   "name": "embrune",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "repository": "koalalord9999/Embrune",
   "author": "John Olivas",
   "description": "Runescape clone, but text based lol",
@@ -35,6 +35,7 @@
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.1",
     "bad-words": "^4.0.0",
+    "electron-updater": "^6.8.3",
     "path": "^0.12.7",
     "pusher": "^5.3.3",
     "pusher-js": "^8.4.2",
@@ -43,8 +44,11 @@
     "vite": "^7.2.4"
   },
   "devDependencies": {
+    "@netlify/functions": "^5.1.5",
     "@types/bad-words": "^3.0.3",
     "@types/node": "^22.14.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.0",
     "electron": "^40.7.0",
     "electron-builder": "^26.8.1",
