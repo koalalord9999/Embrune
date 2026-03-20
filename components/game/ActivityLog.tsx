@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Message } from '../../types';
+import { Message, LogEntry } from '../../types';
 
 interface ActivityLogProps {
-    logs: string[];
+    logs: (LogEntry | string)[];
     chatMessages: Message[];
     onSendMessage: (message: string) => void;
     isDialogueActive?: boolean;
@@ -25,6 +25,22 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
         setChatInput('');
     };
 
+    // Combine and sort logs and chatMessages
+    const combinedLogs = [
+        ...logs.map(log => {
+            if (typeof log === 'string') {
+                return { message: log, timestamp: 0, type: 'log' as const };
+            }
+            return { ...log, type: 'log' as const };
+        }),
+        ...chatMessages.map(msg => ({ 
+            message: msg.message, 
+            timestamp: msg.timestamp || Date.now(), 
+            type: 'chat' as const,
+            username: msg.username 
+        }))
+    ].sort((a, b) => a.timestamp - b.timestamp);
+
     return (
         <div className={`activity-log-wrapper bg-black/70 border-2 border-gray-600 rounded-lg p-3 transition-all duration-300 ease-in-out ${isMinimized ? 'h-12 flex-shrink-0' : 'h-64'} flex flex-col`}>
             <div className="flex justify-between items-center mb-1 flex-shrink-0">
@@ -36,15 +52,12 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
             {!isMinimized && !isDialogueActive && (
                 <div ref={containerRef} className="flex-grow overflow-y-auto pr-1 animate-fade-in min-h-0">
                     <div className="space-y-1">
-                        {logs.map((log, index) => (
-                            <p key={`log-${index}`} className="text-sm text-gray-300 leading-tight">
-                                {log}
-                            </p>
-                        ))}
-                        {chatMessages.map((m, index) => (
-                            <p key={`chat-${index}`} className="text-sm text-zinc-100 leading-tight">
-                                <span className="font-bold text-emerald-400">{m.username}: </span>
-                                {m.message}
+                        {combinedLogs.map((entry, index) => (
+                            <p key={`entry-${index}`} className={`text-sm leading-tight ${entry.type === 'chat' ? 'text-zinc-100' : 'text-gray-300'}`}>
+                                {entry.type === 'chat' && (
+                                    <span className="font-bold text-emerald-400">{entry.username}: </span>
+                                )}
+                                {entry.message}
                             </p>
                         ))}
                     </div>

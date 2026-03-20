@@ -49,7 +49,6 @@ const defaultState = {
     resourceNodeStates: {},
     monsterRespawnTimers: {},
     groundItems: {},
-    activityLog: [] as string[],
     repeatableQuestsState: {
         boards: {},
         activePlayerQuest: null,
@@ -155,7 +154,7 @@ const hydrateGameState = (loadedState: any): GameState => {
     // Ensure array properties are arrays, falling back to default if they're missing or not arrays.
     const arrayKeys: (keyof GameState)[] = [
         'skills', 'inventory', 'bank', 'playerQuests', 'lockedPois', 
-        'clearedSkillObstacles', 'statModifiers', 'activeBuffs', 'activityLog', 'activePrayers'
+        'clearedSkillObstacles', 'statModifiers', 'activeBuffs', 'activePrayers'
     ];
     arrayKeys.forEach(key => {
         const loadedValue = loadedState[key];

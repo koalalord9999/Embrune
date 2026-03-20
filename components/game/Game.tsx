@@ -81,7 +81,7 @@ interface GameProps {
 const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, assets, onExportGame, onImportGame, onResetGame }) => {
     // Core State Hooks
     const session = useGameSession(initialState.currentPoiId);
-    const { activityLog, addLog, setActivityLog } = useActivityLog(initialState.activityLog || []);
+    const { activityLog, addLog, setActivityLog } = useActivityLog([]);
     const { play } = useSoundEngine();
     const [xpDrops, setXpDrops] = useState<XpDrop[]>([]);
     const [levelUpInfo, setLevelUpInfo] = useState<{ skill: SkillName; level: number } | null>(null);
@@ -461,7 +461,6 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         resourceNodeStates: skilling.resourceNodeStates,
         monsterRespawnTimers: monsterRespawnTimers,
         groundItems: allGroundItems,
-        activityLog: activityLog,
         repeatableQuestsState: {
             boards: repeatableQuests.boards,
             activePlayerQuest: repeatableQuests.activePlayerQuest,
@@ -498,7 +497,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         initialState.username, initialState.playerType,
         char.skills, combatStance, char.currentHp, char.rawCurrentPrayer, char.autocastSpell, char.statModifiers, char.activeBuffs, char.combatLevel, prayer.activePrayers, char.runEnergy, char.isRunToggled, char.isResting, agility.agilityState,
         inv.inventory, inv.coins, inv.equipment, bank, session.currentPoiId, quests.playerQuests, quests.lockedPois, clearedSkillObstacles,
-        skilling.resourceNodeStates, monsterRespawnTimers, allGroundItems, activityLog, repeatableQuests, slayer.slayerTask, worldState,
+        skilling.resourceNodeStates, monsterRespawnTimers, allGroundItems, repeatableQuests, slayer.slayerTask, worldState,
         ui.showTooltips, ui.showXpDrops, ui.confirmValuableDrops, ui.valuableDropThreshold, ui.showMinimapHealth, ui.showCombatPlayerHealth, ui.showCombatEnemyHealth, ui.showHitsplats, ui.isOneClickMode,
         devMode.xpMultiplier, devMode.combatSpeedMultiplier, devMode.isPlayerInvisible, devMode.isAutoBankOn, devMode.isGodModeOn
     ]);

@@ -29,4 +29,10 @@ export interface Message {
   username: string;
   message: string;
   sender?: string;
+  timestamp?: number;
+}
+
+export interface LogEntry {
+  message: string;
+  timestamp: number;
 }
