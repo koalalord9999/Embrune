@@ -13,12 +13,12 @@ export const useChat = (username: string) => {
 
     const globalChannel = pusherRef.current.subscribe('embrune-chat');
     globalChannel.bind('new-message', (data: Message) => {
-      setMessages((prev) => [...prev, data]);
+      setMessages((prev) => [...prev, { ...data, timestamp: data.timestamp || Date.now() }]);
     });
 
     const privateChannel = pusherRef.current.subscribe(`embrune-pm-${username}`);
     privateChannel.bind('new-message', (data: Message) => {
-      setMessages((prev) => [...prev, { ...data, message: `(PM) ${data.message}` }]);
+      setMessages((prev) => [...prev, { ...data, timestamp: data.timestamp || Date.now() }]);
     });
 
     return () => {

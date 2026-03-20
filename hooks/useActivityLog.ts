@@ -2,7 +2,9 @@ import { useState, useCallback } from 'react';
 import { LogEntry } from '../types';
 
 export const useActivityLog = (initialLog: (LogEntry | string)[]) => {
-    const [activityLog, setActivityLog] = useState<(LogEntry | string)[]>(initialLog);
+    const [activityLog, setActivityLog] = useState<(LogEntry)[]>(initialLog.map(log => 
+        typeof log === 'string' ? { message: log, timestamp: Date.now() } : log
+    ));
 
     const addLog = useCallback((message: string) => {
         const timestamp = Date.now();
