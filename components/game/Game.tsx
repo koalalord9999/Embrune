@@ -1069,7 +1069,7 @@ itemActions, inv,quests,bank,bankLogic,shops,crafting,repeatableQuests,navigatio
                         <LootButtonOverlay groundItems={groundItemsForCurrentPoi} onOpenLootView={() => ui.setIsLootViewOpen(true)} />
                 </div>
                 <div className={`md:flex-shrink-0 relative`}>
-                    <ActivityLog logs={activityLog} chatMessages={messages} onSendMessage={handleSendMessage} isDialogueActive={!!ui.activeDialogue} />
+                    <ActivityLog logs={activityLog} chatMessages={messages} onSendMessage={handleSendMessage} isDialogueActive={!!ui.activeDialogue} username={initialState.username} />
                     {ui.activeDialogue && <DialogueOverlay dialogue={ui.activeDialogue} setActivePanel={ui.setActivePanel} />}
                 </div>
             </div>
