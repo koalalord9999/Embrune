@@ -39,14 +39,14 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
             return { ...log, type: 'log' as const };
         }),
         ...chatMessages.map(msg => {
-            const isPM = msg.message.startsWith('(PM)');
+            const isPM = msg.isPM || msg.message.startsWith('(PM)');
             let displayMessage = msg.message;
             let displayUsername = msg.username;
             
             // If it's a PM, parse the sender/recipient
             if (isPM) {
                 // Example PM message: "(PM) From PlayerName: Hello" or "(PM) To PlayerName: Hello"
-                const match = msg.message.match(/^\(PM\) (From|To) (\w+): (.*)$/);
+                const match = msg.message.match(/^\(PM\) (From|To) (.*?): (.*)$/);
                 if (match) {
                     const [_, direction, targetName, content] = match;
                     displayUsername = `${direction} ${targetName}`;
@@ -108,10 +108,10 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                                     {entry.type === 'chat' && (
                                         <span 
                                             className={`font-bold cursor-pointer ${
-                                                entry.originalUsername === username 
-                                                    ? 'text-yellow-500' // Gold for me
-                                                    : entry.isPM 
-                                                        ? 'text-pink-400' // Pink for PMs
+                                                entry.isPM 
+                                                    ? 'text-pink-400' // Pink for PMs
+                                                    : entry.originalUsername === username 
+                                                        ? 'text-yellow-500' // Gold for me
                                                         : 'text-emerald-400' // Green for others
                                             }`}
                                             onClick={() => handleMessageClick(entry.originalUsername || entry.username)}

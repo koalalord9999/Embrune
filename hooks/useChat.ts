@@ -35,10 +35,12 @@ export const useChat = (username: string) => {
     let messageContent = input;
 
     if (input.startsWith('/pm ')) {
-      const parts = input.split(' ');
-      recipient = parts[1];
-      messageContent = parts.slice(2).join(' ');
-      type = 'private';
+      const match = input.match(/^\/pm "([^"]+)" (.*)$/) || input.match(/^\/pm ([^ ]+) (.*)$/);
+      if (match) {
+        recipient = match[1];
+        messageContent = match[2];
+        type = 'private';
+      }
     }
 
     try {
