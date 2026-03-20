@@ -24,3 +24,9 @@ export * from './save';
 export * from './prayer';
 export * from './agility';
 export type { Spell } from './spells';
+
+export interface Message {
+  username: string;
+  message: string;
+  sender?: string;
+}

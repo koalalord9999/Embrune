@@ -15,7 +15,6 @@ import ItemsOnDeathView from './components/views/overlays/ItemsOnDeathView';
 import PriceCheckerView from './components/views/overlays/PriceCheckerView';
 import DungeonMapView from './components/views/DungeonMapView';
 import GuidedTutorialOverlay from './components/common/GuidedTutorialOverlay';
-import { Chat } from './components/Chat';
 import Game from './components/game/Game';
 import TechDemoGame from './prototyping/TechDemoGame';
 import SaveSlotScreen from './components/screens/SaveSlotScreen';
@@ -257,7 +256,6 @@ const App: React.FC = () => {
                             onImportGame={handleImport}
                             onResetGame={handleReset}
                         />
-                        <Chat username={activeGameState.username} />
                     </div>
                 );
         }

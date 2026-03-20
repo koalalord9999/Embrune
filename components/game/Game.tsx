@@ -63,6 +63,8 @@ import { dragons } from '../../constants/monsters/dragons';
 import BuffBar from './BuffBar';
 import { useSoundEngine } from '../../hooks/useSoundEngine';
 import { useWorldEvents } from '../../hooks/useWorldEvents';
+import { useChat } from '../../hooks/useChat';
+import { Message } from '../../types';
 
 
 interface GameProps {
@@ -147,6 +149,8 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         setIsGodModeOn: ui.setIsGodModeOn,
     });
     const { isDevMode } = devMode;
+    const { messages, sendMessage } = useChat(initialState.username);
+    const handleSendMessage = (message: string) => sendMessage(initialState.username, message);
 
     const effectiveXpMultiplier = isDevMode ? devMode.xpMultiplier : 1;
     const combatSpeedMultiplier = isDevMode ? devMode.combatSpeedMultiplier : 1;
@@ -1066,7 +1070,7 @@ itemActions, inv,quests,bank,bankLogic,shops,crafting,repeatableQuests,navigatio
                         <LootButtonOverlay groundItems={groundItemsForCurrentPoi} onOpenLootView={() => ui.setIsLootViewOpen(true)} />
                 </div>
                 <div className={`md:flex-shrink-0 relative`}>
-                    <ActivityLog logs={activityLog} isDialogueActive={!!ui.activeDialogue} />
+                    <ActivityLog logs={activityLog} chatMessages={messages} onSendMessage={handleSendMessage} isDialogueActive={!!ui.activeDialogue} />
                     {ui.activeDialogue && <DialogueOverlay dialogue={ui.activeDialogue} setActivePanel={ui.setActivePanel} />}
                 </div>
             </div>
