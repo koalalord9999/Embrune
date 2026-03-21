@@ -255,6 +255,18 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
     };
 
     const handleSingleTap = (e: React.MouseEvent | React.TouchEvent) => {
+        
+        if (itemToUse) {
+            if (!slot) return;
+            setTooltip(null);
+            if (itemToUse.index !== index) {
+                onUseItemOn(itemToUse, { item: slot, index: index });
+            } else {
+                setItemToUse(null);
+            }
+            return;
+        }
+
         if (isOneClickMode) {
             handleLongPress(e);
             return;
@@ -311,15 +323,6 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
             return;
         }
 
-        if (itemToUse) {
-            setTooltip(null);
-            if (itemToUse.index !== index) {
-                onUseItemOn(itemToUse, { item: slot, index: index });
-            } else {
-                setItemToUse(null);
-            }
-            return;
-        }
         
         if (isBusy) {
             addLog("You are busy and cannot do that right now.");

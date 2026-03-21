@@ -1,6 +1,6 @@
 {
   "name": "embrune",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "repository": "koalalord9999/Embrune",
   "author": "John Olivas",
   "description": "Runescape clone, but text based lol",
@@ -19,6 +19,10 @@
       "provider": "github",
       "owner": "koalalord9999",
       "repo": "Embrune"
+    },
+  "nsis": {
+    "oneClick": true,
+    "perMachine": false
     },
     "files": [
       "dist/**/*",
