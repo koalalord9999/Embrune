@@ -99,6 +99,7 @@ export type POIActivity =
       successMessage?: string;
     }
   | { type: 'start_agility_course'; courseId: string; name: string; }
+  | { type: 'sand_pit'; name: string; }
   | BonfireActivity;
 
 export interface POI {

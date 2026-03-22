@@ -48,7 +48,7 @@ export const useSpellActions = (deps: SpellActionDependencies) => {
     const handleSpellOnItem = useCallback((spell: Spell, target: { item: InventorySlot, index: number }) => {
         // Check global cooldown
         if (Date.now() < char.globalActionCooldown) {
-             return;
+            return;
         }
 
         ui.setSpellToCast(null);
@@ -81,11 +81,11 @@ export const useSpellActions = (deps: SpellActionDependencies) => {
 
             // Handle recharging enchanted jewelry
             if (enchantedJewelryIds.includes(target.item.itemId)) {
-                
+
                 if (!BANK_POI_IDS.includes(currentPoiId)) {
                     addLog("You can only recharge this item at a bank.");
                     // Refund cooldown since action failed logic
-                    char.setGlobalActionCooldown(0); 
+                    char.setGlobalActionCooldown(0);
                     return;
                 }
 
@@ -97,7 +97,7 @@ export const useSpellActions = (deps: SpellActionDependencies) => {
 
                 runesNeeded.forEach(rune => modifyItem(rune.itemId, -rune.quantity, true));
                 addXp(SkillName.Magic, spell.xp);
-                
+
                 setInventory(prevInv => {
                     const newInv = [...prevInv];
                     const slotToUpdate = newInv[target.index];
@@ -106,7 +106,7 @@ export const useSpellActions = (deps: SpellActionDependencies) => {
                     }
                     return newInv;
                 });
-                
+
                 addLog(`You recharge your ${itemData.name}. It now has ${maxCharges} charges.`);
                 return; // End the function here to prevent other logic from running
             }
@@ -194,12 +194,12 @@ export const useSpellActions = (deps: SpellActionDependencies) => {
                 char.setGlobalActionCooldown(0);
                 return;
             }
-            
+
             runesNeeded.forEach(rune => modifyItem(rune.itemId, -rune.quantity, true));
             addXp(SkillName.Magic, spell.xp);
 
             const coinValue = Math.floor(itemData.value * (spell.id === 'greater_transmutation' ? 0.6 : 0.3));
-            
+
             modifyItem(target.item.itemId, -1, true, { noted: target.item.noted });
             modifyItem('coins', coinValue, true);
             addLog(`You transmute the ${itemData.name} into ${coinValue} coins.`);

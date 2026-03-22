@@ -28,6 +28,7 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'pineapple', quantity: 20, priceModifier: 4.0 },
             { itemId: 'red_berries', quantity: 50, priceModifier: 1.2 },
             { itemId: 'throwing_flask', quantity: 150, priceModifier: 1.0 },
+            { itemId: 'fire_pot', quantity: 10, priceModifier: 1.0 },
             { itemId: 'rendering_kit', quantity: 1, priceModifier: 1.0 },
         ]
     },
@@ -86,6 +87,8 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'amulet_mould', quantity: 10, priceModifier: 1.0 },
             { itemId: 'tiara_mould', quantity: 10, priceModifier: 1.0 },
             { itemId: 'vial', quantity: 1000, priceModifier: 1.0 },
+            { itemId: 'glassblowing_apparatus', quantity: 1, priceModifier: 1.0 },
+            { itemId: 'soda_ash', quantity: 1000, priceModifier: 1.0 },
         ]
     },
     oakhaven_herblore: {
@@ -124,6 +127,7 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'vial', quantity: 1000, priceModifier: 1.0 },
             { itemId: 'rope', quantity: 100, priceModifier: 1.0 },
             { itemId: 'throwing_flask', quantity: 150, priceModifier: 1.0 },
+            { itemId: 'fire_pot', quantity: 10, priceModifier: 1.0 },
             { itemId: 'rendering_kit', quantity: 1, priceModifier: 1.0 },
         ]
     },

@@ -50,6 +50,9 @@ export const calculateFlaskDamage = (
     if (playerDamage > 0) {
         xpGains[SkillName.Hitpoints] = (xpGains[SkillName.Hitpoints] || 0) + Math.round(playerDamage * 1.33);
         xpGains[SkillName.Firemaking] = (xpGains[SkillName.Firemaking] || 0) + playerDamage * 2;
+    } else if (playerDamage < 0) {
+        // Monster absorbed the damage, but we still reward a tiny bit of experience for the attempt
+        xpGains[SkillName.Firemaking] = (xpGains[SkillName.Firemaking] || 0) + 1;
     }
 
     if (weaponSlot && (successfulHit || playerDamage > 0) && !(monster.fireImmunity && !isXFlask)) {

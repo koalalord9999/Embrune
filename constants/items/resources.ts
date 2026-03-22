@@ -134,4 +134,6 @@ export const resources: Item[] = [
     { id: 'bucket_of_sand', name: 'Bucket of Sand', description: 'A bucket filled with fine sand.', stackable: false, value: 3, iconUrl: 'https://api.iconify.design/game-icons:sand-bucket.svg', material: 'gold' },
     { id: 'molten_glass', name: 'Molten Glass', description: 'A glowing glob of molten glass, ready to be shaped.', stackable: false, value: 20, iconUrl: 'https://api.iconify.design/game-icons:magma-ball.svg', material: 'rune-ember' },
     { id: 'un_tuned_orb', name: 'Un-tuned Orb', description: 'A solid glass orb that hums with potential. It needs to be attuned at a magical altar.', stackable: false, value: 100, iconUrl: 'https://api.iconify.design/game-icons:crystal-ball.svg' },
+    { id: 'lantern_lens', name: 'Lantern Lens', description: 'A perfectly clear glass lens, ready to be fitted into a lantern.', stackable: false, value: 80, iconUrl: 'https://api.iconify.design/game-icons:glass-shot.svg' },
+    { id: 'light_orb', name: 'Light Orb', description: 'A delicate glass orb that can hold a powerful light source.', stackable: false, value: 200, iconUrl: 'https://api.iconify.design/game-icons:glass-ball.svg' },
 ];

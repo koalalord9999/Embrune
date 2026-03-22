@@ -378,4 +378,17 @@ export const elemental: Monster[] = [
         types: [MonsterType.Elemental], attackSpeed: 4, respawnTime: 35000, aggressive: true, attackStyle: 'magic',
         fireWeakness: -0.5,
     },
+    {
+        id: 'avatar_of_sorcery', name: 'Avatar of Sorcery', level: 120, maxHp: 800, attack: 1, magic: 95, customMaxHit: 25, strength: 50, defence: 95,
+        stabDefence: 100, slashDefence: 100, crushDefence: 100, rangedDefence: 80, magicDefence: 60,
+        iconUrl: 'https://api.iconify.design/game-icons:robe.svg',
+        guaranteedDrops: [],
+        mainDrops: [],
+        types: [MonsterType.Elemental], attackSpeed: 4, respawnTime: 600000, aggressive: true, alwaysAggressive: true, attackStyle: 'magic',
+        specialAttacks: [
+            { name: "Creation's Surge", chance: 0.15, effect: 'magic_bypass_defence', maxHit: 30 },
+            { name: "Destruction's Ray", chance: 0.2, effect: 'damage_multiplier', value: 1.5 },
+            { name: "Transmuting Gaze", chance: 0.1, effect: 'stat_drain_multi', skills: [{ skill: SkillName.Attack, value: -10 }, { skill: SkillName.Strength, value: -10 }] }
+        ],
+    },
 ];

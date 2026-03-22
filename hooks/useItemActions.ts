@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 // FIX: Import Equipment type.
 import { InventorySlot, PlayerSkill, SkillName, ActiveCraftingAction, Item, CraftingContext, POIActivity, EquipmentSlot, PlayerQuestState, Spell, Equipment, ActiveBuff, DialogueResponse, DialogueCheckRequirement, WeaponType, EquipmentStats, BonfireActivity, WorldState } from '../types';
-import { ITEMS, FLETCHING_RECIPES, HERBLORE_RECIPES, HERBS, INVENTORY_CAPACITY, rollOnLootTable, LootRollResult, FIREMAKING_RECIPES, QUESTS, COOKING_RECIPES, SMELTING_RECIPES, GEM_CUTTING_RECIPES, REGIONS, RENDERING_RECIPES, FIRE_FLASK_DATA } from '../constants';
+import { ITEMS, FLETCHING_RECIPES, HERBLORE_RECIPES, HERBS, INVENTORY_CAPACITY, rollOnLootTable, LootRollResult, FIREMAKING_RECIPES, QUESTS, COOKING_RECIPES, SMELTING_RECIPES, GEM_CUTTING_RECIPES, REGIONS, RENDERING_RECIPES, FIRE_FLASK_DATA, MISC_FURNACE_RECIPES } from '../constants';
 import { POIS } from '../data/pois';
 // FIX: Import ContextMenuOption from its source file instead of re-exporting from useUIState.
 import { MakeXPrompt, useUIState, ConfirmationPrompt } from './useUIState';
@@ -14,6 +14,7 @@ interface CraftingHandlers {
     // FIX: Corrected typo from onSmelt to handleSmelting and added handleStokeBonfire
     handleSmelting: (barType: BarType, quantity: number) => void;
     handleStokeBonfire: (logId: string, bonfireId: string) => void;
+    handleJewelryCrafting: (itemId: string, quantity: number) => void;
 }
 
 interface UseItemActionsProps {
@@ -535,7 +536,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
             return;
         }
 
-        if (activity.type === 'cooking_range' && usedItem.itemId === 'throwing_flask') {
+        if (activity.type === 'cooking_range' && (usedItem.itemId === 'throwing_flask' || usedItem.itemId === 'throwing_flask_fused')) {
             const now = Date.now();
             const cooldown = rangeCooldowns[currentPoiId];
     
@@ -552,7 +553,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 return;
             }
     
-            modifyItem('throwing_flask', -1, true);
+            modifyItem(usedItem.itemId, -1, true);
             modifyItem('refined_grease_flask', 1, false, { bypassAutoBank: true });
             addXp(SkillName.Cooking, 5);
             addLog("You scoop some grease from the range into a flask.");
@@ -731,9 +732,22 @@ export const useItemActions = (props: UseItemActionsProps) => {
             }
         }
         
+        if (activity.type === 'sand_pit') {
+            if (usedItem.itemId === 'bucket') {
+                modifyItem('bucket', -1, true);
+                modifyItem('bucket_of_sand', 1, false, { bypassAutoBank: true });
+                addLog("You shove the bucket into the sand and scoop some out.");
+            } else {
+                addLog("You need an empty bucket to collect sand.");
+            }
+            return;
+        }
+
         if (activity.type === 'furnace') {
             const smeltRecipe = SMELTING_RECIPES.find(r => r.ingredients.some(i => i.itemId === usedItem.itemId));
-            if(smeltRecipe) {
+            const miscRecipe = MISC_FURNACE_RECIPES.find(r => r.ingredients.some(i => i.itemId === usedItem.itemId));
+            
+            if (smeltRecipe) {
                 const maxSmelt = Math.min(
                     ...smeltRecipe.ingredients.map(ing => {
                         const count = inventory.reduce((total, slot) => slot?.itemId === ing.itemId ? total + slot.quantity : total, 0);
@@ -749,6 +763,23 @@ export const useItemActions = (props: UseItemActionsProps) => {
                  } else {
                     addLog("You don't have the required ingredients.");
                  }
+                return;
+            } else if (miscRecipe) {
+                const maxMisc = Math.min(
+                    ...miscRecipe.ingredients.map(ing => {
+                        const count = inventory.reduce((total, slot) => slot?.itemId === ing.itemId ? total + slot.quantity : total, 0);
+                        return Math.floor(count / ing.quantity);
+                    })
+                );
+                if (maxMisc > 0) {
+                    setMakeXPrompt({
+                        title: `Smelt ${ITEMS[miscRecipe.itemId].name}`,
+                        max: maxMisc,
+                        onConfirm: (quantity) => crafting.handleJewelryCrafting(miscRecipe.itemId, quantity)
+                    });
+                } else {
+                    addLog("You don't have the required ingredients.");
+                }
                 return;
             }
         }

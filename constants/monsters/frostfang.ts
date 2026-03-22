@@ -256,6 +256,7 @@ export const frostfang: Monster[] = [
         specialAttacks: [{ name: 'Ice Breath', chance: 0.25, effect: 'magic_bypass_defence', maxHit: 16 }],
         tertiaryDrops: [
             { itemId: 'frostfang_key', chance: 0.001953125, minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'shard_of_true_ice', chance: 1, minQuantity: 1, maxQuantity: 1 },
         ],
         types: [MonsterType.Dragon], attackSpeed: 5, respawnTime: 240000, aggressive: true, attackStyle: 'crush', customMaxHit: 16,
         fireWeakness: 0.5,

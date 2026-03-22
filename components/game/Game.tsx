@@ -596,7 +596,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     const { handleDialogueCheck, onResponse, handleDialogueAction } = dialogueActions;
     
     const itemActions = useItemActions({ 
-        crafting, addLog, currentHp: char.currentHp, maxHp: char.maxHp, setCurrentHp: char.setCurrentHp, 
+        addLog, currentHp: char.currentHp, maxHp: char.maxHp, setCurrentHp: char.setCurrentHp, 
         currentPrayer: char.currentPrayer, maxPrayer: char.maxPrayer, setCurrentPrayer: char.setCurrentPrayer,
         setRunEnergy: char.setRunEnergy,
         applyStatModifier: char.applyStatModifier, addBuff: char.addBuff, curePoison: char.curePoison, setInventory: inv.setInventory, 
@@ -613,7 +613,12 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         rangeCooldowns,
         setRangeCooldowns,
         worldState,
-        setWorldState
+        setWorldState,
+        crafting: {
+            handleCooking: crafting.handleCooking,
+            handleSmelting: crafting.handleSmelting,
+            handleStokeBonfire: crafting.handleStokeBonfire,
+            handleJewelryCrafting: crafting.handleJewelryCrafting,
     });
     
     const spellActions = useSpellActions({ 

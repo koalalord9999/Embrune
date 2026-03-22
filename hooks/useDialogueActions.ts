@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { DialogueAction, DialogueCheckRequirement, WorldState, InventorySlot, BankTab, ActivePanel, POIActivity, DialogueResponse, SkillName, ActiveTutorialState } from '../types';
+import { DialogueAction, DialogueCheckRequirement, WorldState, InventorySlot, BankTab, ActivePanel, POIActivity, DialogueResponse, SkillName, ActiveTutorialState, LogEntry } from '../types';
 import { INVENTORY_CAPACITY, QUESTS, ITEMS } from '../constants';
 import { useQuests } from './useQuests';
 import { useQuestLogic } from './useQuestLogic';
@@ -33,7 +33,7 @@ interface DialogueActionDependencies {
     addLog: (message: string) => void;
     worldState: WorldState;
     setBank: React.Dispatch<React.SetStateAction<BankTab[]>>;
-    setActivityLog: React.Dispatch<React.SetStateAction<string[]>>;
+    setActivityLog: React.Dispatch<React.SetStateAction<LogEntry[]>>;
     repeatableQuests: ReturnType<typeof useRepeatableQuests>;
     ui: ReturnType<typeof useUIState>;
     setWorldState: React.Dispatch<React.SetStateAction<WorldState>>;
