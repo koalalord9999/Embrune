@@ -61,14 +61,12 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
             let displayMessage = msg.message;
             let displayUsername = msg.username;
             
-            // If it's a PM, parse the sender/recipient
+            // If it's a PM, parse the sender/recipient (fallback for old messages)
             if (isPM) {
-                // Example PM message: "(PM) From PlayerName: Hello" or "(PM) To PlayerName: Hello"
-                const match = msg.message.match(/^\(PM\) (From|To) (.*?): (.*)$/);
-                if (match) {
-                    const [_, direction, targetName, content] = match;
-                    displayUsername = `${direction} ${targetName}`;
-                    displayMessage = content;
+                const pmMatch = msg.message.match(/^\(PM from (.*?)\): (.*)$/);
+                if (pmMatch) {
+                    displayUsername = pmMatch[1];
+                    displayMessage = pmMatch[2];
                 }
             }
 
@@ -78,7 +76,9 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                 type: (msg.type === 'system' ? 'system' : 'chat') as 'chat' | 'system',
                 username: displayUsername,
                 originalUsername: msg.username,
-                isPM
+                isPM,
+                sender: msg.sender,
+                recipient: msg.recipient
             };
         })
     ].sort((a, b) => a.timestamp - b.timestamp);
@@ -126,14 +126,22 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                                     entry.type === 'chat' ? 'text-zinc-100' : 'text-gray-300'
                                 }`}>
                                     <span className="text-gray-500 mr-1">[{formatTimestamp(entry.timestamp)}]</span>
-                                    {entry.type === 'chat' && (
+                                    {entry.type === 'chat' && ('isPM' in entry && entry.isPM) && (
+                                        <span 
+                                            className="font-bold cursor-pointer text-pink-400"
+                                            onClick={() => setChatInput(`/pm "${entry.originalUsername || entry.username}" `)}
+                                        >
+                                            {('sender' in entry && entry.sender === username) 
+                                                ? `To ${entry.recipient}: ` 
+                                                : `From ${'sender' in entry && entry.sender ? entry.sender : entry.username}: `}
+                                        </span>
+                                    )}
+                                    {entry.type === 'chat' && !('isPM' in entry && entry.isPM) && (
                                         <span 
                                             className={`font-bold cursor-pointer ${
-                                                'isPM' in entry && entry.isPM 
-                                                    ? 'text-pink-400' // Pink for PMs
-                                                    : ('originalUsername' in entry && entry.originalUsername === username)
-                                                        ? 'text-yellow-500' // Gold for me
-                                                        : 'text-emerald-400' // Green for others
+                                                ('originalUsername' in entry && entry.originalUsername === username)
+                                                    ? 'text-yellow-500' // Gold for me
+                                                    : 'text-emerald-400' // Green for others
                                             }`}
                                             onClick={() => handleMessageClick(entry.originalUsername || entry.username)}
                                         >
@@ -142,7 +150,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                                     )}
                                     {(() => {
                                         if (entry.type === 'chat' && !entry.isPM) {
-                                            const colorMatch = entry.message.match(/^(red|green|blue|yellow|orange|purple)::\s?(.*)$/i);
+                                            const colorMatch = entry.message.match(/^(red|green|blue|yellow|orange|purple):\s?(.*)$/i);
                                             if (colorMatch) {
                                                 const color = colorMatch[1].toLowerCase();
                                                 const text = colorMatch[2];

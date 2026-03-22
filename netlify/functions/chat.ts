@@ -35,16 +35,26 @@ const pusher = new Pusher({
   useTLS: true,
 });
 
+const headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+};
+
 export const handler: Handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: 'OK' };
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers, body: 'Method Not Allowed' };
   }
 
   try {
-    const { username, message, type, recipient } = JSON.parse(event.body || '{}');
+    const { username, message, type = 'global', recipient } = JSON.parse(event.body || '{}');
 
     if (!username || !message || message.length > 200 || message.length === 0) {
-      return { statusCode: 400, body: 'Invalid message' };
+      return { statusCode: 400, headers, body: 'Invalid message' };
     }
 
     const cleanMessage = type === 'system' ? message : filter.clean(message);
@@ -58,7 +68,7 @@ export const handler: Handler = async (event) => {
         type: 'system',
         timestamp,
       });
-      return { statusCode: 200, body: 'Message sent' };
+      return { statusCode: 200, headers, body: 'Message sent' };
     }
 
     if (type === 'private' && recipient) {
@@ -74,17 +84,20 @@ export const handler: Handler = async (event) => {
       await pusher.trigger(`embrune-pm-${recipient}`, 'new-message', pmPayload);
       // Trigger for the sender so they get the timestamp and exact formatting echoed back
       await pusher.trigger(`embrune-pm-${username}`, 'new-message', pmPayload);
-    } else {
-      await pusher.trigger('embrune-chat', 'new-message', {
-        username,
-        message: cleanMessage,
-        timestamp,
-      });
+
+      return { statusCode: 200, headers, body: 'Private message sent' };
     }
 
-    return { statusCode: 200, body: 'Message sent' };
+    await pusher.trigger('embrune-chat', 'new-message', {
+      username,
+      message: cleanMessage,
+      type: 'global',
+      timestamp,
+    });
+
+    return { statusCode: 200, headers, body: 'Message sent' };
   } catch (error) {
-    console.error('Error in chat function:', error);
-    return { statusCode: 500, body: `Error sending message: ${error}` };
+    console.error('Error sending message:', error);
+    return { statusCode: 500, headers, body: 'Server error' };
   }
 };

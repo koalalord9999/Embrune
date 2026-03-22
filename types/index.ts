@@ -29,6 +29,7 @@ export interface Message {
   username: string;
   message: string;
   sender?: string;
+  recipient?: string;
   timestamp?: number;
   isPM?: boolean;
   type?: string;

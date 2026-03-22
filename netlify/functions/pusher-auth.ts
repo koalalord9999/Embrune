@@ -9,9 +9,19 @@ const pusher = new Pusher({
   useTLS: true,
 });
 
+const headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+};
+
 export const handler: Handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: 'OK' };
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers, body: 'Method Not Allowed' };
   }
 
   try {
@@ -27,7 +37,7 @@ export const handler: Handler = async (event) => {
     const { socket_id, channel_name, username } = body;
 
     if (!socket_id || !channel_name || !username) {
-      return { statusCode: 400, body: 'Missing required parameters (socket_id, channel_name, username)' };
+      return { statusCode: 400, headers, body: 'Missing required parameters (socket_id, channel_name, username)' };
     }
 
     const authResponse = pusher.authorizeChannel(socket_id, channel_name, {
@@ -38,12 +48,13 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 200,
       headers: {
+        ...headers,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(authResponse),
     };
   } catch (error) {
     console.error('Error in pusher-auth function:', error);
-    return { statusCode: 500, body: `Server error: ${error}` };
+    return { statusCode: 500, headers, body: `Server error: ${error}` };
   }
 };
