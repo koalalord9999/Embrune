@@ -1,6 +1,6 @@
 {
   "name": "embrune",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "repository": "koalalord9999/Embrune",
   "author": "John Olivas",
   "description": "Runescape clone, but text based lol",
@@ -11,7 +11,8 @@
     "start": "vite",
     "build": "vite build",
     "package": "electron-builder build --win --publish always",
-    "ship": "npm version patch && npm run build && npm run package"
+    "zip-web": "powershell Compress-Archive -Path dist\\* -DestinationPath Embrune_ItchIO.zip -Force",
+    "ship": "npm version patch && npm run build && npm run zip-web && npm run package"
   },
   "build": {
     "appId": "com.embrune.app",
@@ -20,9 +21,9 @@
       "owner": "koalalord9999",
       "repo": "Embrune"
     },
-  "nsis": {
-    "oneClick": true,
-    "perMachine": false
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
     },
     "files": [
       "dist/**/*",
