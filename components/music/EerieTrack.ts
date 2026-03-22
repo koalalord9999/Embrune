@@ -6,9 +6,16 @@ export const getEerieScore = (track: MusicTrackMetadata): string => {
     const rng = mulberry32(getTileSeed(track.id.length, track.name.length + (track.style.length * 83))); 
     let score = "";
     const totalDuration = 240000; 
-    const style = { bpm: 110, scale: [NOTES.B2, NOTES.C3, NOTES.D3, NOTES.F3, NOTES.G3, NOTES.Ab3, NOTES.B3, NOTES.D4] };
-    const beat = 60000 / style.bpm;
+    
+    const bpm = 60; // Very slow
+    const beat = 60000 / bpm;
     const stepMs = beat / 4; 
+
+    const progression = [
+        [NOTES.C2, NOTES.Fs2, NOTES.G2], // Dissonant tritone
+        [NOTES.Eb2, NOTES.G2, NOTES.Ab2], // Minor second clash
+        [NOTES.B1, NOTES.D2, NOTES.F2]   // Diminished
+    ];
 
     for (let t = 0; t < totalDuration; t += stepMs) {
         const step = Math.floor(t / stepMs);
@@ -16,41 +23,50 @@ export const getEerieScore = (track: MusicTrackMetadata): string => {
         const beatInBar = Math.floor((step % 16) / 4);
         const subStep = step % 4; 
         const phase = t / totalDuration;
+        
+        const isIntro = phase < 0.2;
+        const isDev = phase >= 0.2 && phase < 0.5;
         const isPeak = phase >= 0.5 && phase < 0.8;
-        const isDev = phase >= 0.25 && phase < 0.5;
-        const isIntro = phase < 0.25;
         const isOutro = phase >= 0.8;
-        const scale = style.scale;
 
-        if (step % 16 === 0) { 
-            const noiseVol = isPeak ? 0.015 : isOutro ? 0.005 : 0.01;
-            score += `${t}:noise:white|dur:8|vol:${noiseVol / 2}|filter:2000|attack:4|decay:4
-`;
+        const currentChord = progression[bar % progression.length];
+        const root = currentChord[0];
+
+        // --- LAYER 1: GHOSTLY WHISPERS (NOISE) ---
+        if (step % 16 === 0) {
+            const noiseVol = isPeak ? 0.01 : 0.005;
+            score += `${t}:noise:white|dur:6|vol:${noiseVol}|filter:4000|attack:3|decay:3\n`;
         }
-        if (subStep === 0 && !isOutro) {
-            const rootNote = scale[bar % 4];
-            const bassVol = isPeak ? 0.02 : (isIntro ? 0.008 : 0.015);
-            if (beatInBar === 0) score += `${t}:osc:sine|freq:${rootNote / 2}|dur:4.0|vol:${bassVol}|attack:2.0|decay:2.0
-`;
+
+        // --- LAYER 2: HEARTBEAT (BASS) ---
+        if (subStep === 0 && (beatInBar === 0 || (beatInBar === 0 && step % 4 === 1))) {
+            const heartVol = 0.02;
+            // Double thump
+            score += `${t}:osc:sine|freq:${root / 4}|dur:0.15|vol:${heartVol}|attack:0.01|decay:0.1\n`;
+            score += `${t + 200}:osc:sine|freq:${root / 4}|dur:0.2|vol:${heartVol * 0.8}|attack:0.01|decay:0.15\n`;
         }
-        if (step % 16 === 0 && (isDev || isPeak)) {
-            const chord = [scale[bar % 4], scale[(bar + 2) % 4], scale[(bar + 4) % 4]];
-            const padVol = isPeak ? 0.012 : 0.008;
-            chord.forEach((f, i) => {
-                score += `${t + (i * 10)}:osc:sine|freq:${f}|dur:2.0|vol:${padVol}|filter:120|attack:0.1|decay:1.5
-`;
+
+        // --- LAYER 3: UNSETTLING PADS ---
+        if (step % 32 === 0 && (isDev || isPeak)) {
+            const padVol = isPeak ? 0.01 : 0.006;
+            currentChord.forEach((f, i) => {
+                const pitchShift = (rng() - 0.5) * 2; // Slight detune
+                score += `${t + (i * 50)}:osc:sine|freq:${f + pitchShift}|dur:10.0|vol:${padVol}|filter:300|attack:5.0|decay:5.0\n`;
             });
         }
-        let melodyChance = isPeak ? 0.9 : isDev ? 0.6 : isIntro ? 0.3 : 0.1;
-        if (rng() < melodyChance && (step % 4 === 0 || (isPeak && step % 2 === 0))) {
-            const noteRng = rng();
-            const noteIndex = Math.floor(noteRng * scale.length);
-            let note = scale[noteIndex];
-            if (isPeak && noteRng > 0.6) note *= 2;
-            const leadVol = isPeak ? 0.03 : 0.018;
-            score += `${t}:osc:triangle|freq:${note}|dur:0.6|vol:${leadVol}|filter:3000|attack:0.01|decay:0.8
-`;
+
+        // --- LAYER 4: SPORADIC DISSONANCE ---
+        let melodyChance = isPeak ? 0.4 : isDev ? 0.2 : 0.05;
+        if (isOutro) melodyChance = 0.1;
+
+        if (rng() < melodyChance && (step % 8 === 0)) {
+            const nRng = rng();
+            let note = currentChord[Math.floor(nRng * currentChord.length)] * 4;
+            if (nRng > 0.8) note *= 1.05946; // Shift up by one semitone for dissonance
+
+            const leadVol = isPeak ? 0.015 : 0.01;
+            score += `${t}:osc:triangle|freq:${note}|dur:3.0|vol:${leadVol}|filter:800|attack:1.5|decay:1.5\n`;
         }
     }
     return score;
-}
+};

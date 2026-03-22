@@ -1,52 +1,153 @@
 import * as NOTES from '../../constants/musicScore';
-import { mulberry32, getTileSeed } from '../../prototyping/prng';
 import { MusicTrackMetadata } from '../../hooks/useMusicEngine';
 
+/**
+ * Permanent baked score for the Grand Style (Silverhaven).
+ * 150 BPM, Nostalgic RPG / Medieval Fantasy Style.
+ * Features a structured A/B melody, marching snares, and lute arpeggios.
+ */
 export const getGrandScore = (track: MusicTrackMetadata): string => {
-    const rng = mulberry32(getTileSeed(track.id.length, track.name.length + (track.style.length * 83))); 
+    // Note: We ignore the track parameter for seeding to maintain this 
+    // specific handcrafted "Silverhaven" nostalgic motif.
+    const baseBpm = 150;
+    const beat = 60000 / baseBpm;
+    const stepMs = beat / 4; // 16th note grid
+    const totalDuration = 240000; // 4 mins
     let score = "";
-    const totalDuration = 240000; 
-    const style = { bpm: 80, scale: [NOTES.C3, NOTES.E3, NOTES.G3, NOTES.B3, NOTES.C4, NOTES.D4, NOTES.E4, NOTES.G4] };
-    const beat = 60000 / style.bpm;
-    const stepMs = beat / 4; 
 
-    for (let t = 0; t < totalDuration; t += stepMs) {
-        const step = Math.floor(t / stepMs);
-        const bar = Math.floor(step / 16);
-        const beatInBar = Math.floor((step % 16) / 4);
-        const subStep = step % 4; 
-        const phase = t / totalDuration;
-        const isPeak = phase >= 0.5 && phase < 0.8;
-        const isDev = phase >= 0.25 && phase < 0.5;
-        const isIntro = phase < 0.25;
-        const isOutro = phase >= 0.8;
-        const scale = style.scale;
+    // "Medieval Fantasy Epic" Progression: i - VI - III - VII in minor (Dm - Bb - F - C)
+    const progression = [
+        [NOTES.D2, NOTES.F2, NOTES.A2],   // Dm
+        [NOTES.Bb1, NOTES.D2, NOTES.F2],  // Bb
+        [NOTES.F1, NOTES.A1, NOTES.C2],   // F
+        [NOTES.C2, NOTES.E2, NOTES.G2]    // C
+    ];
 
-        if (step % 16 === 0) { 
-            const noiseVol = isPeak ? 0.015 : isOutro ? 0.005 : 0.01;
-            // Grand doesn't have specific noise but we can add subtle ambience
+    let currentTime = 0;
+    let stepCount = 0;
+
+    while (currentTime < totalDuration) {
+        const bar = Math.floor(stepCount / 16);
+        const beatInBar = Math.floor((stepCount % 16) / 4);
+        const subStep = stepCount % 4;
+        const currentChord = progression[bar % progression.length];
+
+        // --- SECTION LOGIC ---
+        // 8 bars per section (128 steps)
+        const section = Math.floor(stepCount / 128); 
+        const isIntro = section === 0;
+        const isA = section % 4 === 1;
+        const isB = section % 4 === 2;
+        const isBreakdown = section % 4 === 3;
+
+        // --- LAYER 1: MARCHING RHYTHM (Nostalgic RPG feel) ---
+        // Deep drum (Timpani/Bass drum) on beats 1 and 3
+        if ((beatInBar === 0 || beatInBar === 2) && subStep === 0 && !isBreakdown) {
+            score += `${Math.floor(currentTime)}:noise:brown|dur:0.3|vol:0.12|filter:200|decay:0.2\n`;
+            score += `${Math.floor(currentTime)}:osc:sine|freq:${NOTES.D1}|dur:0.2|vol:0.15|decay:0.15\n`;
         }
-        if (subStep === 0 && !isOutro) {
-            const rootNote = scale[bar % 4];
-            const bassVol = isPeak ? 0.02 : (isIntro ? 0.008 : 0.015);
-            if (beatInBar === 0) score += `${t}:osc:sine|freq:${rootNote / 2}|dur:4.0|vol:${bassVol}|attack:2.0|decay:2.0`;
+
+        // Marching Snare (Classic MIDI style)
+        const snareVol = isBreakdown ? 0.0 : 0.08;
+        if (snareVol > 0) {
+            if ((beatInBar === 1 || beatInBar === 3) && subStep === 0) {
+                // Main snare hit
+                score += `${Math.floor(currentTime)}:noise:white|dur:0.15|vol:${snareVol}|filter:3000|decay:0.1\n`;
+            } else if (subStep === 2 && (beatInBar === 1 || beatInBar === 3)) {
+                // Syncopated hit
+                score += `${Math.floor(currentTime)}:noise:white|dur:0.05|vol:${snareVol * 0.4}|filter:3000|decay:0.05\n`;
+            } else if (beatInBar === 3 && subStep > 0 && bar % 2 === 1) {
+                // Drum roll at end of phrase
+                score += `${Math.floor(currentTime)}:noise:white|dur:0.04|vol:${snareVol * 0.5}|filter:3000|decay:0.04\n`;
+            }
         }
-        if (step % 16 === 0 && (isDev || isPeak)) {
-            const chord = [scale[bar % 4], scale[(bar + 2) % 4], scale[(bar + 4) % 4]];
-            const padVol = isPeak ? 0.012 : 0.008;
-            chord.forEach((f, i) => {
-                score += `${t + (i * 10)}:osc:sine|freq:${f}|dur:2.0|vol:${padVol}|filter:120|attack:0.1|decay:1.5`;
-            });
+
+        // --- LAYER 2: "HARPSICHORD/LUTE" ARPEGGIOS ---
+        // Constant 8th notes
+        if (stepCount % 2 === 0 && !isIntro) {
+            const arpVol = 0.04;
+            const noteIndex = (stepCount / 2) % 3;
+            // Up and down arpeggio
+            let arpNote = currentChord[noteIndex];
+            if ((stepCount / 2) % 6 >= 3) {
+                 arpNote = currentChord[2 - noteIndex];
+            }
+            // Filtered square for plucked string
+            score += `${Math.floor(currentTime)}:osc:square|freq:${arpNote * 2}|dur:0.15|vol:${arpVol}|filter:1200|attack:0.01|decay:0.1\n`;
         }
-        let melodyChance = isPeak ? 0.9 : isDev ? 0.6 : isIntro ? 0.3 : 0.1;
-        if (rng() < melodyChance && (step % 4 === 0 || (isPeak && step % 2 === 0))) {
-            const noteRng = rng();
-            const noteIndex = Math.floor(noteRng * scale.length);
-            let note = scale[noteIndex];
-            if (isPeak && noteRng > 0.6) note *= 2;
-            const leadVol = isPeak ? 0.03 : 0.018;
-            score += `${t}:osc:triangle|freq:${note}|dur:0.6|vol:${leadVol}|filter:3000|attack:0.01|decay:0.8`;
+
+        // --- LAYER 3: WARM PAD / CHOIR ---
+        if (subStep === 0 && beatInBar === 0 && !isBreakdown) {
+            const padVol = 0.03;
+            score += `${Math.floor(currentTime)}:osc:sine|freq:${currentChord[0] * 2}|dur:2.0|vol:${padVol}|filter:800|attack:0.5|decay:1.5\n`;
+            score += `${Math.floor(currentTime)}:osc:sine|freq:${currentChord[1] * 2}|dur:2.0|vol:${padVol}|filter:800|attack:0.5|decay:1.5\n`;
+            score += `${Math.floor(currentTime)}:noise:brown|dur:2.0|vol:0.01|filter:600|attack:0.5|decay:1.5\n`; 
         }
+
+        // --- LAYER 4: THE CATCHY MELODY ---
+        let melNote = 0;
+        let melVol = 0;
+        let instr = "sine"; 
+        let filter = 2000;
+        let attack = 0.05;
+        let decay = 0.5;
+
+        if (isIntro && subStep === 0) {
+            // Fanfare intro (Brass-like)
+            instr = "triangle";
+            filter = 3000;
+            melVol = 0.08;
+            attack = 0.02;
+            
+            // Fanfare rhythm
+            if (beatInBar === 0) melNote = currentChord[0] * 4; 
+            else if (beatInBar === 1) melNote = currentChord[2] * 4; 
+            else if (beatInBar === 2) melNote = currentChord[1] * 4; 
+            else if (beatInBar === 3) melNote = currentChord[2] * 4; 
+            decay = 0.3;
+        } 
+        else if (isA) {
+            // "Flute/Ocarina" adventurous bouncy melody
+            instr = "sine";
+            melVol = 0.08;
+            filter = 1500;
+            
+            const motifStep = stepCount % 16;
+            if (motifStep === 0) { melNote = currentChord[2] * 4; decay = 0.4; }      
+            else if (motifStep === 4) { melNote = currentChord[1] * 4; decay = 0.2; } 
+            else if (motifStep === 6) { melNote = currentChord[0] * 4; decay = 0.2; } 
+            else if (motifStep === 8) { melNote = currentChord[2] * 4; decay = 0.4; } 
+            else if (motifStep === 12) {                                              
+                if (bar % 2 === 1) { melNote = currentChord[2] * 8; decay = 0.2; } 
+                else { melNote = currentChord[1] * 4; decay = 0.4; }
+            }
+        }
+        else if (isB) {
+            // "Brass/Strings" soaring epic melody
+            instr = "triangle";
+            melVol = 0.07;
+            filter = 2500;
+            attack = 0.1;
+            
+            const motifStep = stepCount % 16;
+            if (motifStep === 0) { melNote = currentChord[0] * 4; decay = 1.0; } 
+            else if (motifStep === 8) { melNote = currentChord[1] * 4; decay = 0.8; } 
+            else if (motifStep === 12) { melNote = currentChord[2] * 4; decay = 0.4; } 
+            else if (motifStep === 14) { melNote = currentChord[1] * 4; decay = 0.2; } 
+        }
+
+        if (melNote > 0) {
+            score += `${Math.floor(currentTime)}:osc:${instr}|freq:${melNote}|dur:${decay}|vol:${melVol}|filter:${filter}|attack:${attack}|decay:${decay}\n`;
+            if (instr === "sine") {
+                score += `${Math.floor(currentTime)}:osc:triangle|freq:${melNote}|dur:${decay}|vol:${melVol * 0.3}|filter:1000|attack:${attack}|decay:${decay}\n`;
+            } else if (instr === "triangle") {
+               score += `${Math.floor(currentTime)}:osc:sine|freq:${melNote}|dur:${decay}|vol:${melVol * 0.6}|filter:800|attack:${attack}|decay:${decay}\n`;
+            }
+        }
+
+        currentTime += stepMs;
+        stepCount++;
     }
+
     return score;
 };

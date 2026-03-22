@@ -149,8 +149,18 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         setIsGodModeOn: ui.setIsGodModeOn,
     });
     const { isDevMode } = devMode;
-    const { messages, sendMessage } = useChat(initialState.username);
+    const { messages, sendMessage, announceLogin, announceLogout } = useChat(initialState.username);
     const handleSendMessage = (message: string) => sendMessage(initialState.username, message);
+
+    useEffect(() => {
+        announceLogin(initialState.username);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleReturnToMenuWithLogout = useCallback((currentState: any) => {
+        announceLogout(initialState.username);
+        onReturnToMenu(currentState);
+    }, [announceLogout, initialState.username, onReturnToMenu]);
 
     const effectiveXpMultiplier = isDevMode ? devMode.xpMultiplier : 1;
     const combatSpeedMultiplier = isDevMode ? devMode.combatSpeedMultiplier : 1;
@@ -434,7 +444,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     }, [devMode, addLog]);
 
     /* FIX: Moved playerDeath declaration above handlePlayerDeath to fix block-scoped variable usage error. */
-    const playerDeath = usePlayerDeath({ skilling, interactQuest, ui, session, char, inv, addLog, playerQuests: quests.playerQuests, onItemDropped, setWorldState, playerType: initialState.playerType, slotId, onReturnToMenu, repeatableQuests, setDynamicActivities, worldState, onResetGame, setActivePrayers: prayer.setActivePrayers });
+    const playerDeath = usePlayerDeath({ skilling, interactQuest, ui, session, char, inv, addLog, playerQuests: quests.playerQuests, onItemDropped, setWorldState, playerType: initialState.playerType, slotId, onReturnToMenu: handleReturnToMenuWithLogout, repeatableQuests, setDynamicActivities, worldState, onResetGame, setActivePrayers: prayer.setActivePrayers });
 
     const handlePlayerDeath = useCallback((currentState: any) => { playerDeath.handlePlayerDeath(currentState); handleCombatFinish(); }, [playerDeath, handleCombatFinish]);
     
@@ -923,8 +933,8 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     }, [ui]);
 
     const handleLogout = useCallback(() => {
-        onReturnToMenu(gameState);
-    }, [onReturnToMenu, gameState]);
+        handleReturnToMenuWithLogout(gameState);
+    }, [handleReturnToMenuWithLogout, gameState]);
 
     const buffsForDisplay = useMemo(() => {
         const allBuffs: (ActiveBuff | any)[] = [...char.activeBuffs];

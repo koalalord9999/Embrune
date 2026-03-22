@@ -2,123 +2,191 @@ import * as NOTES from '../../constants/musicScore';
 
 /**
  * Permanent baked score for the Heroic Style (Embrune Theme).
- * 180 BPM, High Tier Classical/Epic Orchestral.
- * Features a 20-second deceleration (slowdown) at the end.
+ * 175 BPM, "Hard Hitting Epic Banger" Title Theme.
+ * Features an EDM-style dynamic structure to maximize the drop impact.
  */
 const generateHeroicScore = () => {
-    const baseBpm = 180;
+    const baseBpm = 175;
     const beat = 60000 / baseBpm;
     const stepMs = beat / 4; // 16th note grid
     const totalDuration = 240000; // 4 mins
-    const codaStart = 220000; // Slowdown starts at 3:40
     let score = "";
 
+    // Epic Metal/Rock inspired progression: Em - C - Am - D
     const progression = [
-        [NOTES.D2, NOTES.D3, NOTES.F3, NOTES.A3], // D Minor
-        [NOTES.Bb1, NOTES.Bb2, NOTES.D3, NOTES.F3], // Bb Major
-        [NOTES.C2, NOTES.C3, NOTES.E3, NOTES.G3],  // C Major
-        [NOTES.A1, NOTES.A2, NOTES.Cs3, NOTES.E3]  // A Major (Dominant)
+        [NOTES.E2, NOTES.G2, NOTES.B2],  // Em
+        [NOTES.C2, NOTES.E2, NOTES.G2],  // C
+        [NOTES.A1, NOTES.C2, NOTES.E2],  // Am
+        [NOTES.D2, NOTES.Fs2, NOTES.A2], // D
     ];
-
-    // Seeded random for deterministic permanent track
-    let seed = 12345;
-    const rng = () => {
-        seed = (seed * 9301 + 49297) % 233280;
-        return seed / 233280;
-    };
 
     let currentTime = 0;
     let stepCount = 0;
 
     while (currentTime < totalDuration) {
-        const progress = currentTime / totalDuration;
-        const isIntro = progress < 0.1;
-        const isRising = progress >= 0.1 && progress < 0.25;
-        const isDev = progress >= 0.25 && progress < 0.5;
-        const isPeak = progress >= 0.5 && progress < 0.92;
-        const isCoda = currentTime >= codaStart;
-
-        // Deceleration logic for Coda
-        let currentStepMs = stepMs;
-        if (isCoda) {
-            // Linear deceleration: from 1x to 2.5x duration per step
-            const codaProgress = (currentTime - codaStart) / (totalDuration - codaStart);
-            currentStepMs = stepMs * (1 + codaProgress * 2.5);
-        }
-
         const bar = Math.floor(stepCount / 16);
         const beatInBar = Math.floor((stepCount % 16) / 4);
         const subStep = stepCount % 4;
         const currentChord = progression[bar % progression.length];
         const root = currentChord[0];
 
-        // --- LAYER 1: PERCUSSION ---
-        if (subStep === 0) {
-            const isDownbeat = beatInBar === 0;
-            const isBackbeat = beatInBar === 2;
-            let percVol = isPeak ? 0.15 : isIntro ? 0.05 : 0.1;
-            if (isCoda) percVol *= (1 - (currentTime - codaStart) / (totalDuration - codaStart));
+        // --- SECTION LOGIC (16 bars per section) ---
+        // 175 BPM = ~22 seconds per 16 bars.
+        const section = Math.floor(bar / 16);
+        const isIntro = section === 0;
+        const isVerse = section === 1 || section === 4;
+        // Combine Breakdown and Build to tighten the lull
+        const isBreakdownBuild = section === 2 || section === 5;
+        const isDrop = section === 3 || section >= 6;
 
-            if ((isDownbeat || isBackbeat) && percVol > 0.01) {
-                score += `${Math.floor(currentTime)}:noise:brown|dur:0.4|vol:${percVol}|filter:120|decay:0.3}\n`;
-                score += `${Math.floor(currentTime)}:osc:sine|freq:${NOTES.D1}|dur:0.2|vol:${percVol}|decay:0.2}\n`;
+        const isBreakdown = isBreakdownBuild && (bar % 16 < 8); // First 8 bars = atmospheric
+        const isBuild = isBreakdownBuild && (bar % 16 >= 8); // Last 8 bars = drum roll riser
+        const buildBar = bar % 8; // 0 to 7 within the build
+        
+        const sectionProgress = (bar % 16) / 16; 
+
+        // --- LAYER 1: DYNAMIC DRUMS ---
+        let drumRoll = false;
+        let drumVol = 0.2;
+        let kickPattern = false;
+        let snarePattern = false;
+        let snareVol = 0.25;
+
+        // Build Up Logic (1, 2, 4, 8 hit pattern)
+        if (isBuild) {
+            if (buildBar < 2) {
+                drumRoll = subStep === 0; // Quarter notes
+            } else if (buildBar < 4) {
+                drumRoll = subStep === 0 || subStep === 2; // 8th notes
+                drumVol = 0.25;
+            } else if (buildBar < 6) {
+                drumRoll = true; // 16th notes
+                drumVol = 0.3;
+            } else if (buildBar === 6) {
+                drumRoll = true; // 16th notes louder
+                drumVol = 0.35;
+            } else if (buildBar === 7) {
+                // Gap / Pre-Drop Fill
+                if (beatInBar < 2) {
+                    drumRoll = true;
+                    drumVol = 0.4;
+                } else if (beatInBar === 3 && subStep === 2) {
+                    score += `${Math.floor(currentTime)}:noise:white|dur:0.4|vol:0.4|filter:5000|attack:0.01|decay:0.3\n`; // Crack
+                }
             }
-            // Snare on 2 and 4
-            if ((beatInBar === 1 || beatInBar === 3) && !isCoda && percVol > 0.02) {
-                score += `${Math.floor(currentTime)}:noise:white|dur:0.08|vol:${percVol * 0.6}|filter:2000|decay:0.06}\n`;
+
+            if (drumRoll) {
+                score += `${Math.floor(currentTime)}:noise:brown|dur:0.1|vol:${drumVol}|filter:200|decay:0.1\n`; // Fast kick
+                score += `${Math.floor(currentTime)}:noise:white|dur:0.1|vol:${drumVol * 0.5}|filter:4000|decay:0.1\n`; // Fast snare
+            }
+        } else if (isDrop) {
+            kickPattern = (beatInBar === 0 && subStep === 0) || 
+                          (beatInBar === 1 && subStep === 2) || 
+                          (beatInBar === 2 && subStep === 0) || 
+                          (beatInBar === 3 && subStep === 2);
+            snarePattern = (beatInBar === 1 || beatInBar === 3) && subStep === 0;
+            snareVol = 0.3;
+        } else if (isVerse || isIntro) {
+            kickPattern = (beatInBar === 0 && subStep === 0) || (beatInBar === 2 && subStep === 0);
+            if (isVerse) {
+                snarePattern = beatInBar === 2 && subStep === 0; // Half-time chill snare
+                snareVol = 0.2;
             }
         }
-        // Driving hats
-        if (isPeak && !isCoda && stepCount % 1 === 0) {
-            score += `${Math.floor(currentTime)}:noise:white|dur:0.01|vol:0.006|filter:9000|decay:0.01}\n`;
+
+        if (kickPattern) {
+            const kickFilter = isIntro ? 100 : 150; 
+            score += `${Math.floor(currentTime)}:noise:brown|dur:0.2|vol:0.35|filter:${kickFilter}|decay:0.2\n`; 
+            score += `${Math.floor(currentTime)}:osc:sine|freq:${NOTES.E1}|dur:0.15|vol:0.3|decay:0.15\n`;
         }
 
-        // --- LAYER 2: STACCATO DRIVE ---
-        if (subStep % 2 === 0 && (isRising || isDev || isPeak) && !isCoda) {
-            const stacVol = isPeak ? 0.045 : 0.025;
-            if (stepCount % 4 !== 1) {
-                score += `${Math.floor(currentTime)}:osc:sawtooth|freq:${currentChord[2]}|dur:0.12|vol:${stacVol}|filter:1200|attack:0.01|decay:0.1}\n`;
+        if (snarePattern) {
+            score += `${Math.floor(currentTime)}:noise:white|dur:0.2|vol:${snareVol}|filter:4000|attack:0.01|decay:0.15\n`;
+        }
+
+        // Drop Cymbals
+        if (isDrop) {
+            if (subStep % 2 === 0) { 
+                score += `${Math.floor(currentTime)}:noise:white|dur:0.05|vol:0.04|filter:8000|attack:0.01|decay:0.05\n`;
+            }
+            if (bar % 8 === 0 && beatInBar === 0 && subStep === 0) { 
+                score += `${Math.floor(currentTime)}:noise:white|dur:2.5|vol:0.12|filter:7000|attack:0.01|decay:2.0\n`;
             }
         }
 
-        // --- LAYER 3: BRASS SWELLS ---
-        if (beatInBar === 0 && subStep === 0 && (isDev || isPeak || isCoda)) {
-            let swellVol = isPeak ? 0.03 : 0.015;
-            if (isCoda) swellVol *= (1.2 - (currentTime - codaStart) / (totalDuration - codaStart));
+        // --- LAYER 2: DRIVING BASS / BUILD CHORDS ---
+        if (!isBreakdownBuild && stepCount % 2 === 0) { 
+            const bassFilter = isIntro ? 300 + (sectionProgress * 500) : 800; 
+            const bassVol = isVerse ? 0.12 : 0.18;
+            score += `${Math.floor(currentTime)}:osc:square|freq:${root / 2}|dur:0.15|vol:${bassVol}|filter:${bassFilter}|q:8|attack:0.01|decay:0.1\n`;
+        }
+        
+        if (isDrop && (stepCount % 16 === 7 || stepCount % 16 === 10)) {
+            score += `${Math.floor(currentTime)}:osc:square|freq:${root}|dur:0.1|vol:0.1|filter:1200|q:5|attack:0.01|decay:0.1\n`;
+        }
 
-            currentChord.slice(1).forEach((f, i) => {
-                const duration = isCoda ? 5.0 : 3.0;
-                const attack = isCoda ? 1.2 : 0.25;
-                const decay = isCoda ? 4.0 : 2.5;
-                const startTimeOffset = i * (isCoda ? 40 : 20);
-                score += `${Math.floor(currentTime + startTimeOffset)}:osc:sawtooth|freq:${f}|dur:${duration}|vol:${swellVol}|filter:700|attack:${attack}|decay:${decay}\n`;
-                score += `${Math.floor(currentTime + startTimeOffset)}:osc:triangle|freq:${f / 2}|dur:${duration}|vol:${swellVol}|filter:450|attack:${attack}|decay:${decay}\n`;
+        // Build Chords
+        if (isBuild && drumRoll && buildBar < 7) {
+            // Ascending chord stab to match the drum roll
+            let buildNote = root * 2;
+            if (buildBar >= 2) buildNote = currentChord[1] * 2;
+            if (buildBar >= 4) buildNote = currentChord[2] * 2;
+            if (buildBar >= 6) buildNote = root * 4;
+
+            score += `${Math.floor(currentTime)}:osc:square|freq:${buildNote}|dur:0.1|vol:0.05|filter:1500|attack:0.01|decay:0.1\n`;
+            score += `${Math.floor(currentTime)}:osc:triangle|freq:${buildNote}|dur:0.1|vol:0.08|filter:3000|attack:0.01|decay:0.1\n`;
+        }
+
+        // --- LAYER 3: ATMOSPHERIC PADS & CHORDS ---
+        if (isIntro || isVerse || isBreakdown) {
+            if (stepCount % 2 === 0) {
+                const arpNote = currentChord[(stepCount / 2) % 3];
+                score += `${Math.floor(currentTime)}:osc:sine|freq:${arpNote * 2}|dur:0.2|vol:0.05|filter:2000|attack:0.05|decay:0.2\n`;
+            }
+        }
+
+        if (isDrop && subStep === 0 && (beatInBar === 0 || beatInBar === 2)) {
+            currentChord.forEach(f => {
+                score += `${Math.floor(currentTime)}:osc:triangle|freq:${f}|dur:0.8|vol:0.08|filter:2000|attack:0.05|decay:0.7\n`;
             });
         }
 
-        // --- LAYER 4: MAJESTIC LEAD ---
-        let melodyChance = isPeak ? 0.98 : isDev ? 0.8 : isRising ? 0.4 : 0;
-        if (isCoda) melodyChance = 0.6 * (1 - (currentTime - codaStart) / (totalDuration - codaStart));
+        if (isBreakdown && subStep === 0 && beatInBar === 0) {
+             currentChord.forEach(f => {
+                score += `${Math.floor(currentTime)}:osc:sine|freq:${f}|dur:4.0|vol:0.06|filter:800|attack:1.0|decay:3.0\n`;
+            });
+        }
+
+        // --- LAYER 4: HUGE ANTHEM MELODY ---
+        let melNote = 0;
+        let melVol = isDrop ? 0.14 : 0.08; 
         
-        const isMelodyTick = stepCount % 4 === 0 || (isPeak && stepCount % 2 === 0);
-        if (rng() < melodyChance && isMelodyTick) {
-            const nRng = rng();
-            const nIdx = Math.floor(nRng * currentChord.length);
-            let note = currentChord[nIdx] * (nRng > 0.5 ? 4 : 2);
-            
-            let leadVol = isPeak ? 0.05 : 0.035;
-            if (isCoda) leadVol *= (1 - (currentTime - codaStart) / (totalDuration - codaStart));
-
-            const leadAttack = isCoda ? 0.4 : 0.1;
-            const leadDecay = isCoda ? 3.0 : 1.5;
-            const leadFilter = isPeak ? 3500 : 2000;
-
-            if (leadVol > 0.005) {
-                score += `${Math.floor(currentTime)}:osc:sawtooth|freq:${note}|dur:2.0|vol:${leadVol}|filter:${leadFilter}|attack:${leadAttack}|decay:${leadDecay}\n`;
+        if (isDrop || isVerse) {
+            const isA = bar % 8 < 4;
+            if (isA) {
+                if (beatInBar === 0 && subStep === 0) melNote = currentChord[0] * 4; 
+                else if (beatInBar === 1 && subStep === 0) melNote = currentChord[1] * 4; 
+                else if (beatInBar === 2 && subStep === 0) melNote = currentChord[2] * 4; 
+                else if (beatInBar === 3 && subStep === 0) melNote = currentChord[2] * 4; 
+                else if (beatInBar === 3 && subStep === 2) melNote = currentChord[1] * 4; 
+            } else {
+                if (beatInBar === 0 && subStep === 0) melNote = currentChord[2] * 4; 
+                else if (beatInBar === 1 && subStep === 2) melNote = currentChord[0] * 8; 
+                else if (beatInBar === 2 && subStep === 2) melNote = currentChord[1] * 4; 
+                else if (beatInBar === 3 && subStep === 0) melNote = currentChord[0] * 4; 
             }
         }
 
-        currentTime += currentStepMs;
+        if (melNote > 0) {
+            let dur = (subStep === 2) ? 0.3 : 0.7; 
+            score += `${Math.floor(currentTime)}:osc:triangle|freq:${melNote}|dur:${dur}|vol:${melVol}|filter:3000|q:2|attack:0.05|decay:${dur}\n`;
+            if (isDrop) {
+                score += `${Math.floor(currentTime)}:osc:square|freq:${melNote}|dur:${dur}|vol:${melVol * 0.4}|filter:2000|attack:0.05|decay:${dur}\n`;
+            }
+            score += `${Math.floor(currentTime)}:osc:sine|freq:${melNote / 2}|dur:${dur}|vol:${melVol * 0.5}|filter:800|attack:0.05|decay:${dur}\n`;
+        }
+
+        currentTime += stepMs;
         stepCount++;
     }
 

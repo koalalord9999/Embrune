@@ -11,6 +11,7 @@ interface ActivityLogProps {
 
 const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMessage, isDialogueActive = false, username }) => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const [isMinimized, setIsMinimized] = useState(false);
     const [chatInput, setChatInput] = useState('');
     const [selectedTab, setSelectedTab] = useState<'All' | 'Game' | 'Public' | 'Private' | 'Clan' | 'Trade'>('All');
@@ -20,6 +21,20 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
             containerRef.current.scrollTop = containerRef.current.scrollHeight;
         }
     }, [logs, chatMessages, isMinimized, selectedTab]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                const activeTag = document.activeElement?.tagName.toLowerCase();
+                if (activeTag !== 'input' && activeTag !== 'textarea' && activeTag !== 'select') {
+                    inputRef.current?.focus();
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,6 +51,9 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
     // Combine and sort logs and chatMessages
     const combinedLogs = [
         ...logs.map(log => {
+            if (typeof log === 'string') {
+                return { message: log, timestamp: Date.now(), type: 'log' as const };
+            }
             return { ...log, type: 'log' as const };
         }),
         ...chatMessages.map(msg => {
@@ -57,7 +75,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
             return { 
                 message: displayMessage, 
                 timestamp: msg.timestamp || Date.now(), 
-                type: 'chat' as const,
+                type: (msg.type === 'system' ? 'system' : 'chat') as 'chat' | 'system',
                 username: displayUsername,
                 originalUsername: msg.username,
                 isPM
@@ -103,14 +121,17 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                     <div ref={containerRef} className="flex-grow overflow-y-auto pr-1 animate-fade-in min-h-0">
                         <div className="space-y-1">
                             {filteredLogs.map((entry, index) => (
-                                <p key={`entry-${index}`} className={`text-sm leading-tight ${entry.type === 'chat' ? 'text-zinc-100' : 'text-gray-300'}`}>
+                                <p key={`entry-${index}`} className={`text-sm leading-tight ${
+                                    entry.type === 'system' ? 'text-gray-400 italic' :
+                                    entry.type === 'chat' ? 'text-zinc-100' : 'text-gray-300'
+                                }`}>
                                     <span className="text-gray-500 mr-1">[{formatTimestamp(entry.timestamp)}]</span>
                                     {entry.type === 'chat' && (
                                         <span 
                                             className={`font-bold cursor-pointer ${
-                                                entry.isPM 
+                                                'isPM' in entry && entry.isPM 
                                                     ? 'text-pink-400' // Pink for PMs
-                                                    : entry.originalUsername === username 
+                                                    : ('originalUsername' in entry && entry.originalUsername === username)
                                                         ? 'text-yellow-500' // Gold for me
                                                         : 'text-emerald-400' // Green for others
                                             }`}
@@ -119,9 +140,29 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                                             {entry.username}: 
                                         </span>
                                     )}
-                                    <span className={entry.isPM ? 'text-pink-400' : ''}>
-                                        {entry.message}
-                                    </span>
+                                    {(() => {
+                                        if (entry.type === 'chat' && !entry.isPM) {
+                                            const colorMatch = entry.message.match(/^(red|green|blue|yellow|orange|purple)::\s?(.*)$/i);
+                                            if (colorMatch) {
+                                                const color = colorMatch[1].toLowerCase();
+                                                const text = colorMatch[2];
+                                                const colorMap: Record<string, string> = {
+                                                    red: 'text-red-500',
+                                                    green: 'text-green-500',
+                                                    blue: 'text-blue-500',
+                                                    yellow: 'text-yellow-500',
+                                                    orange: 'text-orange-500',
+                                                    purple: 'text-purple-500'
+                                                };
+                                                return <span className={colorMap[color]}>{text}</span>;
+                                            }
+                                        }
+                                        return (
+                                            <span className={'isPM' in entry && entry.isPM ? 'text-pink-400' : ''}>
+                                                {entry.message}
+                                            </span>
+                                        );
+                                    })()}
                                 </p>
                             ))}
                         </div>
@@ -131,6 +172,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
             {!isMinimized && !isDialogueActive && (
                 <form onSubmit={handleSendMessage} className="flex mt-1">
                     <input
+                        ref={inputRef}
                         value={chatInput}
                         onChange={(e) => setChatInput(e.target.value)}
                         className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-0.5 text-sm text-zinc-100"

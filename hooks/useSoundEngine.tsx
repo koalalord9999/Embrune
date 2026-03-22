@@ -96,6 +96,7 @@ export const useSoundEngine = () => {
         const attack = parseFloat(params.attack || 0.005);
         const decay = parseFloat(params.decay || duration);
         const filterFreq = parseFloat(params.filter || 2000);
+        const filterQ = parseFloat(params.q || 1);
         const pitchMod = parseFloat(params.pitchMod || 0);
 
         const nodeGain = globalAudioContext.createGain();
@@ -125,7 +126,14 @@ export const useSoundEngine = () => {
             if (pitchMod !== 0) {
                 osc.frequency.exponentialRampToValueAtTime(freq + pitchMod, now + duration);
             }
-            osc.connect(nodeGain);
+
+            const filter = globalAudioContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(filterFreq, now);
+            filter.Q.setValueAtTime(filterQ, now);
+
+            osc.connect(filter);
+            filter.connect(nodeGain);
             sourceNode = osc;
         } else {
             const buffer = params.noise === 'white' 
@@ -138,11 +146,13 @@ export const useSoundEngine = () => {
             const filter = globalAudioContext.createBiquadFilter();
             filter.type = 'lowpass';
             filter.frequency.setValueAtTime(filterFreq, now);
+            filter.Q.setValueAtTime(filterQ, now);
 
             source.connect(filter);
             filter.connect(nodeGain);
             sourceNode = source;
         }
+
 
         if (category === 'music') {
             activeMusicNodes.add(sourceNode);

@@ -47,24 +47,33 @@ export const handler: Handler = async (event) => {
       return { statusCode: 400, body: 'Invalid message' };
     }
 
-    const cleanMessage = filter.clean(message);
+    const cleanMessage = type === 'system' ? message : filter.clean(message);
 
     const timestamp = Date.now();
 
+    if (type === 'system') {
+      await pusher.trigger('embrune-chat', 'new-message', {
+        username,
+        message: cleanMessage,
+        type: 'system',
+        timestamp,
+      });
+      return { statusCode: 200, body: 'Message sent' };
+    }
+
     if (type === 'private' && recipient) {
-      await pusher.trigger(`embrune-pm-${recipient}`, 'new-message', {
+      const pmPayload = {
         username,
-        message: `(PM) From ${username}: ${cleanMessage}`,
+        message: cleanMessage,
+        type: 'private',
         sender: username,
+        recipient,
         timestamp,
-      });
-      // Also trigger for the sender so they get the timestamp and formatting
-      await pusher.trigger(`embrune-pm-${username}`, 'new-message', {
-        username,
-        message: `(PM) To ${recipient}: ${cleanMessage}`,
-        sender: username,
-        timestamp,
-      });
+      };
+      // Trigger for the recipient
+      await pusher.trigger(`embrune-pm-${recipient}`, 'new-message', pmPayload);
+      // Trigger for the sender so they get the timestamp and exact formatting echoed back
+      await pusher.trigger(`embrune-pm-${username}`, 'new-message', pmPayload);
     } else {
       await pusher.trigger('embrune-chat', 'new-message', {
         username,

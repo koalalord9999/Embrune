@@ -30,6 +30,8 @@ export interface Message {
   message: string;
   sender?: string;
   timestamp?: number;
+  isPM?: boolean;
+  type?: string;
 }
 
 export interface LogEntry {
