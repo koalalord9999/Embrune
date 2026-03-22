@@ -103,9 +103,9 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         const poi = POIS[session.currentPoiId];
         return poi ? poi.regionId : undefined;
     }, [session.currentPoiId]);
-    
+
     useMusicEngine(currentRegionId, worldState, setWorldState);
-    
+
     // DEV MODE STATE INITIALIZATION
     const handleTogglePermAggro = useCallback(() => {
         ui.setIsPermAggroOn(prev => {
@@ -127,7 +127,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             ui.setIsAutoBankOn(ds.isAutoBankOn ?? false);
             ui.setIsGodModeOn(ds.isGodModeOn ?? false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Only run on initial mount
 
     // --- START DEV MODE LOGIC ---
@@ -154,7 +154,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
 
     useEffect(() => {
         announceLogin(initialState.username);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleReturnToMenuWithLogout = useCallback((currentState: any) => {
@@ -167,7 +167,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     // --- END DEV MODE LOGIC ---
 
     const quests = useQuests({ playerQuests: initialState.playerQuests, lockedPois: initialState.lockedPois });
-    
+
     // Character & Item Hooks
     const handleXpGain = useCallback((skillName: SkillName, amount: number) => {
         if (amount > 0) {
@@ -176,7 +176,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     }, []);
 
     const removeXpDrop = useCallback((id: number) => setXpDrops(prev => prev.filter(drop => drop.id !== id)), []);
-    
+
     const handleLevelUp = useCallback((skill: SkillName, level: number) => {
         setLevelUpInfo({ skill, level });
         play('LEVEL_UP');
@@ -187,7 +187,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     const handlePoisonDamage = useCallback((damage: number) => {
         setPoisonEvent({ damage, timestamp: Date.now() });
     }, []);
-    
+
     useEffect(() => {
         if (poisonEvent) {
             const timer = setTimeout(() => setPoisonEvent(null), 2000);
@@ -197,17 +197,17 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
 
     const charInitialData = useMemo(() => ({ skills: initialState.skills, combatStance: combatStance, currentHp: initialState.currentHp, currentPrayer: initialState.currentPrayer, autocastSpell: initialState.autocastSpell, statModifiers: initialState.statModifiers, activeBuffs: initialState.activeBuffs, runEnergy: initialState.runEnergy, isRunToggled: initialState.isRunToggled, isResting: initialState.isResting ?? false }), [initialState, combatStance]);
     const charCallbacks = useMemo(() => ({ addLog, onXpGain: handleXpGain, onLevelUp: handleLevelUp, onPoisonDamage: handlePoisonDamage }), [addLog, handleXpGain, handleLevelUp, handlePoisonDamage]);
-    
+
     const prayer = usePrayer(initialState.activePrayers || [], addLog);
-    
+
     const invRef = useRef<ReturnType<typeof useInventory> | null>(null);
-    const { 
-        groundItems: allGroundItems, 
-        groundItemsForCurrentPoi, 
-        onItemDropped, 
-        handlePickUpItem, 
-        handleTakeAllLoot, 
-        clearAllItemsAtPoi, 
+    const {
+        groundItems: allGroundItems,
+        groundItemsForCurrentPoi,
+        onItemDropped,
+        handlePickUpItem,
+        handleTakeAllLoot,
+        clearAllItemsAtPoi,
         clearDeathPileItemsAtPoi,
         moveItems
     } = useGroundItems(initialState.groundItems, { session, invRef, addLog, ui, worldState, setWorldState });
@@ -241,14 +241,14 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         () => prayer.setActivePrayers([]),
         inv.equipment
     );
-    
+
     // Logic Hooks
     const [clearedSkillObstacles, setClearedSkillObstacles] = useState(initialState.clearedSkillObstacles);
     const [monsterRespawnTimers, setMonsterRespawnTimers] = useState(initialState.monsterRespawnTimers);
     const isInCombat = ui.combatQueue.length > 0;
-    
+
     const questLogic = useQuestLogic({ playerQuests: quests.playerQuests, setPlayerQuests: quests.setPlayerQuests, addLog, modifyItem: inv.modifyItem, addXp: char.addXp, hasItems: inv.hasItems, setLockedPois: quests.setLockedPois, setClearedSkillObstacles });
-    
+
     const onQuestAcceptedCallback = useCallback((quest: GeneratedRepeatableQuest) => {
         const tutorialQuest = quests.playerQuests.find(q => q.questId === 'embrune_101');
         if (tutorialQuest && !tutorialQuest.isComplete) {
@@ -259,11 +259,11 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             }
         }
     }, [quests.playerQuests, questLogic]);
-    
+
     const repeatableQuests = useRepeatableQuests(initialState.repeatableQuestsState, addLog, inv, char, onQuestAcceptedCallback);
     const skilling = useSkilling(initialState.resourceNodeStates, { addLog, skills: char.skills, addXp: char.addXp, inventory: inv.inventory, modifyItem: inv.modifyItem, equipment: inv.equipment, setEquipment: inv.setEquipment, checkQuestProgressOnShear: questLogic.checkQuestProgressOnShear, hasItems: inv.hasItems });
     const interactQuest = useInteractQuest({ addLog, activePlayerQuest: repeatableQuests.activePlayerQuest, handleTurnInRepeatableQuest: repeatableQuests.handleTurnInRepeatableQuest });
-    
+
     const cancelCurrentAction = useCallback(() => {
         skilling.stopSkilling();
         if (ui.activeCraftingAction) {
@@ -353,7 +353,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
 
 
     const handlePlayerDeathRef = useRef<() => void>(null!);
-    
+
     const thievingPilfering = useThievingPilfering({
         worldState,
         setWorldState,
@@ -391,35 +391,35 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         onItemDropped,
         setIsResting: char.setIsResting,
     });
-    
+
     const poi = useMemo(() => {
         const basePoi = POIS[session.currentPoiId];
         if (!basePoi) return null;
-    
+
         if (repeatableQuests.activePlayerQuest && repeatableQuests.activePlayerQuest.generatedQuest.isInstance && repeatableQuests.activePlayerQuest.generatedQuest.instancePoiId === session.currentPoiId) {
             const quest = repeatableQuests.activePlayerQuest.generatedQuest;
             const newActivities: POIActivity[] = [...basePoi.activities];
-            
+
             if (quest.type === 'kill' && quest.target.monsterId) {
                 const remainingToKill = quest.requiredQuantity - repeatableQuests.activePlayerQuest.progress;
-                
+
                 for (let i = 0; i < remainingToKill; i++) {
                     newActivities.push({ type: 'combat', monsterId: quest.target.monsterId });
                 }
             }
             return { ...basePoi, activities: newActivities };
         }
-        
+
         if (basePoi.id === 'pilfering_house_instance' && dynamicActivities) {
             return { ...basePoi, activities: [...basePoi.activities, ...dynamicActivities] };
         }
-    
+
         return basePoi;
     }, [session.currentPoiId, repeatableQuests.activePlayerQuest, dynamicActivities]);
-    
+
     const shops = useShops(initialState.shopStates, inv.coins, inv.modifyItem, addLog, inv.inventory);
     const slayer = useSlayer(initialState.slayerTask, quests.playerQuests, { addLog, addXp: char.addXp, combatLevel: char.combatLevel, modifyItem: inv.modifyItem });
-    
+
     const startCombat = useCallback((ids: string[]) => {
         cancelCurrentAction();
         if (ui.activeDialogue) {
@@ -438,7 +438,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     const handleCombatFinish = useCallback(() => {
         if (devMode.isInstantRespawnOn && devMode.instantRespawnCounter !== null) {
             const newCount = devMode.instantRespawnCounter - 1;
-            if (newCount <= 0) { devMode.setIsInstantRespawnOn(false); devMode.setInstantRespawnCounter(null); addLog('System: Instant respawn finished.'); } 
+            if (newCount <= 0) { devMode.setIsInstantRespawnOn(false); devMode.setInstantRespawnCounter(null); addLog('System: Instant respawn finished.'); }
             else { devMode.setInstantRespawnCounter(newCount); addLog(`System: Instant respawn encounters remaining: ${newCount}.`); }
         }
     }, [devMode, addLog]);
@@ -447,7 +447,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     const playerDeath = usePlayerDeath({ skilling, interactQuest, ui, session, char, inv, addLog, playerQuests: quests.playerQuests, onItemDropped, setWorldState, playerType: initialState.playerType, slotId, onReturnToMenu: handleReturnToMenuWithLogout, repeatableQuests, setDynamicActivities, worldState, onResetGame, setActivePrayers: prayer.setActivePrayers });
 
     const handlePlayerDeath = useCallback((currentState: any) => { playerDeath.handlePlayerDeath(currentState); handleCombatFinish(); }, [playerDeath, handleCombatFinish]);
-    
+
     const gameState = useMemo(() => ({
         username: initialState.username,
         playerType: initialState.playerType,
@@ -515,16 +515,16 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     useEffect(() => {
         handlePlayerDeathRef.current = () => handlePlayerDeath(gameState);
     }, [gameState, handlePlayerDeath]);
-    
+
     const bankLogic = useBank({ bank, setBank }, { addLog, ...inv, ...char, setCombatStance: setCombatStance, bankPlaceholders: worldState.bankPlaceholders ?? false });
-    
+
     const setWindmillFlour = useCallback((updater: React.SetStateAction<number>) => {
         setWorldState(prev => {
             const newFlour = typeof updater === 'function' ? updater(prev.windmillFlour) : updater;
             return { ...prev, windmillFlour: newFlour };
         });
     }, []);
-    
+
     const onCreateBonfire = useCallback((logId: string) => {
         const recipe = FIREMAKING_RECIPES.find(r => r.logId === logId);
         if (!recipe) return;
@@ -543,9 +543,9 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         const recipe = FIREMAKING_RECIPES.find(r => r.logId === logId);
         if (!recipe) return;
         const duration = (30 + recipe.level * 2) * 1000;
-        setBonfires(prev => prev.map(b => 
-            b.uniqueId === bonfireId 
-                ? { ...b, expiresAt: Date.now() + duration } 
+        setBonfires(prev => prev.map(b =>
+            b.uniqueId === bonfireId
+                ? { ...b, expiresAt: Date.now() + duration }
                 : b
         ));
     }, []);
@@ -556,7 +556,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             const now = Date.now();
             let inventoryChanged = false;
             let equipmentChanged = false;
-    
+
             const newInventory = inv.inventory.map(slot => {
                 if (slot && slot.expiresAt && now >= slot.expiresAt) {
                     const itemData = ITEMS[slot.itemId];
@@ -566,7 +566,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                 }
                 return slot;
             });
-    
+
             const newEquipment: Equipment = { ...inv.equipment };
             (Object.keys(newEquipment) as Array<keyof Equipment>).forEach(slotKey => {
                 const slot = newEquipment[slotKey];
@@ -577,37 +577,37 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                     equipmentChanged = true;
                 }
             });
-    
+
             if (inventoryChanged) {
                 inv.setInventory(newInventory);
             }
             if (equipmentChanged) {
                 inv.setEquipment(newEquipment);
             }
-    
+
         }, 1000); // Check every second
-    
+
         return () => clearInterval(interval);
     }, [inv.inventory, inv.equipment, inv.setInventory, inv.setEquipment, addLog]);
 
-    const crafting = useCrafting({ skills: char.skills, hasItems: inv.hasItems, addLog, activeCraftingAction: ui.activeCraftingAction, setActiveCraftingAction: ui.setActiveCraftingAction, inventory: inv.inventory, modifyItem: inv.modifyItem, addXp: char.addXp, checkQuestProgressOnSpin: questLogic.checkQuestProgressOnSpin, checkQuestProgressOnSmith: questLogic.checkQuestProgressOnSmith, checkQuestProgressOnOffer: questLogic.checkQuestProgressOnOffer, advanceTutorial: (condition: string) => {}, closeCraftingView: ui.closeCraftingView, setWindmillFlour, equipment: inv.equipment, setEquipment: inv.setEquipment, worldState, setWorldState, onCreateBonfire, onRefreshBonfire, isInCombat, currentPrayer: char.currentPrayer, setCurrentPrayer: char.setCurrentPrayer, setIsResting: char.setIsResting, setInventory: inv.setInventory });
+    const crafting = useCrafting({ skills: char.skills, hasItems: inv.hasItems, addLog, activeCraftingAction: ui.activeCraftingAction, setActiveCraftingAction: ui.setActiveCraftingAction, inventory: inv.inventory, modifyItem: inv.modifyItem, addXp: char.addXp, checkQuestProgressOnSpin: questLogic.checkQuestProgressOnSpin, checkQuestProgressOnSmith: questLogic.checkQuestProgressOnSmith, checkQuestProgressOnOffer: questLogic.checkQuestProgressOnOffer, advanceTutorial: (condition: string) => { }, closeCraftingView: ui.closeCraftingView, setWindmillFlour, equipment: inv.equipment, setEquipment: inv.setEquipment, worldState, setWorldState, onCreateBonfire, onRefreshBonfire, isInCombat, currentPrayer: char.currentPrayer, setCurrentPrayer: char.setCurrentPrayer, setIsResting: char.setIsResting, setInventory: inv.setInventory });
     const worldActions = useWorldActions({ hasItems: inv.hasItems, inventory: inv.inventory, modifyItem: inv.modifyItem, addLog, coins: inv.coins, skills: char.skills, addXp: char.addXp, setClearedSkillObstacles, playerQuests: quests.playerQuests, setMakeXPrompt: ui.setMakeXPrompt, windmillFlour: worldState.windmillFlour, setWindmillFlour, setActiveCraftingAction: ui.setActiveCraftingAction, setInventory: inv.setInventory, equipment: inv.equipment, setIsResting: char.setIsResting });
     const dialogueActions = useDialogueActions({ quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session, setIsResting: char.setIsResting, });
     const { handleDialogueCheck, onResponse, handleDialogueAction } = dialogueActions;
-    
-    const itemActions = useItemActions({ 
-        addLog, currentHp: char.currentHp, maxHp: char.maxHp, setCurrentHp: char.setCurrentHp, 
+
+    const itemActions = useItemActions({
+        addLog, currentHp: char.currentHp, maxHp: char.maxHp, setCurrentHp: char.setCurrentHp,
         currentPrayer: char.currentPrayer, maxPrayer: char.maxPrayer, setCurrentPrayer: char.setCurrentPrayer,
         setRunEnergy: char.setRunEnergy,
-        applyStatModifier: char.applyStatModifier, addBuff: char.addBuff, curePoison: char.curePoison, setInventory: inv.setInventory, 
-        skills: char.skills, inventory: inv.inventory, activeCraftingAction: ui.activeCraftingAction, 
-        setActiveCraftingAction: ui.setActiveCraftingAction, hasItems: inv.hasItems, modifyItem: inv.modifyItem, 
-        addXp: char.addXp, openCraftingView: ui.openCraftingView, itemToUse: ui.itemToUse, setItemToUse: ui.setItemToUse, 
+        applyStatModifier: char.applyStatModifier, addBuff: char.addBuff, curePoison: char.curePoison, setInventory: inv.setInventory,
+        skills: char.skills, inventory: inv.inventory, activeCraftingAction: ui.activeCraftingAction,
+        setActiveCraftingAction: ui.setActiveCraftingAction, hasItems: inv.hasItems, modifyItem: inv.modifyItem,
+        addXp: char.addXp, openCraftingView: ui.openCraftingView, itemToUse: ui.itemToUse, setItemToUse: ui.setItemToUse,
         setConfirmationPrompt: ui.setConfirmationPrompt,
-        setMakeXPrompt: ui.setMakeXPrompt, 
-        startQuest: (questId) => { quests.startQuest(questId, addLog); }, 
-        currentPoiId: session.currentPoiId, playerQuests: quests.playerQuests, isStunned: char.isStunned, 
-        setActiveDungeonMap: ui.setActiveDungeonMap, confirmValuableDrops: ui.confirmValuableDrops, 
+        setMakeXPrompt: ui.setMakeXPrompt,
+        startQuest: (questId) => { quests.startQuest(questId, addLog); },
+        currentPoiId: session.currentPoiId, playerQuests: quests.playerQuests, isStunned: char.isStunned,
+        setActiveDungeonMap: ui.setActiveDungeonMap, confirmValuableDrops: ui.confirmValuableDrops,
         valuableDropThreshold: ui.valuableDropThreshold, ui, equipment: inv.equipment, onResponse, handleDialogueCheck, setEquipment: inv.setEquipment,
         navigation,
         rangeCooldowns,
@@ -619,17 +619,18 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             handleSmelting: crafting.handleSmelting,
             handleStokeBonfire: crafting.handleStokeBonfire,
             handleJewelryCrafting: crafting.handleJewelryCrafting,
+        }
     });
-    
-    const spellActions = useSpellActions({ 
-        addLog, 
-        addXp: char.addXp, 
-        modifyItem: inv.modifyItem, 
-        hasItems: inv.hasItems, 
-        skills: char.skills, 
-        ui, 
-        equipment: inv.equipment, 
-        currentPoiId: session.currentPoiId, 
+
+    const spellActions = useSpellActions({
+        addLog,
+        addXp: char.addXp,
+        modifyItem: inv.modifyItem,
+        hasItems: inv.hasItems,
+        skills: char.skills,
+        ui,
+        equipment: inv.equipment,
+        currentPoiId: session.currentPoiId,
         setInventory: inv.setInventory,
         char,
         combatSpeedMultiplier
@@ -644,26 +645,26 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         inventory: inv.inventory,
         setIsResting: char.setIsResting,
     });
-    
+
     useWorldEvents({ session, worldState, setWorldState, char, inv, addLog, questLogic, playerQuests: quests.playerQuests });
 
     const killHandler = useKillHandler({ questLogic, repeatableQuests, slayer, setMonsterRespawnTimers, isInstantRespawnOn: devMode.isInstantRespawnOn, setWorldState, addLog, worldState, inv, navigation });
     const handleKill = useCallback((id: string, style?: 'melee' | 'ranged' | 'magic') => { killHandler.handleKill(id, style); }, [killHandler]);
     const handleEncounterWin = useCallback((ids: string[]) => { killHandler.handleEncounterWin(ids); }, [killHandler]);
-    
-    const spellcasting = useSpellcasting({ 
-        char, 
-        inv, 
-        addLog, 
-        navigation, 
-        ui, 
+
+    const spellcasting = useSpellcasting({
+        char,
+        inv,
+        addLog,
+        navigation,
+        ui,
         isStunned: char.isStunned,
         combatSpeedMultiplier,
         setIsResting: char.setIsResting,
     });
-    
+
     useSaveGame(gameState, slotId);
-    
+
     const onWinCombat = useCallback(() => {
         ui.setCombatQueue([]);
         ui.setIsMandatoryCombat(false);
@@ -675,11 +676,11 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         ui.setCombatQueue([]);
         ui.setIsMandatoryCombat(false);
         setPoisonEvent(null); // Clear poison event on flee
-    
+
         if (defeatedIds.length > 0) {
             killHandler.handleEncounterWin(defeatedIds);
         }
-        
+
         const fleePoiId = session.currentPoiId;
         setWorldState(ws => ({
             ...ws,
@@ -690,7 +691,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         }));
         addLog("You flee from combat, gaining 10 seconds of aggression immunity in this area.");
     }, [ui, addLog, session, setWorldState, killHandler]);
-    
+
     useAggression(
         poi,
         true, // isGameLoaded
@@ -709,7 +710,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         worldState,
         repeatableQuests.activePlayerQuest
     );
-    
+
     useEffect(() => { questLogic.checkGatherQuests(); }, [inv.inventory, questLogic]);
 
     useEffect(() => {
@@ -725,9 +726,9 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             ui.setShowHitsplats(s.showHitsplats ?? true);
             ui.setIsOneClickMode(s.isOneClickMode ?? false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    
+
     const handleBonfireTick = useCallback(() => {
         const now = Date.now();
         setBonfires(prevBonfires => {
@@ -745,7 +746,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             return changed ? activeBonfires : prevBonfires;
         });
     }, [addLog, onItemDropped]);
-    
+
     const bonfireCallbackRef = useRef(handleBonfireTick);
     useEffect(() => { bonfireCallbackRef.current = handleBonfireTick; });
 
@@ -753,11 +754,11 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         const interval = setInterval(() => bonfireCallbackRef.current(), 1000);
         return () => clearInterval(interval);
     }, []);
-    
+
     const handleToggleBankPlaceholders = useCallback(() => {
         setWorldState(ws => ({ ...ws, bankPlaceholders: !ws.bankPlaceholders }));
     }, []);
-    
+
     const handleDeathMarkerTick = useCallback(() => {
         setWorldState(ws => {
             if (!ws.deathMarker) return ws;
@@ -779,7 +780,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         return () => clearInterval(interval);
     }, []);
 
-     // POI Immunity Timer UI Logic
+    // POI Immunity Timer UI Logic
     useEffect(() => {
         const poiImmunityExpiry = worldState.poiImmunity?.[session.currentPoiId];
         if (!poiImmunityExpiry) {
@@ -796,18 +797,18 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         }, 1000);
         return () => clearInterval(timer);
     }, [worldState.poiImmunity, session.currentPoiId]);
-    
+
     // Grant Immunity on Entering Death POI
     useEffect(() => {
         const needsImmunity = !!worldState.deathMarker && session.currentPoiId === worldState.deathMarker.poiId && !worldState.deathMarker.immunityGranted;
         if (needsImmunity) {
             const immunityDuration = 30 * 1000;
             const expiryTime = Date.now() + immunityDuration;
-            
+
             setWorldState(ws => {
                 if (!ws.deathMarker) return ws;
-                return { 
-                    ...ws, 
+                return {
+                    ...ws,
                     deathMarker: { ...ws.deathMarker, immunityGranted: true },
                     poiImmunity: {
                         ...(ws.poiImmunity ?? {}),
@@ -827,7 +828,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                 repeatableQuests.handleTurnInRepeatableQuest();
 
                 addLog("You've cleared the cellar! You are automatically moved back upstairs.");
-                
+
                 const cellarItems = allGroundItems['tavern_cellar'] || [];
                 cellarItems.forEach(item => onItemDropped(item.item, 'the_rusty_flagon'));
                 clearAllItemsAtPoi('tavern_cellar');
@@ -836,7 +837,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             }
         }
     }, [repeatableQuests.activePlayerQuest, session.currentPoiId, repeatableQuests, addLog, allGroundItems, onItemDropped, clearAllItemsAtPoi, navigation]);
-    
+
     useEffect(() => {
         if (!ui.activeSingleAction) return;
 
@@ -880,7 +881,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             handleNonNpcActivity(activity);
         }
     };
-    
+
     const handleNonNpcActivity = useCallback((activity: POIActivity) => {
         if (ui.activeDialogue) {
             ui.setActiveDialogue(null);
@@ -918,7 +919,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
 
     const isBankOpen = ui.activePanel === 'bank';
     const isShopOpen = !!ui.activeShopId;
-    
+
     // Dev Handlers
     const handleHealPlayer = useCallback(() => char.setCurrentHp(char.maxHp), [char]);
     const handleKillMonster = useCallback(() => { if (ui.combatQueue.length > 0) setKillTrigger(k => k + 1); }, [ui.combatQueue]);
@@ -952,7 +953,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                 durationRemaining: Infinity
             });
         }
-    
+
         const checkAndAddExpiryBuff = (slot: InventorySlot | null, idPrefix: string) => {
             if (slot && slot.expiresAt) {
                 allBuffs.push({
@@ -965,13 +966,13 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                 });
             }
         };
-    
+
         // Check equipment
         Object.values(inv.equipment).forEach((slot, index) => checkAndAddExpiryBuff(slot, `equip-${index}`));
-        
+
         // Check inventory
         inv.inventory.forEach((slot, index) => checkAndAddExpiryBuff(slot, `inv-${index}`));
-    
+
         return allBuffs;
     }, [char.activeBuffs, worldState.dehydrationLevel, inv.equipment, inv.inventory]);
 
@@ -1002,7 +1003,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             itemActions.handleTeleport(...args);
         },
     }), [itemActions, cancelCurrentAction]);
-    
+
     const devPanelProps = useMemo(() => ({
         inv,
         setTooltip: ui.setTooltip,
@@ -1056,7 +1057,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         handleHealPlayer, handleKillMonster, handleAddCoins, handleSetSkillLevel, handleMaxCharacter, handleResetQuest,
         repeatableQuests.resetBoards, thievingPilfering.resetPilferingTimers, agility
     ]);
-    
+
     // Centralized death check
     useEffect(() => {
         if (char.currentHp <= 0 && !isInCombat) {
@@ -1070,18 +1071,19 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                 <BuffBar statModifiers={char.statModifiers} activeBuffs={buffsForDisplay} />
                 <div className="bg-black/70 border-2 border-gray-600 rounded-lg p-4 flex-grow min-h-0 relative overflow-y-auto md:overflow-visible">
                     {ui.activeSingleAction && (
-                    <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center">
-                        <SingleActionProgressView
-                            action={ui.activeSingleAction}
-                            onCancel={() => ui.setActiveSingleAction(null)}
-                        />
-                    </div>
-                )}
-                    <MainViewController onFastTravel={handleFastTravel} onCommitMapChanges={devMode.handleCommitMapChanges} {...{ 
-char: {...char, setCombatStance},
-itemActions, inv,quests,bank,bankLogic,shops,crafting,repeatableQuests,navigation,worldActions,slayer,questLogic,skilling,interactQuest,session,clearedSkillObstacles,monsterRespawnTimers,handlePlayerDeath: () => handlePlayerDeath(gameState),handleKill,onWinCombat,onFleeSuccess: onFleeFromCombat,onResponse,handleDialogueCheck,combatSpeedMultiplier: devMode.combatSpeedMultiplier,activeCombatStyleHighlight: null,isTouchSimulationEnabled: devMode.isTouchSimulationEnabled,isMapManagerEnabled: false,poiCoordinates: undefined,regionCoordinates: undefined,onUpdatePoiCoordinate: undefined,poiConnections: undefined,addLog,ui,initialState,showAllPois: devMode.showAllPois,groundItemsForCurrentPoi,onPickUpItem: handlePickUpItem,onTakeAllLoot: handleTakeAllLoot,onItemDropped,isAutoBankOn: devMode.isAutoBankOn,handleCombatXpGain: char.addXp,poiImmunityTimeLeft,killTrigger,bankPlaceholders: worldState.bankPlaceholders??false,handleToggleBankPlaceholders,bonfires: bonfires.filter(b => b.uniqueId.startsWith(session.currentPoiId)),onStokeBonfire: crafting.handleStokeBonfire,isStunned: char.isStunned,addBuff: char.addBuff,isDevMode: devMode.isDevMode,onToggleDevPanel: handleToggleDevPanel,onToggleTouchSimulation: devMode.onToggleTouchSimulation,onDepositEquipment: () => bankLogic.handleDepositEquipment(ui.activeBankTabId),deathMarker: worldState.deathMarker,activeRepeatableQuest: repeatableQuests.activePlayerQuest,onActivity: handleActivityClickWrapper,onResetGame,onImportGame,onExportGame,isOneClickMode: ui.isOneClickMode,poi,thievingContainerStates: thieving.containerStates,onPickpocket: thieving.handlePickpocket,onLockpick: thieving.handleLockpick,onPilfer: thievingPilfering.handlePilfer,onStealFromStall: thieving.handleStealFromStall,worldState,onStartCombat: onStartSingleCombat,onEncounterWin: handleEncounterWin,activePrayers: prayer.activePrayers,onJewelryCraft: crafting.handleJewelryCrafting,setEquipment: inv.setEquipment,poisonEvent,runEnergy: char.runEnergy,setRunEnergy: char.setRunEnergy,playerCombatLevel: char.combatLevel,addXp: char.addXp,setCurrentHp: char.setCurrentHp,agility }} />
-                        {levelUpInfo && <LevelUpAnimation skill={levelUpInfo.skill} level={levelUpInfo.level} />}
-                        <LootButtonOverlay groundItems={groundItemsForCurrentPoi} onOpenLootView={() => ui.setIsLootViewOpen(true)} />
+                        <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center">
+                            <SingleActionProgressView
+                                action={ui.activeSingleAction}
+                                onCancel={() => ui.setActiveSingleAction(null)}
+                            />
+                        </div>
+                    )}
+                    <MainViewController onFastTravel={handleFastTravel} onCommitMapChanges={devMode.handleCommitMapChanges} {...{
+                        char: { ...char, setCombatStance },
+                        itemActions, inv, quests, bank, bankLogic, shops, crafting, repeatableQuests, navigation, worldActions, slayer, questLogic, skilling, interactQuest, session, clearedSkillObstacles, monsterRespawnTimers, handlePlayerDeath: () => handlePlayerDeath(gameState), handleKill, onWinCombat, onFleeSuccess: onFleeFromCombat, onResponse, handleDialogueCheck, combatSpeedMultiplier: devMode.combatSpeedMultiplier, activeCombatStyleHighlight: null, isTouchSimulationEnabled: devMode.isTouchSimulationEnabled, isMapManagerEnabled: false, poiCoordinates: undefined, regionCoordinates: undefined, onUpdatePoiCoordinate: undefined, poiConnections: undefined, addLog, ui, initialState, showAllPois: devMode.showAllPois, groundItemsForCurrentPoi, onPickUpItem: handlePickUpItem, onTakeAllLoot: handleTakeAllLoot, onItemDropped, isAutoBankOn: devMode.isAutoBankOn, handleCombatXpGain: char.addXp, poiImmunityTimeLeft, killTrigger, bankPlaceholders: worldState.bankPlaceholders ?? false, handleToggleBankPlaceholders, bonfires: bonfires.filter(b => b.uniqueId.startsWith(session.currentPoiId)), onStokeBonfire: crafting.handleStokeBonfire, isStunned: char.isStunned, addBuff: char.addBuff, isDevMode: devMode.isDevMode, onToggleDevPanel: handleToggleDevPanel, onToggleTouchSimulation: devMode.onToggleTouchSimulation, onDepositEquipment: () => bankLogic.handleDepositEquipment(ui.activeBankTabId), deathMarker: worldState.deathMarker, activeRepeatableQuest: repeatableQuests.activePlayerQuest, onActivity: handleActivityClickWrapper, onResetGame, onImportGame, onExportGame, isOneClickMode: ui.isOneClickMode, poi, thievingContainerStates: thieving.containerStates, onPickpocket: thieving.handlePickpocket, onLockpick: thieving.handleLockpick, onPilfer: thievingPilfering.handlePilfer, onStealFromStall: thieving.handleStealFromStall, worldState, onStartCombat: onStartSingleCombat, onEncounterWin: handleEncounterWin, activePrayers: prayer.activePrayers, onJewelryCraft: crafting.handleJewelryCrafting, setEquipment: inv.setEquipment, poisonEvent, runEnergy: char.runEnergy, setRunEnergy: char.setRunEnergy, playerCombatLevel: char.combatLevel, addXp: char.addXp, setCurrentHp: char.setCurrentHp, agility
+                    }} />
+                    {levelUpInfo && <LevelUpAnimation skill={levelUpInfo.skill} level={levelUpInfo.level} />}
+                    <LootButtonOverlay groundItems={groundItemsForCurrentPoi} onOpenLootView={() => ui.setIsLootViewOpen(true)} />
                 </div>
                 <div className={`md:flex-shrink-0 relative`}>
                     <ActivityLog logs={activityLog} chatMessages={messages} onSendMessage={handleSendMessage} isDialogueActive={!!ui.activeDialogue} username={initialState.username} />
@@ -1089,38 +1091,38 @@ itemActions, inv,quests,bank,bankLogic,shops,crafting,repeatableQuests,navigatio
                 </div>
             </div>
             <div className="w-full md:w-1/5 flex flex-col">
-                <SidePanel 
+                <SidePanel
                     {...{
-                        ui, 
-                        initialState, 
-                        char: {...char, setCombatStance},
-                        inv, 
-                        quests, 
-                        repeatableQuests, 
-                        slayer, 
-                        onReturnToMenu: handleLogout, 
-                        isDevMode: devMode.isDevMode, 
-                        isTouchSimulationEnabled: devMode.isTouchSimulationEnabled, 
-                        onToggleTouchSimulation: devMode.onToggleTouchSimulation, 
-                        itemActions: wrappedItemActions, 
-                        isBusy, 
-                        handleExamine: itemActions.handleExamine, 
-                        session, 
-                        addLog, 
-                        activeCombatStyleHighlight: null, 
-                        onNavigate: navigation.handleNavigate, 
-                        unlockedPois: navigation.reachablePois, 
-                        isBankOpen, 
-                        isShopOpen, 
-                        onDeposit: (inventoryIndex, quantity) => bankLogic.handleDeposit(inventoryIndex, quantity, ui.activeBankTabId), 
-                        onCastSpell: spellcasting.onCastSpell, 
-                        onSpellOnItem: spellActions.handleSpellOnItem, 
-                        isEquipmentStatsOpen: !!ui.isEquipmentStatsViewOpen, 
-                        activePrayers: prayer.activePrayers, 
-                        onTogglePrayer: (prayerId: string) => prayer.togglePrayer(prayerId, char.skills, quests.playerQuests, char.rawCurrentPrayer), 
-                        isPoisoned: char.isPoisoned, 
-                        onCurePoison: itemActions.handleCurePoisonFromOrb, 
-                        poisonEvent, 
+                        ui,
+                        initialState,
+                        char: { ...char, setCombatStance },
+                        inv,
+                        quests,
+                        repeatableQuests,
+                        slayer,
+                        onReturnToMenu: handleLogout,
+                        isDevMode: devMode.isDevMode,
+                        isTouchSimulationEnabled: devMode.isTouchSimulationEnabled,
+                        onToggleTouchSimulation: devMode.onToggleTouchSimulation,
+                        itemActions: wrappedItemActions,
+                        isBusy,
+                        handleExamine: itemActions.handleExamine,
+                        session,
+                        addLog,
+                        activeCombatStyleHighlight: null,
+                        onNavigate: navigation.handleNavigate,
+                        unlockedPois: navigation.reachablePois,
+                        isBankOpen,
+                        isShopOpen,
+                        onDeposit: (inventoryIndex, quantity) => bankLogic.handleDeposit(inventoryIndex, quantity, ui.activeBankTabId),
+                        onCastSpell: spellcasting.onCastSpell,
+                        onSpellOnItem: spellActions.handleSpellOnItem,
+                        isEquipmentStatsOpen: !!ui.isEquipmentStatsViewOpen,
+                        activePrayers: prayer.activePrayers,
+                        onTogglePrayer: (prayerId: string) => prayer.togglePrayer(prayerId, char.skills, quests.playerQuests, char.rawCurrentPrayer),
+                        isPoisoned: char.isPoisoned,
+                        onCurePoison: itemActions.handleCurePoisonFromOrb,
+                        poisonEvent,
                         onToggleDevPanel: handleToggleDevPanel,
                         worldState,
                     }}
@@ -1136,11 +1138,11 @@ itemActions, inv,quests,bank,bankLogic,shops,crafting,repeatableQuests,navigatio
                     <div className="bg-gray-800 border-4 border-gray-600 rounded-lg shadow-xl w-full max-w-md h-full flex flex-col pointer-events-auto"
                         onClick={e => e.stopPropagation()}
                     >
-                        <DevPanel {...devPanelProps} isCurrentMonsterAggro={devMode.isCurrentMonsterAggro} onToggleAggro={devMode.onToggleAggro}/>
+                        <DevPanel {...devPanelProps} isCurrentMonsterAggro={devMode.isCurrentMonsterAggro} onToggleAggro={devMode.onToggleAggro} />
                     </div>
                 </div>
             )}
-             {ui.isMonsterDBOpen && (
+            {ui.isMonsterDBOpen && (
                 <MonsterDBView
                     monsters={devMode.monsterData}
                     setMonsters={devMode.setMonsterData}
@@ -1199,7 +1201,7 @@ itemActions, inv,quests,bank,bankLogic,shops,crafting,repeatableQuests,navigatio
                     bankPlaceholders={worldState.bankPlaceholders ?? false}
                     handleToggleBankPlaceholders={handleToggleBankPlaceholders}
                 />
-                
+
             )}
         </div>
     );
