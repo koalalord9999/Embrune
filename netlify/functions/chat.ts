@@ -21,9 +21,10 @@ const filter = {
     ];
     
     const regex = new RegExp(badWords.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'i');
-    const isClean = !regex.test(normalizedText);
-    
-    return isClean ? text : '****';
+    return text.replace(
+    new RegExp(`\\b(${badWords.map(w => w.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')).join('|')})\\b`, 'gi'),
+        (match) => '*'.repeat(match.length)
+);
   }
 };
 
