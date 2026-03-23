@@ -12,6 +12,17 @@ const UsernamePrompt: React.FC<UsernamePromptProps> = ({ onConfirm, onCancel }) 
 
     const handleConfirm = () => {
         const trimmedUsername = username.trim();
+        const bannedWords = ['kkk', 'nazi', 'nigger', 'nigga', 'faggot', 'chink', 'spic', 'kike', 'cunt', 'hitler', 'fuck', 'shit', 'bitch', 'asshole', 'pussy', 'dick', 'rape', 'retard', 'pedophile', 'admin', 'moderator', 'support', 'dev', 'developer', 'owner', 'creator', 'ember', 'embrune', '123'];
+
+        const containsBannedWord = bannedWords.some(word =>
+            new RegExp(`\\b${word}\\b`, 'i').test(trimmedUsername) ||
+            trimmedUsername.toLowerCase().includes(word)
+        );
+
+        if (containsBannedWord) {
+            setError('That username is not allowed. Please choose a different name.');
+            return;
+        }
         if (trimmedUsername.length < 3 || trimmedUsername.length > 12) {
             setError('Username must be between 3 and 12 characters.');
             return;
@@ -35,7 +46,7 @@ const UsernamePrompt: React.FC<UsernamePromptProps> = ({ onConfirm, onCancel }) 
                         autoFocus
                         onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
                     />
-                     {error && <p className="text-red-400 text-sm">{error}</p>}
+                    {error && <p className="text-red-400 text-sm">{error}</p>}
                 </div>
                 <div className="flex justify-center gap-4">
                     <Button onClick={handleConfirm} disabled={username.trim().length < 3 || username.trim().length > 12}>
