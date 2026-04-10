@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { POIS, REGIONS } from '../../constants';
+import {  POIS, REGIONS, getIconUrl  } from '../../constants';
 import { ContextMenuState, useUIState } from '../../hooks/useUIState';
 import { ContextMenuOption } from '../common/ContextMenu';
 import { useLongPress } from '../../hooks/useLongPress';
@@ -93,7 +93,7 @@ const HpOrb: React.FC<{
         {/* Heart Icon */}
         <div className="absolute inset-0 flex items-center justify-center">
             <img 
-                src="https://api.iconify.design/game-icons:hearts.svg" 
+                src={getIconUrl("hearts")} 
                 alt="" 
                 className={`w-8 h-8 transition-all ${heartIconClass}`} 
             />
@@ -102,8 +102,8 @@ const HpOrb: React.FC<{
         <div className="absolute top-1 left-1 w-8 h-8 rounded-full bg-white/20 blur-sm" />
         {/* HP Text */}
         {showHealthNumbers && (
-            <div className="absolute inset-0 flex items-center justify-center z-10">
-                <span className="font-bold text-lg text-white" style={{ textShadow: '1px 1px 2px black' }}>
+            <div className="absolute inset-0 flex items-center justify-center z-10 font-pixel-rpg">
+                <span className="font-bold text-xl text-white" style={{ textShadow: '1px 1px 2px black' }}>
                     {currentHp}
                 </span>
             </div>
@@ -119,11 +119,11 @@ const PrayerOrb: React.FC<{ currentPrayer: number, maxPrayer: number }> = ({ cur
       <div className="relative w-11 h-11 rounded-full border-2 border-gray-500 bg-gray-800 overflow-hidden shadow-lg">
         <div className="absolute bottom-0 left-0 w-full bg-blue-500 transition-all duration-300 ease-in-out" style={{ height: `${percentage}%` }} />
         <div className="absolute inset-0 flex items-center justify-center">
-            <img src="https://api.iconify.design/game-icons:polar-star.svg" alt="" className="w-8 h-8 filter invert opacity-25" />
+            <img src={getIconUrl("polar-star")} alt="" className="w-8 h-8 filter invert opacity-25" />
         </div>
         <div className="absolute top-1 left-1 w-8 h-8 rounded-full bg-white/20 blur-sm" />
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-            <span className="font-bold text-lg text-white" style={{ textShadow: '1px 1px 2px black' }}>
+        <div className="absolute inset-0 flex items-center justify-center z-10 font-pixel-rpg">
+            <span className="font-bold text-xl text-white" style={{ textShadow: '1px 1px 2px black' }}>
                 {Math.floor(currentPrayer)}
             </span>
         </div>
@@ -148,20 +148,20 @@ const RunEnergyOrb: React.FC<{
             return {
                 orbColor: 'bg-blue-400',
                 iconColor: 'white',
-                iconUrl: 'https://api.iconify.design/game-icons:meditation.svg'
+                iconUrl: 'meditation'
             };
         }
         if (isToggled) {
             return {
                 orbColor: 'bg-yellow-400',
                 iconColor: '#A16207',
-                iconUrl: 'https://api.iconify.design/game-icons:wingfoot.svg'
+                iconUrl: 'wingfoot'
             };
         }
         return {
             orbColor: 'bg-gray-700',
             iconColor: '#D2B48C',
-            iconUrl: 'https://api.iconify.design/game-icons:wingfoot.svg'
+            iconUrl: 'wingfoot'
         };
     }, [isResting, isToggled]);
     
@@ -205,11 +205,11 @@ const RunEnergyOrb: React.FC<{
                     className="w-8 h-8 transition-all duration-300"
                     style={{
                         backgroundColor: iconColor,
-                        maskImage: `url(${iconUrl})`,
+                        maskImage: `url(${getIconUrl(iconUrl)})`,
                         maskSize: 'contain',
                         maskRepeat: 'no-repeat',
                         maskPosition: 'center',
-                        WebkitMaskImage: `url(${iconUrl})`,
+                        WebkitMaskImage: `url(${getIconUrl(iconUrl)})`,
                         WebkitMaskSize: 'contain',
                         WebkitMaskRepeat: 'no-repeat',
                         WebkitMaskPosition: 'center',
@@ -217,8 +217,8 @@ const RunEnergyOrb: React.FC<{
                 />
             </div>
             <div className="absolute top-1 left-1 w-8 h-8 rounded-full bg-white/20 blur-sm" />
-            <div className="absolute inset-0 flex items-center justify-center z-10">
-                <span className="font-bold text-lg text-white" style={{ textShadow: '1px 1px 3px black' }}>
+            <div className="absolute inset-0 flex items-center justify-center z-10 font-pixel-rpg">
+                <span className="font-bold text-xl text-white" style={{ textShadow: '1px 1px 3px black' }}>
                     {Math.floor(currentEnergy)}
                 </span>
             </div>
@@ -365,9 +365,9 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
                                 }}
                                 onMouseEnter={(e) => ui.setTooltip({
                                     content: (
-                                        <div>
-                                            <p className="font-bold">{POIS[connId].name}</p>
-                                            {!isUnlocked && <p className="text-sm text-red-400">Locked</p>}
+                                        <div className="font-pixel-rpg">
+                                            <p className="font-bold text-xl">{POIS[connId].name}</p>
+                                            {!isUnlocked && <p className="text-lg text-red-400">Locked</p>}
                                         </div>
                                     ),
                                     position: { x: e.clientX, y: e.clientY }
@@ -419,7 +419,7 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
                         className="absolute z-10 w-8 h-8 bg-gray-800 hover:bg-gray-700 border-2 border-gray-500 rounded-full flex items-center justify-center bottom-px left-px"
                         aria-label="Open Dev Panel"
                     >
-                        <img src="https://api.iconify.design/game-icons:wrench.svg" alt="Dev Panel" className="w-5 h-5 filter invert" />
+                        <img src={getIconUrl("wrench")} alt="Dev Panel" className="w-5 h-5 filter invert" />
                     </button>
                 )}
                 
@@ -430,7 +430,7 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
                     className="absolute z-10 w-11 h-11 rounded-full bg-blue-800 hover:bg-blue-700 border-2 border-blue-500 flex items-center justify-center bottom-px right-px"
                     aria-label="Open Map"
                 >
-                    <img src="https://api.iconify.design/game-icons:world.svg" alt="Map" className="w-7 h-7 filter invert" />
+                    <img src={getIconUrl("world")} alt="Map" className="w-7 h-7 filter invert" />
                 </button>
             </div>
         </div>

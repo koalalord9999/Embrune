@@ -1,6 +1,6 @@
 import React from 'react';
 import { InventorySlot, PlayerSkill, SkillName } from '../../../types';
-import { GEM_CUTTING_RECIPES, ITEMS, getIconClassName } from '../../../constants';
+import {  GEM_CUTTING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../constants';
 import Button from '../../common/Button';
 import { ContextMenuOption } from '../../common/ContextMenu';
 import { MakeXPrompt, ContextMenuState } from '../../../hooks/useUIState';
@@ -69,7 +69,7 @@ const GemCuttingView: React.FC<GemCuttingViewProps> = ({ inventory, skills, onCu
                                 onContextMenu={(e) => createContextMenu(e, recipe)}
                             >
                                 <div className="flex items-center gap-3 mb-2">
-                                    <img src={cutItem.iconUrl} alt={cutItem.name} className={`w-10 h-10 bg-black/30 p-1 rounded ${getIconClassName(cutItem)}`} />
+                                    <img src={getIconUrl(cutItem.iconUrl)} alt={cutItem.name} className={`w-10 h-10 bg-black/30 p-1 rounded ${getIconClassName(cutItem)}`} />
                                     <h3 className="text-lg font-semibold text-yellow-300">{cutItem.name}</h3>
                                 </div>
                                 <div className="text-sm space-y-1 mb-3">

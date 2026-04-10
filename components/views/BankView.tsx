@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { InventorySlot, Item, BankTab } from '../../types';
-import { ITEMS, BANK_CAPACITY, getIconClassName, MAX_BANK_TABS } from '../../constants';
+import {  ITEMS, BANK_CAPACITY, getIconClassName, MAX_BANK_TABS, getIconUrl  } from '../../constants';
 import Button from '../common/Button';
 import { ContextMenuOption } from '../common/ContextMenu';
 import { MakeXPrompt, TooltipState, ContextMenuState, useUIState, WithdrawMode } from '../../hooks/useUIState';
@@ -28,17 +28,37 @@ interface BankSlotProps {
     asNote: boolean;
     activeTabId: number;
     onWithdraw: (bankIndex: number, quantity: number | 'all' | 'all-but-1', asNote: boolean) => void;
-    onPrimaryAction: () => void; // New prop for handling the click logic from parent
+    onPrimaryAction: () => void;
     setContextMenu: (menu: ContextMenuState | null) => void;
     setMakeXPrompt: (prompt: MakeXPrompt | null) => void;
     setTooltip: (tooltip: TooltipState | null) => void;
-    dragHandlers: any;
     isOneClickMode: boolean;
     onClearPlaceholder: (tabId: number, itemIndex: number) => void;
+    isDraggable: boolean;
+    isDragging: boolean;
+    isDragOver: boolean;
+    onDragStart: (e: React.DragEvent, index: number, tabId: number) => void;
+    onDragOver: (e: React.DragEvent, index: number) => void;
+    onDragLeave: () => void;
+    onDrop: (e: React.DragEvent, index: number) => void;
+    onDragEnd: () => void;
+    // Primitive props for stable positioning
+    row: number;
+    col: number;
+    rowHeight: number;
+    colWidth: number;
+    onExamine: (item: Item, quantity?: number) => void;
 }
 
-const BankSlot: React.FC<BankSlotProps> = (props) => {
-    const { slot, index, asNote, activeTabId, onWithdraw, onPrimaryAction, setContextMenu, setMakeXPrompt, setTooltip, dragHandlers, isOneClickMode, onClearPlaceholder } = props;
+const BankSlot: React.FC<BankSlotProps> = React.memo((props) => {
+    const { 
+        slot, index, asNote, activeTabId, onWithdraw, onPrimaryAction, 
+        setContextMenu, setMakeXPrompt, setTooltip, isOneClickMode, onClearPlaceholder,
+        isDraggable, isDragging, isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, onDragEnd,
+        row, col, rowHeight, colWidth,
+        onExamine
+    } = props;
+
     const isTouchDevice = useIsTouchDevice(false);
     const isPlaceholder = slot?.quantity === 0;
 
@@ -69,7 +89,7 @@ const BankSlot: React.FC<BankSlotProps> = (props) => {
             setContextMenu({
                 options: [
                     { label: 'Clear placeholder', onClick: () => performActionAndClose(() => onClearPlaceholder(activeTabId, index)) },
-                    { label: 'Examine', onClick: () => { setTooltip(null); setContextMenu(null); alert(item.description); } }
+                    { label: 'Examine', onClick: () => { setTooltip(null); setContextMenu(null); onExamine(item, 0); } }
                 ],
                 triggerEvent: eventForMenu,
                 isTouchInteraction: 'touches' in e || 'changedTouches' in e,
@@ -99,7 +119,7 @@ const BankSlot: React.FC<BankSlotProps> = (props) => {
             options.push({ label: `Withdraw All-but-1`, onClick: () => performActionAndClose(() => performWithdrawAction('all-but-1')), disabled: slot.quantity < 2 || isPlaceholder });
             options.push({ label: `Withdraw All`, onClick: () => performActionAndClose(() => performWithdrawAction('all')), disabled: isPlaceholder });
         }
-        options.push({ label: 'Examine', onClick: () => { setTooltip(null); setContextMenu(null); alert(item.description); } });
+        options.push({ label: 'Examine', onClick: () => { setTooltip(null); setContextMenu(null); onExamine(item, slot.quantity); } });
         setContextMenu({ options, triggerEvent: eventForMenu, isTouchInteraction: isTouchDevice, title: getDisplayName(slot) });
     };
 
@@ -113,7 +133,15 @@ const BankSlot: React.FC<BankSlotProps> = (props) => {
         }
     };
 
-    const combinedHandlers = { ...useLongPress({ onLongPress: handleLongPress, onClick: handleSingleTap, isOneClickMode }), ...dragHandlers };
+    const combinedHandlers = { 
+        ...useLongPress({ onLongPress: handleLongPress, onClick: handleSingleTap, isOneClickMode }),
+        draggable: isDraggable,
+        onDragStart: (e: React.DragEvent) => onDragStart(e, index, activeTabId),
+        onDragOver: (e: React.DragEvent) => onDragOver(e, index),
+        onDragLeave,
+        onDrop: (e: React.DragEvent) => onDrop(e, index),
+        onDragEnd
+    };
     const item = slot ? ITEMS[slot.itemId] : null;
 
     return (
@@ -125,26 +153,35 @@ const BankSlot: React.FC<BankSlotProps> = (props) => {
                 }
             }}
             onMouseLeave={() => setTooltip(null)}
+            className={`bg-gray-900 border-2 border-gray-700 rounded-md flex items-center justify-center p-1 absolute transition-all duration-150 ${slot ? 'cursor-grab' : ''} ${isDragging ? 'opacity-25' : ''} ${isDragOver ? 'border-green-400 scale-105 bg-green-900/50' : slot ? 'cursor-pointer hover:border-yellow-400' : ''}`}
+            data-bank-index={index}
+            style={{ 
+                left: col * colWidth, 
+                top: row * rowHeight, 
+                width: 80, 
+                height: 80, 
+                willChange: 'transform, opacity' // Hardware acceleration
+            }}
         >
             {slot && item && (
                 <>
-                    <img src={item.iconUrl} alt={item.name} className={`w-full h-full ${getIconClassName(item)} ${isPlaceholder ? 'opacity-10' : ''}`} />
+                    <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)} ${isPlaceholder ? 'opacity-10' : ''}`} />
                     {slot.statsOverride?.poisoned && (
                         <img 
-                            src="https://api.iconify.design/game-icons:boiling-bubbles.svg" 
+                            src={getIconUrl("boiling-bubbles")} 
                             alt="Poisoned"
                             className="poison-overlay-icon item-icon-uncut-emerald"
                             title="Poisoned"
                         />
                     )}
-                    <span className={`absolute bottom-0 right-1 text-xs font-bold ${getQuantityColor(slot.quantity)} ${isPlaceholder ? 'opacity-20' : ''}`} style={{ textShadow: '1px 1px 1px black' }}>
+                    <span className={`absolute bottom-0 right-1 text-lg font-pixel-rpg font-bold ${getQuantityColor(slot.quantity)} ${isPlaceholder ? 'opacity-20' : ''}`} style={{ textShadow: '1px 1px 1px black' }}>
                         {isPlaceholder ? '0' : formatQuantity(slot.quantity)}
                     </span>
                 </>
             )}
         </div>
     );
-};
+});
 
 interface BankViewProps {
     bank: BankTab[];
@@ -165,10 +202,19 @@ interface BankViewProps {
     ui: ReturnType<typeof useUIState>;
     isOneClickMode: boolean;
     onClearPlaceholder: (tabId: number, itemIndex: number) => void;
+    onExamine: (item: Item, quantity?: number) => void;
 }
 
+const ITEM_SIZE = 88; // 80px slot + 8px gap
+const VISIBLE_BUFFER = 3; // extra rows at top/bottom
+
 const BankView: React.FC<BankViewProps> = (props) => {
-    const { bank, onClose, onWithdraw, onDepositBackpack, onDepositEquipment, onMoveItem, onAddTab, onRemoveTab, onMoveItemToTab, onRenameTab, setContextMenu, setMakeXPrompt, setTooltip, bankPlaceholders, handleToggleBankPlaceholders, ui, isOneClickMode, onClearPlaceholder } = props;
+    const { 
+        bank, onClose, onWithdraw, onDepositBackpack, onDepositEquipment, onMoveItem, 
+        onAddTab, onRemoveTab, onMoveItemToTab, onRenameTab, setContextMenu, 
+        setMakeXPrompt, setTooltip, bankPlaceholders, handleToggleBankPlaceholders, 
+        ui, isOneClickMode, onClearPlaceholder, onExamine
+    } = props;
     
     const { activeBankTabId, setActiveBankTabId, activeWithdrawMode, setActiveWithdrawMode, customWithdrawAmount, setCustomWithdrawAmount } = ui;
     const [draggingIndex, setDraggingIndex] = useState<{ tabId: number; index: number } | null>(null);
@@ -176,12 +222,57 @@ const BankView: React.FC<BankViewProps> = (props) => {
     const [dragOverTabId, setDragOverTabId] = useState<number | null>(null);
     const [withdrawAsNote, setWithdrawAsNote] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // Virtualization state
+    const [scrollTop, setScrollTop] = useState(0);
+    const [containerWidth, setContainerWidth] = useState(600);
+    const [containerHeight, setContainerHeight] = useState(400);
+    const [isScrolling, setIsScrolling] = useState(false);
+    const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const scrollFrameId = useRef<number | null>(null);
 
     const isTouchDevice = useIsTouchDevice(false);
     const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const panelRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
     
     const activeTab = bank.find(t => t.id === activeBankTabId) ?? bank[0];
+
+    // Measure container size
+    useEffect(() => {
+        const panel = scrollContainerRef.current;
+        if (!panel) return;
+
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                setContainerWidth(entry.contentRect.width);
+                setContainerHeight(entry.contentRect.height);
+            }
+        });
+
+        resizeObserver.observe(panel);
+        return () => resizeObserver.disconnect();
+    }, []);
+
+    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+        if (!isScrolling) setIsScrolling(true);
+        if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
+        scrollEndTimer.current = setTimeout(() => setIsScrolling(false), 150);
+
+        // Throttled scroll state update via rAF
+        if (scrollFrameId.current) cancelAnimationFrame(scrollFrameId.current);
+        const st = e.currentTarget.scrollTop;
+        scrollFrameId.current = requestAnimationFrame(() => {
+            setScrollTop(st);
+        });
+    }, [isScrolling]);
+
+    useEffect(() => {
+        return () => {
+            if (scrollFrameId.current) cancelAnimationFrame(scrollFrameId.current);
+            if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
+        };
+    }, []);
+
 
     const itemsToDisplay = useMemo(() => {
         if (!searchTerm) {
@@ -192,45 +283,58 @@ const BankView: React.FC<BankViewProps> = (props) => {
             }));
         }
         const results: { slot: InventorySlot | null; tabId: number; index: number }[] = [];
-        
         bank.forEach(tab => {
             tab.items.forEach((slot, index) => {
                 if (!slot) return;
                 const itemData = ITEMS[slot.itemId];
-                if (!itemData) return;
-                
-                if (itemData.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+                if (itemData && itemData.name.toLowerCase().includes(searchTerm.toLowerCase())) {
                     results.push({ slot, tabId: tab.id, index });
                 }
             });
         });
-
         return results;
     }, [activeTab, bank, searchTerm]);
 
+    const totalBankedItems = useMemo(() => {
+        return bank.reduce((total, tab) => total + tab.items.filter(item => item !== null && item.quantity > 0).length, 0);
+    }, [bank]);
 
-    const totalBankedItems = bank.reduce((total, tab) => total + tab.items.filter(item => item !== null && item.quantity > 0).length, 0);
+    const virtualization = useMemo(() => {
+        const gap = 8;
+        const availableWidth = containerWidth - 16; // padding
+        const cols = Math.max(1, Math.floor((availableWidth + gap) / (80 + gap)));
+        const totalRows = Math.ceil(itemsToDisplay.length / cols);
+        
+        const rowHeight = ITEM_SIZE;
+        const startRow = Math.max(0, Math.floor(scrollTop / rowHeight) - VISIBLE_BUFFER);
+        const endRow = Math.min(totalRows, Math.ceil((scrollTop + containerHeight) / rowHeight) + VISIBLE_BUFFER);
+        
+        return {
+            cols,
+            totalRows,
+            startIndex: startRow * cols,
+            endIndex: endRow * cols,
+            totalHeight: totalRows * rowHeight,
+            rowHeight,
+            colWidth: 80 + gap
+        };
+    }, [containerWidth, containerHeight, scrollTop, itemsToDisplay.length]);
+
 
     const handleToggleClick = (mode: WithdrawMode) => {
         setActiveWithdrawMode(mode);
-        if (mode !== 'x') {
-            setCustomWithdrawAmount(null);
-        }
+        if (mode !== 'x') setCustomWithdrawAmount(null);
     };
 
-    const handleSlotPrimaryAction = (itemInfo: { slot: InventorySlot | null, tabId: number, index: number }) => {
+    const handleSlotPrimaryAction = useCallback((itemInfo: { slot: InventorySlot | null, tabId: number, index: number }) => {
         const { slot, tabId, index: realIndex } = itemInfo;
-        
         if (!slot || slot.quantity === 0) return;
 
         let quantityToWithdraw: number | 'all' = 1;
-
-        if (activeWithdrawMode === 'all') {
-            quantityToWithdraw = 'all';
-        } else if (activeWithdrawMode === 'x') {
-            if (customWithdrawAmount !== null) {
-                quantityToWithdraw = customWithdrawAmount;
-            } else {
+        if (activeWithdrawMode === 'all') quantityToWithdraw = 'all';
+        else if (activeWithdrawMode === 'x') {
+            if (customWithdrawAmount !== null) quantityToWithdraw = customWithdrawAmount;
+            else {
                 const item = ITEMS[slot.itemId];
                 setMakeXPrompt({
                     title: `Withdraw ${item.name}`,
@@ -242,54 +346,57 @@ const BankView: React.FC<BankViewProps> = (props) => {
                 });
                 return;
             }
-        } else {
-            quantityToWithdraw = activeWithdrawMode;
-        }
+        } else quantityToWithdraw = activeWithdrawMode;
 
         onWithdraw(realIndex, quantityToWithdraw, withdrawAsNote, tabId);
         setTooltip(null);
-    };
+    }, [activeWithdrawMode, customWithdrawAmount, onWithdraw, setCustomWithdrawAmount, setMakeXPrompt, setTooltip, withdrawAsNote]);
 
-    const handleDragStart = (e: React.DragEvent, displayIndex: number, tabId: number) => {
+    const handleDragStart = useCallback((e: React.DragEvent, displayIndex: number, tabId: number) => {
         setTooltip(null);
-        if (searchTerm) {
-            e.preventDefault();
-            return;
-        }
+        if (searchTerm) { e.preventDefault(); return; }
         e.dataTransfer.setData('application/json', JSON.stringify({ index: displayIndex, tabId }));
         e.dataTransfer.effectAllowed = 'move';
         setTimeout(() => setDraggingIndex({ index: displayIndex, tabId }), 0);
-    };
+    }, [searchTerm, setTooltip]);
 
-    const handleDrop = (e: React.DragEvent, toDisplayIndex: number) => {
+    const handleDragOver = useCallback((e: React.DragEvent, realIndex: number) => {
+        e.preventDefault();
+        if (draggingIndex !== null) setDragOverIndex(realIndex);
+    }, [draggingIndex]);
+
+    const handleDragLeave = useCallback(() => {
+        setDragOverIndex(null);
+    }, []);
+
+    const handleDrop = useCallback((e: React.DragEvent, toDisplayIndex: number) => {
         e.preventDefault();
         setTooltip(null);
         if (searchTerm) return;
-
         try {
             const data = JSON.parse(e.dataTransfer.getData('application/json'));
-            const fromIndex = data.index;
-            const fromTabId = data.tabId;
-            if (fromTabId === activeBankTabId && fromIndex !== toDisplayIndex) {
-                onMoveItem(fromIndex, toDisplayIndex, activeBankTabId);
+            if (data.tabId === activeBankTabId && data.index !== toDisplayIndex) {
+                onMoveItem(data.index, toDisplayIndex, activeBankTabId);
             }
         } catch (error) { console.error("Drop failed:", error); }
         setDraggingIndex(null);
         setDragOverIndex(null);
-    };
+    }, [activeBankTabId, onMoveItem, searchTerm, setTooltip]);
+
+    const handleDragEnd = useCallback(() => {
+        setDraggingIndex(null);
+        setDragOverIndex(null);
+        setTooltip(null);
+    }, [setTooltip]);
 
     const handleTabDrop = (e: React.DragEvent, toTabId: number) => {
         e.preventDefault();
         setDragOverTabId(null);
         if (searchTerm) return;
-
         try {
             const data = JSON.parse(e.dataTransfer.getData('application/json'));
-            if (!data) return;
-            const fromIndex = data.index;
-            const fromTabId = data.tabId;
-            if (fromTabId !== toTabId) {
-                onMoveItemToTab(fromIndex, fromTabId, toTabId);
+            if (data && data.tabId !== toTabId) {
+                onMoveItemToTab(data.index, data.tabId, toTabId);
             }
         } catch (error) { console.error("Tab drop failed:", error); }
     };
@@ -302,10 +409,7 @@ const BankView: React.FC<BankViewProps> = (props) => {
         let index = -1;
         while (currentElement) {
             const indexStr = currentElement.getAttribute('data-bank-index');
-            if (indexStr) {
-                index = parseInt(indexStr, 10);
-                break;
-            }
+            if (indexStr) { index = parseInt(indexStr, 10); break; }
             currentElement = currentElement.parentElement;
         }
         if (index > -1 && itemsToDisplay[index]?.slot) {
@@ -328,32 +432,19 @@ const BankView: React.FC<BankViewProps> = (props) => {
         let currentElement = overElement;
         while (currentElement) {
             const indexStr = currentElement.getAttribute('data-bank-index');
-            if (indexStr) {
-                targetDisplayIndex = parseInt(indexStr, 10);
-                break;
-            }
+            if (indexStr) { targetDisplayIndex = parseInt(indexStr, 10); break; }
             currentElement = currentElement.parentElement;
         }
-
         if (targetDisplayIndex !== null && itemsToDisplay[targetDisplayIndex]) {
             setDragOverIndex(itemsToDisplay[targetDisplayIndex].index);
-        } else {
-            setDragOverIndex(null);
-        }
+        } else setDragOverIndex(null);
     }, [draggingIndex, itemsToDisplay]);
 
     const handleTouchEnd = () => {
-        if (holdTimer.current) {
-            clearTimeout(holdTimer.current);
-            holdTimer.current = null;
-        }
+        if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; }
         if (draggingIndex && dragOverIndex !== null) {
-            const fromIndex = draggingIndex.index;
-            const fromTabId = draggingIndex.tabId;
-            const toIndex = dragOverIndex;
-
-            if (fromTabId === activeBankTabId && fromIndex !== toIndex) {
-                 onMoveItem(fromIndex, toIndex, fromTabId);
+            if (draggingIndex.tabId === activeBankTabId && draggingIndex.index !== dragOverIndex) {
+                 onMoveItem(draggingIndex.index, dragOverIndex, draggingIndex.tabId);
             }
         }
         setDraggingIndex(null);
@@ -361,12 +452,10 @@ const BankView: React.FC<BankViewProps> = (props) => {
     };
     
     useEffect(() => {
-        const panel = panelRef.current;
+        const panel = scrollContainerRef.current;
         if (!panel) return;
         panel.addEventListener('touchmove', handleTouchMove, { passive: false });
-        return () => {
-            panel.removeEventListener('touchmove', handleTouchMove);
-        };
+        return () => panel.removeEventListener('touchmove', handleTouchMove);
     }, [handleTouchMove]);
 
     const handleTabContextMenu = (e: React.MouseEvent, tab: BankTab) => {
@@ -393,44 +482,29 @@ const BankView: React.FC<BankViewProps> = (props) => {
             id: 'bank-tour',
             currentStepIndex: 0,
             steps: [
-                { targetId: 'bank-container', description: <p>Welcome to the <span className="text-yellow-400 font-bold">Bank of Embrune</span>! Here you can store your valuables safely. Even if you fall in battle, items kept here remain secure.</p> },
-                { targetId: 'bank-tabs', description: <p>These are your <span className="text-yellow-300 font-bold">Bank Tabs</span>. You can organize your items by dragging them into different tabs. You can have up to {MAX_BANK_TABS} tabs!</p> },
-                { targetId: 'bank-item-grid', description: <p>This is the <span className="text-yellow-300 font-bold">Main Vault</span>. It shows all the items in your current tab. Click an item to withdraw it, or drag to reorganize.</p> },
-                { targetId: 'bank-quantity-toggles', description: <p>Choose <span className="text-yellow-300 font-bold">how many</span> items you want to move at once. Select 1, 5, 10, or 'All'. Use 'X' to set a custom amount.</p> },
-                { targetId: 'bank-withdraw-mode', description: <p>You can withdraw items as physical objects or as <span className="text-yellow-300 font-bold">Bank Notes</span>. Notes stack in your bag, making them easier to carry in bulk!</p> },
-                { targetId: 'bank-search', description: <p>Need to find something specific? Use the <span className="text-yellow-300 font-bold">Search Bar</span> to filter items across all your tabs instantly.</p> },
-                { targetId: 'bank-deposit-backpack', description: <p>Need space? Click this to <span className="text-yellow-300 font-bold">deposit everything</span> currently in your inventory into the bank.</p> },
-                { targetId: 'bank-deposit-equipment', description: <p>Use this to quickly <span className="text-yellow-300 font-bold">deposit all equipped items</span>. Great for changing gear sets in a hurry!</p> },
-                { targetId: 'bank-placeholders', description: <p>This padlock icon toggles <span className="text-yellow-300 font-bold">Bank Placeholders</span>. When ON, withdrawing all of an item leaves a slot so your bank stays organized.</p> },
-                { targetId: 'bank-exit', description: <p>That's the basics! Click <span className="text-yellow-300 font-bold">Exit Bank</span> when you're finished to return to the world.</p> },
+                { targetId: 'bank-container', description: <p>Welcome to the <span className="text-yellow-400 font-bold">Bank of Embrune</span>!</p> },
+                { targetId: 'bank-tabs', description: <p>Organize items by dragging them into tabs.</p> },
+                { targetId: 'bank-item-grid', description: <p>This is the <span className="text-yellow-300 font-bold">Main Vault</span>.</p> },
+                { targetId: 'bank-quantity-toggles', description: <p>Choose how many items to move.</p> },
+                { targetId: 'bank-withdraw-mode', description: <p>Withdraw as physical items or notes.</p> },
+                { targetId: 'bank-search', description: <p>Search across all tabs.</p> },
+                { targetId: 'bank-deposit-backpack', description: <p>Deposit inventory.</p> },
+                { targetId: 'bank-deposit-equipment', description: <p>Deposit gear.</p> },
+                { targetId: 'bank-placeholders', description: <p>Toggle placeholders.</p> },
+                { targetId: 'bank-exit', description: <p>Exit when finished.</p> },
             ]
         });
     }, [ui]);
 
     return (
-        <div data-tut="bank-container" className={`flex flex-col h-full animate-fade-in text-gray-200`} onClick={() => setTooltip(null)}>
+        <div data-tut="bank-container" className="flex flex-col h-full animate-fade-in text-gray-200" onClick={() => setTooltip(null)}>
             <div className="flex justify-between items-start mb-2 pb-2 border-b-2 border-gray-600">
                 <h1 className="text-3xl font-bold text-yellow-400">Bank of Embrune</h1>
                 <div className="text-right">
                     <p className="text-gray-400">{totalBankedItems} / {BANK_CAPACITY} Slots Used</p>
                     <div className="flex gap-2 items-center mt-1">
-                        <Button
-                            onClick={handleStartTutorial}
-                            size="sm"
-                            variant="secondary"
-                            className="w-8 h-8 flex items-center justify-center font-bold text-lg"
-                            onMouseEnter={(e) => setTooltip({ content: 'Banking Tutorial', position: { x: e.clientX, y: e.clientY } })}
-                            onMouseLeave={() => setTooltip(null)}
-                            aria-label="Start banking tutorial"
-                        >
-                            ?
-                        </Button>
-                        <Button data-tut="bank-exit" onClick={() => {
-                            if (ui.activeTutorial?.id === 'bank-tour') {
-                                ui.setActiveTutorial(null);
-                            }
-                            onClose();
-                        }} size="sm">Exit Bank</Button>
+                        <Button onClick={handleStartTutorial} size="sm" variant="secondary" className="w-8 h-8 flex items-center justify-center font-bold text-lg">?</Button>
+                        <Button data-tut="bank-exit" onClick={() => { if (ui.activeTutorial?.id === 'bank-tour') ui.setActiveTutorial(null); onClose(); }} size="sm">Exit Bank</Button>
                     </div>
                 </div>
             </div>
@@ -438,18 +512,13 @@ const BankView: React.FC<BankViewProps> = (props) => {
             <div data-tut="bank-tabs" className="bank-tabs-container flex items-end -mb-px">
                 {bank.map(tab => {
                     let iconContent = null;
-                    if (tab.id === 0) {
-                        iconContent = <img src="https://api.iconify.design/game-icons:infinity.svg" alt="Main Tab" className="bank-tab-icon filter invert w-8 h-8" />;
-                    } else {
+                    if (tab.id === 0) iconContent = <img src={getIconUrl("infinity")} alt="Main Tab" className="bank-tab-icon filter invert w-8 h-8" />;
+                    else {
                         const firstItem = tab.items.find(item => item !== null && item.quantity > 0);
                         if (firstItem) {
                             const itemData = ITEMS[firstItem.itemId];
-                            if (itemData) {
-                                iconContent = <img src={itemData.iconUrl} alt={tab.name} className={`bank-tab-icon ${getIconClassName(itemData)} w-8 h-8`} />;
-                            }
-                        } else {
-                            iconContent = <img src="https://api.iconify.design/game-icons:bank.svg" alt="Empty Tab" className="bank-tab-icon filter invert opacity-50 w-8 h-8 " />;
-                        }
+                            if (itemData) iconContent = <img src={getIconUrl(itemData.iconUrl)} alt={tab.name} className={`bank-tab-icon ${getIconClassName(itemData)} w-8 h-8`} />;
+                        } else iconContent = <img src={getIconUrl("bank")} alt="Empty Tab" className="bank-tab-icon filter invert opacity-50 w-8 h-8 " />;
                     }
 
                     const dndHandlers = !isTouchDevice ? {
@@ -459,61 +528,39 @@ const BankView: React.FC<BankViewProps> = (props) => {
                     } : {};
 
                     return (
-                        <button
-                            key={tab.id}
-                            className={`bank-tab ${tab.id === activeBankTabId ? 'active' : ''} ${dragOverTabId === tab.id ? 'bank-tab-drag-over' : ''}`}
-                            onClick={() => handleTabClick(tab.id)}
-                            onContextMenu={(e) => handleTabContextMenu(e, tab)}
-                            onMouseEnter={(e) => setTooltip({ content: tab.name, position: { x: e.clientX, y: e.clientY } })}
-                            onMouseLeave={() => setTooltip(null)}
-                            {...dndHandlers}
-                        >
+                        <button key={tab.id} className={`bank-tab ${tab.id === activeBankTabId ? 'active' : ''} ${dragOverTabId === tab.id ? 'bank-tab-drag-over' : ''}`} onClick={() => handleTabClick(tab.id)} onContextMenu={(e) => handleTabContextMenu(e, tab)} onMouseEnter={(e) => setTooltip({ content: tab.name, position: { x: e.clientX, y: e.clientY } })} onMouseLeave={() => setTooltip(null)} {...dndHandlers}>
                             {iconContent}
                         </button>
                     );
                 })}
                 {bank.length < MAX_BANK_TABS && (
-                     <button
-                        className="bank-tab"
-                        onClick={() => { onAddTab(); setTooltip(null); }}
-                        onMouseEnter={(e) => setTooltip({ content: 'Add new tab', position: { x: e.clientX, y: e.clientY }})}
-                        onMouseLeave={() => setTooltip(null)}
-                    >
-                        <img src="https://api.iconify.design/game-icons:health-normal.svg" alt="Add Tab" className="bank-tab-icon filter invert opacity-50 w-8 h-8" />
+                     <button className="bank-tab" onClick={() => { onAddTab(); setTooltip(null); }} onMouseEnter={(e) => setTooltip({ content: 'Add new tab', position: { x: e.clientX, y: e.clientY }})} onMouseLeave={() => setTooltip(null)}>
+                        <img src={getIconUrl("health-normal")} alt="Add Tab" className="bank-tab-icon filter invert opacity-50 w-8 h-8" />
                     </button>
                 )}
             </div>
 
             <div 
                 data-tut="bank-item-grid"
-                className="flex-grow min-h-[300px] max-h-[400px] bg-black/40 p-2 rounded-lg border-2 border-gray-600 border-t-0 rounded-t-none pr-1"
-                ref={panelRef}
+                className="flex-grow bg-black/40 p-2 rounded-lg border-2 border-gray-600 border-t-0 rounded-t-none pr-1 overflow-y-auto"
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
             >
-                <div className="bank-grid h-full pb-8">
-                    {itemsToDisplay.map((displayItem, displayIndex) => {
+                <div className="relative w-full" style={{ height: virtualization.totalHeight }}>
+                    {itemsToDisplay.slice(virtualization.startIndex, virtualization.endIndex).map((displayItem, sliceIdx) => {
+                        const displayIndex = virtualization.startIndex + sliceIdx;
                         const { slot, tabId, index: realIndex } = displayItem;
-                        let slotClasses = '';
-                        const isDraggingThis = draggingIndex?.tabId === tabId && draggingIndex?.index === realIndex;
-                        
-                        if (isDraggingThis) slotClasses = 'opacity-25';
-                        else if (dragOverIndex === realIndex && tabId === activeBankTabId) slotClasses = 'border-green-400 scale-105 bg-green-900/50';
-                        else if (slot) slotClasses = 'cursor-pointer hover:border-yellow-400';
-
-                        const dragHandlers = {
-                            draggable: !!slot && !searchTerm,
-                            'data-bank-index': displayIndex,
-                            onDragStart: (e: React.DragEvent) => handleDragStart(e, realIndex, tabId),
-                            onDragOver: (e: React.DragEvent) => { e.preventDefault(); if (draggingIndex !== null) setDragOverIndex(realIndex); },
-                            onDragLeave: () => setDragOverIndex(null),
-                            onDrop: (e: React.DragEvent) => handleDrop(e, realIndex),
-                            onDragEnd: () => { setDraggingIndex(null); setDragOverIndex(null); setTooltip(null); },
-                            className: `w-full aspect-square bg-gray-900 border-2 border-gray-700 rounded-md flex items-center justify-center p-1 relative transition-all duration-150 ${slot ? 'cursor-grab' : ''} ${slotClasses}`
-                        };
+                        const row = Math.floor(displayIndex / virtualization.cols);
+                        const col = displayIndex % virtualization.cols;
 
                         return <BankSlot 
                             key={`${tabId}-${realIndex}`}
+                            row={row}
+                            col={col}
+                            rowHeight={virtualization.rowHeight}
+                            colWidth={virtualization.colWidth}
                             slot={slot} 
                             index={realIndex}
                             asNote={withdrawAsNote} 
@@ -522,72 +569,48 @@ const BankView: React.FC<BankViewProps> = (props) => {
                             onPrimaryAction={() => handleSlotPrimaryAction(displayItem)}
                             setContextMenu={setContextMenu} 
                             setMakeXPrompt={setMakeXPrompt} 
-                            setTooltip={setTooltip} 
-                            dragHandlers={dragHandlers} 
+                            setTooltip={isScrolling ? () => {} : setTooltip}
                             isOneClickMode={isOneClickMode} 
-                            onClearPlaceholder={onClearPlaceholder} 
+                            onClearPlaceholder={onClearPlaceholder}
+                            isDraggable={!!slot && !searchTerm}
+                            isDragging={draggingIndex?.tabId === tabId && draggingIndex?.index === realIndex}
+                            isDragOver={dragOverIndex === realIndex && tabId === activeBankTabId}
+                            onDragStart={handleDragStart}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            onDragEnd={handleDragEnd}
+                            onExamine={onExamine}
                         />;
                     })}
                     {itemsToDisplay.length === 0 && searchTerm && (
-                         <div className="col-span-full text-center text-gray-400 italic py-4">
-                             No items found matching "{searchTerm}".
-                         </div>
+                         <div className="col-span-full text-center text-gray-400 italic py-4">No items found matching "{searchTerm}".</div>
                     )}
                 </div>
             </div>
 
             <div className="mt-2 pt-2 border-t-2 border-gray-600 flex flex-wrap justify-between items-center gap-2">
                 <div className="flex items-center gap-2">
-                    <button data-tut="bank-withdraw-mode" onClick={() => setWithdrawAsNote(prev => !prev)} className={`w-10 h-10 relative overflow-hidden rounded transition-colors ${withdrawAsNote ? 'bg-yellow-600 border-2 border-yellow-500' : 'bg-gray-700 border-2 border-gray-600 hover:bg-gray-600'}`} title="Toggle Withdraw as Note">
-                        <img src="https://api.iconify.design/game-icons:folded-paper.svg" alt="Note" className="item-note-paper" />
+                    <button onClick={() => setWithdrawAsNote(prev => !prev)} className={`w-10 h-10 relative overflow-hidden rounded ${withdrawAsNote ? 'bg-yellow-600 border-2 border-yellow-500' : 'bg-gray-700 border-2 border-gray-600 hover:bg-gray-600'}`}>
+                        <img src={getIconUrl("folded-paper")} alt="Note" className="item-note-paper" />
                     </button>
-                    <button data-tut="bank-placeholders" onClick={handleToggleBankPlaceholders} className={`w-10 h-10 flex items-center justify-center rounded transition-colors ${bankPlaceholders ? 'bg-yellow-600 border-2 border-yellow-500' : 'bg-gray-700 border-2 border-gray-600 hover:bg-gray-600'}`} title="Toggle Bank Placeholders">
+                    <button onClick={handleToggleBankPlaceholders} className={`w-10 h-10 flex items-center justify-center rounded ${bankPlaceholders ? 'bg-yellow-600 border-2 border-yellow-500' : 'bg-gray-700 border-2 border-gray-600 hover:bg-gray-600'}`}>
                         <img src={bankPlaceholders ? "https://api.iconify.design/game-icons:padlock.svg" : "https://api.iconify.design/game-icons:padlock-open.svg"} alt="Placeholders" className="w-6 h-6 filter invert" />
                     </button>
                 </div>
-
-                <div data-tut="bank-quantity-toggles" className="flex items-center gap-1">
-                     {[1, 5, 10].map(qty => (
-                        <button
-                            key={qty}
-                            onClick={() => handleToggleClick(qty as WithdrawMode)}
-                            className={`h-10 px-3 rounded font-bold text-sm transition-colors ${activeWithdrawMode === qty ? 'bg-yellow-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-                        >
-                            {qty}
+                <div className="flex items-center gap-1">
+                     {[1, 5, 10, 'x', 'all'].map(qty => (
+                        <button key={qty} onClick={() => handleToggleClick(qty as WithdrawMode)} className={`h-10 px-3 rounded font-bold text-sm ${activeWithdrawMode === qty ? 'bg-yellow-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
+                            {qty === 'x' ? (customWithdrawAmount ? `X: ${customWithdrawAmount}` : 'X') : qty}
                         </button>
                     ))}
-                    <button
-                        onClick={() => handleToggleClick('x')}
-                        className={`h-10 px-3 rounded font-bold text-sm transition-colors ${activeWithdrawMode === 'x' ? 'bg-yellow-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-                    >
-                        {customWithdrawAmount ? `X: ${customWithdrawAmount}` : 'X'}
-                    </button>
-                    <button
-                        onClick={() => handleToggleClick('all')}
-                        className={`h-10 px-3 rounded font-bold text-sm transition-colors ${activeWithdrawMode === 'all' ? 'bg-yellow-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
-                    >
-                        All
-                    </button>
                 </div>
-                
-                <div data-tut="bank-search" className="flex-grow max-w-xs mx-2">
-                    <input 
-                        type="text" 
-                        placeholder="Search..." 
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full h-10 px-3 rounded bg-gray-800 border border-gray-600 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-yellow-500 transition-colors"
-                    />
+                <div className="flex-grow max-w-xs mx-2">
+                    <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full h-10 px-3 rounded bg-gray-800 border border-gray-600 text-sm text-white focus:outline-none focus:border-yellow-500" />
                 </div>
-
                 <div className="flex justify-center gap-2">
-                    <button data-tut="bank-deposit-backpack" onClick={() => onDepositBackpack()} className="w-10 h-10 flex items-center justify-center rounded bg-gray-700 border-2 border-gray-600 hover:bg-gray-600 transition-colors" title="Deposit Inventory">
-                        <img src="https://api.iconify.design/game-icons:profit.svg" alt="Deposit Inventory" className="w-6 h-6 filter invert" />
-                    </button>
-                    <button data-tut="bank-deposit-equipment" onClick={() => onDepositEquipment()} className="w-10 h-10 relative flex items-center justify-center rounded bg-gray-700 border-2 border-gray-600 hover:bg-gray-600 transition-colors overflow-hidden" title="Deposit Equipment">
-                        <img src="https://api.iconify.design/game-icons:contract.svg" alt="" className="bank-action-bg-icon" />
-                        <img src="https://api.iconify.design/game-icons:battle-gear.svg" alt="Deposit Equipment" className="relative w-6 h-6 filter invert" />
-                    </button>
+                    <button onClick={() => onDepositBackpack()} className="w-10 h-10 flex items-center justify-center rounded bg-gray-700 border-2 border-gray-600 hover:bg-gray-600"><img src={getIconUrl("profit")} alt="Deposit" className="w-6 h-6 filter invert" /></button>
+                    <button onClick={() => onDepositEquipment()} className="w-10 h-10 relative flex items-center justify-center rounded bg-gray-700 border-2 border-gray-600 hover:bg-gray-600 overflow-hidden"><img src={getIconUrl("contract")} alt="" className="bank-action-bg-icon" /><img src={getIconUrl("battle-gear")} alt="Deposit" className="relative w-6 h-6 filter invert" /></button>
                 </div>
             </div>
         </div>

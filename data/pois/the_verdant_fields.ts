@@ -153,6 +153,7 @@ export const theVerdantFieldsPois: Record<string, POI> = {
             { type: 'skilling', id: 'boar_woods_edge_tree', name: 'Chop Tree', skill: SkillName.Woodcutting, requiredLevel: 1, loot: [{ itemId: 'logs', chance: 1, xp: 25 }], resourceCount: { min: 2, max: 4 }, respawnTime: 12000, gatherTime: 2000 },
         ],
         regionId: 'the_verdant_fields',
+        maxGroupSize: 2,
         x: 460, y: 1240
     },
     winding_brook_north: {
@@ -259,8 +260,13 @@ export const theVerdantFieldsPois: Record<string, POI> = {
         name: "Giant's Foothold",
         description: 'A small plateau where the ground is scarred with enormous footprints. Young, boisterous hill giants roam here.',
         connections: ['ancient_standing_stones'],
-        activities: [ { type: 'combat', monsterId: 'young_hill_giant' } ],
+        activities: [
+            { type: 'combat', monsterId: 'young_hill_giant' },
+            { type: 'combat', monsterId: 'young_hill_giant' },
+            { type: 'combat', monsterId: 'young_hill_giant' },
+        ],
         regionId: 'the_verdant_fields',
+        maxGroupSize: 2,
         x: 400, y: 900
     },
     tanglewood_edge: {
@@ -291,6 +297,7 @@ export const theVerdantFieldsPois: Record<string, POI> = {
             { type: 'ground_item', id: 'wolf_den_beef', itemId: 'raw_beef', resourceCount: 1, respawnTimer: 120000 },
         ],
         regionId: 'the_verdant_fields',
+        maxGroupSize: 2,
         x: 450, y: 1150
     },
     bear_cave: {
@@ -304,6 +311,7 @@ export const theVerdantFieldsPois: Record<string, POI> = {
              { type: 'combat', monsterId: 'bear' }
             ],
         regionId: 'the_verdant_fields',
+        maxGroupSize: 2,
         x: 400, y: 1200
     },
     overgrown_ruins: {
@@ -311,8 +319,13 @@ export const theVerdantFieldsPois: Record<string, POI> = {
         name: 'Overgrown Ruins',
         description: 'The crumbling stone foundations of some ancient structure are being reclaimed by the forest. Strange, tree-like creatures wander here.',
         connections: ['bear_cave', 'hunters_campsite'],
-        activities: [ { type: 'combat', monsterId: 'treant_sapling' } ],
+        activities: [
+            { type: 'combat', monsterId: 'treant_sapling' },
+            { type: 'combat', monsterId: 'treant_sapling' },
+            { type: 'combat', monsterId: 'treant_sapling' },
+        ],
         regionId: 'the_verdant_fields',
+        maxGroupSize: 2,
         x: 350, y: 1150
     },
     hunters_campsite: {
@@ -341,8 +354,13 @@ export const theVerdantFieldsPois: Record<string, POI> = {
         name: 'Hornet Nest Grove',
         description: 'The air is filled with the loud buzzing of enormous hornets. Several large, papery nests hang from the trees.',
         connections: ['stag_clearing'],
-        activities: [ { type: 'combat', monsterId: 'giant_hornet' }, { type: 'combat', monsterId: 'giant_hornet' } ],
+        activities: [
+            { type: 'combat', monsterId: 'giant_hornet' },
+            { type: 'combat', monsterId: 'giant_hornet' },
+            { type: 'combat', monsterId: 'giant_hornet' },
+        ],
         regionId: 'the_verdant_fields',
+        maxGroupSize: 2,
         x: 200, y: 1200
     },
     clearwater_ford: {
@@ -423,9 +441,9 @@ export const theVerdantFieldsPois: Record<string, POI> = {
         description: 'A low, grass-covered mound with a single stone door, sealed shut with an ancient lock.',
         connections: ['ancient_standing_stones'],
         activities: [
-            { type: 'npc', name: 'Examine Seal', icon: 'https://api.iconify.design/game-icons:locked-fortress.svg', questCondition: { questId: 'an_echo_of_battle', stages: [0] }, startNode: 'aeb_barrow_seal' },
+            { type: 'npc', name: 'Examine Seal', icon: 'locked-fortress', questCondition: { questId: 'an_echo_of_battle', stages: [0] }, startNode: 'aeb_barrow_seal' },
             { type: 'ladder', name: 'Enter the Barrow', questCondition: { questId: 'an_echo_of_battle', stages: [6, 7, 8], visibleAfterCompletion: true }, direction: 'down', toPoiId: `barrow_entrance_hall` },
-            { type: 'npc', name: 'Use Reforged Key', icon: 'https://api.iconify.design/game-icons:key-skeleton.svg', questCondition: { questId: 'an_echo_of_battle', stages: [5] }, startNode: 'aeb_barrow_door_puzzle_start' }
+            { type: 'npc', name: 'Use Reforged Key', icon: 'key-skeleton', questCondition: { questId: 'an_echo_of_battle', stages: [5] }, startNode: 'aeb_barrow_door_puzzle_start' }
         ],
         regionId: 'the_verdant_fields',
         x: 400, y: 950

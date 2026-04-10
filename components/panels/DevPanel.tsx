@@ -3,13 +3,14 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import Button from '../common/Button';
 import { useInventory } from '../../hooks/useInventory';
 import { Item, SkillName, ToolType } from '../../types';
-import { ITEMS, INVENTORY_CAPACITY, getIconClassName, REGIONS, ALL_SKILLS, QUESTS, LOG_HARDNESS, AGILITY_COURSES } from '../../constants';
+import { ITEMS, INVENTORY_CAPACITY, getIconClassName, REGIONS, ALL_SKILLS, QUESTS, LOG_HARDNESS, AGILITY_COURSES, getIconUrl } from '../../constants';
 import { POIS } from '../../data/pois';
 import { TooltipState, useUIState } from '../../hooks/useUIState';
 import { useAgility } from '../../hooks/useAgility';
 
 interface GameManagerProps {
     onResetQuest: (questId: string) => void;
+    onAdjustQuestStage: (questId: string, amount: number) => void;
     showAllPois: boolean;
     onToggleShowAllPois: () => void;
     isMapManagerEnabled: boolean;
@@ -20,32 +21,40 @@ interface GameManagerProps {
     onToggleTouchSimulation: () => void;
     onResetQuestBoards: () => void;
     onResetPilferingHouses: () => void;
+    onTrialTestBoost: () => void;
+    isShowMusicStatusOverlay: boolean;
+    onToggleMusicStatusOverlay: () => void;
 }
 
 const GameManagerComponent: React.FC<GameManagerProps> = ({
-    onResetQuest, showAllPois, onToggleShowAllPois, isMapManagerEnabled,
+    onResetQuest, onAdjustQuestStage, showAllPois, onToggleShowAllPois, isMapManagerEnabled,
     onToggleMapManager, onCommitMapChanges, hasMapChanges, isTouchSimulationEnabled, onToggleTouchSimulation,
-    onResetQuestBoards, onResetPilferingHouses
+    onResetQuestBoards, onResetPilferingHouses, onTrialTestBoost,
+    isShowMusicStatusOverlay, onToggleMusicStatusOverlay
 }) => {
-    const [questToReset, setQuestToReset] = useState<string>('');
+    const [selectedQuestId, setSelectedQuestId] = useState<string>('');
 
     return (
         <div className="p-2 space-y-4">
-            {/* Reset Quest */}
+            {/* Quest Management */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Reset Quest</label>
-                <div className="flex gap-2">
-                    <select value={questToReset} onChange={e => setQuestToReset(e.target.value)} className="w-full p-1 text-base bg-gray-800 border border-gray-600 rounded">
+                <label className="block text-lg font-semibold mb-1">Quest Management</label>
+                <div className="flex flex-col gap-2">
+                    <select value={selectedQuestId} onChange={e => setSelectedQuestId(e.target.value)} className="w-full p-1 text-base bg-gray-800 border border-gray-600 rounded">
                         <option value="">-- Select Quest --</option>
-                        {Object.values(QUESTS).sort((a,b) => a.name.localeCompare(b.name)).map(q => <option key={q.id} value={q.id}>{q.name}</option>)}
+                        {Object.values(QUESTS).sort((a, b) => a.name.localeCompare(b.name)).map(q => <option key={q.id} value={q.id}>{q.name}</option>)}
                     </select>
-                    <Button size="sm" onClick={() => { if (questToReset) onResetQuest(questToReset); }} disabled={!questToReset}>Reset</Button>
+                    <div className="flex gap-2">
+                        <Button size="sm" onClick={() => { if (selectedQuestId) onAdjustQuestStage(selectedQuestId, -1); }} disabled={!selectedQuestId} className="flex-1">- Stage</Button>
+                        <Button size="sm" onClick={() => { if (selectedQuestId) onAdjustQuestStage(selectedQuestId, 1); }} disabled={!selectedQuestId} className="flex-1">+ Stage</Button>
+                        <Button size="sm" onClick={() => { if (selectedQuestId) onResetQuest(selectedQuestId); }} disabled={!selectedQuestId} variant="secondary">Reset</Button>
+                    </div>
                 </div>
             </div>
 
             {/* Reset Timers */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Reset Timers</label>
+                <label className="block text-lg font-semibold mb-1">Reset Timers</label>
                 <div className="grid grid-cols-2 gap-2">
                     <Button size="sm" onClick={onResetQuestBoards}>Quest Boards</Button>
                     <Button size="sm" onClick={onResetPilferingHouses}>Pilfering Houses</Button>
@@ -54,23 +63,39 @@ const GameManagerComponent: React.FC<GameManagerProps> = ({
 
             {/* Show All POIs */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Show All POIs on Map</label>
-                <button onClick={onToggleShowAllPois} className={`w-full py-1 text-xs rounded font-bold transition-colors ${showAllPois ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}>{showAllPois ? 'ON' : 'OFF'}</button>
+                <label className="block text-lg font-semibold mb-1">Show All POIs on Map</label>
+                <button onClick={onToggleShowAllPois} className={`w-full py-1 text-base rounded font-bold transition-colors ${showAllPois ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}>{showAllPois ? 'ON' : 'OFF'}</button>
             </div>
 
             {/* Map Manager */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Map Manager</label>
+                <label className="block text-lg font-semibold mb-1">Map Manager</label>
                 <div className="flex gap-2">
-                    <button onClick={() => onToggleMapManager(!isMapManagerEnabled)} className={`flex-1 py-1 text-xs rounded font-bold transition-colors ${isMapManagerEnabled ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}>{isMapManagerEnabled ? 'ON' : 'OFF'}</button>
+                    <button onClick={() => onToggleMapManager(!isMapManagerEnabled)} className={`flex-1 py-1 text-base rounded font-bold transition-colors ${isMapManagerEnabled ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}>{isMapManagerEnabled ? 'ON' : 'OFF'}</button>
                     <Button size="sm" onClick={onCommitMapChanges} disabled={!isMapManagerEnabled || !hasMapChanges}>Commit</Button>
                 </div>
             </div>
 
             {/* Simulate Touch */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Simulate Touch</label>
-                <button onClick={onToggleTouchSimulation} className={`w-full py-1 text-xs rounded font-bold transition-colors ${isTouchSimulationEnabled ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}>{isTouchSimulationEnabled ? 'ON' : 'OFF'}</button>
+                <label className="block text-lg font-semibold mb-1">Simulate Touch</label>
+                <button onClick={onToggleTouchSimulation} className={`w-full py-1 text-base rounded font-bold transition-colors ${isTouchSimulationEnabled ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}>{isTouchSimulationEnabled ? 'ON' : 'OFF'}</button>
+            </div>
+
+            <div>
+                <label className="block text-lg font-semibold mb-1">Sorcerer's Trial Prep</label>
+                <Button size="sm" onClick={onTrialTestBoost} className="w-full bg-indigo-700 hover:bg-indigo-600">Trial Test Boost</Button>
+            </div>
+
+            {/* Music Diagnostic */}
+            <div className="pt-2 border-t border-gray-700">
+                <label className="block text-lg font-semibold mb-1 text-yellow-500/80">Synth Diagnostic Overlay</label>
+                <button
+                    onClick={onToggleMusicStatusOverlay}
+                    className={`w-full py-1 text-base rounded font-bold transition-colors ${isShowMusicStatusOverlay ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}
+                >
+                    {isShowMusicStatusOverlay ? 'VISIBLE' : 'HIDDEN'}
+                </button>
             </div>
         </div>
     );
@@ -125,17 +150,17 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
         <div className="p-2 space-y-4">
             {/* Player Cheats */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Player Cheats</label>
+                <label className="block text-lg font-semibold mb-1">Player Cheats</label>
                 <div className="grid grid-cols-2 gap-2">
                     <Button size="sm" onClick={onHealPlayer}>Heal Player</Button>
                     <Button size="sm" onClick={onKillMonster} disabled={!isInCombat}>Kill Monster</Button>
                     <Button size="sm" onClick={onMaxCharacter} className="col-span-2">Max Character</Button>
                 </div>
             </div>
-            
+
             {/* Add Coins */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Add Coins</label>
+                <label className="block text-lg font-semibold mb-1">Add Coins</label>
                 <div className="flex gap-2">
                     <input
                         type="number"
@@ -150,7 +175,7 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
 
             {/* Set Skill Level */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Set Skill Level</label>
+                <label className="block text-lg font-semibold mb-1">Set Skill Level</label>
                 <div className="flex gap-2">
                     <select value={skillToSet} onChange={e => setSkillToSet(e.target.value as SkillName | '')} className="w-full p-1 text-base bg-gray-800 border border-gray-600 rounded">
                         <option value="">Select Skill</option>
@@ -170,9 +195,9 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
                 </div>
             </div>
 
-             {/* XP Multiplier */}
+            {/* XP Multiplier */}
             <div>
-                <label className="block text-sm font-semibold mb-1">XP Multiplier</label>
+                <label className="block text-lg font-semibold mb-1">XP Multiplier</label>
                 <div className="flex flex-wrap gap-1">
                     {[1, 2, 5, 10, 25, 50, 100].map(val => (
                         <Button
@@ -189,7 +214,7 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
             </div>
             {/* Combat Speed */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Combat Speed</label>
+                <label className="block text-lg font-semibold mb-1">Combat Speed</label>
                 <div className="flex gap-1">
                     {[1, 2, 3].map(speed => (
                         <Button key={speed} size="sm" onClick={() => setCombatSpeedMultiplier(speed)} variant={combatSpeedMultiplier === speed ? 'primary' : 'secondary'} className="flex-1">{speed}x</Button>
@@ -198,9 +223,9 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
             </div>
             {/* Instant Respawn */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Instant Respawn</label>
+                <label className="block text-lg font-semibold mb-1">Instant Respawn</label>
                 <div className="flex gap-2 items-center">
-                    <button onClick={() => setIsInstantRespawnOn(!isInstantRespawnOn)} className={`flex-1 py-1 text-xs rounded font-bold transition-colors ${isInstantRespawnOn ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>
+                    <button onClick={() => setIsInstantRespawnOn(!isInstantRespawnOn)} className={`flex-1 py-1 text-base rounded font-bold transition-colors ${isInstantRespawnOn ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>
                         {isInstantRespawnOn ? 'ON' : 'OFF'}
                     </button>
                     <input type="number" placeholder="Count" disabled={!isInstantRespawnOn} value={instantRespawnCounter ?? ''} onChange={e => setInstantRespawnCounter(e.target.value ? parseInt(e.target.value, 10) : null)} className="w-20 p-1 text-base bg-gray-800 border border-gray-600 rounded disabled:opacity-50 text-center" />
@@ -208,23 +233,23 @@ const CheatsComponent: React.FC<CheatsComponentProps> = ({
             </div>
             {/* God Mode */}
             <div>
-                <label className="block text-sm font-semibold mb-1">God Mode</label>
-                <button onClick={() => setIsGodModeOn(!isGodModeOn)} className={`w-full py-1 text-xs rounded font-bold transition-colors ${isGodModeOn ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>{isGodModeOn ? 'ON' : 'OFF'}</button>
+                <label className="block text-lg font-semibold mb-1">God Mode</label>
+                <button onClick={() => setIsGodModeOn(!isGodModeOn)} className={`w-full py-1 text-base rounded font-bold transition-colors ${isGodModeOn ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>{isGodModeOn ? 'ON' : 'OFF'}</button>
             </div>
             {/* Invisibility */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Invisibility</label>
-                <button onClick={() => setIsPlayerInvisible(!isPlayerInvisible)} className={`w-full py-1 text-xs rounded font-bold transition-colors ${isPlayerInvisible ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>{isPlayerInvisible ? 'ON' : 'OFF'}</button>
+                <label className="block text-lg font-semibold mb-1">Invisibility</label>
+                <button onClick={() => setIsPlayerInvisible(!isPlayerInvisible)} className={`w-full py-1 text-base rounded font-bold transition-colors ${isPlayerInvisible ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>{isPlayerInvisible ? 'ON' : 'OFF'}</button>
             </div>
             {/* Auto-Bank */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Auto-Bank</label>
-                <button onClick={() => setIsAutoBankOn(!isAutoBankOn)} className={`w-full py-1 text-xs rounded font-bold transition-colors ${isAutoBankOn ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>{isAutoBankOn ? 'ON' : 'OFF'}</button>
+                <label className="block text-lg font-semibold mb-1">Auto-Bank</label>
+                <button onClick={() => setIsAutoBankOn(!isAutoBankOn)} className={`w-full py-1 text-base rounded font-bold transition-colors ${isAutoBankOn ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>{isAutoBankOn ? 'ON' : 'OFF'}</button>
             </div>
             {/* Perm-Aggro */}
             <div>
-                <label className="block text-sm font-semibold mb-1">Permanent Aggro</label>
-                <button onClick={onTogglePermAggro} className={`w-full py-1 text-xs rounded font-bold transition-colors ${isPermAggroOn ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>
+                <label className="block text-lg font-semibold mb-1">Permanent Aggro</label>
+                <button onClick={onTogglePermAggro} className={`w-full py-1 text-base rounded font-bold transition-colors ${isPermAggroOn ? 'bg-green-600 hover:bg-green-500' : 'bg-red-700 hover:bg-red-600'}`}>
                     {isPermAggroOn ? 'ON (Global)' : 'OFF (Global)'}
                 </button>
             </div>
@@ -243,15 +268,67 @@ interface ItemSpawnerProps {
     setQuantity: (qty: number) => void;
 }
 
+const ITEM_SIZE = 54; // Item size + gap for spawner
+const VISIBLE_BUFFER = 4;
+
 const ItemSpawnerComponent: React.FC<ItemSpawnerProps> = ({ inv, setTooltip, searchTerm, setSearchTerm, selectedItem, setSelectedItem, quantity, setQuantity }) => {
     const { inventory, modifyItem } = inv;
+    const [scrollTop, setScrollTop] = useState(0);
+    const [containerWidth, setContainerWidth] = useState(300);
+    const [containerHeight, setContainerHeight] = useState(400);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const scrollFrameId = useRef<number | null>(null);
 
-    const allItems = useMemo(() => Object.values(ITEMS).sort((a, b) => a.name.localeCompare(b.name)), []);
+    // Measure container size
+    useEffect(() => {
+        const panel = containerRef.current;
+        if (!panel) return;
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                setContainerWidth(entry.contentRect.width);
+                setContainerHeight(entry.contentRect.height);
+            }
+        });
+        resizeObserver.observe(panel);
+        return () => resizeObserver.disconnect();
+    }, []);
+
+    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+        if (scrollFrameId.current) cancelAnimationFrame(scrollFrameId.current);
+        const st = e.currentTarget.scrollTop;
+        scrollFrameId.current = requestAnimationFrame(() => setScrollTop(st));
+    }, []);
+
+
+
+    const allItems = useMemo(() => Object.values(ITEMS).filter(item => !item.hidden).sort((a, b) => a.name.localeCompare(b.name)), []);
     const filteredItems = useMemo(() => {
         if (!searchTerm.trim()) return allItems;
         const lowerCaseSearch = searchTerm.toLowerCase();
         return allItems.filter(item => item.name.toLowerCase().includes(lowerCaseSearch) || item.id.toLowerCase().includes(lowerCaseSearch));
     }, [searchTerm, allItems]);
+
+    const virtualization = useMemo(() => {
+        const gap = 4;
+        const availableWidth = containerWidth - 8;
+        const cols = 7; // Hardcoded cols to match grid-cols-7
+        const totalRows = Math.ceil(filteredItems.length / cols);
+        const rowHeight = ITEM_SIZE;
+        
+        const startRow = Math.max(0, Math.floor(scrollTop / rowHeight) - VISIBLE_BUFFER);
+        const endRow = Math.min(totalRows, Math.ceil((scrollTop + containerHeight) / rowHeight) + VISIBLE_BUFFER);
+        
+        return {
+            cols,
+            totalRows,
+            startIndex: startRow * cols,
+            endIndex: endRow * cols,
+            totalHeight: totalRows * rowHeight,
+            rowHeight,
+            colWidth: (availableWidth / cols)
+        };
+    }, [containerWidth, containerHeight, scrollTop, filteredItems.length]);
+
 
     const freeSlots = INVENTORY_CAPACITY - inventory.filter(Boolean).length;
 
@@ -274,7 +351,7 @@ const ItemSpawnerComponent: React.FC<ItemSpawnerProps> = ({ inv, setTooltip, sea
             bypassAutoBank: true
         });
     };
-    
+
     const handleQuantityChange = (value: string) => {
         const num = parseInt(value, 10);
         if (isNaN(num)) {
@@ -283,7 +360,7 @@ const ItemSpawnerComponent: React.FC<ItemSpawnerProps> = ({ inv, setTooltip, sea
             setQuantity(Math.max(1, Math.min(maxQty, num)));
         }
     };
-    
+
     const handleMouseEnter = (e: React.MouseEvent, item: Item) => {
         const tooltipContent = (
             <div>
@@ -297,19 +374,39 @@ const ItemSpawnerComponent: React.FC<ItemSpawnerProps> = ({ inv, setTooltip, sea
     return (
         <div className="p-2 flex flex-col h-full">
             <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search for items..." className="w-full p-1 mb-2 bg-gray-800 border border-gray-600 rounded text-center text-base" />
-            <div className="flex-grow overflow-y-auto border-2 border-gray-700 rounded-md bg-black/20 p-1">
-                <div className="grid grid-cols-7 gap-1">
-                    {filteredItems.map(item => (
-                        <button 
-                            key={item.id} 
-                            onClick={() => setSelectedItem(item)} 
-                            className={`aspect-square p-1 rounded-md transition-colors ${selectedItem?.id === item.id ? 'bg-yellow-700 ring-2 ring-yellow-400' : 'bg-gray-800 hover:bg-gray-700'}`}
-                            onMouseEnter={(e) => handleMouseEnter(e, item)}
-                            onMouseLeave={() => setTooltip(null)}
-                        >
-                            <img src={item.iconUrl} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
-                        </button>
-                    ))}
+            <div 
+                ref={containerRef}
+                onScroll={handleScroll}
+                className="flex-grow overflow-y-auto border-2 border-gray-700 rounded-md bg-black/20 p-1"
+            >
+                <div 
+                    className="relative w-full" 
+                    style={{ height: virtualization.totalHeight }}
+                >
+                    {filteredItems.slice(virtualization.startIndex, virtualization.endIndex).map((item: Item, sliceIdx) => {
+                        const displayIndex = virtualization.startIndex + sliceIdx;
+                        const row = Math.floor(displayIndex / virtualization.cols);
+                        const col = displayIndex % virtualization.cols;
+
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => setSelectedItem(item)}
+                                className={`p-1 rounded-md transition-colors absolute ${selectedItem?.id === item.id ? 'bg-yellow-700 ring-2 ring-yellow-400' : 'bg-gray-800 hover:bg-gray-700'}`}
+                                onMouseEnter={(e) => handleMouseEnter(e, item)}
+                                onMouseLeave={() => setTooltip(null)}
+                                style={{
+                                    left: col * virtualization.colWidth,
+                                    top: row * virtualization.rowHeight,
+                                    width: virtualization.colWidth - 4,
+                                    height: 50,
+                                    willChange: 'transform'
+                                }}
+                            >
+                                <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
             {selectedItem && (
@@ -362,7 +459,7 @@ const TeleportComponent: React.FC<{
     return (
         <div className="p-2 space-y-4">
             <div>
-                <label htmlFor="region-select" className="block text-sm font-semibold mb-1">Region</label>
+                <label htmlFor="region-select" className="block text-lg font-semibold mb-1">Region</label>
                 <select id="region-select" value={selectedRegionId} onChange={e => setSelectedRegionId(e.target.value)} className="w-full p-2 bg-gray-800 border border-gray-600 rounded text-base">
                     <option value="">-- Select Region --</option>
                     {regions.map(region => (
@@ -371,7 +468,7 @@ const TeleportComponent: React.FC<{
                 </select>
             </div>
             <div>
-                <label htmlFor="poi-select" className="block text-sm font-semibold mb-1">Point of Interest</label>
+                <label htmlFor="poi-select" className="block text-lg font-semibold mb-1">Point of Interest</label>
                 <select id="poi-select" value={selectedPoiId} onChange={e => setSelectedPoiId(e.target.value)} disabled={!selectedRegionId} className="w-full p-2 bg-gray-800 border border-gray-600 rounded disabled:opacity-50 text-base">
                     <option value="">-- Select POI --</option>
                     {poisInRegion.map(poi => (
@@ -384,38 +481,22 @@ const TeleportComponent: React.FC<{
     );
 };
 
-const AgilityManagerComponent: React.FC<{ agility: ReturnType<typeof useAgility> }> = ({ agility }) => {
-    const { agilityState, startCourse, stopCourse, attemptObstacle } = agility;
-    const [selectedCourseId, setSelectedCourseId] = useState(Object.keys(AGILITY_COURSES)[0] || '');
-
-    if (agilityState.activeCourseId) {
-        const course = AGILITY_COURSES[agilityState.activeCourseId];
-        const currentObstacle = course.obstacles[agilityState.currentObstacleIndex];
-        const laps = agilityState.lapsCompleted[agilityState.activeCourseId] || 0;
-        return (
-            <div className="p-2 space-y-3">
-                <h3 className="font-bold text-yellow-300">{course.name}</h3>
-                <p>Progress: Obstacle {agilityState.currentObstacleIndex + 1} / {course.obstacles.length}</p>
-                <p>Laps Completed: {laps}</p>
-                <Button size="sm" onClick={attemptObstacle} className="w-full">Attempt: {currentObstacle.name}</Button>
-                <Button size="sm" onClick={stopCourse} variant="secondary" className="w-full">Stop Course</Button>
-            </div>
-        );
-    }
-
+const SlayerManagerComponent: React.FC<{ slayer: any }> = ({ slayer }) => {
     return (
         <div className="p-2 space-y-4">
             <div>
-                <label className="block text-sm font-semibold mb-1">Select Agility Course</label>
-                <select value={selectedCourseId} onChange={e => setSelectedCourseId(e.target.value)} className="w-full p-1 text-base bg-gray-800 border border-gray-600 rounded">
-                    {Object.values(AGILITY_COURSES).map(c => (
-                        <option key={c.id} value={c.id}>{c.name} (Lvl {c.level})</option>
-                    ))}
-                </select>
+                <label className="block text-lg font-semibold mb-1 text-yellow-500">Slayer Status</label>
+                <div className="bg-black/20 p-2 rounded border border-gray-700 space-y-1">
+                    <p className="flex justify-between"><span>Task Streak:</span> <span className="text-yellow-400 font-bold">{slayer.slayerTaskStreak}</span></p>
+                    <p className="flex justify-between"><span>Current Master:</span> <span className="text-yellow-400 font-bold">{slayer.slayerTask?.masterId || 'None'}</span></p>
+                    <p className="flex justify-between"><span>Current Credits:</span> <span className="text-yellow-400 font-bold">{slayer.slayerCredits}</span></p>
+                </div>
             </div>
-            <Button onClick={() => startCourse(selectedCourseId)} disabled={!selectedCourseId} className="w-full">
-                Start Course
-            </Button>
+            <div className="flex flex-col gap-2">
+                <Button size="sm" onClick={() => slayer.setSlayerTaskStreak(0)}>Task Streak [Reset]</Button>
+                <Button size="sm" onClick={() => slayer.setSlayerTask(null)}>Slayer Task [Reset]</Button>
+                <Button size="sm" onClick={() => slayer.setSlayerCredits(slayer.slayerCredits + 100)}>Slayer Credits [+100]</Button>
+            </div>
         </div>
     );
 };
@@ -424,7 +505,7 @@ const AgilityManagerComponent: React.FC<{ agility: ReturnType<typeof useAgility>
 interface DevPanelProps {
     inv: ReturnType<typeof useInventory>;
     devPanelState: {
-        activeTab: 'cheats' | 'items' | 'teleport' | 'game-manager' | 'monsters' | 'agility';
+        activeTab: 'cheats' | 'items' | 'teleport' | 'game-manager' | 'monsters' | 'slayer';
         itemSearchTerm: string;
         selectedItemId: string | null;
         spawnQuantity: number;
@@ -434,8 +515,8 @@ interface DevPanelProps {
     updateDevPanelState: (updates: Partial<DevPanelProps['devPanelState']>) => void;
     onClose: () => void;
     ui: ReturnType<typeof useUIState>;
-    agility: ReturnType<typeof useAgility>;
-    
+    slayer: any;
+
     // Cheats Props
     combatSpeedMultiplier: number;
     setCombatSpeedMultiplier: (speed: number) => void;
@@ -464,6 +545,7 @@ interface DevPanelProps {
 
     // Game Manager Props
     onResetQuest: (questId: string) => void;
+    onAdjustQuestStage: (questId: string, amount: number) => void;
     showAllPois: boolean;
     onToggleShowAllPois: () => void;
     isMapManagerEnabled: boolean;
@@ -476,10 +558,11 @@ interface DevPanelProps {
     onForcedNavigate: (poiId: string) => void;
     onResetQuestBoards: () => void;
     onResetPilferingHouses: () => void;
+    onTrialTestBoost: () => void;
 }
 
 const DevPanel: React.FC<DevPanelProps> = (props) => {
-    const { inv, setTooltip, devPanelState, updateDevPanelState, onClose, ui, agility, ...otherProps } = props;
+    const { inv, setTooltip, devPanelState, updateDevPanelState, onClose, ui, slayer, ...otherProps } = props;
     const { activeTab, itemSearchTerm, selectedItemId, spawnQuantity, teleportRegionId, teleportPoiId } = devPanelState;
 
     const setActiveTab = (tab: DevPanelProps['devPanelState']['activeTab']) => updateDevPanelState({ activeTab: tab });
@@ -492,17 +575,17 @@ const DevPanel: React.FC<DevPanelProps> = (props) => {
     const setQuantity = useCallback((qty: number) => updateDevPanelState({ spawnQuantity: qty }), [updateDevPanelState]);
 
     return (
-        <div className="flex flex-col h-full text-gray-300 font-sans">
-             <div className="flex justify-between items-center p-2 border-b-2 border-gray-700 flex-shrink-0">
-                <h3 className="text-lg font-bold text-yellow-400">Developer Panel</h3>
+        <div className="flex flex-col h-full text-gray-300 font-pixel-rpg">
+            <div className="flex justify-between items-center p-2 border-b-2 border-gray-700 flex-shrink-0">
+                <h3 className="text-xl font-bold text-yellow-400">Developer Panel</h3>
                 <Button onClick={onClose} size="sm">X</Button>
             </div>
             <div className="flex border-b-2 border-gray-700 mb-2 flex-shrink-0">
-                <button onClick={() => setActiveTab('cheats')} className={`flex-1 py-1 text-sm font-semibold rounded-t-md transition-colors ${activeTab === 'cheats' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Cheats</button>
-                <button onClick={() => setActiveTab('items')} className={`flex-1 py-1 text-sm font-semibold rounded-t-md transition-colors ${activeTab === 'items' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Items</button>
-                <button onClick={() => setActiveTab('game-manager')} className={`flex-1 py-1 text-sm font-semibold rounded-t-md transition-colors ${activeTab === 'game-manager' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Game</button>
-                <button onClick={() => setActiveTab('teleport')} className={`flex-1 py-1 text-sm font-semibold rounded-t-md transition-colors ${activeTab === 'teleport' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Teleport</button>
-                <button onClick={() => setActiveTab('agility')} className={`flex-1 py-1 text-sm font-semibold rounded-t-md transition-colors ${activeTab === 'agility' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Agility</button>
+                <button onClick={() => setActiveTab('cheats')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'cheats' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Cheats</button>
+                <button onClick={() => setActiveTab('items')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'items' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Items</button>
+                <button onClick={() => setActiveTab('game-manager')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'game-manager' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Game</button>
+                <button onClick={() => setActiveTab('teleport')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'teleport' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Teleport</button>
+                <button onClick={() => setActiveTab('slayer')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'slayer' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Slayer</button>
             </div>
             <div className="flex-grow min-h-0 overflow-y-auto">
                 {activeTab === 'cheats' && <CheatsComponent {...otherProps} />}
@@ -516,7 +599,11 @@ const DevPanel: React.FC<DevPanelProps> = (props) => {
                     quantity={spawnQuantity}
                     setQuantity={setQuantity}
                 />}
-                {activeTab === 'game-manager' && <GameManagerComponent {...otherProps} />}
+                {activeTab === 'game-manager' && <GameManagerComponent
+                    {...otherProps}
+                    isShowMusicStatusOverlay={ui.isShowMusicStatusOverlay}
+                    onToggleMusicStatusOverlay={() => ui.setIsShowMusicStatusOverlay(!ui.isShowMusicStatusOverlay)}
+                />}
                 {activeTab === 'teleport' && <TeleportComponent
                     onForcedNavigate={props.onForcedNavigate}
                     selectedRegionId={teleportRegionId}
@@ -524,7 +611,7 @@ const DevPanel: React.FC<DevPanelProps> = (props) => {
                     selectedPoiId={teleportPoiId}
                     setSelectedPoiId={(id) => updateDevPanelState({ teleportPoiId: id })}
                 />}
-                {activeTab === 'agility' && <AgilityManagerComponent agility={agility} />}
+                {activeTab === 'slayer' && <SlayerManagerComponent slayer={slayer} />}
             </div>
         </div>
     );

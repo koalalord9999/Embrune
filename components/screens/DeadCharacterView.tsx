@@ -1,9 +1,15 @@
 
 import React from 'react';
 import { Slot, PlayerSkill, SkillName } from '../../types';
-import { SKILL_ICONS, SKILL_DISPLAY_ORDER, XP_TABLE, getSkillColorClass } from '../../constants';
+import {  SKILL_ICONS, SKILL_DISPLAY_ORDER, XP_TABLE, getSkillColorClass, ALL_SKILLS, getIconUrl  } from '../../constants';
 import Button from '../common/Button';
 import { TooltipState } from '../../hooks/useUIState';
+
+const getLevel = (skill: PlayerSkill): number => {
+    if (skill.level !== undefined) return skill.level;
+    const level = XP_TABLE.findIndex(xpVal => xpVal > skill.xp);
+    return level === -1 ? 99 : level;
+};
 
 // SkillDisplay component copied from SaveSlotScreen.tsx
 const SkillDisplay: React.FC<{
@@ -16,10 +22,12 @@ const SkillDisplay: React.FC<{
         return <div className="bg-gray-900/50 p-2 h-10 rounded-md" />;
     }
 
+    const level = getLevel(skill);
+
     const handleMouseEnter = (e: React.MouseEvent) => {
-        const isMaxLevel = skill.level >= 99;
-        const xpForCurrentLevel = XP_TABLE[skill.level - 1] ?? 0;
-        const xpForNextLevel = isMaxLevel ? skill.xp : (XP_TABLE[skill.level] ?? skill.xp);
+        const isMaxLevel = level >= 99;
+        const xpForCurrentLevel = XP_TABLE[level - 1] ?? 0;
+        const xpForNextLevel = isMaxLevel ? skill.xp : (XP_TABLE[level] ?? skill.xp);
         
         const xpInLevel = skill.xp - xpForCurrentLevel;
         const xpToNextLevel = xpForNextLevel - xpForCurrentLevel;
@@ -62,18 +70,18 @@ const SkillDisplay: React.FC<{
             <div
                 className={`w-6 h-6 flex-shrink-0 ${getSkillColorClass(skill.name)}`}
                 style={{
-                    maskImage: `url(${SKILL_ICONS[skill.name]})`,
+                    maskImage: `url(${getIconUrl(SKILL_ICONS[skill.name])})`,
                     maskSize: 'contain',
                     maskRepeat: 'no-repeat',
                     maskPosition: 'center',
-                    WebkitMaskImage: `url(${SKILL_ICONS[skill.name]})`,
+                    WebkitMaskImage: `url(${getIconUrl(SKILL_ICONS[skill.name])})`,
                     WebkitMaskSize: 'contain',
                     WebkitMaskRepeat: 'no-repeat',
                     WebkitMaskPosition: 'center',
                 }}
             />
             <div className="flex-1 text-right leading-none">
-                <span className="text-base font-bold align-super text-white">{skill.level}</span>
+                <span className="text-base font-bold align-super text-white">{level}</span>
             </div>
         </div>
     );
@@ -92,7 +100,7 @@ const DeadCharacterView: React.FC<DeadCharacterViewProps> = ({ slot, onDelete, s
 
     return (
         <div className="animate-fade-in w-full max-w-2xl flex flex-col items-center text-center p-4 bg-black/50 border-2 border-red-700 rounded-lg overflow-y-auto max-h-[75vh]">
-            <img src="https://api.iconify.design/game-icons:tombstone.svg" alt="Tombstone" className="w-16 h-16 filter invert opacity-50 mb-2" />
+            <img src={getIconUrl("tombstone")} alt="Tombstone" className="w-16 h-16 filter invert opacity-50 mb-2" />
             <h2 className="text-3xl font-bold text-red-400">Here Lies</h2>
             <h3 className="text-4xl font-bold text-gray-200 mt-1">{metadata.username}</h3>
             <p className="text-base text-gray-400 mt-2">A Hardcore adventurer who has fallen.</p>
@@ -102,16 +110,25 @@ const DeadCharacterView: React.FC<DeadCharacterViewProps> = ({ slot, onDelete, s
                 <p>Final Total Level:</p><p className="font-semibold text-right">{metadata.totalLevel}</p>
             </div>
 
-            {data?.skills && (
-                <div className="p-3 bg-black/20 rounded-lg border border-gray-700 mt-2 w-full max-w-md">
-                    <h3 className="font-bold text-yellow-300 mb-2 text-sm">Final Skills</h3>
-                    <div className="grid grid-cols-3 gap-2">
-                        {SKILL_DISPLAY_ORDER.map(skillName => (
-                            <SkillDisplay key={skillName} skillName={skillName} skills={data.skills} setTooltip={setTooltip} />
-                        ))}
-                    </div>
-                </div>
-            )}
+            {(() => {
+                const displaySkills = data?.skills || (data?._v === 2 && Array.isArray(data.s) 
+                    ? ALL_SKILLS.map((skillDef, i) => ({ name: skillDef.name, xp: data.s[i] || 0 }))
+                    : null);
+                
+                if (displaySkills) {
+                    return (
+                        <div className="p-3 bg-black/20 rounded-lg border border-gray-700 mt-2 w-full max-w-md">
+                            <h3 className="font-bold text-yellow-300 mb-2 text-sm">Final Skills</h3>
+                            <div className="grid grid-cols-3 gap-2">
+                                {SKILL_DISPLAY_ORDER.map(skillName => (
+                                    <SkillDisplay key={skillName} skillName={skillName} skills={displaySkills as any} setTooltip={setTooltip} />
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+                return null;
+            })()}
             
             <p className="text-xs text-gray-500 mt-4">"The journey has ended, but the story will be remembered."</p>
 

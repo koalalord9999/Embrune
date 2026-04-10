@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { PlayerSkill, SkillName, CombatStance, Spell, WorldState, Prayer, PrayerType, ActiveStatModifier, ActiveBuff, Equipment, Item } from '../types';
-import { XP_TABLE, PRAYERS, ITEMS } from '../constants';
+import {  XP_TABLE, PRAYERS, ITEMS  } from '../constants';
 
 const getLevelForXp = (xp: number): number => {
     const level = XP_TABLE.findIndex(xpVal => xpVal > xp);
@@ -16,12 +16,12 @@ interface CharacterCallbacks {
 }
 
 export const useCharacter = (
-    initialData: { skills: PlayerSkill[], combatStance: CombatStance, currentHp: number, currentPrayer: number, autocastSpell: Spell | null, statModifiers: ActiveStatModifier[], activeBuffs: ActiveBuff[], runEnergy: number, isRunToggled: boolean, isResting: boolean }, 
-    callbacks: CharacterCallbacks, 
+    initialData: { skills: PlayerSkill[], combatStance: CombatStance, currentHp: number, currentPrayer: number, autocastSpell: Spell | null, statModifiers: ActiveStatModifier[], activeBuffs: ActiveBuff[], runEnergy: number, isRunToggled: boolean, isResting: boolean },
+    callbacks: CharacterCallbacks,
     worldState: WorldState,
     setWorldState: React.Dispatch<React.SetStateAction<WorldState>>,
-    isInCombat: boolean, 
-    combatSpeedMultiplier: number, 
+    isInCombat: boolean,
+    combatSpeedMultiplier: number,
     xpMultiplier: number = 1,
     isGodModeOn: boolean = false,
     activePrayers: string[],
@@ -35,13 +35,21 @@ export const useCharacter = (
     const [statModifiers, setStatModifiers] = useState<ActiveStatModifier[]>(initialData.statModifiers ?? []);
     const [activeBuffs, setActiveBuffs] = useState<ActiveBuff[]>(initialData.activeBuffs ?? []);
     const [autocastSpell, setAutocastSpell] = useState<Spell | null>(initialData.autocastSpell ?? null);
-    
+
     const [rawCurrentPrayer, _setRawCurrentPrayer] = useState<number>(initialData.currentPrayer);
     const [globalActionCooldown, setGlobalActionCooldown] = useState<number>(0);
-    
-    const [runEnergy, setRunEnergy] = useState<number>(initialData.runEnergy ?? 100);
+
+    const [runEnergy, setRunEnergyInternal] = useState<number>(initialData.runEnergy ?? 100);
     const [isRunToggled, setIsRunToggled] = useState<boolean>(initialData.isRunToggled ?? false);
     const [isResting, setIsResting] = useState<boolean>(initialData.isResting ?? false);
+
+    const setRunEnergy = useCallback((updater: React.SetStateAction<number>) => {
+        setRunEnergyInternal(prev => {
+            if (isGodModeOn) return 100;
+            const newValue = typeof updater === 'function' ? updater(prev) : updater;
+            return Math.max(0, Math.min(100, newValue));
+        });
+    }, [isGodModeOn]);
 
     const [godModeHp, setGodModeHp] = useState(999); // Invisible HP
     const [godModePrayer, setGodModePrayer] = useState(999); // Invisible Prayer
@@ -50,10 +58,10 @@ export const useCharacter = (
     const maxPrayer = useMemo(() => skills.find(s => s.name === SkillName.Prayer)?.level ?? 1, [skills]);
     const hpBoost = useMemo(() => worldState.hpBoost?.amount ?? 0, [worldState.hpBoost]);
     const maxHp = useMemo(() => baseMaxHp + hpBoost, [baseMaxHp, hpBoost]);
-    
+
     const isStunned = useMemo(() => activeBuffs.some(b => b.type === 'stun'), [activeBuffs]);
     const isPoisoned = useMemo(() => activeBuffs.some(b => b.type === 'poison'), [activeBuffs]);
-    
+
     const isAgilitySetEffectActive = useMemo(() => {
         const requiredItems = ['weightless_hood', 'weightless_tunic', 'weightless_trousers', 'weightless_gloves', 'weightless_boots'];
         const isSetEquipped = requiredItems.every(itemId => {
@@ -102,14 +110,14 @@ export const useCharacter = (
                 const reductions = Math.floor(agilityLevel / 15);
                 return 13 - reductions;
             };
-    
+
             const regenInterval = getRegenTicks() * 600; // 1 tick = 600ms
             const regenAmount = isAgilitySetEffectActive ? 2 : 1;
-    
+
             const timer = setInterval(() => {
                 setRunEnergy(prev => Math.min(100, prev + regenAmount));
             }, regenInterval);
-    
+
             return () => clearInterval(timer);
         }
     }, [agilityLevel, isResting, isAgilitySetEffectActive]);
@@ -136,7 +144,7 @@ export const useCharacter = (
                 animationFrameId = requestAnimationFrame(loop);
                 return;
             }
-            
+
             const deltaTime = timestamp - lastTimestamp;
             lastTimestamp = timestamp;
 
@@ -152,21 +160,18 @@ export const useCharacter = (
                     const drainPerMs = drainPerMinute / 60000;
                     const drainAmount = deltaTime * drainPerMs;
 
-                    _setRawCurrentPrayer(prev => {
-                        if (prev <= 0) return 0;
-                        const newPrayer = prev - drainAmount;
-                        if (newPrayer <= 0) {
-                            if (prev > 0) { // Only trigger on the frame it hits zero
-                                onPrayerDepleted();
-                                addLog("You have run out of prayer points!");
-                            }
-                            return 0;
-                        }
-                        return newPrayer;
-                    });
+                    const prevPrayer = rawPrayerRef.current;
+                    const newPrayer = Math.max(0, prevPrayer - drainAmount);
+                    
+                    if (prevPrayer > 0 && newPrayer <= 0) {
+                        onPrayerDepleted();
+                        addLog("You have run out of prayer points!");
+                    }
+
+                    _setRawCurrentPrayer(newPrayer);
                 }
             }
-            
+
             // --- 2. Debug Log Logic ---
             if (activePrayers.length > 0 && !isGodModeOn && timestamp - lastLogTimestamp! >= logInterval) {
                 // Log only if prayer is actually draining
@@ -175,7 +180,7 @@ export const useCharacter = (
                 }
                 lastLogTimestamp = timestamp;
             }
-            
+
             animationFrameId = requestAnimationFrame(loop);
         };
 
@@ -190,7 +195,7 @@ export const useCharacter = (
     const setCurrentHp = useCallback((updater: React.SetStateAction<number>) => {
         _setCurrentHp(prevHp => {
             const newHp = typeof updater === 'function' ? updater(prevHp) : updater;
-            
+
             if (isGodModeOn && newHp < prevHp) {
                 // Damage is being applied in God Mode
                 const damage = prevHp - newHp;
@@ -199,20 +204,21 @@ export const useCharacter = (
                 // We don't change the visual HP here, so it appears no damage was taken.
                 return prevHp;
             }
-            
+
             // Allow healing or normal damage
             return Math.min(maxHp, newHp);
         });
     }, [isGodModeOn, maxHp]);
-    
+
     // This effect triggers the "full heal" and "full prayer" whenever invisible HP/Prayer changes or God Mode is toggled
     useEffect(() => {
         if (isGodModeOn) {
             _setCurrentHp(maxHp);
             _setRawCurrentPrayer(maxPrayer);
+            setRunEnergy(100);
         }
     }, [godModeHp, godModePrayer, isGodModeOn, maxHp, maxPrayer]);
-    
+
     const combatLevel = useMemo(() => {
         const get = (name: SkillName) => skills.find(s => s.name === name)?.level ?? 1;
 
@@ -235,14 +241,14 @@ export const useCharacter = (
 
         return Math.floor(base + styleBonus);
     }, [skills, baseMaxHp]);
-    
+
     useEffect(() => {
         if (currentHp >= maxHp) {
             return;
         }
 
         let regenerationInterval = 60000;
-        
+
         // Rapid Heal prayer doubles regeneration rate.
         if (activePrayers.includes('rapid_heal')) {
             regenerationInterval /= 2;
@@ -289,7 +295,7 @@ export const useCharacter = (
                         addLog(`Your ${mod.skill} level has returned to normal.`);
                         return null; // Mark for removal
                     }
-                    
+
                     // Reset the timer for the next decay
                     return { ...mod, currentValue: newValue, nextDecayTimestamp: now + 60000 };
                 });
@@ -305,7 +311,7 @@ export const useCharacter = (
     useEffect(() => {
         activeBuffsRef.current = activeBuffs;
     }, [activeBuffs]);
-    
+
     // Use a ref for the callback to avoid stale closures in the interval
     const onPoisonDamageRef = useRef(onPoisonDamage);
     useEffect(() => {
@@ -329,17 +335,17 @@ export const useCharacter = (
                         return null;
                     }
                     return { ...b, durationRemaining: newDuration };
-                } 
-                
+                }
+
                 // 2. Handle Poison Logic separately
                 // Poison uses nextTickTimestamp for damage ticks, not durationRemaining for expiration
                 if (b.type === 'poison') {
                     if (now >= (b.nextTickTimestamp ?? 0)) {
                         poisonDamageTotal += b.value;
-                        
+
                         const nextTick = now + 15000;
                         const ticks = (b.ticksApplied ?? 0) + 1;
-                        
+
                         // Poison decay logic (every 2 ticks, reduce damage)
                         if (ticks >= 2) {
                             const newDamage = b.value - 1;
@@ -366,7 +372,7 @@ export const useCharacter = (
                     } else if (buff.type === 'stamina') {
                         addLog("You feel your legs grow heavy again.");
                     } else if (buff.type !== 'stun') {
-                         addLog("A magical effect has worn off.");
+                        addLog("A magical effect has worn off.");
                     }
                 }
             });
@@ -380,11 +386,11 @@ export const useCharacter = (
                 setCurrentHp(prevHp => {
                     const newHp = Math.max(0, prevHp - poisonDamageTotal);
                     if (newHp > 0) {
-                         addLog(`You take ${poisonDamageTotal} poison damage.`);
-                         // Trigger callback for visual effects
-                         if (onPoisonDamageRef.current) {
-                             onPoisonDamageRef.current(poisonDamageTotal);
-                         }
+                        addLog(`You take ${poisonDamageTotal} poison damage.`);
+                        // Trigger callback for visual effects
+                        if (onPoisonDamageRef.current) {
+                            onPoisonDamageRef.current(poisonDamageTotal);
+                        }
                     }
                     return newHp;
                 });
@@ -407,92 +413,107 @@ export const useCharacter = (
         if (roundedAmount <= 0) return;
 
         onXpGain(skillName, roundedAmount);
+
         setSkills(prevSkills => {
+            const skillIndex = prevSkills.findIndex(s => s.name === skillName);
+            if (skillIndex === -1) return prevSkills;
+
+            const oldSkill = prevSkills[skillIndex];
+            const newXp = oldSkill.xp + roundedAmount;
+            const oldLevel = oldSkill.level;
+            const newLevel = Math.min(99, getLevelForXp(newXp));
+
+            if (newLevel > oldLevel) {
+                // Determine side-effects to run AFTER state update logic
+                // But for simplicity in this tick-based game, we call them here but OUTSIDE the setter by doing them before/after
+                // Wait, if we are inside setSkills, we are STILL in the updater.
+            }
+
             const newSkills = [...prevSkills];
-            const skillIndex = newSkills.findIndex(s => s.name === skillName);
-            if (skillIndex !== -1) {
-                const oldSkill = newSkills[skillIndex];
-                const newXp = oldSkill.xp + roundedAmount;
-                const oldLevel = oldSkill.level;
-                const newLevel = getLevelForXp(newXp);
+            newSkills[skillIndex] = { ...oldSkill, xp: newXp, level: newLevel };
+            return newSkills;
+        });
+
+        // Calculate if a level up WOULD happen based on current skills state
+        // This is safe because we just triggered an update, and React will process it
+        const currentSkill = skills.find(s => s.name === skillName);
+        if (currentSkill) {
+            const newXp = currentSkill.xp + roundedAmount;
+            const oldLevel = currentSkill.level;
+            const newLevel = Math.min(99, getLevelForXp(newXp));
+
+            if (newLevel > oldLevel) {
+                addLog(`Congratulations, you just advanced a ${skillName} level! Your ${skillName} level is now ${newLevel}.`);
+                onLevelUp(skillName, newLevel);
                 
-                const finalLevel = Math.min(99, newLevel);
-                newSkills[skillIndex] = { ...oldSkill, xp: newXp, level: finalLevel };
+                if (skillName === SkillName.Hitpoints) {
+                    setCurrentHp(hp => hp + (newLevel - oldLevel));
+                }
+                if (skillName === SkillName.Prayer) {
+                    setCurrentPrayer(p => p + (newLevel - oldLevel));
+                }
+                if (skillName === SkillName.Magic && newLevel >= 40 && oldLevel < 40) {
+                    addLog("As your magical power grows, a deep sense of dread washes over you. You feel a subtle, yet profound, disturbance in the world's magical weave.");
+                }
 
-                if (finalLevel > oldLevel) {
-                    addLog(`Congratulations, you just advanced a ${skillName} level! Your ${skillName} level is now ${finalLevel}.`);
-                    onLevelUp(skillName, finalLevel);
-                    if (skillName === SkillName.Hitpoints) {
-                        setCurrentHp(hp => hp + (finalLevel - oldLevel));
-                    }
-                    if (skillName === SkillName.Prayer) {
-                        setCurrentPrayer(p => p + (finalLevel - oldLevel));
-                    }
-                    if (skillName === SkillName.Magic && finalLevel >= 40 && oldLevel < 40) {
-                        addLog("As your magical power grows, a deep sense of dread washes over you. You feel a subtle, yet profound, disturbance in the world's magical weave.");
-                    }
-                    // Adjust active stat modifiers on level up.
-                    setStatModifiers(prev => {
-                        const newModifiers = [...prev];
-                        const modIndex = newModifiers.findIndex(m => m.skill === skillName);
-
-                        if (modIndex > -1) {
-                            const modifier = newModifiers[modIndex];
-                            const levelsGained = finalLevel - oldLevel;
-
-                            if (modifier.currentValue > 0) { // It's a boost
-                                const newCurrentValue = modifier.currentValue - levelsGained;
-                                if (newCurrentValue <= 0) {
-                                    addLog(`Your level up has completely absorbed your ${skillName} boost.`);
-                                    newModifiers.splice(modIndex, 1); // Remove the modifier
-                                } else {
-                                    newModifiers[modIndex] = { ...modifier, currentValue: newCurrentValue };
-                                }
-                            } else if (modifier.currentValue < 0) { // It's a drain
-                                const newCurrentValue = modifier.currentValue + levelsGained;
-                                if (newCurrentValue >= 0) {
-                                    addLog(`Your level up has completely overcome your ${skillName} drain.`);
-                                    newModifiers.splice(modIndex, 1); // Remove the modifier
-                                } else {
-                                    newModifiers[modIndex] = { ...modifier, currentValue: newCurrentValue };
-                                }
-                            }
+                // Handling stat boost absorption
+                const existingMod = statModifiers.find(m => m.skill === skillName);
+                if (existingMod) {
+                    const levelsGained = newLevel - oldLevel;
+                    if (existingMod.currentValue > 0) {
+                        if (existingMod.currentValue <= levelsGained) {
+                             addLog(`Your level up has completely absorbed your ${skillName} boost.`);
                         }
-                        return newModifiers;
+                    } else if (existingMod.currentValue < 0) {
+                        if (Math.abs(existingMod.currentValue) <= levelsGained) {
+                             addLog(`Your level up has completely overcome your ${skillName} drain.`);
+                        }
+                    }
+
+                    setStatModifiers(prev => {
+                        const modIndex = prev.findIndex(m => m.skill === skillName);
+                        if (modIndex === -1) return prev;
+                        const modifier = prev[modIndex];
+                        const isBoost = modifier.currentValue > 0;
+                        const decayAmount = isBoost ? -levelsGained : levelsGained;
+                        const newValue = modifier.currentValue + decayAmount;
+
+                        if ((isBoost && newValue <= 0) || (!isBoost && newValue >= 0)) {
+                            return prev.filter((_, i) => i !== modIndex);
+                        }
+                        return prev.map((m, i) => i === modIndex ? { ...m, currentValue: newValue } : m);
                     });
                 }
             }
-            return newSkills;
-        });
-    }, [addLog, onXpGain, onLevelUp, xpMultiplier, setCurrentHp, setCurrentPrayer]);
-    
-    const applyStatModifier = useCallback((skill: SkillName, value: number, baseLevelOnConsumption: number) => {
-        setStatModifiers(prev => {
-            const existingModifier = prev.find(m => m.skill === skill);
+        }
+    }, [skills, statModifiers, addLog, onXpGain, onLevelUp, xpMultiplier, setCurrentHp, setCurrentPrayer]);
 
-            if (existingModifier) {
-                if (value > 0 && value < existingModifier.initialValue) {
-                    addLog(`You already have a stronger ${skill} boost active.`);
-                    return prev;
-                }
-                if (value < 0 && value > existingModifier.initialValue) {
-                    addLog(`You already have a stronger ${skill} drain active.`);
-                    return prev;
-                }
+    const applyStatModifier = useCallback((skill: SkillName, value: number, baseLevelOnConsumption: number) => {
+        const existingModifier = statModifiers.find(m => m.skill === skill);
+
+        if (existingModifier) {
+            if (value > 0 && value < existingModifier.initialValue) {
+                addLog(`You already have a stronger ${skill} boost active.`);
+                return;
             }
-            
-            const newModifier: ActiveStatModifier = {
-                id: existingModifier?.id ?? (Date.now() + Math.random()),
-                skill,
-                initialValue: value,
-                currentValue: value,
-                baseLevelOnConsumption,
-                nextDecayTimestamp: Date.now() + 60000,
-            };
-            addLog(value > 0 ? `You feel your ${skill} level increase.` : `You feel your ${skill} level decrease.`);
-            return [...prev.filter(m => m.skill !== skill), newModifier];
-        });
-    }, [addLog]);
+            if (value < 0 && value > existingModifier.initialValue) {
+                addLog(`You already have a stronger ${skill} drain active.`);
+                return;
+            }
+        }
+
+        const newModifier: ActiveStatModifier = {
+            id: existingModifier?.id ?? (Date.now() + Math.random()),
+            skill,
+            initialValue: value,
+            currentValue: value,
+            baseLevelOnConsumption,
+            nextDecayTimestamp: Date.now() + 60000,
+        };
+
+        addLog(value > 0 ? `You feel your ${skill} level increase.` : `You feel your ${skill} level decrease.`);
+        setStatModifiers(prev => [...prev.filter(m => m.skill !== skill), newModifier]);
+    }, [statModifiers, addLog]);
 
     const applySpellStatBuff = useCallback((skill: SkillName, value: number, duration: number, source?: string) => {
         const newBuff: ActiveBuff = {
@@ -538,7 +559,7 @@ export const useCharacter = (
                     };
                     return [...prev.filter(b => b.type !== 'poison'), newBuff];
                 }
-                
+
                 // New poison application
                 const newBuff: ActiveBuff = {
                     ...buff,
@@ -558,7 +579,7 @@ export const useCharacter = (
             };
             return [...prev.filter(b => b.type !== buff.type), newBuff];
         });
-        
+
         let buffMessage = "You feel a surge of power!";
         if (buff.type === 'recoil') buffMessage = "Your skin hardens and feels prickly.";
         if (buff.type === 'flat_damage') buffMessage = "Your strikes feel unnaturally powerful.";
@@ -577,22 +598,20 @@ export const useCharacter = (
     }, [addLog, activeBuffs]);
 
     const curePoison = useCallback(() => {
-        setActiveBuffs(prev => {
-            const wasPoisoned = prev.some(b => b.type === 'poison');
-            if (wasPoisoned) {
-                addLog("You feel the poison's effects fade.");
-                return prev.filter(b => b.type !== 'poison');
-            }
+        const wasPoisoned = activeBuffs.some(b => b.type === 'poison');
+        if (wasPoisoned) {
+            addLog("You feel the poison's effects fade.");
+            setActiveBuffs(prev => prev.filter(b => b.type !== 'poison'));
+        } else {
             addLog("You are not poisoned.");
-            return prev;
-        });
-    }, [addLog]);
+        }
+    }, [activeBuffs, addLog]);
 
     const clearStatModifiers = useCallback(() => {
         setStatModifiers([]);
         setActiveBuffs(prev => prev.filter(b => b.type !== 'stat_boost'));
     }, []);
-    
+
     const clearBuffs = useCallback(() => {
         setActiveBuffs(prev => prev.filter(b => b.type === 'stat_boost'));
     }, []);
@@ -601,21 +620,21 @@ export const useCharacter = (
     const skillsWithCurrentLevels = useMemo(() => {
         return skills.map(skill => {
             let currentLevel = skill.level;
-    
+
             // Note: Prayers and Spell Buffs are now considered "Effective" levels (invisible)
             // and are not included here. Only Potions (statModifiers) affect the visible level.
-            
+
             // Apply decaying potion/monster modifiers
             const decayModifier = statModifiers.find(m => m.skill === skill.name);
             if (decayModifier) {
                 const modifiedLevel = currentLevel + decayModifier.currentValue;
-                currentLevel = decayModifier.currentValue < 0 ? Math.max(1, Math.round(modifiedLevel)) : Math.round(modifiedLevel);
+                currentLevel = decayModifier.currentValue < 0 ? Math.max(1, Math.floor(modifiedLevel)) : Math.floor(modifiedLevel);
             }
-    
+
             return { ...skill, currentLevel: currentLevel };
         });
     }, [skills, statModifiers]);
-    
+
     // EFFECTIVE LEVEL Calculation (Visible + Prayers + Spells)
     // This is used for combat math (accuracy, damage).
     const getEffectiveLevel = useCallback((skillName: SkillName) => {
@@ -647,7 +666,7 @@ export const useCharacter = (
         const clampedLevel = Math.max(1, Math.min(99, level));
         const newXp = XP_TABLE[clampedLevel - 1] ?? 0;
 
-        setSkills(prevSkills => prevSkills.map(skill => 
+        setSkills(prevSkills => prevSkills.map(skill =>
             skill.name === skillName ? { ...skill, level: clampedLevel, xp: newXp } : skill
         ));
 
@@ -665,22 +684,22 @@ export const useCharacter = (
     const setAllSkillsLevel = useCallback((level: number) => {
         const clampedLevel = Math.max(1, Math.min(99, level));
         const newXp = XP_TABLE[clampedLevel - 1] ?? 0;
-    
+
         setSkills(prevSkills => prevSkills.map(skill => ({ ...skill, level: clampedLevel, xp: newXp })));
-        
+
         setCurrentHp(clampedLevel);
         setCurrentPrayer(clampedLevel);
-    
+
         addLog(`DEV: All skills set to level ${clampedLevel}.`);
     }, [addLog, setCurrentHp, setCurrentPrayer]);
 
     return {
-        skills: skillsWithCurrentLevels, 
+        skills: skillsWithCurrentLevels,
         getEffectiveLevel,
         setSkills,
-        combatStance, 
-        currentHp, 
-        setCurrentHp, 
+        combatStance,
+        currentHp,
+        setCurrentHp,
         maxHp,
         currentPrayer: Math.round(rawCurrentPrayer),
         rawCurrentPrayer: rawCurrentPrayer,
@@ -692,8 +711,8 @@ export const useCharacter = (
         setIsRunToggled,
         isResting,
         setIsResting,
-        combatLevel, 
-        addXp, 
+        combatLevel,
+        addXp,
         applyStatModifier,
         applySpellStatBuff,
         activeBuffs,

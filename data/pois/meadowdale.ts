@@ -9,7 +9,7 @@ export const meadowdalePois: Record<string, POI> = {
         description: 'The southern gates of Meadowdale, opening up to the road south. A single guard keeps a lazy watch.',
         connections: ['south_meadow_road', 'south_meadow_street'],
         activities: [
-            { type: 'npc', name: 'Guard', icon: 'https://api.iconify.design/game-icons:guard.svg', pickpocket: { lootTableId: 'pickpocket_guard_table' }, attackableMonsterId: 'guard', dialogue: { start: { npcName: 'Guard', npcIcon: 'https://api.iconify.design/game-icons:guard.svg', text: "Just keeping an eye on things. Move along.", responses: [] } }, startNode: 'start' }
+            { type: 'npc', name: 'Guard', icon: 'guard', pickpocket: { lootTableId: 'pickpocket_guard_table' }, attackableMonsterId: 'guard', dialogue: { start: { npcName: 'Guard', npcIcon: 'guard', text: "Just keeping an eye on things. Move along.", responses: [] } }, startNode: 'start' }
         ],
         regionId: 'meadowdale',
         type: 'internal',
@@ -56,7 +56,7 @@ export const meadowdalePois: Record<string, POI> = {
         description: "The main southern road inside Meadowdale. The cook's kitchen is just off the road here.",
         connections: ['meadowdale_south_gate', 'meadowdale_square', 'meadowdale_kitchen'],
         activities: [
-            { type: 'npc', name: 'Man', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Man', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
+            { type: 'npc', name: 'Man', icon: 'person', dialogue: { start: { npcName: 'Man', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
         ],
         regionId: 'meadowdale',
         x: 250, y: 350,
@@ -68,7 +68,7 @@ export const meadowdalePois: Record<string, POI> = {
         description: 'The main northern road inside Meadowdale, leading past the library, a small magic shop, and the town hall.',
         connections: ['meadowdale_north_gate', 'meadowdale_square', 'meadowdale_library', 'town_hall', 'meadowdale_magic_shop'],
         activities: [
-            { type: 'npc', name: 'Woman', icon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', dialogue: { start: { npcName: 'Woman', npcIcon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
+            { type: 'npc', name: 'Woman', icon: 'woman-elf-face', dialogue: { start: { npcName: 'Woman', npcIcon: 'woman-elf-face', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
         ],
         regionId: 'meadowdale',
         x: 250, y: 150,
@@ -80,7 +80,7 @@ export const meadowdalePois: Record<string, POI> = {
         description: 'The eastern road of Meadowdale, leading past the smithy and the local inn. A small alley leads to a rooftop access point.',
         connections: ['meadowdale_east_gate', 'meadowdale_square', 'meadowdale_smithy', 'the_rusty_flagon', 'meadowdale_rooftop_access'],
         activities: [
-            { type: 'npc', name: 'Man', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Man', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
+            { type: 'npc', name: 'Man', icon: 'person', dialogue: { start: { npcName: 'Man', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
         ],
         regionId: 'meadowdale',
         x: 350, y: 250,
@@ -129,9 +129,9 @@ export const meadowdalePois: Record<string, POI> = {
                     }
                 }
             },
-            { type: 'npc', name: 'Man', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Man', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
-            { type: 'npc', name: 'Woman', icon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', dialogue: { start: { npcName: 'Woman', npcIcon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
-            { type: 'npc', name: 'Use Blight Ward Potion', icon: 'https://api.iconify.design/game-icons:sprout.svg', questCondition: { questId: 'petunia_problems', stages: [3] }, startNode: 'petunia_use_potion' },
+            { type: 'npc', name: 'Man', icon: 'person', dialogue: { start: { npcName: 'Man', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
+            { type: 'npc', name: 'Woman', icon: 'woman-elf-face', dialogue: { start: { npcName: 'Woman', npcIcon: 'woman-elf-face', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
+            { type: 'npc', name: 'Use Blight Ward Potion', icon: 'sprout', questCondition: { questId: 'petunia_problems', stages: [3] }, startNode: 'petunia_use_potion' },
             { type: 'ground_item', id: 'meadowdale_square_coins', itemId: 'coins', resourceCount: 1, respawnTimer: 60000 },
         ],
         regionId: 'meadowdale',
@@ -147,11 +147,11 @@ export const meadowdalePois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Altar',
-                icon: 'https://api.iconify.design/game-icons:altar.svg',
+                icon: 'altar',
                 dialogue: {
                     start: {
                         npcName: 'Altar',
-                        npcIcon: 'https://api.iconify.design/game-icons:altar.svg',
+                        npcIcon: 'altar',
                         text: 'You feel a divine presence. Your prayer may be answered here.',
                         responses: [
                             { text: 'Pray', actions: [{ type: 'restore_prayer' }] },
@@ -306,12 +306,12 @@ export const meadowdalePois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Tavern Regular',
-                icon: 'https://api.iconify.design/game-icons:person.svg',
+                icon: 'person',
                 pickpocket: { lootTableId: 'pickpocket_tavern_regular' },
                 dialogue: {
                     start: {
                         npcName: 'Tavern Regular',
-                        npcIcon: 'https://api.iconify.design/game-icons:person.svg',
+                        npcIcon: 'person',
                         text: "Hear the goblins in the mines are getting bolder. They say their king is building a throne of junk and stolen goods.\n\nSome say the Whispering Woods got their name 'cause the trees themselves are alive... others say it's just the wind. I know what I believe.",
                         responses: []
                     }
@@ -322,13 +322,13 @@ export const meadowdalePois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Warrior',
-                icon: 'https://api.iconify.design/game-icons:swordman.svg',
+                icon: 'swordman',
                 pickpocket: { lootTableId: 'pickpocket_warrior_table' },
                 attackableMonsterId: 'warrior',
                 dialogue: {
                     start: {
                         npcName: 'Warrior',
-                        npcIcon: 'https://api.iconify.design/game-icons:swordman.svg',
+                        npcIcon: 'swordman',
                         text: "Looking for a fight? You've come to the right place. Or the wrong one, depending on how you look at it.",
                         responses: []
                     }
@@ -387,7 +387,7 @@ completed "How goes the Runecrafting research?", check: { requirements: [{ type:
             {
                 type: 'npc',
                 name: 'Wizard Elmsworth',
-                icon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+                icon: 'wizard-face',
                 startNode: 'elmsworth_default',
                 questTopics: ['magical_runestone_discovery'],
                 conditionalGreetings: [

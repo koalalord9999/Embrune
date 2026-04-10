@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { POIActivity, PlayerQuestState, DialogueNode, Quest, DialogueResponse, DialogueCheckRequirement, DialogueAction, InventorySlot } from '../types';
-import { QUESTS } from '../constants';
+import {  QUESTS  } from '../constants';
 import { DialogueState, useUIState } from './useUIState';
 
 interface SceneInteractionDependencies {
@@ -18,7 +18,7 @@ export const useSceneInteractions = (poiId: string, deps: SceneInteractionDepend
 
     const handleActivityClick = useCallback((activity: POIActivity) => {
         setIsResting(false);
-        if (activity.type !== 'npc' || !activity.startNode) {
+        if ((activity.type !== 'npc' && activity.type !== 'slayer_master') || !activity.startNode) {
             return; // Not a dialogue NPC or no entry point defined
         }
 
@@ -56,7 +56,9 @@ export const useSceneInteractions = (poiId: string, deps: SceneInteractionDepend
             if (questData?.dialogueEntryPoints) {
                 for (const entryPoint of questData.dialogueEntryPoints) {
                     if (entryPoint.npcName === name) {
-                        if (handleDialogueCheck(entryPoint.response.check?.requirements ?? [])) {
+                        const requirements = entryPoint.response.check?.requirements ?? [];
+                        const hasFailurePath = !!entryPoint.response.check?.failureNode;
+                        if (hasFailurePath || handleDialogueCheck(requirements)) {
                             dynamicResponses.push(entryPoint.response);
                         }
                     }

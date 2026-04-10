@@ -42,7 +42,7 @@ export const crystallineIslesPois: Record<string, POI> = {
         description: 'The path continues along the edge of the floating island. A narrower, more treacherous-looking path branches off toward the island\'s interior.',
         connections: ['crystalline_path_1', 'crystalline_path_3', 'inner_path_A1'],
         activities: [
-             { type: 'skilling', id: 'ci_maple_1', name: 'Chop Maple Tree', skill: SkillName.Woodcutting, requiredLevel: 45, loot: [{ itemId: 'maple_logs', chance: 1, xp: 100 }], resourceCount: { min: 1, max: 2 }, respawnTime: 30000, gatherTime: 4000 },
+            { type: 'skilling', id: 'ci_maple_1', name: 'Chop Maple Tree', skill: SkillName.Woodcutting, requiredLevel: 45, loot: [{ itemId: 'maple_logs', chance: 1, xp: 100 }], resourceCount: { min: 1, max: 2 }, respawnTime: 30000, gatherTime: 4000 },
         ],
         regionId: 'crystalline_isles',
         x: 1678, y: 947
@@ -53,8 +53,8 @@ export const crystallineIslesPois: Record<string, POI> = {
         description: 'The view of the endless sky is dizzying from this vantage point.',
         connections: ['crystalline_path_2', 'crystalline_path_4'],
         activities: [
-             { type: 'combat', monsterId: 'shard_golem' },
-             { type: 'thieving_lockpick', id: 'ci_chest_1', targetName: 'Glimmering Chest', lootTableId: 'thieving_dungeon_chest_high' },
+            { type: 'combat', monsterId: 'shard_golem' },
+            { type: 'thieving_lockpick', id: 'ci_chest_1', targetName: 'Glimmering Chest', lootTableId: 'thieving_dungeon_chest_high' },
         ],
         regionId: 'crystalline_isles',
         x: 1569, y: 802
@@ -76,8 +76,8 @@ export const crystallineIslesPois: Record<string, POI> = {
         description: 'The path curves northwards. A grove of hardy oak and maple trees grow here, their roots fused with the crystal.',
         connections: ['crystalline_path_4', 'crystalline_path_6'],
         activities: [
-             { type: 'skilling', id: 'ci_oak_1', name: 'Chop Oak Tree', skill: SkillName.Woodcutting, requiredLevel: 15, loot: [{ itemId: 'oak_logs', chance: 1, xp: 65 }], resourceCount: { min: 2, max: 4 }, respawnTime: 18000, gatherTime: 3000 },
-             { type: 'skilling', id: 'ci_maple_2', name: 'Chop Maple Tree', skill: SkillName.Woodcutting, requiredLevel: 45, loot: [{ itemId: 'maple_logs', chance: 1, xp: 100 }], resourceCount: { min: 1, max: 2 }, respawnTime: 30000, gatherTime: 4000 },
+            { type: 'skilling', id: 'ci_oak_1', name: 'Chop Oak Tree', skill: SkillName.Woodcutting, requiredLevel: 15, loot: [{ itemId: 'oak_logs', chance: 1, xp: 65 }], resourceCount: { min: 2, max: 4 }, respawnTime: 18000, gatherTime: 3000 },
+            { type: 'skilling', id: 'ci_maple_2', name: 'Chop Maple Tree', skill: SkillName.Woodcutting, requiredLevel: 45, loot: [{ itemId: 'maple_logs', chance: 1, xp: 100 }], resourceCount: { min: 1, max: 2 }, respawnTime: 30000, gatherTime: 4000 },
         ],
         regionId: 'crystalline_isles',
         x: 1648, y: 544
@@ -91,7 +91,7 @@ export const crystallineIslesPois: Record<string, POI> = {
             { type: 'combat', monsterId: 'crystal_grazer' },
         ],
         regionId: 'crystalline_isles',
-        x: 1842, y: 499
+        x: 1842, y: 430
     },
     crystalline_path_7: {
         id: 'crystalline_path_7',
@@ -110,8 +110,8 @@ export const crystallineIslesPois: Record<string, POI> = {
         description: 'The air hums with a faint, musical energy here.',
         connections: ['crystalline_path_7', 'crystalline_path_9'],
         activities: [
-             { type: 'skilling', id: 'ci_coal_2', name: 'Mine Coal', skill: SkillName.Mining, requiredLevel: 30, loot: [{ itemId: 'coal', chance: 1, xp: 50 }], resourceCount: { min: 2, max: 5 }, respawnTime: 12000, gatherTime: 3500 },
-             { type: 'thieving_lockpick', id: 'ci_chest_2', targetName: 'Floating Chest', lootTableId: 'thieving_dungeon_chest_high' },
+            { type: 'skilling', id: 'ci_coal_2', name: 'Mine Coal', skill: SkillName.Mining, requiredLevel: 30, loot: [{ itemId: 'coal', chance: 1, xp: 50 }], resourceCount: { min: 2, max: 5 }, respawnTime: 12000, gatherTime: 3500 },
+            { type: 'thieving_lockpick', id: 'ci_chest_2', targetName: 'Floating Chest', lootTableId: 'thieving_dungeon_chest_high' },
         ],
         regionId: 'crystalline_isles',
         x: 2139, y: 753
@@ -122,7 +122,7 @@ export const crystallineIslesPois: Record<string, POI> = {
         description: 'The path levels out, leading back toward the skyship landing.',
         connections: ['crystalline_path_8', 'crystalline_isles_landing'],
         activities: [
-             { type: 'combat', monsterId: 'crystal_grazer' },
+            { type: 'combat', monsterId: 'crystal_grazer' },
         ],
         regionId: 'crystalline_isles',
         x: 2053, y: 882
@@ -216,12 +216,12 @@ export const crystallineIslesPois: Record<string, POI> = {
         id: 'magus_spire_entrance',
         name: "Magus Spire Entrance",
         description: 'A shimmering, ethereal doorway hangs in the air before the Heartcrystal, leading into a towering spire of pure magic.',
-        connections: ['the_heartcrystal', 'ms_f1_antechamber'],
+        connections: ['the_heartcrystal', 'ms_f1_landing'],
         activities: [
             {
                 type: 'npc',
                 name: 'Enter the Spire',
-                icon: 'https://api.iconify.design/game-icons:rune-gate.svg',
+                icon: 'rune-gate',
                 questCondition: { questId: 'the_arcane_awakening', stages: [7] },
                 startNode: 'enter_spire_start',
             }

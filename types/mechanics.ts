@@ -5,7 +5,7 @@ export interface Shop {
     id: string;
     name: string;
     inventory: { itemId: string; quantity: number; priceModifier: number; doses?: number; }[]; // modifier for buying/selling
-    currency?: 'coins' | 'agility_voucher';
+    currency?: 'coins' | 'agility_voucher' | 'slayer_credits';
     sellingDisabled?: boolean;
 }
 
@@ -48,13 +48,23 @@ export interface JewelryRecipe {
 export interface SkillGuideEntry {
     level: number;
     description: string;
+    subDescription?: string;
     itemId?: string;
+    /** If true, subDescription is only shown when the player meets the level requirement */
+    revealSubAtLevel?: boolean;
 }
+
+export interface SkillGuideTab {
+    id: string;
+    label: string;
+    entries: SkillGuideEntry[];
+}
+
 
 export interface ActiveCraftingAction {
     recipeId: string;
     // Distinguishes between different types of recipes that might share item IDs
-    recipeType: 'smithing-bar' | 'smithing-item' | 'smithing-special' | 'fletching-carve' | 'fletching-string' | 'fletching-headless' | 'fletching-tip' | 'crafting' | 'gem-cutting' | 'spinning' | 'cooking' | 'herblore-unfinished' | 'herblore-finished' | 'jewelry' | 'firemaking-light' | 'firemaking-stoke' | 'milling' | 'dough-making' | 'fletching-stock' | 'fletching-assembly' | 'fletching-feather' | 'consecration' | 'grinding' | 'paste-making' | 'offering' | 'rendering' | 'glassblowing' | 'furnace-misc';
+    recipeType: 'smithing-bar' | 'smithing-item' | 'smithing-special' | 'fletching-carve' | 'fletching-string' | 'fletching-headless' | 'fletching-tip' | 'crafting' | 'gem-cutting' | 'spinning' | 'cooking' | 'herblore-unfinished' | 'herblore-finished' | 'jewelry' | 'firemaking-light' | 'firemaking-stoke' | 'milling' | 'dough-making' | 'fletching-stock' | 'fletching-assembly' | 'fletching-feather' | 'consecration' | 'grinding' | 'paste-making' | 'offering' | 'rendering' | 'glassblowing' | 'furnace-misc' | 'flask-mixing';
     totalQuantity: number;
     completedQuantity: number;
     successfulQuantity?: number;

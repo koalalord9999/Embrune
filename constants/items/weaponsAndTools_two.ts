@@ -1,65 +1,16 @@
 import { Item, EquipmentSlot, SkillName, WeaponType } from '../../types';
 
 export const weaponsAndTools_two: Item[] = [
-    { id: 'petrifying_flail', name: 'Petrifying Flail', description: 'A mace with a head carved from a basilisk eye. Has a chance to briefly stun opponents.', stackable: false, value: 40000, iconUrl: 'https://api.iconify.design/game-icons:flanged-mace.svg', material: 'adamantite', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Mace, speed: 5, stabAttack: 10, slashAttack: -2, crushAttack: 45, strengthBonus: 42, requiredLevels: [{ skill: SkillName.Attack, level: 50 }], } },
-    { id: 'basalt_crusher', name: 'Basalt Crusher', description: 'An enormous warhammer made from a single piece of volcanic rock. Incredibly heavy and slow.', stackable: false, value: 75000, iconUrl: 'https://api.iconify.design/game-icons:warhammer.svg', material: 'runic', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Warhammer, isTwoHanded: true, speed: 7, stabAttack: -4, slashAttack: -4, crushAttack: 95, strengthBonus: 88, requiredLevels: [{ skill: SkillName.Attack, level: 60 }, { skill: SkillName.Strength, level: 60 }], } },
-    { id: 'demonic_whip', name: 'Demonic Whip', description: 'A whip crafted from the spine of a demon. Incredibly fast and accurate.', stackable: false, value: 1200000, iconUrl: 'https://api.iconify.design/game-icons:whip.svg', material: 'rune-ember', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Whip, speed: 4, stabAttack: 50, slashAttack: 82, crushAttack: -5, strengthBonus: 82, requiredLevels: [{ skill: SkillName.Attack, level: 75 }], } },
-    { id: 'sandstorm_staff', name: 'Sandstorm Staff', description: 'A staff that hums with the power of the desert winds, providing an unlimited supply of earth and air runes.', stackable: false, value: 35000, iconUrl: 'https://api.iconify.design/game-icons:wizard-staff.svg', material: 'gold', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Staff, speed: 4, crushAttack: 8, magicAttack: 12, strengthBonus: 4, providesRune: 'stone_rune', requiredLevels: [{ skill: SkillName.Magic, level: 50 }], } },
+    { id: 'petrifying_flail', itemNum: 782, name: 'Petrifying Flail', description: 'A mace with a head carved from a basilisk eye. Has a chance to briefly stun opponents.', stackable: false, value: 40000, iconUrl: 'flanged-mace', material: 'adamantite', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Mace, speed: 5, stabAttack: 10, slashAttack: -2, crushAttack: 45, strengthBonus: 42, requiredLevels: [{ skill: SkillName.Attack, level: 50 }], } },
+    { id: 'basalt_crusher', itemNum: 783, name: 'Basalt Crusher', description: 'An enormous warhammer made from a single piece of volcanic rock. Incredibly heavy and slow.', stackable: false, value: 75000, iconUrl: 'warhammer', material: 'runic', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Warhammer, isTwoHanded: true, speed: 7, stabAttack: -4, slashAttack: -4, crushAttack: 95, strengthBonus: 88, requiredLevels: [{ skill: SkillName.Attack, level: 60 }, { skill: SkillName.Strength, level: 60 }], } },
+    { id: 'demonic_whip', itemNum: 784, name: 'Demonic Whip', description: 'A whip crafted from the spine of a demon. Incredibly fast and accurate.', stackable: false, value: 1200000, iconUrl: 'whip', material: 'rune-ember', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Whip, speed: 4, stabAttack: 50, slashAttack: 82, crushAttack: -5, strengthBonus: 82, requiredLevels: [{ skill: SkillName.Attack, level: 75 }], } },
+    { id: 'sandstorm_staff', itemNum: 785, name: 'Sandstorm Staff', description: 'A staff that hums with the power of the desert winds, providing an unlimited supply of earth and air runes.', stackable: false, value: 35000, iconUrl: 'wizard-staff', material: 'gold', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Staff, speed: 4, crushAttack: 8, magicAttack: 12, strengthBonus: 4, providesRune: 'stone_rune', requiredLevels: [{ skill: SkillName.Magic, level: 50 }], } },
     // --- Fire Flasks ---
-    {
-        id: 'refined_grease_flask', name: 'Refined Grease Flask (L)', description: 'A flask of purified grease. The most basic fire flask.',
-        stackable: true, value: 10, iconUrl: 'https://api.iconify.design/game-icons:molotov.svg',
-        equipment: {
-            slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6,
-            rangedStrength: 4, requiredLevels: [{ skill: SkillName.Ranged, level: 1 }, { skill: SkillName.Firemaking, level: 1 }]
-        }
-    },
-    {
-        id: 'animal_fat_flask', name: 'Animal Fat Flask (L)', description: 'A flask filled with rendered animal fat.',
-        stackable: true, value: 20, iconUrl: 'https://api.iconify.design/game-icons:molotov.svg',
-        equipment: {
-            slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6,
-            rangedStrength: 8, requiredLevels: [{ skill: SkillName.Ranged, level: 10 }, { skill: SkillName.Firemaking, level: 10 }]
-        }
-    },
-    {
-        id: 'tallow_flask', name: 'Tallow Flask (L)', description: 'A flask filled with flammable tallow.',
-        stackable: true, value: 35, iconUrl: 'https://api.iconify.design/game-icons:molotov.svg',
-        equipment: {
-            slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6,
-            rangedStrength: 12, requiredLevels: [{ skill: SkillName.Ranged, level: 20 }, { skill: SkillName.Firemaking, level: 20 }]
-        }
-    },
-    {
-        id: 'rich_animal_fat_flask', name: 'Rich Animal Fat Flask (L)', description: 'A flask of highly flammable rich animal fat.',
-        stackable: true, value: 50, iconUrl: 'https://api.iconify.design/game-icons:molotov.svg',
-        equipment: {
-            slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6,
-            rangedStrength: 16, requiredLevels: [{ skill: SkillName.Ranged, level: 30 }, { skill: SkillName.Firemaking, level: 30 }]
-        }
-    },
-    {
-        id: 'beast_fat_flask', name: 'Beast Fat Flask (L)', description: 'A flask of magical beast fat that burns with an unnatural flame.',
-        stackable: true, value: 75, iconUrl: 'https://api.iconify.design/game-icons:molotov.svg',
-        equipment: {
-            slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6,
-            rangedStrength: 20, requiredLevels: [{ skill: SkillName.Ranged, level: 40 }, { skill: SkillName.Firemaking, level: 40 }]
-        }
-    },
-    {
-        id: 'titan_fat_flask', name: 'Titan Fat Flask (L)', description: 'A flask of dense titan fat that burns for a long time.',
-        stackable: true, value: 100, iconUrl: 'https://api.iconify.design/game-icons:molotov.svg',
-        equipment: {
-            slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6,
-            rangedStrength: 24, requiredLevels: [{ skill: SkillName.Ranged, level: 50 }, { skill: SkillName.Firemaking, level: 50 }]
-        }
-    },
-    {
-        id: 'dragon_fat_flask', name: 'Dragon Fat Flask (L)', description: 'A flask filled with dragon fat. Burns with intense heat.',
-        stackable: true, value: 200, iconUrl: 'https://api.iconify.design/game-icons:molotov.svg',
-        equipment: {
-            slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6,
-            rangedStrength: 28, requiredLevels: [{ skill: SkillName.Ranged, level: 60 }, { skill: SkillName.Firemaking, level: 60 }]
-        }
-    },
+    { id: 'refined_grease_flask', itemNum: 786, name: 'Refined Grease Flask', description: 'A flask of purified grease. The most basic fire flask.', stackable: true, value: 10, iconUrl: 'molotov', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6, rangedStrength: 4, requiredLevels: [{ skill: SkillName.Ranged, level: 1 }, { skill: SkillName.Firemaking, level: 1 }] } },
+    { id: 'animal_fat_flask', itemNum: 787, name: 'Animal Fat Flask', description: 'A flask filled with rendered animal fat.', stackable: true, value: 20, iconUrl: 'molotov', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6, rangedStrength: 8, requiredLevels: [{ skill: SkillName.Ranged, level: 10 }, { skill: SkillName.Firemaking, level: 10 }] } },
+    { id: 'tallow_flask', itemNum: 788, name: 'Tallow Flask', description: 'A flask filled with flammable tallow.', stackable: true, value: 35, iconUrl: 'molotov', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6, rangedStrength: 12, requiredLevels: [{ skill: SkillName.Ranged, level: 20 }, { skill: SkillName.Firemaking, level: 20 }] } },
+    { id: 'rich_animal_fat_flask', itemNum: 789, name: 'Rich Animal Fat Flask', description: 'A flask of highly flammable rich animal fat.', stackable: true, value: 50, iconUrl: 'molotov', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6, rangedStrength: 16, requiredLevels: [{ skill: SkillName.Ranged, level: 30 }, { skill: SkillName.Firemaking, level: 30 }] } },
+    { id: 'beast_fat_flask', itemNum: 790, name: 'Beast Fat Flask', description: 'A flask of magical beast fat that burns with an unnatural flame.', stackable: true, value: 75, iconUrl: 'molotov', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6, rangedStrength: 20, requiredLevels: [{ skill: SkillName.Ranged, level: 40 }, { skill: SkillName.Firemaking, level: 40 }] } },
+    { id: 'titan_fat_flask', itemNum: 791, name: 'Titan Fat Flask', description: 'A flask of dense titan fat that burns for a long time.', stackable: true, value: 100, iconUrl: 'molotov', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6, rangedStrength: 24, requiredLevels: [{ skill: SkillName.Ranged, level: 50 }, { skill: SkillName.Firemaking, level: 50 }] } },
+    { id: 'dragon_fat_flask', itemNum: 792, name: 'Dragon Fat Flask', description: 'A flask filled with dragon fat. Burns with intense heat.', stackable: true, value: 200, iconUrl: 'molotov', equipment: { slot: EquipmentSlot.Weapon, weaponType: WeaponType.Thrown, speed: 6, rangedStrength: 28, requiredLevels: [{ skill: SkillName.Ranged, level: 60 }, { skill: SkillName.Firemaking, level: 60 }] } },
 ];

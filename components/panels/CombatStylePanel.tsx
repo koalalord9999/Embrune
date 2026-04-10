@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CombatStance, Equipment, WeaponType } from '../../types';
-import { ITEMS } from '../../constants';
+import {  ITEMS  } from '../../constants';
 import Button from '../common/Button';
 import { useUIState } from '../../hooks/useUIState';
 
@@ -62,16 +62,16 @@ const CombatStylePanel: React.FC<CombatStylePanelProps> = ({ combatStance, setCo
     };
 
     return (
-        <div className="flex flex-col h-full text-gray-300">
+        <div className="flex flex-col h-full text-gray-300 font-pixel-rpg">
             <div className="text-center mb-4">
-                <p className="text-sm">Combat Level: <span className="font-bold text-yellow-300">{combatLevel}</span></p>
+                <p className="text-xl">Combat Level: <span className="font-bold text-yellow-300">{combatLevel}</span></p>
             </div>
             <div className="space-y-2">
                 {stanceOptions.map(stance => (
                     <Button
                         key={stance}
                         onClick={() => handleStanceChange(stance)}
-                        className={`w-full ${combatStance === stance ? 'ring-2 ring-yellow-400' : ''} ${activeCombatStyleHighlight === stance ? 'tutorial-highlight-target' : ''}`}
+                        className={`w-full text-xl ${combatStance === stance ? 'ring-2 ring-yellow-400' : ''} ${activeCombatStyleHighlight === stance ? 'tutorial-highlight-target' : ''}`}
                         variant={combatStance === stance ? 'primary' : 'secondary'}
                     >
                         {stanceLabels[stance as keyof typeof stanceLabels]}

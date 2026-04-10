@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { PlayerRepeatableQuest, GeneratedRepeatableQuest, RepeatableQuestsState, SkillName, PlayerSkill } from '../types';
-import { REPEATABLE_QUEST_POOL, MONSTERS, ITEMS, XP_TABLE, TELEPORT_UNLOCK_THRESHOLD } from '../constants';
+import {  REPEATABLE_QUEST_POOL, MONSTERS, ITEMS, XP_TABLE, TELEPORT_UNLOCK_THRESHOLD  } from '../constants';
 import { POIS } from '../data/pois';
 
 const BOARD_IDS = ['the_rusty_flagon', 'the_carved_mug', 'tutorial_tavern', 'the_barnacles_bite', 'the_gilded_goblet', 'the_sand_serpent_inn', 'sanctity_inn'];

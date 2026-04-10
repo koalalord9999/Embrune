@@ -61,7 +61,7 @@ export const sunkenLabyrinthPois: Record<string, POI> = {
         {
             type: 'npc',
             name: 'Commune with the Altar',
-            icon: 'https://api.iconify.design/game-icons:rune-stone.svg',
+            icon: 'rune-stone',
             questCondition: { questId: 'whispers_of_the_divine', stages: [4] },
             startNode: 'wod_nexus_echo'
         },
@@ -119,6 +119,7 @@ export const sunkenLabyrinthPois: Record<string, POI> = {
     description: 'A huge crack in the floor leaks a steady stream of water. The entire room feels unstable.',
     connections: ['laby_hub_3'],
     activities: [
+        { type: 'combat', monsterId: 'giant_clam' },
         { type: 'combat', monsterId: 'giant_clam' }
     ],
     regionId: 'sunken_labyrinth',
@@ -264,6 +265,7 @@ export const sunkenLabyrinthPois: Record<string, POI> = {
     description: 'The western end of a once-magnificent hall, now collapsed and impassable to the east.',
     connections: ['laby_colonnade_of_the_ancients'],
     activities: [
+        { type: 'combat', monsterId: 'coral_golem' },
         { type: 'combat', monsterId: 'coral_golem' }
     ],
     regionId: 'sunken_labyrinth',
@@ -523,6 +525,7 @@ export const sunkenLabyrinthPois: Record<string, POI> = {
     description: 'An underground stream flows through this passage. Faint, incoherent whispers seem to echo from the water.',
     connections: ['laby_crossroads_1', 'laby_lurker_nest', 'laby_waterfall_chamber', 'laby_fungal_cavern'],
     activities: [
+        { type: 'combat', monsterId: 'water_weird' },
         { type: 'combat', monsterId: 'water_weird' }
     ],
     regionId: 'sunken_labyrinth',

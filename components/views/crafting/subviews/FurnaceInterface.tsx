@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SkillName } from '../../../../types';
-import { ITEMS, getIconClassName, SMELTING_RECIPES } from '../../../../constants';
+import {  ITEMS, getIconClassName, SMELTING_RECIPES, getIconUrl  } from '../../../../constants';
 import { CraftingViewProps } from '../CraftingView';
 import { useLongPress } from '../../../../hooks/useLongPress';
 import { useIsTouchDevice } from '../../../../hooks/useIsTouchDevice';
@@ -101,11 +101,11 @@ const FurnaceSlot: React.FC<{
             <div className={`crafting-slot-level ${hasLevel ? 'met' : 'unmet'}`}>
                 Lvl {recipe.level}
             </div>
-            <img src={item.iconUrl} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
+            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
             <div className="crafting-slot-ingredients">
                 {recipe.ingredients.map(ing => (
                     <div key={ing.itemId} className="ingredient-icon" title={`${ITEMS[ing.itemId].name} (${getItemCount(ing.itemId)})`}>
-                        <img src={ITEMS[ing.itemId].iconUrl} alt={ITEMS[ing.itemId].name} className={getIconClassName(ITEMS[ing.itemId])} />
+                        <img src={getIconUrl(ITEMS[ing.itemId].iconUrl)} alt={ITEMS[ing.itemId].name} className={getIconClassName(ITEMS[ing.itemId])} />
                         {ing.quantity > 1 && <span className="ingredient-quantity">{ing.quantity}</span>}
                     </div>
                 ))}

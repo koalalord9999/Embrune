@@ -4,7 +4,7 @@ import { DialogueNode } from '../../types';
 export const BROTHER_THADDEUS_DIALOGUE: Record<string, DialogueNode> = {
     start: {
         npcName: 'Brother Thaddeus',
-        npcIcon: 'https://api.iconify.design/game-icons:priest-hat.svg',
+        npcIcon: 'priest-hat',
         text: "Blessings upon you, traveler. The light of the Divines shines on this town. May it bring you peace.",
         responses: [
             { text: "What is this place?", next: 'about_sanctity' },
@@ -13,7 +13,7 @@ export const BROTHER_THADDEUS_DIALOGUE: Record<string, DialogueNode> = {
     },
     about_sanctity: {
         npcName: 'Brother Thaddeus',
-        npcIcon: 'https://api.iconify.design/game-icons:priest-hat.svg',
+        npcIcon: 'priest-hat',
         text: "This is Sanctity, a bastion of hope against the encroaching darkness of the swamps. We believe in order, worship, and the marriage of technology and faith to create a better world.",
         responses: []
     }
@@ -22,9 +22,31 @@ export const BROTHER_THADDEUS_DIALOGUE: Record<string, DialogueNode> = {
 export const LIBRARIAN_ANYA_DIALOGUE: Record<string, DialogueNode> = {
     start: {
         npcName: 'Librarian Anya',
-        npcIcon: '/assets/npcChatHeads/librarian_elara.png', // Re-use
+        npcIcon: '/assets/npcChatHeads/librarian_elara.png',
         text: "Welcome to the Sanctity Library. Here, we preserve the holy texts and the history of our founders. Please, keep your voice down.",
-        responses: []
+        responses: [],
+        conditionalResponses: [
+            {
+                text: "",
+                check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'completed' }], successNode: 'post_quest_start' }
+            }
+        ]
+    },
+    post_quest_start: {
+        npcName: 'Librarian Anya',
+        npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+        text: "Ah, the Archmage returns! The library is significantly safer now that the weave has been... adjusted. How can I assist you today?",
+        responses: [
+            { text: "About that hat... purple, stars, you remember?", next: 'the_hat_joke' }
+        ]
+    },
+    the_hat_joke: {
+        npcName: 'Librarian Anya',
+        npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+        text: "*Anya's expression remains deadpan.* Of course. I've spent the morning consulting the ancient scrolls of Millinery. There was a section on 'The Inherent Folly of Arcane Fashion'. It was quite comprehensive. There is no hat, Archmage. I suggest you spend your time researching something more practical. Like... gravity.",
+        responses: [
+            { text: "I'll keep looking for it elsewhere then." }
+        ]
     }
 };
 

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Equipment, InventorySlot, Item } from '../../../types';
-import { ITEMS, getIconClassName } from '../../../constants';
+import {  ITEMS, getIconClassName, getIconUrl  } from '../../../constants';
 import Button from '../../common/Button';
 import { useUIState, TooltipState, ContextMenuState } from '../../../hooks/useUIState';
 import { ContextMenuOption } from '../../common/ContextMenu';
@@ -15,29 +15,29 @@ interface EquipmentStatsViewProps {
     setTooltip: (tooltip: TooltipState | null) => void;
     ui: ReturnType<typeof useUIState>;
     addLog: (message: string) => void;
-    onExamine: (item: Item) => void;
+    onExamine: (item: Item, quantity?: number) => void;
     isTouchSimulationEnabled: boolean;
 }
 
 const StatRow: React.FC<{ label: string; value: number | string; }> = ({ label, value }) => (
-    <div className="flex justify-between">
-        <span className="text-gray-400">{label}</span>
-        <span className="font-bold">{value}</span>
+    <div className="flex justify-between font-pixel-rpg">
+        <span className="text-gray-400 text-lg">{label}</span>
+        <span className="font-bold text-xl">{value}</span>
     </div>
 );
 
 const SLOT_PLACEHOLDERS: Record<keyof Equipment, string> = {
-    head: 'https://api.iconify.design/game-icons:light-helm.svg',
-    cape: 'https://api.iconify.design/game-icons:cloak.svg',
-    necklace: 'https://api.iconify.design/game-icons:gem-pendant.svg',
-    ammo: 'https://api.iconify.design/game-icons:broadhead-arrow.svg',
-    weapon: 'https://api.iconify.design/game-icons:broadsword.svg',
-    body: 'https://api.iconify.design/game-icons:leather-vest.svg',
-    shield: 'https://api.iconify.design/game-icons:shield.svg',
-    legs: 'https://api.iconify.design/game-icons:armored-pants.svg',
-    gloves: 'https://api.iconify.design/game-icons:gloves.svg',
-    boots: 'https://api.iconify.design/game-icons:leather-boot.svg',
-    ring: 'https://api.iconify.design/game-icons:ring.svg',
+    head: 'light-helm',
+    cape: 'cloak',
+    necklace: 'gem-pendant',
+    ammo: 'broadhead-arrow',
+    weapon: 'broadsword',
+    body: 'leather-vest',
+    shield: 'shield',
+    legs: 'armored-pants',
+    gloves: 'gloves',
+    boots: 'leather-boot',
+    ring: 'ring',
 };
 
 const EmptySlot = () => <div className="w-full aspect-square" />;
@@ -49,7 +49,7 @@ interface EquipmentSlotDisplayProps {
     setTooltip: (tooltip: TooltipState | null) => void;
     setContextMenu: (menu: ContextMenuState | null) => void;
     addLog: (message: string) => void;
-    onExamine: (item: Item) => void;
+    onExamine: (item: Item, quantity?: number) => void;
     isTouchSimulationEnabled: boolean;
 }
 
@@ -96,7 +96,7 @@ const EquipmentSlotDisplay: React.FC<EquipmentSlotDisplayProps> = ({ slotKey, it
             });
         }
         
-        options.push({ label: 'Examine', onClick: () => performAction(() => onExamine(item)) });
+        options.push({ label: 'Examine', onClick: () => performAction(() => onExamine(item, itemSlot.quantity)) });
         setContextMenu({ options, triggerEvent: eventForMenu, isTouchInteraction: 'touches' in e || 'changedTouches' in e, title: getDisplayName(itemSlot) });
     };
 
@@ -112,10 +112,10 @@ const EquipmentSlotDisplay: React.FC<EquipmentSlotDisplayProps> = ({ slotKey, it
         >
             {item ? (
                 <>
-                    <img src={item.iconUrl} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+                    <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
                     {itemSlot?.statsOverride?.poisoned && (
                         <img 
-                            src="https://api.iconify.design/game-icons:boiling-bubbles.svg" 
+                            src={getIconUrl("boiling-bubbles")} 
                             alt="Poisoned"
                             className="poison-overlay-icon item-icon-uncut-emerald"
                             title="Poisoned"
@@ -128,7 +128,7 @@ const EquipmentSlotDisplay: React.FC<EquipmentSlotDisplayProps> = ({ slotKey, it
                     )}
                 </>
             ) : (
-                <img src={SLOT_PLACEHOLDERS[slotKey]} alt={slotKey} className="w-8 h-8 opacity-20 filter invert" />
+                <img src={getIconUrl(SLOT_PLACEHOLDERS[slotKey])} alt={slotKey} className="w-8 h-8 opacity-20 filter invert" />
             )}
         </div>
     );
@@ -181,18 +181,18 @@ const EquipmentStatsView: React.FC<EquipmentStatsViewProps> = (props) => {
     };
 
     return (
-        <div className="flex flex-col h-full text-gray-200 animate-fade-in">
+        <div className="flex flex-col h-full text-gray-200 animate-fade-in font-pixel-rpg">
             <div className="flex justify-between items-center p-4 bg-gray-900/50 border-b-2 border-gray-600 flex-shrink-0">
-                <h1 className="text-2xl font-bold text-yellow-400">Worn Equipment</h1>
+                <h1 className="text-3xl font-bold text-yellow-400">Worn Equipment</h1>
                 <Button onClick={onClose} size="sm">Close</Button>
             </div>
             <div className="flex-grow min-h-0 overflow-y-auto">
                 <div className="flex flex-col md:flex-row p-4 gap-4">
                     {/* Left: Stats Panel */}
                     <div className="w-full md:w-1/2 bg-black/40 p-3 rounded-lg border border-gray-600">
-                        <h2 className="text-xl font-bold text-yellow-400 text-center mb-2">Equipment Stats</h2>
+                        <h2 className="text-2xl font-bold text-yellow-400 text-center mb-2">Equipment Stats</h2>
                         <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-x-8 text-sm">
+                            <div className="grid grid-cols-2 gap-x-8">
                                 <div className="space-y-1">
                                     <h3 className="font-bold text-yellow-300 border-b border-gray-600 mb-2 pb-1">Attack Bonuses</h3>
                                     <StatRow label="Stab" value={totalStats.stabAttack} />

@@ -1,17 +1,21 @@
 
-import React, { useEffect, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import { useSoundEngine } from './useSoundEngine';
 import { WorldState } from '../types';
-import { REGIONS } from '../constants';
+import {  REGIONS  } from '../constants';
 import * as TRACKS from '../components/music/index';
 import { useUIState } from './useUIState';
 
 export type MusicStyle = 'grand' | 'pastoral' | 'mystic' | 'industrial' | 'desolate' | 'eerie' | 'volcanic' | 'tutorial' | 'heroic';
+export type MusicMode = 'play' | 'stop' | 'pause' | 'loop' | 'random';
 
 export interface MusicTrackMetadata {
     id: string;
     name: string;
     style: MusicStyle;
+    regionId?: string;
+    poiId?: string;
+    trackNum?: number;
 }
 
 interface MusicEvent {
@@ -24,15 +28,66 @@ let globalSessionId = 0;
 let globalSchedulerTimer: number | null = null;
 let globalPreStartTimeout: number | null = null;
 let globalActiveTrackId: string | null = null;
-let globalManualStop = false; 
+let globalMusicMode: MusicMode = 'play'; // Default to 'play'
+let globalSelectedTrackId: string | null = null;
 let globalLastValidRegionId: string | undefined = undefined;
+let globalPlaybackNonce = 0; // Incremented to force effect re-runs
+
+// Subscriber pattern so all hook instances share state
+type MusicStateListener = () => void;
+const listeners: Set<MusicStateListener> = new Set();
+function notifyListeners() {
+    listeners.forEach(fn => fn());
+}
+
+export function resetMusicEngine() {
+    globalSessionId++; // Invalidate pending timeouts
+    if (globalSchedulerTimer) clearInterval(globalSchedulerTimer);
+    if (globalPreStartTimeout) clearTimeout(globalPreStartTimeout);
+    globalSchedulerTimer = null;
+    globalPreStartTimeout = null;
+    globalActiveTrackId = null;
+    globalSelectedTrackId = null;
+    globalLastValidRegionId = undefined;
+    globalMusicMode = 'play';
+    globalPlaybackNonce = 0;
+    notifyListeners();
+}
 // ---------------------------------------------------
 
 export const MUSIC_TRACKS: MusicTrackMetadata[] = [
-    { id: 'login', name: 'Embrune Theme', style: 'heroic' as MusicStyle },
-    // FIX: Add 'as MusicStyle' to ensure correct type inference within the array.
-    { id: 'generated_track_1', name: 'Whispers from the Void', style: 'eerie' as MusicStyle },
+    { id: 'login', name: 'Embrune Theme', style: 'heroic' as MusicStyle, trackNum: 1 },
+    // Specialized POI/Discovery Tracks FIRST
+    // --- Meadowdale Suite ---
+    { id: 'meadowdale_breeze', name: 'Meadowdale Breeze', style: 'pastoral' as MusicStyle, regionId: 'meadowdale', trackNum: 2 },
+    { id: 'rusty_flagon', name: 'The Rusty Flagon', style: 'pastoral' as MusicStyle, poiId: 'the_rusty_flagon', trackNum: 3 },
+    { id: 'hallowed_ground', name: 'Hallowed Ground', style: 'mystic' as MusicStyle, poiId: 'meadowdale_chapel', trackNum: 4 },
+    { id: 'market_day', name: 'Market Day', style: 'pastoral' as MusicStyle, poiId: 'meadowdale_square', trackNum: 5 },
+    // --- Oakhaven Suite ---
+    { id: 'sawdust_and_ambition', name: 'Sawdust & Ambition', style: 'industrial' as MusicStyle, regionId: 'oakhaven', trackNum: 6 },
+    { id: 'the_last_round', name: 'The Last Round', style: 'industrial' as MusicStyle, poiId: 'the_carved_mug', trackNum: 7 },
+    { id: 'oakhaven_market', name: 'Oakhaven Market', style: 'industrial' as MusicStyle, poiId: 'oakhaven_market', trackNum: 8 },
+    // --- Silverhaven Suite ---
+    { id: 'silver_crown', name: 'Silver Crown', style: 'grand' as MusicStyle, regionId: 'silverhaven', trackNum: 9 },
+    { id: 'velvet_and_venom', name: 'Velvet & Venom', style: 'grand' as MusicStyle, poiId: 'the_gilded_goblet', trackNum: 10 },
+    { id: 'salt_and_sirens', name: 'Salt & Sirens', style: 'grand' as MusicStyle, poiId: 'silverhaven_docks', trackNum: 11 },
+    { id: 'hymn_of_the_spire', name: 'Hymn of the Spire', style: 'mystic' as MusicStyle, poiId: 'silverhaven_temple', trackNum: 12 },
+    { id: 'dragons_shadow', name: "The Dragon's Shadow", style: 'grand' as MusicStyle, poiId: 'silverhaven_castle_grounds', trackNum: 13 },
+    { id: 'hammer_and_thread', name: 'Hammer & Thread', style: 'industrial' as MusicStyle, poiId: 'silverhaven_artisans_quarter', trackNum: 14 },
+    // --- Sanctity Suite ---
+    { id: 'grace_everlasting', name: 'Grace Everlasting', style: 'pastoral' as MusicStyle, regionId: 'sanctity', trackNum: 15 },
+    { id: 'still_waters', name: 'Still Waters', style: 'pastoral' as MusicStyle, poiId: 'sanctity_inn', trackNum: 16 },
+    { id: 'ashes_and_absolution', name: 'Ashes & Absolution', style: 'mystic' as MusicStyle, poiId: 'sanctity_chapel', trackNum: 17 },
+    // --- Fouthia Suite ---
+    { id: 'dust_and_devotion', name: 'Dust & Devotion', style: 'desolate' as MusicStyle, regionId: 'fouthia', trackNum: 18 },
+    { id: 'scorpions_den', name: "Scorpion's Den", style: 'desolate' as MusicStyle, poiId: 'the_sand_serpent_inn', trackNum: 19 },
+    { id: 'silk_and_cinder', name: 'Silk & Cinder', style: 'desolate' as MusicStyle, poiId: 'fouthia_bazaar', trackNum: 20 },
+    { id: 'whispers_in_the_sand', name: 'Whispers in the Sand', style: 'mystic' as MusicStyle, poiId: 'fouthia_shrine', trackNum: 21 },
+    // --- Other ---
+    { id: 'generated_track_1', name: 'Whispers from the Void', style: 'eerie' as MusicStyle, trackNum: 22 },
+    // Generic Region Defaults LAST
     ...(Object.values(REGIONS).map((r): MusicTrackMetadata => {
+        if (['meadowdale', 'oakhaven', 'silverhaven', 'sanctity', 'fouthia'].includes(r.id)) return null as any; // Skip regions with dedicated suites
         let style: MusicStyle = 'desolate';
         if (['meadowdale', 'the_verdant_fields', 'sunbright_plains'].includes(r.id)) style = 'pastoral';
         else if (['oakhaven', 'dwarven_outpost', 'sanctity'].includes(r.id)) style = 'industrial';
@@ -42,8 +97,8 @@ export const MUSIC_TRACKS: MusicTrackMetadata[] = [
         else if (r.id.includes('dungeon') || r.id.includes('chasm') || r.id.includes('warrens') || r.id.includes('barrow')) style = 'eerie';
         else if (r.id === 'path_of_beginnings') style = 'tutorial';
 
-        return { id: r.id, name: r.name, style };
-    }))
+        return { id: r.id, name: r.name, style, regionId: r.id, trackNum: r.trackNum };
+    }) as (MusicTrackMetadata | null)[]).filter((r): r is MusicTrackMetadata => r !== null)
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const generateScore = (track: MusicTrackMetadata): string => {
@@ -51,6 +106,31 @@ const generateScore = (track: MusicTrackMetadata): string => {
     if (track.id === 'generated_track_1') {
         return (TRACKS as any).GENERATED_SCORE;
     }
+    // --- Meadowdale Suite ---
+    if (track.id === 'meadowdale_breeze') return (TRACKS as any).MEADOWDALE_BREEZE_SCORE;
+    if (track.id === 'rusty_flagon') return (TRACKS as any).RUSTY_FLAGON_SCORE;
+    if (track.id === 'hallowed_ground') return (TRACKS as any).HALLOWED_GROUND_SCORE;
+    if (track.id === 'market_day') return (TRACKS as any).MARKET_DAY_SCORE;
+    // --- Oakhaven Suite ---
+    if (track.id === 'sawdust_and_ambition') return (TRACKS as any).SAWDUST_AND_AMBITION_SCORE;
+    if (track.id === 'the_last_round') return (TRACKS as any).THE_LAST_ROUND_SCORE;
+    if (track.id === 'oakhaven_market') return (TRACKS as any).OAKHAVEN_MARKET_SCORE;
+    // --- Silverhaven Suite ---
+    if (track.id === 'silver_crown') return (TRACKS as any).SILVER_CROWN_SCORE;
+    if (track.id === 'velvet_and_venom') return (TRACKS as any).VELVET_AND_VENOM_SCORE;
+    if (track.id === 'salt_and_sirens') return (TRACKS as any).SALT_AND_SIRENS_SCORE;
+    if (track.id === 'hymn_of_the_spire') return (TRACKS as any).HYMN_OF_THE_SPIRE_SCORE;
+    if (track.id === 'dragons_shadow') return (TRACKS as any).DRAGONS_SHADOW_SCORE;
+    if (track.id === 'hammer_and_thread') return (TRACKS as any).HAMMER_AND_THREAD_SCORE;
+    // --- Sanctity Suite ---
+    if (track.id === 'grace_everlasting') return (TRACKS as any).GRACE_EVERLASTING_SCORE;
+    if (track.id === 'still_waters') return (TRACKS as any).STILL_WATERS_SCORE;
+    if (track.id === 'ashes_and_absolution') return (TRACKS as any).ASHES_AND_ABSOLUTION_SCORE;
+    // --- Fouthia Suite ---
+    if (track.id === 'dust_and_devotion') return (TRACKS as any).DUST_AND_DEVOTION_SCORE;
+    if (track.id === 'scorpions_den') return (TRACKS as any).SCORPIONS_DEN_SCORE;
+    if (track.id === 'silk_and_cinder') return (TRACKS as any).SILK_AND_CINDER_SCORE;
+    if (track.id === 'whispers_in_the_sand') return (TRACKS as any).WHISPERS_IN_THE_SAND_SCORE;
     switch (track.style) {
         // FIX: Property 'TUTORIAL_SCORE' does not exist on type 'typeof import("file:///components/music/index")'.
         case 'tutorial': return (TRACKS as any).TUTORIAL_SCORE;
@@ -73,23 +153,41 @@ MUSIC_TRACKS.forEach(track => {
 
 export const useMusicEngine = (
     regionId?: string, 
+    poiId?: string,
     worldState?: WorldState,
     setWorldState?: React.Dispatch<React.SetStateAction<WorldState>>
 ) => {
     const ui = useUIState();
     const { playRecipe, stopAllMusic, setMusicVolume, getContextTime, initContext, isAudioActive } = useSoundEngine();
     
-    const [manualOverrideId, setManualOverrideId] = useState<string | null>(null);
-    const [intendedTrackId, setIntendedTrackId] = useState<string | null>(null);
-    
+    // Shared state via module globals + subscriber re-render
+    const [, forceUpdate] = useState(0);
+    useEffect(() => {
+        const listener = () => forceUpdate(n => n + 1);
+        listeners.add(listener);
+        return () => { listeners.delete(listener); };
+    }, []);
+
+    const musicMode = globalMusicMode;
+    const selectedTrackId = globalSelectedTrackId;
+
+    const setSelectedTrackId = useCallback((id: string | null) => {
+        globalSelectedTrackId = id;
+        notifyListeners();
+    }, []);
+
+    const setMusicModeState = useCallback((mode: MusicMode) => {
+        globalMusicMode = mode;
+        notifyListeners();
+    }, []);
+
     // Instance-local tracking
     const playbackEventsRef = useRef<MusicEvent[]>([]);
     const nextEventIndexRef = useRef<number>(0);
     const playbackStartTimeRef = useRef<number>(0);
+    const pausedProgressRef = useRef<number>(0); // ms offset into the song when paused
 
     const parseScore = (score: string): MusicEvent[] => {
-        // FIX: Type 'string[]' is not assignable to type 'MusicEvent[]'.
-        // FIX: Property 'map' does not exist on type '")"'.
         return score.split('\n')
             .map(line => {
                 const [offset, recipe] = line.split(/:(.+)/);
@@ -111,40 +209,39 @@ export const useMusicEngine = (
         }
     }, []);
 
-    const playMusicSegment = useCallback((score: string, trackId: string, isManual: boolean = false) => {
-        if (!isAudioActive) {
-            if (isManual) {
-                setManualOverrideId(trackId);
-                globalManualStop = false;
-            }
-            return;
-        }
+    const playMusicSegmentInternal = useCallback((score: string, trackId: string, startOffsetMs: number = 0, instant: boolean = false) => {
+        if (!isAudioActive) return;
 
         initContext();
         stopScheduler();
 
         const currentSessionId = globalSessionId;
         
-        if (isManual) {
-            setManualOverrideId(trackId);
-            setIntendedTrackId(trackId);
-            globalManualStop = false;
-        }
-
         const events = parseScore(score);
         playbackEventsRef.current = events;
-        nextEventIndexRef.current = 0;
         globalActiveTrackId = trackId;
+        notifyListeners();
 
-        const fadeOutTime = 1.0;
+        const fadeOutTime = instant ? 0 : 0.5;
         stopAllMusic(fadeOutTime);
+
+        let startIdx = 0;
+        if (startOffsetMs > 0) {
+            startIdx = events.findIndex(e => e.time >= startOffsetMs);
+            if (startIdx === -1) startIdx = 0;
+        }
+        nextEventIndexRef.current = startIdx;
 
         globalPreStartTimeout = window.setTimeout(() => {
             if (currentSessionId !== globalSessionId) return;
 
-            playbackStartTimeRef.current = getContextTime() + 0.2;
-            setMusicVolume(0, 0);
-            setMusicVolume(1, 2.0);
+            playbackStartTimeRef.current = getContextTime() + 0.1 - (startOffsetMs / 1000);
+            if (instant) {
+                setMusicVolume(1, 0); 
+            } else {
+                setMusicVolume(0, 0);
+                setMusicVolume(1, 1.0);
+            }
 
             globalSchedulerTimer = window.setInterval(() => {
                 if (currentSessionId !== globalSessionId) {
@@ -159,113 +256,203 @@ export const useMusicEngine = (
                 const lookAheadMs = 4000; 
                 const targetTimeMs = nowMs + lookAheadMs;
 
-                let idx = nextEventIndexRef.current;
                 const activeEvents = playbackEventsRef.current;
+                const totalDurationMs = activeEvents.length > 0 ? activeEvents[activeEvents.length - 1].time + 100 : 0;
 
-                while (idx < activeEvents.length && activeEvents[idx].time < targetTimeMs) {
-                    const event = activeEvents[idx];
-                    const scheduleTime = playbackStartTimeRef.current + (event.time / 1000);
-                    
-                    if (scheduleTime > getContextTime()) {
-                        playRecipe(event.recipe, scheduleTime, 'music');
+                while (activeEvents.length > 0) {
+                    const nowMsNormalized = (getContextTime() - playbackStartTimeRef.current) * 1000;
+                    const targetTimeMs = nowMsNormalized + lookAheadMs;
+
+                    if (nextEventIndexRef.current < activeEvents.length && activeEvents[nextEventIndexRef.current].time < targetTimeMs) {
+                        const event = activeEvents[nextEventIndexRef.current];
+                        const scheduleTime = playbackStartTimeRef.current + (event.time / 1000);
+                        
+                        if (scheduleTime > getContextTime()) {
+                            playRecipe(event.recipe, scheduleTime, 'music');
+                        }
+                        nextEventIndexRef.current++;
+                    } else if (nextEventIndexRef.current >= activeEvents.length && globalMusicMode === 'loop' && totalDurationMs > 0) {
+                        // Loop around: increment the start time by the total duration and reset index
+                        playbackStartTimeRef.current += (totalDurationMs / 1000);
+                        nextEventIndexRef.current = 0;
+                    } else {
+                        // No more events in the lookahead window
+                        break;
                     }
-                    idx++;
                 }
-                nextEventIndexRef.current = idx;
 
-                if (idx >= activeEvents.length) {
-                    nextEventIndexRef.current = 0;
-                    playbackStartTimeRef.current = getContextTime() + 0.1;
-                    
-                    if (isManual) {
-                        setManualOverrideId(null);
+                if (nextEventIndexRef.current >= activeEvents.length && globalMusicMode !== 'loop') {
+                    if (globalMusicMode === 'random') {
+                        stopScheduler();
+                        globalActiveTrackId = null; 
+                        const unlockedTracks = worldState?.unlockedMusicTracks || [];
+                        const playable = MUSIC_TRACKS.filter(t => unlockedTracks.includes(t.id));
+                        if (playable.length > 0) {
+                            const others = playable.filter(t => t.id !== globalSelectedTrackId);
+                            const next = others.length > 0
+                                ? others[Math.floor(Math.random() * others.length)]
+                                : playable[Math.floor(Math.random() * playable.length)];
+                            setSelectedTrackId(next.id);
+                        }
+                    } else {
+                        // Just stop or stay at end
                     }
                 }
             }, 800); 
 
-        }, (fadeOutTime * 1000) + 50);
-    }, [getContextTime, initContext, playRecipe, stopAllMusic, setMusicVolume, isAudioActive, stopScheduler]);
+        }, (fadeOutTime * 1000) + 20);
+    }, [getContextTime, initContext, playRecipe, stopAllMusic, setMusicVolume, isAudioActive, stopScheduler, worldState?.unlockedMusicTracks, setSelectedTrackId]);
 
-    const stopMusic = useCallback((fade: number = 0.5) => {
-        globalManualStop = true;
-        setManualOverrideId(null);
-        setIntendedTrackId(null);
-        globalActiveTrackId = null;
-        stopAllMusic(fade);
-        stopScheduler();
-    }, [stopAllMusic, stopScheduler]);
-
-    // Handle region unlocking
-    useEffect(() => {
-        if (regionId && worldState && setWorldState && worldState.unlockedMusicTracks) {
-            const trackId = STATIC_MUSIC_LIBRARY[regionId] ? regionId : 'wilderness';
-            if (!worldState.unlockedMusicTracks.includes(trackId)) {
-                setWorldState(ws => ({
-                    ...ws,
-                    unlockedMusicTracks: [...ws.unlockedMusicTracks, trackId]
-                }));
+    const setMusicMode = useCallback((mode: MusicMode) => {
+        // Reroll random if already in random
+        if (mode === 'random' && globalMusicMode === 'random') {
+            const unlocked = worldState?.unlockedMusicTracks || [];
+            const playable = MUSIC_TRACKS.filter(t => unlocked.includes(t.id));
+            if (playable.length > 0) {
+                const others = playable.filter(t => t.id !== globalSelectedTrackId);
+                const next = others.length > 0
+                    ? others[Math.floor(Math.random() * others.length)]
+                    : playable[Math.floor(Math.random() * playable.length)];
+                setSelectedTrackId(next.id);
+                notifyListeners();
             }
-        }
-    }, [regionId, worldState, setWorldState]);
-
-    // Unified Track Decision Logic
-    useEffect(() => {
-        if (ui.isMuted) {
-            stopMusic();
             return;
         }
 
-        // Detect valid region transitions
-        if (regionId !== undefined && regionId !== globalLastValidRegionId) {
-            globalManualStop = false;
-            globalLastValidRegionId = regionId;
-        }
+        if (mode === globalMusicMode) return;
 
-        if (globalManualStop) {
-            if (intendedTrackId !== null) {
-                setIntendedTrackId(null);
+        globalMusicMode = mode;
+        setMusicModeState(mode);
+
+        if (mode === 'stop') {
+            globalActiveTrackId = null;
+            globalSelectedTrackId = null;
+            stopAllMusic(0);
+            stopScheduler();
+            pausedProgressRef.current = 0;
+            notifyListeners();
+        } else if (mode === 'pause') {
+            if (globalActiveTrackId && playbackStartTimeRef.current > 0) {
+                const nowMs = (getContextTime() - playbackStartTimeRef.current) * 1000;
+                pausedProgressRef.current = Math.max(0, nowMs);
+            }
+            stopAllMusic(0);
+            stopScheduler();
+        } else if (mode === 'play') {
+            // Trigger playback state without forced track pinning so zone music isn't blocked
+            globalPlaybackNonce++;
+            notifyListeners();
+        } else if (mode === 'loop') {
+            globalPlaybackNonce++;
+            notifyListeners();
+        } else if (mode === 'random') {
+            const unlocked = worldState?.unlockedMusicTracks || [];
+            const playable = MUSIC_TRACKS.filter(t => unlocked.includes(t.id));
+            if (playable.length > 0) {
+                const next = playable[Math.floor(Math.random() * playable.length)];
+                globalActiveTrackId = null;
+                globalPlaybackNonce++;
+                setSelectedTrackId(next.id);
+            }
+        }
+    }, [stopAllMusic, stopScheduler, getContextTime, regionId, worldState?.unlockedMusicTracks, setSelectedTrackId, setMusicModeState]);
+
+    const stopMusic = useCallback((fade: number = 0.5) => {
+        setMusicMode('stop');
+    }, [setMusicMode]);
+
+
+    // --- TWO-EYE DISCOVERY SYSTEM ---
+    
+    // 1. Discovery Eye: Only looks at physical location for unlocks (Ignores manual selection)
+    const currentLocaleTrackId = useMemo(() => {
+        if (poiId) {
+            const poiTrack = MUSIC_TRACKS.find(t => t.poiId === poiId);
+            if (poiTrack) return poiTrack.id;
+        } 
+        
+        if (regionId) {
+            const regionTrack = MUSIC_TRACKS.find(t => t.regionId === regionId);
+            if (regionTrack) return regionTrack.id;
+            return regionId; // Standard region fallback
+        }
+        
+        return null;
+    }, [poiId, regionId]);
+
+    // 2. Playback Eye: Decides what the speakers actually play (Manual override priority)
+    const targetPlaybackTrackId = useMemo(() => {
+        return selectedTrackId || currentLocaleTrackId;
+    }, [selectedTrackId, currentLocaleTrackId]);
+
+    // Auto-Unlock Effect: Dedicated to updating worldState library based on LOCATION
+    useEffect(() => {
+        if (currentLocaleTrackId && setWorldState) {
+            setWorldState(prev => {
+                if (prev.unlockedMusicTracks.includes(currentLocaleTrackId as string)) return prev;
+                return {
+                    ...prev,
+                    unlockedMusicTracks: [...prev.unlockedMusicTracks, currentLocaleTrackId as string]
+                };
+            });
+        }
+    }, [currentLocaleTrackId, setWorldState]);
+
+    // Unified Playback Decision Logic: Dedicated to starting/stopping audio segments
+    useEffect(() => {
+        if (!isAudioActive || globalMusicMode === 'stop' || globalMusicMode === 'pause') {
+            // Respect the Pause/Stop state
+            if (globalActiveTrackId) {
+                stopAllMusic(0);
+                stopScheduler();
                 globalActiveTrackId = null;
             }
             return;
         }
 
-        if (manualOverrideId) {
-            if (intendedTrackId !== manualOverrideId) {
-                setIntendedTrackId(manualOverrideId);
-            }
-            return;
-        }
-
-        if (!regionId) {
-            if (intendedTrackId !== null) {
-                setIntendedTrackId(null);
-            }
-            return;
-        }
-
-        const locationTrackId = STATIC_MUSIC_LIBRARY[regionId] ? regionId : 'wilderness';
-        if (intendedTrackId !== locationTrackId) {
-            setIntendedTrackId(locationTrackId);
-        }
-    }, [regionId, ui.isMuted, manualOverrideId, stopMusic, intendedTrackId]);
-
-    // Playback Execution
-    useEffect(() => {
-        if (globalManualStop) return;
-
-        if (isAudioActive && intendedTrackId && globalActiveTrackId !== intendedTrackId) {
-            const score = STATIC_MUSIC_LIBRARY[intendedTrackId];
-            if (score) {
-                const isManual = (intendedTrackId === manualOverrideId);
-                playMusicSegment(score, intendedTrackId, isManual);
+        // Only start music if we have a target and it's not already playing
+        if (targetPlaybackTrackId && targetPlaybackTrackId !== globalActiveTrackId) {
+            const track = MUSIC_TRACKS.find(t => t.id === targetPlaybackTrackId);
+            if (track) {
+                const score = STATIC_MUSIC_LIBRARY[track.id];
+                if (score) {
+                    // Check if we have paused progress for this specific track
+                    const resumeOffset = pausedProgressRef.current;
+                    pausedProgressRef.current = 0; // Consume the progress
+                    
+                    // Switch to the new track
+                    playMusicSegmentInternal(score, track.id, resumeOffset, true);
+                }
             }
         }
-    }, [isAudioActive, intendedTrackId, manualOverrideId, playMusicSegment]);
+
+        // Detect transitions or mode changes that require resetting state
+        const isZoneTransition = (regionId !== undefined && regionId !== globalLastValidRegionId);
+        if (isZoneTransition) {
+            globalLastValidRegionId = regionId;
+            pausedProgressRef.current = 0; // Clear progress on zone change
+        }
+    }, [targetPlaybackTrackId, regionId, globalMusicMode, globalPlaybackNonce, stopAllMusic, stopScheduler, isAudioActive, playMusicSegmentInternal]);
 
     return { 
         musicLibrary: STATIC_MUSIC_LIBRARY, 
-        playMusicSegment: (score: string, id: string) => playMusicSegment(score, id, true), 
+        playMusicSegment: (score: string, id: string) => {
+            setSelectedTrackId(id);
+            if (globalMusicMode === 'stop' || globalMusicMode === 'pause') {
+                globalMusicMode = 'play';
+                setMusicModeState('play');
+            }
+            // Trigger playback by clearing active track id so the effect re-runs
+            globalActiveTrackId = null;
+            globalPlaybackNonce++;
+            notifyListeners();
+        }, 
         stopMusic, 
-        isReady: !!STATIC_MUSIC_LIBRARY 
+        isReady: !!STATIC_MUSIC_LIBRARY,
+        musicMode,
+        setMusicMode,
+        selectedTrackId,
+        setSelectedTrackId,
+        activeTrackId: globalActiveTrackId,
     };
 };

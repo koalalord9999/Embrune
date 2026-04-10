@@ -1,8 +1,9 @@
 
 
 import React, { useEffect } from 'react';
-import { MONSTERS } from '../constants';
+import {  MONSTERS, REGIONS  } from '../constants';
 import { POI, POIActivity, Equipment, WorldState, PlayerRepeatableQuest } from '../types';
+
 
 export const useAggression = (
     currentPoi: POI | null,
@@ -38,6 +39,13 @@ export const useAggression = (
             
             if (!isGameLoaded || isBusy || isInCombat || isTraveling || isPlayerInvisible || isPlayerImmune || isPoiImmune) return;
     
+            // Don't trigger the next group while the previous one is still in its clearing animation.
+            // The existing recentlyKilled window (2200ms) acts as the natural inter-group grace period.
+            const hasRecentlyKilledAtPoi = (worldState.recentlyKilled || []).some(
+                id => id.startsWith(currentPoiId + ':')
+            );
+            if (hasRecentlyKilledAtPoi) return;
+
             const combatActivities = currentPoi.activities
                 .map((act, index) => ({ act, index }))
                 .filter(({ act }) => act.type === 'combat');
@@ -72,6 +80,13 @@ export const useAggression = (
                 });
             
             if (aggressiveMonsterInstances.length > 0) {
+                // Resolve maxGroupSize: POI override → Region default → no cap
+                const currentRegion = REGIONS[currentPoi.regionId];
+                const maxGroupSize = currentPoi.maxGroupSize ?? currentRegion?.defaultMaxGroupSize;
+                const toAttack = maxGroupSize !== undefined
+                    ? aggressiveMonsterInstances.slice(0, maxGroupSize)
+                    : aggressiveMonsterInstances;
+
                 const necklace = equipment.necklace;
                 if (necklace?.itemId === 'necklace_of_shadows' && (necklace.charges ?? 0) > 0) {
                     const newCharges = (necklace.charges ?? 1) - 1;
@@ -82,7 +97,7 @@ export const useAggression = (
                         setEquipment(prev => ({ ...prev, necklace: null }));
                     }
                 } else {
-                    startCombat(aggressiveMonsterInstances.map(m => m.uniqueInstanceId));
+                    startCombat(toAttack.map(m => m.uniqueInstanceId));
                 }
             }
         };

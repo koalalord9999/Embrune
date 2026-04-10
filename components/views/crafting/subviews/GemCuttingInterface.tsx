@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { InventorySlot, PlayerSkill, SkillName } from '../../../../types';
-import { GEM_CUTTING_RECIPES, ITEMS, getIconClassName } from '../../../../constants';
+import {  GEM_CUTTING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../../constants';
 import { CraftingViewProps } from '../CraftingView';
 import { useLongPress } from '../../../../hooks/useLongPress';
 import { useIsTouchDevice } from '../../../../hooks/useIsTouchDevice';
@@ -97,10 +97,10 @@ const GemCuttingSlot: React.FC<{
             <div className={`crafting-slot-level ${hasLevel ? 'met' : 'unmet'}`}>
                 Lvl {recipe.level}
             </div>
-            <img src={cutItem.iconUrl} alt={cutItem.name} className={`crafting-slot-icon ${getIconClassName(cutItem)}`} />
+            <img src={getIconUrl(cutItem.iconUrl)} alt={cutItem.name} className={`crafting-slot-icon ${getIconClassName(cutItem)}`} />
             <div className="crafting-slot-ingredients">
                 <div className="ingredient-icon" title={`${uncutItem.name} (${uncutCount})`}>
-                    <img src={uncutItem.iconUrl} alt={uncutItem.name} className={getIconClassName(uncutItem)} />
+                    <img src={getIconUrl(uncutItem.iconUrl)} alt={uncutItem.name} className={getIconClassName(uncutItem)} />
                 </div>
             </div>
         </div>

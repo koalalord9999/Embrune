@@ -43,6 +43,8 @@ export interface ConfirmationPrompt {
 export interface QuestDetailState {
     questId: string;
     playerQuests: PlayerQuestState[];
+    skills?: { skill: SkillName; level: number }[];
+    combatLevel?: number;
 }
 
 export interface ExportDataState {
@@ -67,6 +69,59 @@ export interface ActiveSingleAction {
     duration: number; // in ms
     onComplete: () => void;
 }
+
+export interface Keybindings {
+    move_n: string;
+    move_s: string;
+    move_w: string;
+    move_e: string;
+    action_1: string;
+    action_2: string;
+    action_3: string;
+    action_4: string;
+    action_5: string;
+    action_6: string;
+    action_7: string;
+    action_8: string;
+    action_9: string;
+    // Side Panel Shortcuts
+    panel_combat: string;
+    panel_skills: string;
+    panel_quests: string;
+    panel_inventory: string;
+    panel_equipment: string;
+    panel_prayer: string;
+    panel_spells: string;
+    panel_music: string;
+    panel_settings: string;
+    panel_dev: string;
+}
+
+export const DEFAULT_KEYBINDINGS: Keybindings = {
+    move_n: 'ArrowUp',
+    move_s: 'ArrowDown',
+    move_w: 'ArrowLeft',
+    move_e: 'ArrowRight',
+    action_1: '1',
+    action_2: '2',
+    action_3: '3',
+    action_4: '4',
+    action_5: '5',
+    action_6: '6',
+    action_7: '7',
+    action_8: '8',
+    action_9: '9',
+    panel_combat: 'F1',
+    panel_skills: 'F2',
+    panel_quests: 'F3',
+    panel_inventory: 'F4',
+    panel_equipment: 'F5',
+    panel_prayer: 'F6',
+    panel_spells: 'F7',
+    panel_music: 'F8',
+    panel_settings: 'F12',
+    panel_dev: 'Backquote',
+};
 
 export type WithdrawMode = 1 | 5 | 10 | 'x' | 'all';
 
@@ -156,6 +211,7 @@ const useUIStateInternal = () => {
     const [sfxVolume, setSfxVolume] = createPersistentState<number>('settings_sfxVolume', 1);
     const [ambientVolume, setAmbientVolume] = createPersistentState<number>('settings_ambientVolume', 1);
     const [isMuted, setIsMuted] = createPersistentState<boolean>('settings_isMuted', false);
+    const [keybindings, setKeybindings] = createPersistentState<Keybindings>('settings_keybindings', DEFAULT_KEYBINDINGS);
     
     // Non-persistent dev settings
     const [xpMultiplier, setXpMultiplier] = useState<number>(1);
@@ -164,6 +220,7 @@ const useUIStateInternal = () => {
     const [isAutoBankOn, setIsAutoBankOn] = useState<boolean>(false);
     const [isGodModeOn, setIsGodModeOn] = useState<boolean>(false);
     const [isPermAggroOn, setIsPermAggroOn] = useState<boolean>(false);
+    const [isShowMusicStatusOverlay, setIsShowMusicStatusOverlay] = useState<boolean>(false);
 
     // New state for bank quantity toggles (session-wide)
     const [activeWithdrawMode, setActiveWithdrawMode] = useState<WithdrawMode>(1);
@@ -179,7 +236,7 @@ const useUIStateInternal = () => {
         exportData ||
         isImportModalOpen ||
         activeSkillGuide ||
-        activeCraftingAction ||
+        (activeCraftingAction && activeCraftingAction.recipeType !== 'firemaking-stoke') ||
         activeSingleAction ||
         activeQuestDetail ||
         isEquipmentStatsViewOpen ||
@@ -222,6 +279,10 @@ const useUIStateInternal = () => {
     const openCraftingView = useCallback((context: CraftingContext) => setActiveCraftingContext(context), []);
     const closeCraftingView = useCallback(() => setActiveCraftingContext(null), []);
     
+    const resetKeybindings = useCallback(() => {
+        setKeybindings(DEFAULT_KEYBINDINGS);
+    }, [setKeybindings]);
+
     const closeAllModals = useCallback(() => {
         setCombatQueue([]);
         setIsMandatoryCombat(false);
@@ -255,6 +316,9 @@ const useUIStateInternal = () => {
         setIsMonsterDBOpen(false);
         setActiveTutorial(null);
         setIsSoundCreatorOpen(false);
+        setIsShowMusicStatusOverlay(false);
+        setContextMenu(null);
+        setTooltip(null);
     }, []);
 
     return {
@@ -309,6 +373,7 @@ const useUIStateInternal = () => {
         sfxVolume, setSfxVolume,
         ambientVolume, setAmbientVolume,
         isMuted, setIsMuted,
+        keybindings, setKeybindings,
         activeWithdrawMode, setActiveWithdrawMode,
         customWithdrawAmount, setCustomWithdrawAmount,
         xpMultiplier, setXpMultiplier,
@@ -317,6 +382,7 @@ const useUIStateInternal = () => {
         isAutoBankOn, setIsAutoBankOn,
         isGodModeOn, setIsGodModeOn,
         isPermAggroOn, setIsPermAggroOn,
+        isShowMusicStatusOverlay, setIsShowMusicStatusOverlay,
         closeContextMenu,
         closeMakeXPrompt,
         closeConfirmationPrompt,
@@ -326,6 +392,7 @@ const useUIStateInternal = () => {
         openCraftingView,
         closeCraftingView,
         closeAllModals,
+        resetKeybindings,
     };
 };
 

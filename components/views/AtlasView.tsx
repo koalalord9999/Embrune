@@ -2,9 +2,9 @@
 
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { POI, Region, WorldState } from '../../types';
-import { REGIONS, MAP_FEATURES } from '../../constants';
+import {  REGIONS, MAP_FEATURES, getIconUrl  } from '../../constants';
 import { POIS } from '../../data/pois';
-import { MAP_DIMENSIONS, CITY_MAP_DIMENSIONS } from '../../constants';
+import {  MAP_DIMENSIONS, CITY_MAP_DIMENSIONS  } from '../../constants';
 import { TooltipState } from '../../hooks/useUIState';
 import Button from '../common/Button';
 
@@ -309,7 +309,7 @@ const AtlasView: React.FC<AtlasViewProps> = ({ currentPoiId, unlockedPois, onClo
                                     onMouseEnter={(e) => handleMouseEnter(e, region)}
                                     onMouseLeave={() => setTooltip(null)}
                                 >
-                                    <img src="https://api.iconify.design/game-icons:capitol.svg" alt={region.name} className={`filter invert transition-opacity ${isUnlocked ? 'opacity-80 group-hover:opacity-100' : 'opacity-30'}`} style={{width: `${40 / view.zoom}px`, height: `${40 / view.zoom}px`}} />
+                                    <img src={getIconUrl("capitol")} alt={region.name} className={`filter invert transition-opacity ${isUnlocked ? 'opacity-80 group-hover:opacity-100' : 'opacity-30'}`} style={{width: `${40 / view.zoom}px`, height: `${40 / view.zoom}px`}} />
                                     {isCurrent && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-full border-2 border-yellow-400 animate-pulse" style={{width: `${50/view.zoom}px`, height: `${50/view.zoom}px`}}></div>}
                                 </div>
                             )
@@ -329,7 +329,7 @@ const AtlasView: React.FC<AtlasViewProps> = ({ currentPoiId, unlockedPois, onClo
                                     onMouseEnter={(e) => handleMouseEnter(e, {name: dungeon.name, description: entryPoi.description})}
                                     onMouseLeave={() => setTooltip(null)}
                                 >
-                                    <img src="https://api.iconify.design/game-icons:cave-entrance.svg" alt={dungeon.name} className={`filter invert transition-opacity ${isUnlocked ? 'opacity-80 group-hover:opacity-100' : 'opacity-30'}`} style={{width: `${40 / view.zoom}px`, height: `${40 / view.zoom}px`}} />
+                                    <img src={getIconUrl("cave-entrance")} alt={dungeon.name} className={`filter invert transition-opacity ${isUnlocked ? 'opacity-80 group-hover:opacity-100' : 'opacity-30'}`} style={{width: `${40 / view.zoom}px`, height: `${40 / view.zoom}px`}} />
                                 </div>
                             )
                         })}
@@ -356,7 +356,7 @@ const AtlasView: React.FC<AtlasViewProps> = ({ currentPoiId, unlockedPois, onClo
                                 className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
                                 style={{ top: `${POIS[deathMarker.poiId].y}px`, left: `${POIS[deathMarker.poiId].x}px` }}
                             >
-                                <img src="https://api.iconify.design/game-icons:tombstone.svg" alt="Death Location" className="filter invert opacity-90" style={{ width: `${32 / view.zoom}px`, height: `${32 / view.zoom}px` }} />
+                                <img src={getIconUrl("tombstone")} alt="Death Location" className="filter invert opacity-90" style={{ width: `${32 / view.zoom}px`, height: `${32 / view.zoom}px` }} />
                                 <span 
                                     className="text-xs font-bold text-white bg-black/50 px-1 rounded whitespace-nowrap"
                                     style={{ transform: `scale(${1 / view.zoom}) translateY(-${4 / view.zoom}px)` }}

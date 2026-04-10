@@ -1,8 +1,41 @@
-
 import { useCallback, useRef, useEffect, useState } from 'react';
+import React from 'react';
 import { AUDIO_MANIFEST, SOUND_CATEGORIES, SoundCategory, SoundID } from '../constants/audioManifest';
 import { createWhiteNoiseBuffer, createBrownNoiseBuffer } from '../utils/audioSynth';
+import { InstrumentDefinition } from '../types/music';
+import { INSTRUMENTS } from '../constants/instruments';
 import { useUIState } from './useUIState';
+
+export interface MusicStatus {
+    lastInstrumentName: string;
+    lastFreq: string;
+    activeNodes: number;
+    lastTriggerTime: number;
+}
+
+let globalMusicStatus: MusicStatus = {
+    lastInstrumentName: 'None',
+    lastFreq: '-',
+    activeNodes: 0,
+    lastTriggerTime: 0
+};
+
+const statusListeners = new Set<(status: MusicStatus) => void>();
+
+function updateStatus(updates: Partial<MusicStatus>) {
+    globalMusicStatus = { ...globalMusicStatus, ...updates };
+    statusListeners.forEach(l => l(globalMusicStatus));
+}
+
+export function useMusicStatus() {
+    const [, forceUpdate] = React.useState(0);
+    React.useEffect(() => {
+        const l = () => forceUpdate(n => n + 1);
+        statusListeners.add(l);
+        return () => { statusListeners.delete(l); };
+    }, []);
+    return globalMusicStatus;
+}
 
 export let globalAudioContext: AudioContext | null = null;
 let masterGain: GainNode | null = null;
@@ -73,7 +106,7 @@ export const useSoundEngine = () => {
     }, [ui.isMuted, ui.masterVolume, ui.musicVolume, ui.sfxVolume, ui.ambientVolume]);
 
     const playRecipe = useCallback((recipe: string, baseStartTime?: number, category: SoundCategory | 'music' = 'sfx') => {
-        if (!globalAudioContext || !masterGain || ui.isMuted) return;
+        if (!globalAudioContext || !masterGain) return;
 
         let recipeString = recipe;
         let timeOffsetMs = 0;
@@ -98,6 +131,11 @@ export const useSoundEngine = () => {
         const filterFreq = parseFloat(params.filter || 2000);
         const filterQ = parseFloat(params.q || 1);
         const pitchMod = parseFloat(params.pitchMod || 0);
+
+        if (params.instr) {
+            playInstrumentNote(params.instr, freq, duration * 1000, now, vol, category);
+            return;
+        }
 
         const nodeGain = globalAudioContext.createGain();
         nodeGain.gain.setValueAtTime(0, now);
@@ -161,7 +199,102 @@ export const useSoundEngine = () => {
 
         sourceNode.start(now);
         sourceNode.stop(now + duration + 0.1);
-    }, [ui.isMuted]);
+    }, []);
+
+    const playInstrumentNote = useCallback((
+        instrumentId: string, 
+        freq: number, 
+        durationMs: number, 
+        startTimeInContext?: number, 
+        velocity: number = 1.0,
+        category: SoundCategory | 'music' = 'music'
+    ) => {
+        if (!globalAudioContext) return;
+        const instrument = INSTRUMENTS[instrumentId];
+        if (!instrument) {
+            console.error(`Instrument ${instrumentId} not found.`);
+            return;
+        }
+
+        const now = startTimeInContext || globalAudioContext.currentTime;
+        const durationSec = durationMs / 1000;
+        const targetGainNode = category === 'music' ? musicGain : (category === 'ambient' ? ambientGain : sfxGain);
+        if (!targetGainNode) return;
+
+        // --- ENVELOPE (Gain Node) ---
+        // Each note gets its own master gain across all its layers.
+        const noteGain = globalAudioContext.createGain();
+        const env = instrument.envelope;
+        
+        // Velocity impacts the overall volume.
+        const vol = 0.5 * (velocity || 1.0); 
+
+        // ATTACK
+        noteGain.gain.setValueAtTime(0, now);
+        noteGain.gain.linearRampToValueAtTime(vol, now + env.attack);
+        // DECAY
+        noteGain.gain.linearRampToValueAtTime(vol * env.sustain, now + env.attack + env.decay);
+        
+        // RELEASE (Schedules for after duration)
+        const noteOffTime = now + durationSec;
+        // MUST clamp the noteOffTime so it doesn't overlap the attack/decay ramp causing audio clicks
+        const safeNoteOffTime = Math.max(noteOffTime, now + env.attack + env.decay);
+        
+        noteGain.gain.cancelScheduledValues(safeNoteOffTime);
+        noteGain.gain.setValueAtTime(vol * env.sustain, safeNoteOffTime);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, safeNoteOffTime + env.release);
+
+        noteGain.connect(targetGainNode);
+
+        // --- FILTER (Optional) ---
+        let lastNode: AudioNode = noteGain;
+        if (instrument.filter) {
+            const filterNode = globalAudioContext.createBiquadFilter();
+            filterNode.type = instrument.filter.type;
+            const filterFreq = instrument.filter.isFixed 
+                ? instrument.filter.frequency 
+                : freq * instrument.filter.frequency;
+            filterNode.frequency.setValueAtTime(filterFreq, now);
+            filterNode.Q.setValueAtTime(instrument.filter.Q, now);
+            
+            filterNode.connect(targetGainNode);
+            noteGain.disconnect();
+            noteGain.connect(filterNode);
+        }
+
+        // --- OSCILLATOR LAYERS ---
+        const activeInstr = instrument.name;
+        const activeNote = freq.toFixed(1);
+        updateStatus({
+            lastInstrumentName: activeInstr,
+            lastFreq: activeNote,
+            activeNodes: activeMusicNodes.size + instrument.layers.length,
+            lastTriggerTime: Date.now()
+        });
+
+        instrument.layers.forEach(layer => {
+            const osc = globalAudioContext!.createOscillator();
+            osc.type = layer.type;
+            osc.frequency.setValueAtTime(freq * layer.multiplier, now);
+            osc.detune.setValueAtTime(layer.detune, now);
+            
+            const layerGain = globalAudioContext!.createGain();
+            layerGain.gain.setValueAtTime(layer.volume, now);
+            
+            osc.connect(layerGain);
+            layerGain.connect(noteGain);
+            
+            if (category === 'music') activeMusicNodes.add(osc);
+            
+            osc.start(now);
+            osc.stop(noteOffTime + env.release + 0.1); 
+            
+            osc.onended = () => {
+                if (category === 'music') activeMusicNodes.delete(osc);
+            };
+        });
+
+    }, []);
 
     const getContextTime = useCallback(() => globalAudioContext?.currentTime ?? 0, []);
 
@@ -210,7 +343,8 @@ export const useSoundEngine = () => {
 
     return { 
         play, 
-        playRecipe, 
+        playRecipe,
+        playInstrumentNote,
         stopAllMusic, 
         setMusicVolume, 
         initContext, 

@@ -1,3 +1,4 @@
+import {  getIconUrl  } from '../../constants';
 import React from 'react';
 import { GroundItem } from '../../types';
 
@@ -18,7 +19,7 @@ const LootButtonOverlay: React.FC<LootButtonOverlayProps> = ({ groundItems, onOp
             aria-label={`Loot ${groundItems.length} items`}
             style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}
         >
-            <img src="https://api.iconify.design/game-icons:swap-bag.svg" alt="" className="w-8 h-8 filter invert drop-shadow-lg" />
+            <img src={getIconUrl("swap-bag")} alt="" className="w-8 h-8 filter invert drop-shadow-lg" />
             <span className="font-bold text-white text-lg">Loot ({groundItems.length})</span>
         </button>
     );

@@ -117,9 +117,50 @@ export const embrune101: Quest = {
         in_progress_embrune_101_0: {
             npcName: 'Leo the Guide',
             npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
-            text: "Welcome to Embrune! This is a tutorial area to teach you the basics. To progress, you'll need to speak with the guides in each area. You should follow the path and speak to the Survival Guide to begin.",
+            text: "Welcome to Embrune! I'm Leo, your guide. Before you set off, let me show you how to find your way around.",
+            dim: true,
             responses: [
-                { text: "Got it. Talk to the guides.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] },
+                { text: "Lead the way!", next: 'tutorial_navigation' }
+            ]
+        },
+        tutorial_navigation: {
+            npcName: 'Leo the Guide',
+            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            text: "This is the Main View. It shows where you are, who's there with you, and any interesting things you can interact with.",
+            dim: true,
+            highlight: 'main-view',
+            responses: [
+                { text: "I see. What about actions?", next: 'tutorial_actions' }
+            ]
+        },
+        tutorial_actions: {
+            npcName: 'Leo the Guide',
+            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            text: "The Actions list contains everything you can do here—like talking to folks, gathering resources, or starting a fight!",
+            dim: true,
+            highlight: 'activity-buttons',
+            responses: [
+                { text: "And how do I move?", next: 'tutorial_travel' }
+            ]
+        },
+        tutorial_travel: {
+            npcName: 'Leo the Guide',
+            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            text: "The Travel grid lets you move between locations. The center is where you are, and the surrounding buttons lead elsewhere.",
+            dim: true,
+            highlight: 'navigation-buttons',
+            responses: [
+                { text: "Got it. Anything else?", next: 'tutorial_outro' }
+            ]
+        },
+        tutorial_outro: {
+            npcName: 'Leo the Guide',
+            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            text: "Follow the path and speak to the Survival Guide to begin your training. You can always check your Quest Journal if you're lost!",
+            dim: true,
+            highlight: 'side-panel-button-quests',
+            responses: [
+                { text: "Thanks, Leo!", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] },
                 { text: "Tell me more about this island.", next: 'leo_lore' },
                 { text: "I've played games like this before, can I skip the tutorial?", next: 'skip_tutorial_confirm' }
             ]

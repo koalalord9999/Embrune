@@ -11,7 +11,7 @@ export const chasmOfWoePois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Enter the Chasm',
-                icon: 'https://api.iconify.design/game-icons:cave-entrance.svg',
+                icon: 'cave-entrance',
                 questCondition: { questId: 'depths_of_despair', stages: [0] },
                 startNode: 'dod_enter_chasm',
             },
@@ -102,7 +102,7 @@ export const chasmOfWoePois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Approach the Golem',
-                icon: 'https://api.iconify.design/game-icons:rock-golem.svg',
+                icon: 'rock-golem',
                 questCondition: { questId: 'depths_of_despair', stages: [1] },
                 startNode: 'dod_approach_golem',
             },

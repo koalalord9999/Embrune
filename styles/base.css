@@ -1,0 +1,51 @@
+/* ============================================================
+   BASE — layout, body, root, global resets
+   ============================================================ */
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents scrollbars if aspect ratio overflows a bit */
+}
+
+body {
+  background-color: #282c34;
+  font-family: 'VT323', monospace;
+  user-select: none; /* Disable text selection */
+  letter-spacing: 0.02em;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE */
+  -webkit-touch-callout: none; /* iOS Safari - Disable long-press menu */
+}
+
+.font-pixel-rpg {
+  font-family: 'VT323', monospace;
+  letter-spacing: 0.02em;
+}
+
+.font-medieval {
+  font-family: 'MedievalSharp', cursive;
+}
+
+/* Re-enable text selection specifically for the activity log text */
+.activity-log-wrapper .text-sm {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+.pixelated-image {
+  image-rendering: -moz-crisp-edges; /* Firefox */
+  image-rendering: -webkit-crisp-edges; /* Webkit */
+  image-rendering: pixelated; /* Standard */
+}
+
+.poisoned-heart-icon {
+  filter: invert(50%) sepia(90%) saturate(1000%) hue-rotate(80deg) brightness(1.2) opacity(0.8);
+}

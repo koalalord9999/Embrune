@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SkillName } from '../../../../types';
-import { JEWELRY_CRAFTING_RECIPES, ITEMS, getIconClassName } from '../../../../constants';
+import {  JEWELRY_CRAFTING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../../constants';
 import Button from '../../../common/Button';
 import { CraftingViewProps } from '../CraftingView';
 import { useLongPress } from '../../../../hooks/useLongPress';
@@ -103,19 +103,19 @@ const JewelrySlot: React.FC<{
             <div className={`crafting-slot-level ${hasLevel ? 'met' : 'unmet'}`}>
                 Lvl {recipe.level}
             </div>
-            <img src={item.iconUrl} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
+            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
             <div className="crafting-slot-ingredients">
                 <div className="ingredient-icon" title={`${ITEMS[recipe.barType].name} (x${recipe.barsRequired})`}>
-                    <img src={ITEMS[recipe.barType].iconUrl} alt={ITEMS[recipe.barType].name} className={getIconClassName(ITEMS[recipe.barType])} />
+                    <img src={getIconUrl(ITEMS[recipe.barType].iconUrl)} alt={ITEMS[recipe.barType].name} className={getIconClassName(ITEMS[recipe.barType])} />
                     {recipe.barsRequired > 1 && <span className="ingredient-quantity">{recipe.barsRequired}</span>}
                 </div>
                 {gemItem && (
                     <div className="ingredient-icon" title={gemItem.name}>
-                        <img src={gemItem.iconUrl} alt={gemItem.name} className={getIconClassName(gemItem)} />
+                        <img src={getIconUrl(gemItem.iconUrl)} alt={gemItem.name} className={getIconClassName(gemItem)} />
                     </div>
                 )}
                 <div className="ingredient-icon" title={mould.name}>
-                    <img src={mould.iconUrl} alt={mould.name} className={getIconClassName(mould)} />
+                    <img src={getIconUrl(mould.iconUrl)} alt={mould.name} className={getIconClassName(mould)} />
                 </div>
             </div>
         </div>

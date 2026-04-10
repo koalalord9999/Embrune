@@ -40,8 +40,8 @@ db.version(2).stores({
         });
     }
 
-    // Initialize remaining empty slots (Now 6 slots)
-    for (let i = (oldSave ? 1 : 0); i < 6; i++) {
+    // Initialize remaining empty slots (Now 5 slots)
+    for (let i = (oldSave ? 1 : 0); i < 5; i++) {
         const existing = await tx.table('slots').get(i);
         if (!existing) {
             await tx.table('slots').put({
@@ -68,17 +68,42 @@ export const saveSlotState = async (slotId: number, state: any): Promise<void> =
         const existingSlot = await (db as any).slots.get(slotId);
         const isNewCharacter = state && !existingSlot?.data;
 
+        // Helper: derive level from XP (mirrors constants/skills.ts)
+        const getSkillLevelFromXp = (xp: number) => {
+            const xpTable: number[] = [0];
+            for (let i = 1; i <= 100; i++) {
+                xpTable[i] = (xpTable[i-1] || 0) + Math.floor(i - 1 + 80 * Math.pow(2, (i - 1) / 6.7));
+            }
+            const level = xpTable.findIndex(xpVal => xpVal > xp);
+            return level === -1 ? 99 : level;
+        };
+
+        const isV2 = state?._v === 2;
+        
+        const metadata = state ? {
+            username: isV2 ? state.u : state.username,
+            playerType: isV2 ? state.pt : state.playerType,
+            combatLevel: state.combatLevel ?? undefined,
+            totalLevel: 0,
+            currentPoiName: (isV2 ? state.loc : state.currentPoiId) ? (POIS[isV2 ? state.loc : state.currentPoiId]?.name ?? 'Unknown') : 'Unknown',
+            isDead: isV2 ? (state.dead !== undefined ? state.dead : (state.hp <= 0)) : (state.isDead ?? ((state.currentHp ?? 0) <= 0)),
+        } : null;
+
+        if (state && metadata) {
+            if (isV2 && Array.isArray(state.s)) {
+                metadata.totalLevel = state.s.reduce((sum: number, xp: number) => sum + getSkillLevelFromXp(xp), 0);
+            } else if (Array.isArray(state.skills)) {
+                metadata.totalLevel = state.skills.reduce((sum: number, s: any) => {
+                    const level = s.level ?? getSkillLevelFromXp(s.xp ?? 0);
+                    return sum + level;
+                }, 0);
+            }
+        }
+
         await (db as any).slots.put({
             slotId: slotId,
             data: state,
-            metadata: state ? {
-                username: state.username,
-                playerType: state.playerType,
-                combatLevel: state.combatLevel, // This should be calculated and passed in the state object
-                totalLevel: state.skills.reduce((sum: number, s: any) => sum + s.level, 0),
-                currentPoiName: state.currentPoiId ? (POIS[state.currentPoiId]?.name ?? 'Unknown') : 'Unknown',
-                isDead: state.isDead ?? false,
-            } : null,
+            metadata: metadata,
             updatedAt: new Date(),
             createdAt: isNewCharacter ? new Date() : existingSlot?.createdAt,
         });
@@ -95,14 +120,14 @@ export const loadAllSlots = async (): Promise<any[]> => {
     try {
         await db.open(); // Ensure DB is open
         const slots = await (db as any).slots.toArray();
-        // Ensure we return 6 slots even if DB only has 5 from previous version
-        const allSlots = Array.from({ length: 6 }, (_, i) => {
+        // Ensure we return 5 slots
+        const allSlots = Array.from({ length: 5 }, (_, i) => {
             return slots.find(s => s.slotId === i) || { slotId: i, data: null, metadata: null };
         });
         return allSlots;
     } catch (error) {
         console.error("Failed to load all slots:", error);
-        return Array.from({ length: 6 }, (_, i) => ({ slotId: i, data: null, metadata: null }));
+        return Array.from({ length: 5 }, (_, i) => ({ slotId: i, data: null, metadata: null }));
     }
 };
 

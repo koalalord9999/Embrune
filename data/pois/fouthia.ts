@@ -1,16 +1,17 @@
 import { POI, SkillName } from '../../types';
+import { RAVINDRA_DIALOGUE } from '../dialogues/slayerDialogues';
 import { CIVILLIAN_DIALOGUE } from '../../constants/dialogue';
 import { BANKER_ZAHRA_DIALOGUE, BARKEEP_ZALE_DIALOGUE, KHALID_DIALOGUE, ZAFIRA_DIALOGUE, CAPTAIN_OMAR_DIALOGUE } from '../dialogues/fouthiaDialogues';
 
 export const fouthiaPois: Record<string, POI> = {
     // --- GATES (World Map POIs) ---
-        fouthia_north_gate: {
+    fouthia_north_gate: {
         id: 'fouthia_north_gate',
         name: 'Fouthia North Gate',
         description: 'This gate looks towards a range of dark, volcanic mountains. A hot wind blows from the north.',
         connections: ['fouthia_garrison_road', 'vsv_entrance'],
         activities: [
-            { type: 'npc', name: 'Fouthian Guard', icon: 'https://api.iconify.design/game-icons:desert-helmet.svg', attackableMonsterId: 'fouthian_guard' }
+            { type: 'npc', name: 'Fouthian Guard', icon: 'desert-helmet', attackableMonsterId: 'fouthian_guard' }
         ],
         regionId: 'fouthia',
         type: 'internal',
@@ -19,13 +20,13 @@ export const fouthiaPois: Record<string, POI> = {
         eX: -42,
         eY: 1256,
     },
-        fouthia_southeast_gate: {
+    fouthia_southeast_gate: {
         id: 'fouthia_southeast_gate',
         name: 'Fouthia South-East Gate',
         description: 'A gate of sun-bleached wood and rusted iron, leading out into the blinding Salt Flats.',
         connections: ['salt_flats_northwest_passage', 'fouthia_main_street'],
         activities: [
-            { type: 'npc', name: 'Fouthian Guard', icon: 'https://api.iconify.design/game-icons:desert-helmet.svg', attackableMonsterId: 'fouthian_guard' }
+            { type: 'npc', name: 'Fouthian Guard', icon: 'desert-helmet', attackableMonsterId: 'fouthian_guard' }
         ],
         regionId: 'fouthia',
         type: 'internal',
@@ -34,13 +35,13 @@ export const fouthiaPois: Record<string, POI> = {
         eX: -42,
         eY: 1256,
     },
-        fouthia_west_gate: {
+    fouthia_west_gate: {
         id: 'fouthia_west_gate',
         name: 'Fouthia West Gate',
         description: 'The western gate opens to a vast, shimmering desert, said to hide the ruins of a Sunken City.',
         connections: ['fouthia_back_alleys', 'sunscorched_wastes_entrance'],
         activities: [
-            { type: 'npc', name: 'Fouthian Guard', icon: 'https://api.iconify.design/game-icons:desert-helmet.svg', attackableMonsterId: 'fouthian_guard' }
+            { type: 'npc', name: 'Fouthian Guard', icon: 'desert-helmet', attackableMonsterId: 'fouthian_guard' }
         ],
         regionId: 'fouthia',
         type: 'internal',
@@ -57,7 +58,7 @@ export const fouthiaPois: Record<string, POI> = {
         description: 'The dusty main street leading from the gate to the town square. Buildings are made of sandstone and weathered wood.',
         connections: ['fouthia_southeast_gate', 'fouthia_square'],
         activities: [
-            { type: 'npc', name: 'Weary Traveler', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Weary Traveler', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.fouthia.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
+            { type: 'npc', name: 'Weary Traveler', icon: 'person', dialogue: { start: { npcName: 'Weary Traveler', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.fouthia.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
         ],
         regionId: 'fouthia',
         x: 350, y: 350, type: 'internal',
@@ -69,7 +70,7 @@ export const fouthiaPois: Record<string, POI> = {
         connections: ['fouthia_main_street', 'fouthia_bazaar', 'fouthia_garrison_road', 'fouthia_back_alleys', 'fouthia_bank', 'fouthia_general_store', 'fouthia_shrine'],
         activities: [
             { type: 'water_source', name: 'Draw Water from Well' },
-            { type: 'npc', name: 'Townsfolk', icon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', dialogue: { start: { npcName: 'Townsfolk', npcIcon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', text: CIVILLIAN_DIALOGUE.fouthia.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
+            { type: 'npc', name: 'Townsfolk', icon: 'woman-elf-face', dialogue: { start: { npcName: 'Townsfolk', npcIcon: 'woman-elf-face', text: CIVILLIAN_DIALOGUE.fouthia.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_man_woman_table' } },
         ],
         regionId: 'fouthia',
         x: 250, y: 250, type: 'internal',
@@ -83,11 +84,11 @@ export const fouthiaPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Altar',
-                icon: 'https://api.iconify.design/game-icons:altar.svg',
+                icon: 'altar',
                 dialogue: {
                     start: {
                         npcName: 'Altar',
-                        npcIcon: 'https://api.iconify.design/game-icons:altar.svg',
+                        npcIcon: 'altar',
                         text: 'You feel a divine presence. Your prayer may be answered here.',
                         responses: [
                             { text: 'Pray', actions: [{ type: 'restore_prayer' }] },
@@ -185,7 +186,15 @@ export const fouthiaPois: Record<string, POI> = {
         description: 'A small, functional barracks. The few guards here seem overworked and weary.',
         connections: ['fouthia_garrison_road'],
         activities: [
-            { type: 'npc', name: 'Captain Omar', icon: '/assets/npcChatHeads/guard_captain_elara.png', dialogue: CAPTAIN_OMAR_DIALOGUE, startNode: 'start' }
+            { type: 'npc', name: 'Captain Omar', icon: '/assets/npcChatHeads/guard_captain_elara.png', dialogue: CAPTAIN_OMAR_DIALOGUE, startNode: 'start' },
+            {
+                type: 'slayer_master',
+                name: 'Ravindra',
+                icon: 'desert-helmet',
+                masterId: 'ravindra',
+                dialogue: RAVINDRA_DIALOGUE,
+                startNode: 'start'
+            },
         ],
         regionId: 'fouthia',
         x: 200, y: 150, type: 'internal',
@@ -219,12 +228,30 @@ export const fouthiaPois: Record<string, POI> = {
                 startNode: 'start',
                 questTopics: ['the_sorcerers_trial'],
                 conditionalGreetings: [
-                    { 
-                        text: "You're back! And you haven't exploded! A pity, but a successful experiment nonetheless. Is that my little creation? It looks... bored.",
-                        check: { requirements: [
-                            { type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 12 },
-                            { type: 'items', items: [{ itemId: 'tempered_core', quantity: 1 }] }
-                        ]}
+                    {
+                        text: "Anya sent you for a lesson in 'controlled demolition'? HA! Let's see if you have the stomach for it.",
+                        check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 6 }] }
+                    },
+                    {
+                        text: "Where's my Wyvern Claw? I can't build a containment unit out of thin air and good intentions!",
+                        check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 7 }] }
+                    },
+                    {
+                        text: "The claw is perfect. Now I just need the fuel. Ten pieces of Brimstone, and keep the smell to yourself!",
+                        check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 9 }] }
+                    },
+                    {
+                        text: "Don't just stand there holding that core! It's twitchy! Go show it the Forge, the Deep, and the Salt!",
+                        check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 11 }] }
+                    },
+                    {
+                        text: "I can tell by looking at you that you've undergone some patience yourself. I hope you feel like you're ready to EXPLODE! Or not? It doesn't really matter.",
+                        check: {
+                            requirements: [
+                                { type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 12 },
+                                { type: 'items', items: [{ itemId: 'tempered_core', quantity: 1 }] }
+                            ]
+                        }
                     },
                 ],
             }

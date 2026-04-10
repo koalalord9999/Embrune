@@ -1,0 +1,5 @@
+/* Master stylesheet — imports all partials in order */
+@import './styles/base.css';
+@import './styles/animations.css';
+@import './styles/item-colors.css';
+@import './styles/ui.css';

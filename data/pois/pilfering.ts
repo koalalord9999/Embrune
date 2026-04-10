@@ -10,7 +10,7 @@ export const pilferingPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Leave House',
-                icon: 'https://api.iconify.design/game-icons:exit-door.svg',
+                icon: 'exit-door',
             }
         ],
         regionId: 'wilderness', // Generic region, won't be shown on map

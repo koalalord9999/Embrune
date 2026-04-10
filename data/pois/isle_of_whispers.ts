@@ -93,12 +93,12 @@ export const isleOfWhispersPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Salty Sam',
-                icon: 'https://api.iconify.design/game-icons:pirate-captain.svg',
+                icon: 'pirate-captain',
                 pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' },
                 dialogue: {
                     start: {
                         npcName: 'Salty Sam',
-                        npcIcon: 'https://api.iconify.design/game-icons:pirate-captain.svg',
+                        npcIcon: 'pirate-captain',
                         text: "Welcome to The Barnacle's Bite. Don't mind the creaking, she's an old ship. What'll it be?",
                         responses: [
                             { text: "What's on tap?", next: 'buy_drink_intro' },
@@ -107,7 +107,7 @@ export const isleOfWhispersPois: Record<string, POI> = {
                     },
                     buy_drink_intro: {
                         npcName: 'Salty Sam',
-                        npcIcon: 'https://api.iconify.design/game-icons:pirate-captain.svg',
+                        npcIcon: 'pirate-captain',
                         text: "Got some grog. Strong enough to strip barnacles, which is how the place got its name. 5 coins.",
                         responses: [
                             { text: "Pour me one.", check: { requirements: [{ type: 'coins', amount: 5 }], successNode: 'buy_drink_success', failureNode: 'buy_drink_fail' }, actions: [{ type: 'take_coins', amount: 5 }, { type: 'give_item', itemId: 'beer', quantity: 1 }] },
@@ -116,19 +116,19 @@ export const isleOfWhispersPois: Record<string, POI> = {
                     },
                     buy_drink_success: {
                         npcName: 'Salty Sam',
-                        npcIcon: 'https://api.iconify.design/game-icons:pirate-captain.svg',
+                        npcIcon: 'pirate-captain',
                         text: "There ya go. Put some hair on your chest!",
                         responses: []
                     },
                     buy_drink_fail: {
                         npcName: 'Salty Sam',
-                        npcIcon: 'https://api.iconify.design/game-icons:pirate-captain.svg',
+                        npcIcon: 'pirate-captain',
                         text: "No coin, no grog. That's the rule.",
                         responses: []
                     },
                     rent_room_intro: {
                         npcName: 'Salty Sam',
-                        npcIcon: 'https://api.iconify.design/game-icons:pirate-captain.svg',
+                        npcIcon: 'pirate-captain',
                         text: "A hammock, eh? It's not the Silverhaven suite, but it's dry and keeps the crabs from nibblin' your toes. 25 coins for the night, and you'll wake up feeling brand new.",
                         responses: [
                             { text: "Sounds good to me.", check: { requirements: [{ type: 'coins', amount: 25 }], successNode: 'rent_room_success', failureNode: 'buy_drink_fail' }, actions: [{ type: 'take_coins', amount: 25 }, { type: 'heal', amount: 'full' }] },
@@ -137,7 +137,7 @@ export const isleOfWhispersPois: Record<string, POI> = {
                     },
                     rent_room_success: {
                         npcName: 'Salty Sam',
-                        npcIcon: 'https://api.iconify.design/game-icons:pirate-captain.svg',
+                        npcIcon: 'pirate-captain',
                         text: "Attaboy. Sleep tight.",
                         responses: []
                     }
@@ -193,6 +193,8 @@ export const isleOfWhispersPois: Record<string, POI> = {
             { type: 'combat', monsterId: 'giant_crab' },
             { type: 'skilling', id: 'saltstone_driftwood_1', name: 'Chop Driftwood', skill: SkillName.Woodcutting, requiredLevel: 5, loot: [{ itemId: 'driftwood_logs', chance: 1, xp: 30 }], resourceCount: { min: 2, max: 5 }, respawnTime: 10000, gatherTime: 2200 },
             { type: 'ground_item', id: 'crabclaw_seaweed_1', itemId: 'seaweed', resourceCount: 1, respawnTimer: 60000 },
+            { type: 'skilling', id: 'crabclaw_harpoon_fish', name: 'Harpoon Fish', skill: SkillName.Fishing, requiredLevel: 40, loot: [{ itemId: 'raw_tuna', chance: 1, xp: 80 }, { itemId: 'raw_swordfish', chance: 0.4, xp: 100, requiredLevel: 62 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 10, max: 25 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.Harpoon },
+            { type: 'skilling', id: 'crabclaw_ocean_trap_lobster', name: 'Set Ocean Trap', skill: SkillName.Fishing, requiredLevel: 50, loot: [{ itemId: 'raw_lobster', chance: 1, xp: 90 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 4, max: 9 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.OceanBoxTrap },
         ],
         regionId: 'isle_of_whispers',
         x: 340, y: 2400,
@@ -203,6 +205,7 @@ export const isleOfWhispersPois: Record<string, POI> = {
         description: 'The skeletons of countless ships litter this misty, haunted coastline. The air is unnaturally cold.',
         connections: ['island_crossroads', 'tidal_flats', 'sirens_cove'],
         activities: [
+            { type: 'combat', monsterId: 'shipwreck_specter' },
             { type: 'combat', monsterId: 'shipwreck_specter' },
             { type: 'thieving_lockpick', id: 'iow_shipwreck_chest_1', targetName: 'Waterlogged Chest', lootTableId: 'thieving_dungeon_chest_mid' },
             { type: 'ground_item', id: 'shipwreck_graveyard_logs', itemId: 'driftwood_logs', resourceCount: 1, respawnTimer: 120000 },
@@ -222,6 +225,8 @@ export const isleOfWhispersPois: Record<string, POI> = {
             { type: 'ground_item', id: 'tidal_seaweed_1', itemId: 'seaweed', resourceCount: 1, respawnTimer: 60000 },
             { type: 'ground_item', id: 'tidal_seaweed_2', itemId: 'seaweed', resourceCount: 1, respawnTimer: 60000 },
             { type: 'ground_item', id: 'tidal_seaweed_3', itemId: 'seaweed', resourceCount: 1, respawnTimer: 60000 },
+            { type: 'skilling', id: 'tidal_flats_harpoon_fish', name: 'Harpoon Fish', skill: SkillName.Fishing, requiredLevel: 40, loot: [{ itemId: 'raw_tuna', chance: 1, xp: 80 }, { itemId: 'raw_swordfish', chance: 0.4, xp: 100, requiredLevel: 62 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 10, max: 25 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.Harpoon },
+            { type: 'skilling', id: 'tidal_flats_ocean_trap_lobster', name: 'Set Ocean Trap', skill: SkillName.Fishing, requiredLevel: 50, loot: [{ itemId: 'raw_lobster', chance: 1, xp: 90 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 4, max: 9 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.OceanBoxTrap },
         ],
         regionId: 'isle_of_whispers',
         x: 500, y: 2500,
@@ -233,12 +238,17 @@ export const isleOfWhispersPois: Record<string, POI> = {
         connections: ['shipwreck_graveyard'],
         activities: [
             { type: 'combat', monsterId: 'siren' },
+            { type: 'combat', monsterId: 'siren' },
+            { type: 'combat', monsterId: 'siren' },
             { type: 'ground_item', id: 'sirens_seaweed_1', itemId: 'seaweed', resourceCount: 1, respawnTimer: 60000 },
             { type: 'ground_item', id: 'sirens_seaweed_2', itemId: 'seaweed', resourceCount: 1, respawnTimer: 60000 },
             { type: 'ground_item', id: 'sirens_seaweed_3', itemId: 'seaweed', resourceCount: 1, respawnTimer: 60000 },
             { type: 'ground_item', id: 'sirens_seaweed_4', itemId: 'seaweed', resourceCount: 1, respawnTimer: 60000 },
+            { type: 'skilling', id: 'sirens_cove_harpoon_fish', name: 'Harpoon Fish', skill: SkillName.Fishing, requiredLevel: 40, loot: [{ itemId: 'raw_tuna', chance: 1, xp: 80 }, { itemId: 'raw_swordfish', chance: 0.4, xp: 100, requiredLevel: 62 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 10, max: 25 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.Harpoon },
+            { type: 'skilling', id: 'sirens_cove_ocean_trap_lobster', name: 'Set Ocean Trap', skill: SkillName.Fishing, requiredLevel: 50, loot: [{ itemId: 'raw_lobster', chance: 1, xp: 90 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 4, max: 9 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.OceanBoxTrap },
         ],
         regionId: 'isle_of_whispers',
+        maxGroupSize: 2,
         x: 600, y: 2500,
     },
     // --- North Jungle ---
@@ -296,7 +306,8 @@ export const isleOfWhispersPois: Record<string, POI> = {
         description: 'An overgrown stone path, clearly of ancient construction, leads deeper into the jungle highlands.',
         connections: ['ancient_monoliths', 'forgotten_temple_courtyard'],
         activities: [
-            { type: 'combat', monsterId: 'jungle_stalker' }
+            { type: 'combat', monsterId: 'jungle_stalker' },
+            { type: 'combat', monsterId: 'jungle_stalker' },
         ],
         regionId: 'isle_of_whispers',
         x: 456,
@@ -331,7 +342,9 @@ export const isleOfWhispersPois: Record<string, POI> = {
         connections: ['ashfall_path'],
         activities: [
             { type: 'combat', monsterId: 'magma_imp' },
+            { type: 'combat', monsterId: 'magma_imp' },
             { type: 'skilling', id: 'brimstone_node_1', name: 'Mine Brimstone', skill: SkillName.Mining, requiredLevel: 45, loot: [{ itemId: 'brimstone', chance: 1, xp: 100 }], resourceCount: { min: 2, max: 4 }, respawnTime: 90000, gatherTime: 4000 },
+            { type: 'skilling', id: 'volcanic_harpoon_eel', name: 'Harpoon Lava Eels', skill: SkillName.Fishing, requiredLevel: 53, loot: [{ itemId: 'molten_eel', chance: 1, xp: 110 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 5, max: 15 }, respawnTime: 45000, gatherTime: 5000, requiredTool: ToolType.Harpoon },
         ],
         regionId: 'isle_of_whispers',
         x: 650, y: 2350,
@@ -342,6 +355,7 @@ export const isleOfWhispersPois: Record<string, POI> = {
         description: 'The ashen path gives way to a dark, twisted mangrove swamp. Ghostly lights flicker in the distance.',
         connections: ['ashfall_path', 'mangrove_heart'],
         activities: [
+            { type: 'combat', monsterId: 'shipwreck_specter' },
             { type: 'combat', monsterId: 'shipwreck_specter' },
         ],
         regionId: 'isle_of_whispers',
@@ -364,7 +378,10 @@ export const isleOfWhispersPois: Record<string, POI> = {
         name: 'Lighthouse Path',
         description: 'A crumbling stone causeway leads out to a lonely lighthouse perched on a rocky outcrop in the sea.',
         connections: ['mangrove_heart', 'abandoned_lighthouse'],
-        activities: [],
+        activities: [
+            { type: 'skilling', id: 'lhpath_harpoon_fish', name: 'Harpoon Fish', skill: SkillName.Fishing, requiredLevel: 40, loot: [{ itemId: 'raw_tuna', chance: 1, xp: 80 }, { itemId: 'raw_swordfish', chance: 0.4, xp: 100, requiredLevel: 62 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 10, max: 25 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.Harpoon },
+            { type: 'skilling', id: 'lhpath_ocean_trap_lobster', name: 'Set Ocean Trap', skill: SkillName.Fishing, requiredLevel: 50, loot: [{ itemId: 'raw_lobster', chance: 1, xp: 90 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 4, max: 9 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.OceanBoxTrap },
+        ],
         regionId: 'isle_of_whispers',
         x: 750, y: 2550,
     },
@@ -375,7 +392,8 @@ export const isleOfWhispersPois: Record<string, POI> = {
         connections: ['abandoned_lighthouse_path'],
         activities: [
             { type: 'combat', monsterId: 'siren' },
-            { type: 'combat', monsterId: 'siren' },
+            { type: 'skilling', id: 'lh_harpoon_fish', name: 'Harpoon Fish', skill: SkillName.Fishing, requiredLevel: 40, loot: [{ itemId: 'raw_tuna', chance: 1, xp: 80 }, { itemId: 'raw_swordfish', chance: 0.4, xp: 100, requiredLevel: 62 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 10, max: 25 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.Harpoon },
+            { type: 'skilling', id: 'lh_ocean_trap_lobster', name: 'Set Ocean Trap', skill: SkillName.Fishing, requiredLevel: 50, loot: [{ itemId: 'raw_lobster', chance: 1, xp: 90 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 4, max: 9 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.OceanBoxTrap },
         ],
         regionId: 'isle_of_whispers',
         x: 800, y: 2600,
@@ -394,15 +412,16 @@ export const isleOfWhispersPois: Record<string, POI> = {
                 requiredLevel: 40,
                 loot: [
                     { itemId: 'raw_tuna', chance: 1, xp: 80 },
-                    { itemId: 'raw_swordfish', chance: 0.4, xp: 100, requiredLevel: 62 }
+                    { itemId: 'raw_swordfish', chance: 0.4, xp: 100, requiredLevel: 62 },
+                    { itemId: 'casket', chance: 0.04, xp: 0 }
                 ],
                 resourceCount: { min: 50, max: 100 },
                 respawnTime: 35000,
                 gatherTime: 4500,
                 requiredTool: ToolType.Harpoon
             },
-            { type: 'skilling', id: 'isle_harpoon_shark', name: 'Harpoon Shark', skill: SkillName.Fishing, requiredLevel: 76, loot: [{ itemId: 'raw_shark', chance: 1, xp: 110 }], resourceCount: { min: 1, max: 5 }, respawnTime: 90000, gatherTime: 6000, requiredTool: ToolType.Harpoon },
-            { type: 'skilling', id: 'isle_ocean_trap_lobster', name: 'Set Ocean Trap', skill: SkillName.Fishing, requiredLevel: 50, loot: [{ itemId: 'raw_lobster', chance: 1, xp: 90 }], resourceCount: { min: 4, max: 9 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.OceanBoxTrap },
+            { type: 'skilling', id: 'isle_harpoon_shark', name: 'Harpoon Shark', skill: SkillName.Fishing, requiredLevel: 76, loot: [{ itemId: 'raw_shark', chance: 1, xp: 110 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 1, max: 5 }, respawnTime: 90000, gatherTime: 6000, requiredTool: ToolType.Harpoon },
+            { type: 'skilling', id: 'isle_ocean_trap_lobster', name: 'Set Ocean Trap', skill: SkillName.Fishing, requiredLevel: 50, loot: [{ itemId: 'raw_lobster', chance: 1, xp: 90 }, { itemId: 'casket', chance: 0.04, xp: 0 }], resourceCount: { min: 4, max: 9 }, respawnTime: 35000, gatherTime: 4500, requiredTool: ToolType.OceanBoxTrap },
         ],
         regionId: 'isle_of_whispers',
         x: 400, y: 2460,

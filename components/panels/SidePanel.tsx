@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect, useRef } from 'react';
 import { useUIState, TooltipState } from '../../hooks/useUIState';
 import { useCharacter } from '../../hooks/useCharacter';
 import { useInventory } from '../../hooks/useInventory';
@@ -36,7 +36,7 @@ interface SidePanelProps {
     onToggleTouchSimulation: () => void;
     itemActions: ReturnType<typeof useItemActions>;
     isBusy: boolean;
-    handleExamine: (item: Item) => void;
+    handleExamine: (item: Item, quantity?: number) => void;
     session: ReturnType<typeof useGameSession>;
     addLog: (message: string) => void;
     activeCombatStyleHighlight?: CombatStance | null;
@@ -119,6 +119,13 @@ const PlaceholderIcon: React.FC = () => (
 const SidePanel: React.FC<SidePanelProps> = (props) => {
     const { ui, char, inv, quests, repeatableQuests, slayer, onReturnToMenu, isDevMode, isTouchSimulationEnabled, onToggleTouchSimulation, itemActions, isBusy, handleExamine, session, addLog, activeCombatStyleHighlight, isBankOpen, isShopOpen, onDeposit, onNavigate, unlockedPois, onCastSpell, onSpellOnItem, isEquipmentStatsOpen = false, initialState, activePrayers, onTogglePrayer, isPoisoned, onCurePoison, poisonEvent, onToggleDevPanel, isPermAggroOn, onTogglePermAggro, isGodModeOn, onToggleGodMode, worldState } = props;
     const { activePanel, setActivePanel } = ui;
+    const panelContentRef = useRef<HTMLDivElement>(null);
+
+    useLayoutEffect(() => {
+        if (panelContentRef.current) {
+            panelContentRef.current.scrollTop = 0;
+        }
+    }, [activePanel]);
 
     const inventoryPanelProps = {
         inventory: inv.inventory, coins: inv.coins, skills: char.skills, onEquip:(item, idx) => inv.handleEquip(item, idx, char.skills, char.combatStance), onConsume: itemActions.handleConsume, onDropItem: inv.handleDropItem, 
@@ -163,9 +170,18 @@ const SidePanel: React.FC<SidePanelProps> = (props) => {
                     onTeleport={itemActions.handleTeleport}
                 />;
             case 'skills':
-                return <SkillsPanel skills={char.skills} setTooltip={ui.setTooltip} setContextMenu={ui.setContextMenu} onOpenGuide={ui.setActiveSkillGuide} isTouchSimulationEnabled={isTouchSimulationEnabled} isOneClickMode={ui.isOneClickMode} />;
+                return <SkillsPanel 
+                    skills={char.skills} 
+                    setTooltip={ui.setTooltip} 
+                    setContextMenu={ui.setContextMenu} 
+                    onOpenGuide={ui.setActiveSkillGuide} 
+                    isTouchSimulationEnabled={isTouchSimulationEnabled} 
+                    isOneClickMode={ui.isOneClickMode}
+                    tooltip={ui.tooltip}
+                    contextMenu={ui.contextMenu}
+                />;
             case 'quests':
-                 return <QuestsPanel playerQuests={quests.playerQuests} activeRepeatableQuest={repeatableQuests.activePlayerQuest} inventory={inv.inventory} slayerTask={slayer.slayerTask} onSelectQuest={(questId) => ui.setActiveQuestDetail({ questId: questId, playerQuests: quests.playerQuests })} />;
+                 return <QuestsPanel playerQuests={quests.playerQuests} activeRepeatableQuest={repeatableQuests.activePlayerQuest} inventory={inv.inventory} slayerTask={slayer.slayerTask} onSelectQuest={(questId) => ui.setActiveQuestDetail({ questId: questId, playerQuests: quests.playerQuests, skills: char.skills.map(s => ({ skill: s.name, level: s.level })), combatLevel: char.combatLevel })} />;
             case 'prayer':
                 return <PrayerPanel skills={char.skills} activePrayers={activePrayers} onTogglePrayer={onTogglePrayer} setTooltip={ui.setTooltip} playerQuests={quests.playerQuests} />;
             case 'spellbook':
@@ -229,7 +245,7 @@ const SidePanel: React.FC<SidePanelProps> = (props) => {
                     <PanelIcon setTooltip={ui.setTooltip} tutorialId="side-panel-button-spellbook" icon="book-cover" label="Spellbook" ariaLabel="Spellbook" isActive={activePanel==='spellbook'} onClick={() => setActivePanel('spellbook')} />
                 </div>
             </div>
-            <div className="flex-grow min-h-0 p-2 overflow-y-auto">
+            <div className="flex-grow min-h-0 p-2 overflow-y-auto" ref={panelContentRef}>
                 {renderActivePanel()}
             </div>
             <div className="flex-shrink-0">

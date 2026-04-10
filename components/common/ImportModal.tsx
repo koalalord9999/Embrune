@@ -32,6 +32,9 @@ const ImportModal: React.FC<ImportModalProps> = ({ onImport, onClose }) => {
                     className="w-full h-48 bg-gray-900 border border-gray-500 rounded-md p-2 text-xs font-mono text-gray-300"
                     placeholder="Paste your save data here..."
                 />
+                <div className="text-right text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-bold">
+                    Character Count: <span className="text-yellow-500 font-mono">{data.length.toLocaleString()}</span>
+                </div>
                 {error && <p className="text-red-400 text-sm text-center mt-2">{error}</p>}
                 <div className="flex justify-center gap-4 mt-4">
                     <Button onClick={handleImport} variant="primary" disabled={!data.trim()}>Load Game</Button>

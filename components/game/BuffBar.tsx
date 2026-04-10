@@ -1,23 +1,30 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ActiveStatModifier, ActiveBuff, SkillName, Item } from '../../types';
-import { SKILL_ICONS, getSkillColorClass, ITEMS, getIconClassName } from '../../constants';
+import { ActiveStatModifier, ActiveBuff, SkillName, Item, Prayer } from '../../types';
+import {  SKILL_ICONS, getSkillColorClass, ITEMS, getIconClassName, PRAYERS, getPrayerIconColor, getPrayerShadowColor, getIconUrl  } from '../../constants';
+import { TooltipState } from '../../hooks/useUIState';
 
 interface BuffBarProps {
     statModifiers: ActiveStatModifier[];
     activeBuffs: (ActiveBuff | any)[]; // Use 'any' to allow for custom buff structures
+    activePrayers: string[];
+    setTooltip: (tooltip: TooltipState | null) => void;
 }
 
 interface DisplayBuff {
     id: number | string;
+    name?: string;
+    description?: string;
     iconUrl: string;
     value: string;
     valueColor?: string;
     expiresAt: number; // Can be Infinity for non-expiring buffs
     iconClassName?: string;
     colorClass?: string;
+    prayerColor?: string;
+    prayerShadowColor?: string;
 }
 
-const BuffIcon: React.FC<{ buff: DisplayBuff }> = ({ buff }) => {
+const BuffIcon: React.FC<{ buff: DisplayBuff; setTooltip: (tooltip: TooltipState | null) => void }> = ({ buff, setTooltip }) => {
     const [timeLeft, setTimeLeft] = useState(0);
 
     useEffect(() => {
@@ -30,10 +37,10 @@ const BuffIcon: React.FC<{ buff: DisplayBuff }> = ({ buff }) => {
             const remaining = Math.max(0, Math.ceil((buff.expiresAt - Date.now()) / 1000));
             setTimeLeft(remaining);
         };
-        
+
         calculateTime(); // Initial calculation
         const timer = setInterval(calculateTime, 1000);
-        
+
         return () => clearInterval(timer);
     }, [buff.expiresAt]);
 
@@ -47,26 +54,69 @@ const BuffIcon: React.FC<{ buff: DisplayBuff }> = ({ buff }) => {
 
     const valueColor = buff.valueColor || defaultValueColor;
 
+    const handleMouseEnter = (e: React.MouseEvent) => {
+        if (!buff.name && !buff.description) return;
+
+        const tooltipContent = (
+            <div className="text-left w-48">
+                {buff.name && <p className="font-bold text-yellow-300">{buff.name}</p>}
+                {buff.description && <p className="text-sm text-gray-300 mb-2">{buff.description}</p>}
+                {timeLeft !== Infinity && <p className="text-xs text-gray-400">Duration remaining: {timeLeft}s</p>}
+            </div>
+        );
+
+        setTooltip({
+            content: tooltipContent,
+            position: { x: e.clientX, y: e.clientY }
+        });
+    };
+
     return (
-        <div className="relative w-12 h-12 bg-gray-800 border-2 border-gray-600 rounded-md flex items-center justify-center p-1 shadow-lg">
-            {buff.colorClass ? (
+        <div
+            className="relative w-12 h-12 bg-gray-800 border-2 border-gray-600 rounded-md flex items-center justify-center p-1 shadow-lg cursor-help transition-transform hover:scale-105"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={() => setTooltip(null)}
+        >
+            {buff.prayerColor ? (
+                <div
+                    className="w-full h-full flex items-center justify-center shadow-none"
+                    style={{
+                        filter: `drop-shadow(1px 1px 0px black) drop-shadow(-1px -1px 0px black) drop-shadow(1px -1px 0px black) drop-shadow(-1px 1px 0px black) drop-shadow(0 0 2px ${buff.prayerShadowColor || buff.prayerColor}) drop-shadow(0 0 2px ${buff.prayerShadowColor || buff.prayerColor})`,
+                    }}
+                >
+                    <div
+                        className="w-full h-full"
+                        style={{
+                            backgroundColor: buff.prayerColor,
+                            maskImage: `url(${getIconUrl(buff.iconUrl)})`,
+                            WebkitMaskImage: `url(${getIconUrl(buff.iconUrl)})`,
+                            maskSize: 'contain',
+                            WebkitMaskSize: 'contain',
+                            maskRepeat: 'no-repeat',
+                            WebkitMaskRepeat: 'no-repeat',
+                            maskPosition: 'center',
+                            WebkitMaskPosition: 'center',
+                        }}
+                    />
+                </div>
+            ) : buff.colorClass ? (
                 <div
                     className={`w-full h-full ${buff.colorClass}`}
                     style={{
-                        maskImage: `url(${buff.iconUrl})`,
+                        maskImage: `url(${getIconUrl(buff.iconUrl)})`,
                         maskSize: 'contain',
                         maskRepeat: 'no-repeat',
                         maskPosition: 'center',
-                        WebkitMaskImage: `url(${buff.iconUrl})`,
+                        WebkitMaskImage: `url(${getIconUrl(buff.iconUrl)})`,
                         WebkitMaskSize: 'contain',
                         WebkitMaskRepeat: 'no-repeat',
                         WebkitMaskPosition: 'center',
                     }}
                 />
             ) : (
-                <img 
-                    src={buff.iconUrl} 
-                    alt="buff icon" 
+                <img
+                    src={getIconUrl(buff.iconUrl)}
+                    alt="buff icon"
                     className={`w-full h-full ${buff.iconClassName || 'filter invert opacity-60'}`}
                 />
             )}
@@ -83,7 +133,7 @@ const BuffIcon: React.FC<{ buff: DisplayBuff }> = ({ buff }) => {
 };
 
 
-const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
+const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs, activePrayers, setTooltip }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const allBuffs = useMemo(() => {
@@ -93,6 +143,8 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
         statModifiers.forEach(mod => {
             buffs.push({
                 id: mod.id,
+                name: `${mod.skill} Boost`,
+                description: `Increases your ${mod.skill} level.`,
                 iconUrl: SKILL_ICONS[mod.skill],
                 value: `${mod.currentValue > 0 ? '+' : ''}${mod.currentValue}`,
                 valueColor: mod.currentValue > 0 ? 'text-green-400' : 'text-red-400',
@@ -104,7 +156,7 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
         // 2. Process activeBuffs (spells, debuffs, etc.)
         activeBuffs.forEach(buff => {
             let expiresAt = Date.now() + buff.durationRemaining;
-            
+
             // Specific logic for Poison
             if (buff.type === 'poison') {
                 expiresAt = buff.nextTickTimestamp ?? (Date.now() + 15000);
@@ -126,7 +178,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'accuracy_boost':
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:crosshair-arrow.svg',
+                        name: 'Accuracy Boost',
+                        description: 'Increases your accuracy by ' + buff.value + '%.',
+                        iconUrl: 'crosshair-arrow',
                         value: `+${buff.value}%`,
                         valueColor: 'text-green-400',
                         expiresAt
@@ -135,7 +189,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'evasion_boost':
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:run.svg',
+                        name: 'Evasion Boost',
+                        description: 'Increases your evasion by ' + buff.value + '%.',
+                        iconUrl: 'run',
                         value: `+${buff.value}%`,
                         valueColor: 'text-green-400',
                         expiresAt
@@ -144,7 +200,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'recoil':
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:porcupine.svg',
+                        name: 'Recoil',
+                        description: 'Returns ' + buff.value + '% of incoming damage to the attacker.',
+                        iconUrl: 'porcupine',
                         value: `${buff.value}%`,
                         valueColor: 'text-orange-400',
                         expiresAt
@@ -153,7 +211,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'flat_damage':
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:sword-brandish.svg',
+                        name: 'Flat Damage Boost',
+                        description: 'Increases your damage by ' + buff.value + '.',
+                        iconUrl: 'sword-brandish',
                         value: `+${buff.value}`,
                         valueColor: 'text-yellow-400',
                         expiresAt
@@ -162,7 +222,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'damage_on_hit': // Sunfire Elixir
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:fire-sword.svg',
+                        name: 'Sunfire',
+                        description: 'Deals additional fire damage on hit.',
+                        iconUrl: 'fire-sword',
                         value: `+${buff.value}`,
                         valueColor: 'text-orange-500',
                         expiresAt
@@ -171,7 +233,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'poison_immunity':
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:health-potion.svg',
+                        name: 'Poison Immunity',
+                        description: 'You are immune to poison damage.',
+                        iconUrl: 'health-potion',
                         value: `Immune`,
                         valueColor: 'text-green-300',
                         expiresAt,
@@ -181,7 +245,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'damage_reduction':
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:stone-shield.svg',
+                        name: 'Damage Reduction',
+                        description: 'Reduces incoming damage by ' + buff.value + '%.',
+                        iconUrl: 'stone-shield',
                         value: `-${buff.value}%`,
                         valueColor: 'text-blue-300',
                         expiresAt
@@ -190,7 +256,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'antifire':
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:dragon-shield.svg',
+                        name: 'Antifire',
+                        description: 'Protects you from dragonfire attacks.',
+                        iconUrl: 'dragon-shield',
                         value: 'Fire',
                         valueColor: 'text-orange-400',
                         expiresAt,
@@ -200,16 +268,20 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'stun':
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:star-swirl.svg',
+                        name: 'Stunned',
+                        description: 'You are unable to move or act.',
+                        iconUrl: 'star-swirl',
                         value: 'Stun',
                         valueColor: 'text-yellow-300',
                         expiresAt
                     });
                     break;
                 case 'poison':
-                     buffs.push({
+                    buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:boiling-bubbles.svg',
+                        name: 'Poison',
+                        description: 'You are taking poison damage over time.',
+                        iconUrl: 'boiling-bubbles',
                         value: `${buff.value}`,
                         valueColor: 'text-green-500',
                         expiresAt,
@@ -220,7 +292,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'dehydration' as any: // Cast as any to handle custom type from Game.tsx
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:sunrise.svg',
+                        name: 'Dehydration',
+                        description: 'You are suffering from severe dehydration. Drink water!',
+                        iconUrl: 'sunrise',
                         value: `+${buff.value}`,
                         valueColor: 'text-orange-400',
                         expiresAt: Infinity,
@@ -230,7 +304,9 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                 case 'magic_damage_boost' as any:
                     buffs.push({
                         id: buff.id,
-                        iconUrl: 'https://api.iconify.design/game-icons:magic-swirl.svg',
+                        name: 'Magic Power',
+                        description: 'Increases your magic damage by ' + buff.value + '%.',
+                        iconUrl: 'magic-swirl',
                         value: `+${buff.value}%`,
                         valueColor: 'text-purple-400',
                         expiresAt,
@@ -242,6 +318,8 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
                     if (item) {
                         buffs.push({
                             id: buff.id,
+                            name: item.name,
+                            description: 'This item will expire soon.',
                             iconUrl: item.iconUrl,
                             value: '',
                             expiresAt: Date.now() + buff.durationRemaining,
@@ -253,8 +331,26 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
             }
         });
 
+        // 3. Process activePrayers
+        activePrayers.forEach(prayerId => {
+            const prayer = PRAYERS.find(p => p.id === prayerId);
+            if (prayer) {
+                buffs.push({
+                    id: `prayer-${prayer.id}`,
+                    name: prayer.name,
+                    description: prayer.description,
+                    iconUrl: prayer.iconUrl,
+                    value: '',
+                    expiresAt: Infinity,
+                    iconClassName: 'filter-none',
+                    prayerColor: getPrayerIconColor(prayer),
+                    prayerShadowColor: getPrayerShadowColor(prayer)
+                });
+            }
+        });
+
         return buffs.sort((a, b) => a.expiresAt - b.expiresAt);
-    }, [statModifiers, activeBuffs]);
+    }, [statModifiers, activeBuffs, activePrayers]);
 
     const showExpandButton = allBuffs.length > 4 && !isExpanded;
     const containerHeight = isExpanded ? 'max-h-80' : 'max-h-[224px]'; // 4 * (h-12 + gap-1) = 224px
@@ -264,16 +360,16 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs }) => {
     }
 
     return (
-        <div 
+        <div
             className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-1"
-            onMouseEnter={() => { if(allBuffs.length > 4) setIsExpanded(true) }}
+            onMouseEnter={() => { if (allBuffs.length > 4) setIsExpanded(true) }}
             onMouseLeave={() => setIsExpanded(false)}
         >
-            <div 
+            <div
                 className={`flex flex-col gap-1 transition-all duration-300 overflow-y-auto overflow-x-hidden ${containerHeight}`}
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-                {allBuffs.map(buff => <BuffIcon key={buff.id} buff={buff} />)}
+                {allBuffs.map(buff => <BuffIcon key={buff.id} buff={buff} setTooltip={setTooltip} />)}
             </div>
             {showExpandButton && (
                 <div className="w-12 h-4 bg-gray-700 rounded-b-md flex items-center justify-center text-xs font-bold text-gray-300 cursor-pointer">

@@ -1,8 +1,8 @@
 
 import React, { useCallback } from 'react';
 import { PlayerQuestState, SkillName, InventorySlot } from '../types';
-import { ITEMS, MONSTERS } from '../constants';
-import { QUESTS } from '../constants';
+import {  ITEMS, MONSTERS  } from '../constants';
+import {  QUESTS  } from '../constants';
 import { POIS } from '../data/pois';
 
 interface UseQuestLogicProps {
@@ -14,10 +14,12 @@ interface UseQuestLogicProps {
     hasItems: (items: { itemId: string, quantity: number }[]) => boolean;
     setLockedPois: React.Dispatch<React.SetStateAction<string[]>>;
     setClearedSkillObstacles: React.Dispatch<React.SetStateAction<string[]>>;
+    worldState: any; 
+    setWorldState: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export const useQuestLogic = (props: UseQuestLogicProps) => {
-    const { playerQuests, setPlayerQuests, addLog, modifyItem, addXp, hasItems, setLockedPois, setClearedSkillObstacles } = props;
+    const { playerQuests, setPlayerQuests, addLog, modifyItem, addXp, hasItems, setLockedPois, setClearedSkillObstacles, worldState, setWorldState } = props;
 
     const checkQuestProgressOnShear = useCallback(() => {
         setPlayerQuests(qs => qs.map(q => {
@@ -227,18 +229,36 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
 
                 const nextStageIndex = q.currentStage + stagesToAdvance;
                 Object.values(POIS).forEach(poi => {
-                    if (poi.unlockRequirement?.type === 'quest' && poi.unlockRequirement.questId === questId && poi.unlockRequirement.stage <= nextStageIndex) {
-                        setLockedPois(prev => {
-                            if (prev.includes(poi.id)) {
-                                addLog(`You have unlocked ${poi.name}!`);
-                                return prev.filter(id => id !== poi.id);
-                            }
-                            return prev;
-                        });
+                    const req = poi.unlockRequirement;
+                    if (req?.type === 'quest' && req.questId === questId) {
+                        const op = req.operator || 'gte';
+                        const isMet = op === 'gte' ? nextStageIndex >= req.stage : nextStageIndex <= req.stage;
+
+                        if (isMet) {
+                            setLockedPois(prev => {
+                                if (prev.includes(poi.id)) {
+                                    addLog(`You have unlocked ${poi.name}!`);
+                                    return prev.filter(id => id !== poi.id);
+                                }
+                                return prev;
+                            });
+                        } else {
+                            // If condition is no longer met (e.g. lte check fails), re-lock it
+                            setLockedPois(prev => {
+                                if (!prev.includes(poi.id)) {
+                                    return [...prev, poi.id];
+                                }
+                                return prev;
+                            });
+                        }
                     }
                 });
 
                 const isCompletingFinalStage = q.currentStage >= questData.stages.length - stagesToAdvance;
+
+                if (!isCompletingFinalStage) {
+                    addLog(`Quest updated: ${questData.name} - stage completed!`);
+                }
 
                 if(isCompletingFinalStage) {
                     addLog(`Congratulations! You have completed the quest: ${questData.name}!`);
@@ -295,14 +315,30 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
         rewards.xp?.forEach(xpReward => addXp(xpReward.skill, xpReward.amount));
     
         Object.values(POIS).forEach(poi => {
-            if (poi.unlockRequirement?.type === 'quest' && poi.unlockRequirement.questId === questId) {
-                setLockedPois(prev => {
-                    if (prev.includes(poi.id)) {
-                        addLog(`You have unlocked ${poi.name}!`);
-                        return prev.filter(id => id !== poi.id);
-                    }
-                    return prev;
-                });
+            const req = poi.unlockRequirement;
+            if (req?.type === 'quest' && req.questId === questId) {
+                // When force completing, we assume we are at the "final" state (complete)
+                const op = req.operator || 'gte';
+                const isMet = op === 'gte'; // 'gte' is always met if complete, 'lte' is never (unless stage was very high)
+                // Actually, let's be precise: isComplete is effectively stage infinity
+                const isActuallyMet = op === 'gte' ? true : (questData.stages.length <= req.stage);
+
+                if (isActuallyMet) {
+                    setLockedPois(prev => {
+                        if (prev.includes(poi.id)) {
+                            addLog(`You have unlocked ${poi.name}!`);
+                            return prev.filter(id => id !== poi.id);
+                        }
+                        return prev;
+                    });
+                } else {
+                    setLockedPois(prev => {
+                        if (!prev.includes(poi.id)) {
+                            return [...prev, poi.id];
+                        }
+                        return prev;
+                    });
+                }
             }
         });
     
@@ -311,6 +347,62 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
             addLog("With the supplies delivered, the Oakhaven guard repairs the bridge. The path to Silverhaven is open!");
         }
     }, [setPlayerQuests, addLog, modifyItem, addXp, setLockedPois, setClearedSkillObstacles]);
+
+    const getQuestVariable = useCallback((name: string) => {
+        return worldState.questVariables?.[name] ?? 0;
+    }, [worldState.questVariables]);
+
+    const setQuestVariable = useCallback((name: string, value: number) => {
+        setWorldState((prev: any) => ({
+            ...prev,
+            questVariables: {
+                ...(prev.questVariables || {}),
+                [name]: value
+            }
+        }));
+    }, [setWorldState]);
+
+    const incrementQuestVariable = useCallback((name: string, amount: number = 1) => {
+        setWorldState((prev: any) => ({
+            ...prev,
+            questVariables: {
+                ...(prev.questVariables || {}),
+                [name]: (prev.questVariables?.[name] ?? 0) + amount
+            }
+        }));
+    }, [setWorldState]);
+
+    const cleanupQuestState = useCallback((questId: string) => {
+        const questData = QUESTS[questId];
+        if (!questData) return;
+
+        setWorldState((prev: any) => {
+            const next = { ...prev };
+            let changed = false;
+
+            if (questData.cleanupWorldState) {
+                questData.cleanupWorldState.forEach((prop: string) => {
+                    if (next[prop] !== undefined) {
+                        delete next[prop];
+                        changed = true;
+                    }
+                });
+            }
+
+            if (questData.cleanupQuestVariables && next.questVariables) {
+                const nextVars = { ...next.questVariables };
+                questData.cleanupQuestVariables.forEach((varName: string) => {
+                    if (nextVars[varName] !== undefined) {
+                        delete nextVars[varName];
+                        changed = true;
+                    }
+                });
+                if (changed) next.questVariables = nextVars;
+            }
+
+            return changed ? next : prev;
+        });
+    }, [setWorldState]);
 
     return {
         checkQuestProgressOnShear,
@@ -321,5 +413,9 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
         completeQuestStage,
         checkGatherQuests,
         forceCompleteQuest,
+        getQuestVariable,
+        setQuestVariable,
+        incrementQuestVariable,
+        cleanupQuestState,
     };
 }

@@ -1,5 +1,5 @@
 
-import { CombatStance, WeaponType, ActiveBuff, Monster, SkillName, MonsterStatusEffect, InventorySlot } from '../../../types';
+import { CombatStance, WeaponType, ActiveBuff, Monster, SkillName, MonsterStatusEffect, InventorySlot, MonsterType } from '../../../types';
 import { calculateAccuracy, DamageCalculationResult } from './combatUtils';
 
 export const calculateMeleeDamage = (
@@ -31,6 +31,9 @@ export const calculateMeleeDamage = (
         case WeaponType.Warhammer: playerAttackStyle = 'crush'; break;
         case WeaponType.Unarmed: playerAttackStyle = 'crush'; break;
         case WeaponType.Staff: playerAttackStyle = 'crush'; break;
+        case WeaponType.Whip: playerAttackStyle = 'slash'; break;
+        case WeaponType.Greatsword: playerAttackStyle = 'slash'; break;
+        case WeaponType.Spear: playerAttackStyle = 'stab'; break;
     }
 
     let attackBonus = 0;
@@ -53,25 +56,31 @@ export const calculateMeleeDamage = (
     const totalMonsterDefence = monster.defence + monsterDefenceBonus;
 
     const accuracyBuff = activeBuffs.find(b => b.type === 'accuracy_boost' && (b.style === 'melee' || b.style === 'all'));
-    const accuracy = calculateAccuracy(totalAttack, totalMonsterDefence, accuracyBuff?.value);
-    
-    if (Math.random() < accuracy) {
-        playerDamage = Math.floor(Math.random() * (playerMaxHit + 1));
+    let accuracy = calculateAccuracy(totalAttack, totalMonsterDefence, accuracyBuff?.value);
+
+    let finalMaxHit = playerMaxHit;
+    if (playerWeapon.type === WeaponType.Mace && monster.types?.includes(MonsterType.Armored)) {
+        accuracy *= 1.15;
+        finalMaxHit = Math.floor(finalMaxHit * 1.15);
+    }
+
+    if (Math.random() < Math.min(1.0, accuracy)) {
+        playerDamage = Math.floor(Math.random() * (finalMaxHit + 1));
         successfulHit = true;
     }
-    
+
     const flatDamageBuff = activeBuffs.find(b => b.type === 'flat_damage' && (b.style === 'all' || b.style === 'melee'));
     if (flatDamageBuff && successfulHit) {
         playerDamage += flatDamageBuff.value;
     }
-    
+
     const damageOnHitBuff = activeBuffs.find(b => b.type === 'damage_on_hit' && (b.style === 'all' || b.style === 'melee'));
     if (damageOnHitBuff && successfulHit) {
         playerDamage += damageOnHitBuff.value;
     }
 
-    const isMax = successfulHit && playerDamage > 0 && playerDamage === playerMaxHit && playerMaxHit >= 2;
-    
+    const isMax = successfulHit && playerDamage > 0 && playerDamage === finalMaxHit && finalMaxHit >= 2;
+
     if (playerDamage > 0) {
         xpGains[SkillName.Hitpoints] = (xpGains[SkillName.Hitpoints] || 0) + Math.round(playerDamage * 1.33);
         if (combatStance === CombatStance.Accurate) xpGains[SkillName.Attack] = (xpGains[SkillName.Attack] || 0) + playerDamage * 4;

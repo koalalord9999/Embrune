@@ -57,12 +57,14 @@ const ExportModal: React.FC<ExportModalProps> = ({ exportState, onClose }) => {
                     </div>
                 )}
                 
-                <p className="text-gray-300 mb-4 text-sm">Copy the text below and save it. This data represents changes you've made in developer mode.</p>
                 <textarea
                     readOnly
                     value={currentContent?.content || ''}
                     className="w-full h-96 bg-gray-900 border border-gray-500 rounded-md p-2 text-xs font-mono text-gray-300"
                 />
+                <div className="text-right text-[10px] text-gray-500 mt-1 uppercase tracking-wider font-bold">
+                    Character Count: <span className="text-yellow-500 font-mono">{currentContent?.content.length.toLocaleString() || 0}</span>
+                </div>
                 <div className="flex justify-between items-center gap-4 mt-4">
                     {paginatedData.length > 1 ? (
                         <div className="flex gap-2">

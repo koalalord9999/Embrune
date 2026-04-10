@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { AgilityState, SkillName, PlayerSkill, InventorySlot } from '../types';
-import { AGILITY_COURSES, SKILL_ICONS } from '../constants';
+import {  AGILITY_COURSES, SKILL_ICONS  } from '../constants';
 import { useCharacter } from './useCharacter';
 import { useInventory } from './useInventory';
 import { ActiveSingleAction } from './useUIState';
@@ -50,7 +50,7 @@ export const useAgility = (initialState: AgilityState, deps: AgilityDependencies
         }
     }, [agilityState.activeCourseId, addLog]);
 
-    const attemptObstacle = useCallback(() => {
+    const attemptObstacle = useCallback((xpMultiplier = 1, performance?: 'lightning' | 'fast' | 'steady') => {
         setIsResting(false);
         if (!agilityState.activeCourseId) {
             addLog("You are not on an agility course.");
@@ -71,49 +71,51 @@ export const useAgility = (initialState: AgilityState, deps: AgilityDependencies
             const isSuccess = obstacle.canFail === false || (() => {
                 let successChance = 80 + (playerAgility - obstacle.level) * 2;
                 successChance = Math.max(10, Math.min(95, successChance));
-                return Math.random() * 100 < successChance;
+                
+                // PERFORMANCE BONUS
+                let failChance = 100 - successChance;
+                if (performance === 'lightning') {
+                    failChance /= 2; // 2x reduction
+                } else if (performance === 'fast') {
+                    failChance /= 1.5; // 1.5x reduction
+                }
+                
+                const finalSuccessChance = 100 - failChance;
+                return Math.random() * 100 < finalSuccessChance;
             })();
 
             if (isSuccess) {
-                // Success
-                addXp(SkillName.Agility, obstacle.xp); // Only reward Agility vouchers from completing a course
+                // Success - ALWAYS reward obstacle XP
+                addXp(SkillName.Agility, Math.round(obstacle.xp * xpMultiplier));
+
+                // Determine if lap was completed
+                const isLapComplete = agilityState.currentObstacleIndex + 1 >= course.obstacles.length;
+                const newLaps = (agilityState.lapsCompleted[course.id] || 0) + (isLapComplete ? 1 : 0);
+
+                if (isLapComplete) {
+                    addXp(SkillName.Agility, Math.round(course.lapBonusXp * xpMultiplier));
+                    if (Math.random() < 0.10) { 
+                        modifyItem('agility_voucher', 1);
+                        addLog("As a testament to your Agility, an Agility Voucher appears in your inventory!");
+                    }
+                    
+                    if (course.energyRestore) {
+                        setRunEnergy(prevEnergy => Math.min(100, prevEnergy + course.energyRestore!));
+                        addLog(`Your run energy has been restored by ${course.energyRestore}!`);
+                    }
+
+                    addLog(`Lap complete! You have completed ${newLaps} laps on this course.`);
+                }
 
                 setAgilityState(prev => {
                     const newObstacleIndex = prev.currentObstacleIndex + 1;
                     if (newObstacleIndex >= course.obstacles.length) {
-                        // Lap completed
-                        addXp(SkillName.Agility, course.lapBonusXp);
-                            if (Math.random() < 0.10) { // 10% chance for Mark of Grace
-                            modifyItem('agility_voucher', 1);
-                            addLog("As a testament to your Agility, an Agility Aoucher appears in your inventory!");
-                            }
-                        
-                        if (course.energyRestore) {
-                            setRunEnergy(prevEnergy => Math.min(100, prevEnergy + course.energyRestore!));
-                            addLog(`Your run energy has been restored by ${course.energyRestore}!`);
-                        }
-
-                        const newLaps = (prev.lapsCompleted[course.id] || 0) + 1;
-                        addLog(`Lap complete! You have completed ${newLaps} laps on this course.`);
-                        
-                        const newLapsCompleted = { ...prev.lapsCompleted, [course.id]: newLaps };
-
                         const lastObstacle = course.obstacles[course.obstacles.length - 1];
                         if (lastObstacle.successPoiId) {
                             navigation.handleForcedNavigate(lastObstacle.successPoiId);
-                            // Set active course to null, but preserve lap counts
-                            return { 
-                                ...prev, 
-                                activeCourseId: null, 
-                                currentObstacleIndex: 0, 
-                                lapsCompleted: newLapsCompleted 
-                            };
+                            return { ...prev, activeCourseId: null, currentObstacleIndex: 0, lapsCompleted: { ...prev.lapsCompleted, [course.id]: newLaps } };
                         } else {
-                             return { 
-                                ...prev, 
-                                currentObstacleIndex: 0, 
-                                lapsCompleted: newLapsCompleted
-                            };
+                            return { ...prev, currentObstacleIndex: 0, lapsCompleted: { ...prev.lapsCompleted, [course.id]: newLaps } };
                         }
                     } else {
                         return { ...prev, currentObstacleIndex: newObstacleIndex };

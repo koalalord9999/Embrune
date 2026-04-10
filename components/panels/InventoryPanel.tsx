@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { InventorySlot, PlayerSkill, Item, Spell, Equipment } from '../../types';
-import { INVENTORY_CAPACITY } from '../../constants';
+import {  INVENTORY_CAPACITY  } from '../../constants';
 import { ConfirmationPrompt, ContextMenuState, MakeXPrompt, useUIState } from '../../hooks/useUIState';
 import InventorySlotDisplay from './InventorySlot';
 

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { DialogueAction, DialogueCheckRequirement, WorldState, InventorySlot, BankTab, ActivePanel, POIActivity, DialogueResponse, SkillName, ActiveTutorialState, LogEntry } from '../types';
-import { INVENTORY_CAPACITY, QUESTS, ITEMS } from '../constants';
+import {  INVENTORY_CAPACITY, QUESTS, ITEMS  } from '../constants';
 import { useQuests } from './useQuests';
 import { useQuestLogic } from './useQuestLogic';
 import { useNavigation } from './useNavigation';
@@ -11,6 +11,7 @@ import { useRepeatableQuests } from './useRepeatableQuests';
 import { useUIState } from './useUIState';
 import { POIS } from '../data/pois';
 import { useGameSession } from './useGameSession';
+import { useSlayer } from './useSlayer';
 
 const TANNING_RECIPES: Record<string, { leatherId: string; cost: number }> = {
     'cowhide': { leatherId: 'leather', cost: 5 },
@@ -39,10 +40,11 @@ interface DialogueActionDependencies {
     setWorldState: React.Dispatch<React.SetStateAction<WorldState>>;
     session: ReturnType<typeof useGameSession>;
     setIsResting: React.Dispatch<React.SetStateAction<boolean>>;
+    slayer: ReturnType<typeof useSlayer>;
 }
 
 export const useDialogueActions = (deps: DialogueActionDependencies) => {
-    const { quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session } = deps;
+    const { quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session, slayer } = deps;
     const { setActiveDialogue } = ui;
 
     const handleDialogueCheck = useCallback((requirements: DialogueCheckRequirement[]): boolean => {
@@ -51,7 +53,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                 case 'items':
                     return req.items.every(itemReq => {
                         const totalQuantity = inv.inventory.reduce((acc, slot) => {
-                            if (slot && slot.itemId === itemReq.itemId) {
+                            if (slot && slot.itemId === itemReq.itemId && !slot.noted) {
                                 // If nameOverride is required, check it.
                                 if (itemReq.nameOverride) {
                                     if (slot.nameOverride === itemReq.nameOverride) {
@@ -89,16 +91,31 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                             return worldState.windmillFlour === req.value;
                         }
                     }
-                    if (req.property === 'monolithFire') {
-                        // Check if fire exists and is not expired
-                        const fireExists = !!worldState.monolithFire && worldState.monolithFire.expiresAt > Date.now();
-                        return fireExists === req.value;
+                    if (req.property === 'monolithFire' || req.property === 'monolithFires') {
+                        const fires = worldState.monolithFires || {};
+                        const now = Date.now();
+                        const anyFireExists = Object.values(fires).some(f => f.expiresAt > now);
+                        return anyFireExists === req.value;
+                    }
+                    if (req.property.startsWith('monolith_pit_')) {
+                        const fires = worldState.monolithFires || {};
+                        const now = Date.now();
+                        const fire = fires[req.property];
+                        const exists = !!fire && fire.expiresAt > now;
+                        
+                        if (req.value === 'feywood_logs') {
+                            return exists && fire?.logType === 'feywood_logs';
+                        }
+                        if (req.value === 'normal_logs') {
+                            return exists && fire?.logType !== 'feywood_logs' && fire?.logType !== 'none';
+                        }
+                        return exists === req.value;
                     }
                     if (req.property === 'monolithLogType') {
-                        const fire = worldState.monolithFire;
-                        if (!fire || fire.expiresAt <= Date.now()) return false; // No active fire
-                        // Only 'eq' makes sense here
-                        return fire.logType === req.value;
+                        const fires = worldState.monolithFires || {};
+                        const now = Date.now();
+                        const hasMatchingLog = Object.values(fires).some(f => f.logType === req.value && f.expiresAt > now);
+                        return hasMatchingLog;
                     }
                     return false;
                 case 'quest':
@@ -122,6 +139,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     }
                     return false; // Should not be reached
                 // FIX: Added new check type for quest-specific variables.
+                // FIX: Added new check type for quest-specific variables.
                 case 'variable': {
                     const variableValue = (questLogic as any).getQuestVariable(req.name) ?? 0;
                     switch (req.operator) {
@@ -131,9 +149,61 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         default: return false;
                     }
                 }
+                case 'quest_requirements': {
+                    const questData = QUESTS[req.questId];
+                    if (!questData?.requirements) return true;
+                    
+                    const { skills: reqSkills = [], quests: reqQuests = [] } = questData.requirements;
+                    
+                    const skillsMet = reqSkills.every(sReq => {
+                        const playerSkill = char.skills.find(s => s.name === sReq.skill);
+                        return playerSkill && playerSkill.level >= sReq.level;
+                    });
+                    
+                    const questsMet = reqQuests.every(qId => {
+                        const playerQuest = quests.playerQuests.find(q => q.questId === qId);
+                        return !!playerQuest && playerQuest.isComplete;
+                    });
+                    
+                    return skillsMet && questsMet;
+                }
+                case 'slayer_credits': {
+                    const credits = slayer.slayerCredits;
+                    const operator = req.operator ?? 'gte';
+                    switch (operator) {
+                        case 'gte': return credits >= req.amount;
+                        case 'lt': return credits < req.amount;
+                        case 'eq': return credits === req.amount;
+                        default: return credits >= req.amount;
+                    }
+                }
+                case 'slayer_task': {
+                    const task = slayer.slayerTask;
+                    const operator = req.operator ?? 'eq';
+                    
+                    if (req.status === 'none') {
+                        return operator === 'eq' ? !task : !!task;
+                    }
+                    
+                    if (!task) return operator === 'ne';
+
+                    if (req.status === 'active') {
+                        const masterMatch = req.masterId ? task.masterId === req.masterId : true;
+                        const result = !task.isComplete && masterMatch;
+                        return operator === 'eq' ? result : !result;
+                    }
+                    
+                    if (req.status === 'complete') {
+                        const result = task.isComplete;
+                        return operator === 'eq' ? result : !result;
+                    }
+                    
+                    return false;
+                }
             }
+            return true;
         });
-    }, [inv, char, worldState, quests.playerQuests, questLogic]);
+    }, [inv, char, worldState, quests.playerQuests, questLogic, slayer]);
 
     const handleDialogueAction = useCallback((actions: DialogueAction[]) => {
         for (const action of actions) {
@@ -158,8 +228,8 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         }
                         // Always succeeds, even if 0 items are taken.
                     } else {
-                        if (inv.hasItems([{ itemId: action.itemId, quantity: quantity }])) {
-                            inv.modifyItem(action.itemId, -quantity, true);
+                        if (inv.hasItems([{ itemId: action.itemId, quantity: quantity, nameOverride: action.nameOverride }])) {
+                            inv.modifyItem(action.itemId, -quantity, true, { nameOverride: action.nameOverride });
                         } else {
                             const item = ITEMS[action.itemId];
                             const itemName = item ? item.name : 'the required item';
@@ -353,14 +423,13 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     (questLogic as any).incrementQuestVariable(action.name, action.amount);
                     break;
                 }
-                case 'start_destruction_trial_heat': {
-                    if (inv.coins < 15000) {
-                        addLog("You don't have enough coins.");
-                        success = false;
-                        break;
-                    }
-                    inv.modifyItem('coins', -15000, true);
-                    inv.modifyItem('unstable_core', -1, true);
+                case 'tst_start_heat_trial_slow': {
+                    // Remove ANY existing core to prevent duplication
+                    inv.inventory.forEach(slot => {
+                        if (slot && slot.itemId === 'unstable_core') {
+                            inv.modifyItem('unstable_core', -slot.quantity, true, { nameOverride: slot.nameOverride });
+                        }
+                    });
                     setWorldState(ws => ({
                         ...ws,
                         destructionTrialProgress: {
@@ -369,16 +438,121 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                             heatEndTime: Date.now() + 120000 // 2 minutes
                         }
                     }));
-                    addLog("You hand the unstable core and 15,000 coins to Durin. He nods grimly and tells his apprentices to get the tongs. This will take about two minutes.");
+                    addLog("You hand the unstable core to Durin's apprentices. They carefully place it near the central anvil and begin the work.");
                     break;
                 }
+                case 'restore_unstable_core': {
+                    const playerQuest = quests.playerQuests.find(q => q.questId === 'the_sorcerers_trial');
+                    if (playerQuest && playerQuest.currentStage >= 13) {
+                        inv.modifyItem('core_of_controlled_destruction', 1, false, { bypassAutoBank: true });
+                    } else {
+                        const progress = worldState.destructionTrialProgress;
+                        const trials = [];
+                        if (progress?.heat === 'completed') trials.push('Heat');
+                        if (progress?.pressure === 'completed') trials.push('Pressure');
+                        if (progress?.silence === 'completed') trials.push('Silence');
+                        
+                        const nameOverride = trials.length === 0 ? undefined : `Unstable Core (${trials.join(', ')})`;
+                        inv.modifyItem('unstable_core', 1, false, { bypassAutoBank: true, nameOverride });
+                    }
+                    break;
+                }
+                case 'reset_destruction_trial': {
+                    setWorldState(ws => ({
+                        ...ws,
+                        destructionTrialProgress: {
+                            heat: undefined,
+                            pressure: undefined,
+                            silence: undefined,
+                            heatEndTime: undefined,
+                            pressureStartTime: undefined,
+                            silenceStartTime: undefined
+                        }
+                    }));
+                    inv.modifyItem('unstable_core', 1, false, { bypassAutoBank: true });
+                    break;
+                }
+                case 'instant_heat_temper': {
+                    if (inv.coins < 15000) {
+                        addLog("You don't have enough coins.");
+                        success = false;
+                        break;
+                    }
+                    inv.modifyItem('coins', -15000, true);
+                    
+                    // Remove ANY existing core to prevent duplication
+                    inv.inventory.forEach(slot => {
+                        if (slot && slot.itemId === 'unstable_core') {
+                            inv.modifyItem('unstable_core', -slot.quantity, true, { nameOverride: slot.nameOverride });
+                        }
+                    });
+
+                    setWorldState(ws => {
+                        const newProgress = { ...ws.destructionTrialProgress, heat: 'completed' as const };
+                        const newState = { ...ws, destructionTrialProgress: newProgress };
+                        
+                        const trials = [];
+                        if (newProgress.heat === 'completed') trials.push('Heat');
+                        if (newProgress.pressure === 'completed') trials.push('Pressure');
+                        if (newProgress.silence === 'completed') trials.push('Silence');
+                        
+                        if (newProgress.heat === 'completed' && newProgress.pressure === 'completed' && newProgress.silence === 'completed') {
+                            inv.modifyItem('tempered_core', 1, false, { bypassAutoBank: true });
+                            addLog("The unstable core has been fully tempered. Durin's apprentices hand you the finished product.");
+                        } else {
+                            const nameOverride = `Unstable Core (${trials.join(', ')})`;
+                            inv.modifyItem('unstable_core', 1, false, { bypassAutoBank: true, nameOverride });
+                            addLog("The unstable core has been instantly tempered by Durin's master smiths.");
+                        }
+                        
+                        return newState;
+                    });
+                    break;
+                }
+                case 'cleanup_quest_state': {
+                    questLogic.cleanupQuestState(action.questId);
+                    break;
+                }
+                case 'light_monolith_fire': {
+                    setWorldState(ws => ({
+                        ...ws,
+                        monolithFires: {
+                            ...(ws.monolithFires || {}),
+                            [action.pitId]: {
+                                logType: action.logType,
+                                expiresAt: Date.now() + 120000 // 2 minutes
+                            }
+                        }
+                    }));
+                    addLog(`You light the fire pit with ${ITEMS[action.logType]?.name || 'logs'}.`);
+                    break;
+                }
+                case 'show_quest_info': {
+                    ui.setActivePanel('quests');
+                    ui.setActiveQuestDetail({
+                        questId: action.questId,
+                        playerQuests: quests.playerQuests,
+                        skills: char.skills.map(s => ({ skill: s.name, level: s.level })),
+                        combatLevel: char.combatLevel
+                    });
+                    break;
+                }
+                case 'slayer_get_task':
+                    slayer.handleSlayerMasterInteraction(action.masterId);
+                    break;
+                case 'slayer_reset_task':
+                    slayer.resetTask(action.masterId);
+                    break;
+                case 'slayer_open_shop':
+                    slayer.openSlayerShop();
+                    break;
             }
 
             if (!success) {
                 break; // Stop processing subsequent actions in this chain.
             }
         }
-    }, [quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session.currentPoiId]);
+    }, [quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session.currentPoiId, slayer]);
 
     const onResponse = useCallback((response: DialogueResponse) => {
         if (response.check) {
@@ -390,12 +564,18 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                 if (response.actions) {
                     handleDialogueAction(response.actions);
                 }
+            } else {
+                if (response.failureActions) {
+                    handleDialogueAction(response.failureActions);
+                }
             }
 
             if (nextNodeKey !== undefined && nextNodeKey !== '') {
                 setActiveDialogue(prev => prev ? { ...prev, currentNodeKey: nextNodeKey } : null);
             } else if (nextNodeKey === '') {
                 // Do nothing, let the check act as a filter.
+            } else if (response.next) {
+                setActiveDialogue(prev => prev ? { ...prev, currentNodeKey: response.next! } : null);
             } else {
                 // Default to closing dialogue if no specific branch is provided (e.g. simple visibility gating)
                 setActiveDialogue(null);

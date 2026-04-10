@@ -13,10 +13,18 @@ export const useChat = (username: string) => {
     blockedUsersRef.current = blockedUsers;
   }, [blockedUsers]);
 
+  const getBackendUrl = () => {
+    let url = import.meta.env.VITE_BACKEND_URL || window.location.origin;
+    if (url && !url.startsWith('http') && !url.startsWith('https') && !url.startsWith('/')) {
+      return `https://${url}`;
+    }
+    return url;
+  };
+
   useEffect(() => {
     pusherRef.current = new Pusher(import.meta.env.VITE_PUSHER_KEY || '', {
       cluster: import.meta.env.VITE_PUSHER_CLUSTER || '',
-      authEndpoint: `${import.meta.env.VITE_BACKEND_URL || window.location.origin}/.netlify/functions/pusher-auth`,
+      authEndpoint: `${getBackendUrl()}/.netlify/functions/pusher-auth`,
       auth: {
         params: { username }
       }
@@ -114,8 +122,7 @@ export const useChat = (username: string) => {
     }
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
-      const response = await fetch(`${backendUrl}/.netlify/functions/chat`, {
+      const response = await fetch(`${getBackendUrl()}/.netlify/functions/chat`, {
         method: 'POST',
         body: JSON.stringify({ username, message: messageContent, type, recipient }),
       });
@@ -133,8 +140,7 @@ export const useChat = (username: string) => {
 
   const announceLogin = async (username: string) => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
-      await fetch(`${backendUrl}/.netlify/functions/chat`, {
+      await fetch(`${getBackendUrl()}/.netlify/functions/chat`, {
         method: 'POST',
         body: JSON.stringify({ username, message: `${username} has logged in.`, type: 'system' }),
       });
@@ -145,8 +151,7 @@ export const useChat = (username: string) => {
 
   const announceLogout = async (username: string) => {
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
-      await fetch(`${backendUrl}/.netlify/functions/chat`, {
+      await fetch(`${getBackendUrl()}/.netlify/functions/chat`, {
         method: 'POST',
         body: JSON.stringify({ username, message: `${username} has logged out.`, type: 'system' }),
       });

@@ -46,8 +46,8 @@ export const oakhavenPois: Record<string, POI> = {
         activities: [
             { type: 'wishing_well' },
             { type: 'water_source', name: 'Collect Water' },
-            { type: 'npc', name: 'Man', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Man', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_oakhaven_citizen' } },
-            { type: 'npc', name: 'Woman', icon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', dialogue: { start: { npcName: 'Woman', npcIcon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_oakhaven_citizen' } },
+            { type: 'npc', name: 'Man', icon: 'person', dialogue: { start: { npcName: 'Man', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_oakhaven_citizen' } },
+            { type: 'npc', name: 'Woman', icon: 'woman-elf-face', dialogue: { start: { npcName: 'Woman', npcIcon: 'woman-elf-face', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_oakhaven_citizen' } },
             {
                 type: 'npc',
                 name: 'Craftsman',
@@ -79,11 +79,11 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Altar',
-                icon: 'https://api.iconify.design/game-icons:altar.svg',
+                icon: 'altar',
                 dialogue: {
                     start: {
                         npcName: 'Altar',
-                        npcIcon: 'https://api.iconify.design/game-icons:altar.svg',
+                        npcIcon: 'altar',
                         text: 'You feel a divine presence. Your prayer may be answered here.',
                         responses: [
                             { text: 'Pray', actions: [{ type: 'restore_prayer' }] },
@@ -117,7 +117,7 @@ export const oakhavenPois: Record<string, POI> = {
         id: 'oakhaven_crafting_district',
         name: 'Crafting District',
         description: 'The sound of work fills the air here. Tanning racks and workbenches line the street, leading to various artisan shops.',
-        connections: ['oakhaven_square', 'oakhaven_crafting_supplies', 'tanner_svens_shop', 'oakhaven_west_gate', 'oakhaven_herblore_shop', 'oakhaven_artisans_quarter', 'oakhaven_rooftop_access'],
+        connections: ['oakhaven_square', 'oakhaven_crafting_supplies', 'tanner_svens_shop', 'oakhaven_west_gate', 'oakhaven_herblore_shop', 'oakhaven_artisans_quarter'],
         activities: [],
         regionId: 'oakhaven',
         x: 190, y: 160,
@@ -127,7 +127,7 @@ export const oakhavenPois: Record<string, POI> = {
         id: 'oakhaven_artisans_quarter',
         name: 'Oakhaven Artisan\'s Quarter',
         description: 'A quieter section of the district where master craftsmen have their workshops. The smell of oiled wood and hemp rope is strong here.',
-        connections: ['oakhaven_crafting_district', 'oakhaven_woodworkers_shop'],
+        connections: ['oakhaven_crafting_district', 'oakhaven_woodworkers_shop', 'oakhaven_rooftop_access'],
         activities: [
             {
                 type: 'npc',
@@ -322,20 +322,20 @@ export const oakhavenPois: Record<string, POI> = {
                 conditionalGreetings: [
                     // AN ECHO OF BATTLE (HIGHEST PRIORITY)
                     { text: "Thank you again, my friend. It's... quieter now. In my head.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'completed' }] } },
-                    { text: "Have you uncovered any information about the barrow?", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 1 }] }},
-                    { text: "Have you uncovered any information about the barrow?", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 0 }] }},
+                    { text: "Have you uncovered any information about the barrow?", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 1 }] } },
+                    { text: "Have you uncovered any information about the barrow?", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 0 }] } },
                     { text: "The barrow seal is weakening. I knew it. What are you waiting for? Take the key to Valerius!", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 2 }] } },
                     { text: "Have you reforged the key yet?", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 3 }] } },
                     { text: "You have the reforged key? Then what are you doing here? Get to the barrow!", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 5 }] } },
                     { text: "The seal is broken? Don't keep it waiting. End this.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 6 }] } },
                     { text: "You've returned, what news do you have?", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 7 }] } },
-                    
+
                     // ART OF THE WARHAMMER (LOWER PRIORITY)
                     { text: "Still here? Valerius isn't getting any younger. You'll find him at the smithy in Meadowdale.", check: { requirements: [{ type: 'quest', questId: 'art_of_the_warhammer', status: 'in_progress', stage: 0 }] } },
                     { text: "Have you forged that warhammer yet? The anvil awaits!", check: { requirements: [{ type: 'quest', questId: 'art_of_the_warhammer', status: 'in_progress', stage: 1 }] } },
                     { text: "Let's see that hammer you've made, then. Show it to me.", check: { requirements: [{ type: 'quest', questId: 'art_of_the_warhammer', status: 'in_progress', stage: 2 }] } },
                     // ART OF THE WARHAMMER POSTQUEST
-                    { text: "(Bronn finishes his mug of ale with a troubled look on his face) Ahhh, hello again adventurer... Nice to see a proper smith around here. How's the hammer holding up?", check: { requirements: [{ type: 'quest', questId: 'art_of_the_warhammer', status: 'completed' }, { type: 'quest', questId: 'an_echo_of_battle', status: 'not_started'}] } },
+                    { text: "(Bronn finishes his mug of ale with a troubled look on his face) Ahhh, hello again adventurer... Nice to see a proper smith around here. How's the hammer holding up?", check: { requirements: [{ type: 'quest', questId: 'art_of_the_warhammer', status: 'completed' }, { type: 'quest', questId: 'an_echo_of_battle', status: 'not_started' }] } },
                 ],
 
                 dialogue: {
@@ -398,7 +398,7 @@ export const oakhavenPois: Record<string, POI> = {
         id: 'oakhaven_rooftop_access',
         name: 'Rooftop Access',
         description: 'A stack of lumber and discarded barrels provides a convenient way up to the rooftops of the crafting district.',
-        connections: ['oakhaven_crafting_district'],
+        connections: ['oakhaven_artisans_quarter'],
         activities: [
             { type: 'start_agility_course', name: "Start Artisan's Run (Lvl 12)", courseId: 'oakhaven_artisans_run' },
         ],

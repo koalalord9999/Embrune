@@ -1,12 +1,18 @@
 import { useState, useCallback } from 'react';
 import { PlayerSlayerTask, SkillName, PlayerQuestState, QuestId, InventorySlot } from '../types';
-import { MONSTERS } from '../constants';
+import {  MONSTERS  } from '../constants';
 
 interface SlayerDependencies {
     addLog: (message: string) => void;
     addXp: (skill: SkillName, amount: number) => void;
     modifyItem: (itemId: string, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean; }) => void;
     combatLevel: number;
+    slayerLevel: number;
+    slayerCredits: number;
+    slayerTaskStreak: number;
+    setSlayerCredits: (credits: number) => void;
+    setSlayerTaskStreak: (streak: number) => void;
+    setActiveShopId: (shopId: string | null) => void;
 }
 
 interface SlayerAssignment {
@@ -77,11 +83,60 @@ const SLAYER_MONSTERS_BY_LEVEL: Record<number, SlayerAssignment[]> = {
     ],
 };
 
+// Regional monsters for Ravindra's bias (Sunscorched Wastes, Salt Flats, Volcanic Steam Vents)
+const RAVINDRA_REGIONAL_MONSTERS: string[] = [
+    // Sunscorched Wastes
+    'sand_scrabbler', 'dune_stalker', 'sunstone_scorpion', 'desert_nomad', 'canyon_basilisk', 'oasis_croc', 'sand_wyrm',
+    // Salt Flats
+    'salt_flat_skitterer', 'salt_leaper', 'salt_preserved_vulture', 'brine_elemental', 'crystalline_tortoise',
+    'crystal_scuttler', 'mirage_weaver', 'salt_cryst_golem', 'salt_wraith', 'ancient_ammonite',
+    // Volcanic Steam Vents
+    'fire_fiend', 'magma_imp', 'lesser_incubus', 'greater_incubus', 'succubus',
+    'emberscale_dragon', 'deathscythe', 'blazing_efreeti',
+    // Fouthia
+    'sunscale_serpent',
+];
 
-const getAssignableMonsters = (combatLevel: number, playerQuests: PlayerQuestState[]): string[] => {
+interface SlayerMasterConfig {
+    name: string;
+    minQuantity: number;
+    maxQuantity: number;
+    maxTaskCountMultiplier: number;
+    regionalBias?: string[];
+    requiredSlayerLevel: number;
+    creditsPerTask: number;
+}
+
+const SLAYER_MASTERS: Record<string, SlayerMasterConfig> = {
+    kaelen: {
+        name: 'Kaelen',
+        minQuantity: 10,
+        maxQuantity: 40,
+        maxTaskCountMultiplier: 1,
+        requiredSlayerLevel: 1,
+        creditsPerTask: 5,
+    },
+    ravindra: {
+        name: 'Ravindra',
+        minQuantity: 50,
+        maxQuantity: 100,
+        maxTaskCountMultiplier: 2,
+        regionalBias: RAVINDRA_REGIONAL_MONSTERS,
+        requiredSlayerLevel: 40,
+        creditsPerTask: 10,
+    },
+};
+
+
+const getAssignableMonsters = (combatLevel: number, playerQuests: PlayerQuestState[], masterId: string = 'kaelen', maxCombatLevelOverride?: number): string[] => {
     let available: string[] = [];
+    const master = SLAYER_MASTERS[masterId];
+    
+    // Determine the effective combat level for monster selection
+    const effectiveCombatLevel = maxCombatLevelOverride !== undefined ? Math.min(combatLevel, maxCombatLevelOverride) : combatLevel;
+
     for (const level in SLAYER_MONSTERS_BY_LEVEL) {
-        if (combatLevel >= parseInt(level)) {
+        if (effectiveCombatLevel >= parseInt(level)) {
             const assignments = SLAYER_MONSTERS_BY_LEVEL[level as any];
             for (const assignment of assignments) {
                 if (assignment.questReq) {
@@ -105,16 +160,41 @@ const getAssignableMonsters = (combatLevel: number, playerQuests: PlayerQuestSta
             }
         }
     }
-    return available.length > 0 ? available : SLAYER_MONSTERS_BY_LEVEL[1].map(a => a.monsterId);
+    
+    if (available.length === 0) {
+        available = SLAYER_MONSTERS_BY_LEVEL[1].map(a => a.monsterId);
+    }
+    
+    // Apply regional bias: add extra copies of regional monsters so they're picked more often
+    if (master?.regionalBias) {
+        const regionalAvailable = available.filter(id => master.regionalBias!.includes(id));
+        // Add 3 extra copies of each regional monster to heavily bias the pool
+        for (let i = 0; i < 3; i++) {
+            available = available.concat(regionalAvailable);
+        }
+    }
+    
+    return available;
 };
 
 
 export const useSlayer = (initialTask: PlayerSlayerTask | null, playerQuests: PlayerQuestState[], deps: SlayerDependencies) => {
     const [slayerTask, setSlayerTask] = useState<PlayerSlayerTask | null>(initialTask);
-    const { addLog, addXp, modifyItem, combatLevel } = deps;
+    const { addLog, addXp, modifyItem, combatLevel, slayerLevel, slayerCredits, slayerTaskStreak, setSlayerCredits, setSlayerTaskStreak, setActiveShopId } = deps;
 
-    const getTask = useCallback(() => {
-        const assignable = getAssignableMonsters(combatLevel, playerQuests);
+    const getTask = useCallback((masterId: string = 'kaelen', bypassStreakReset: boolean = false, maxCombatLevelOverride?: number) => {
+        const master = SLAYER_MASTERS[masterId] ?? SLAYER_MASTERS.kaelen;
+        
+        // Reset streak if transitioning to a lower level master (easier task)
+        if (!bypassStreakReset && slayerTask && slayerTask.masterId !== masterId) {
+            const currentMaster = SLAYER_MASTERS[slayerTask.masterId] || SLAYER_MASTERS.kaelen;
+            if (master.requiredSlayerLevel < currentMaster.requiredSlayerLevel) {
+                setSlayerTaskStreak(0);
+                addLog(`You ask ${master.name} for an easier mission. Your task streak has been reset to 0.`);
+            }
+        }
+
+        const assignable = getAssignableMonsters(combatLevel, playerQuests, masterId, maxCombatLevelOverride);
         const monsterId = assignable[Math.floor(Math.random() * assignable.length)];
         const monster = MONSTERS[monsterId];
         
@@ -122,9 +202,9 @@ export const useSlayer = (initialTask: PlayerSlayerTask | null, playerQuests: Pl
         if (monster.maxTaskCount) {
             const [min, max] = monster.maxTaskCount;
             requiredCount = Math.floor(Math.random() * (max - min + 1)) + min;
+            requiredCount = Math.floor(requiredCount * master.maxTaskCountMultiplier);
         } else {
-            const baseCount = 10;
-            requiredCount = Math.floor(baseCount + Math.random() * 10) + Math.floor(combatLevel / 5);
+            requiredCount = Math.floor(master.minQuantity + Math.random() * (master.maxQuantity - master.minQuantity + 1)) + Math.floor(combatLevel / 5);
         }
 
         const newTask: PlayerSlayerTask = {
@@ -132,81 +212,165 @@ export const useSlayer = (initialTask: PlayerSlayerTask | null, playerQuests: Pl
             requiredCount,
             progress: 0,
             isComplete: false,
+            masterId,
         };
         setSlayerTask(newTask);
-        addLog(`Your new slayer task is to kill ${requiredCount} ${monster.name}s.`);
-    }, [addLog, combatLevel, playerQuests]);
+        addLog(`${master.name} assigns you a task: kill ${requiredCount} ${monster.name}s.`);
+    }, [addLog, combatLevel, playerQuests, slayerTask]);
 
-    const handleSlayerMasterInteraction = useCallback(() => {
+    const handleSlayerMasterInteraction = useCallback((masterId: string = 'kaelen') => {
+        const master = SLAYER_MASTERS[masterId] ?? SLAYER_MASTERS.kaelen;
+        if (slayerLevel < master.requiredSlayerLevel) {
+            addLog(`${master.name} looks you over dismissively. "Come back when you have reached Slayer level ${master.requiredSlayerLevel}. You are not ready for the hunts I offer."`);
+            return;
+        }
+
         if (!slayerTask) {
-            getTask();
+            getTask(masterId);
         } else if (slayerTask.isComplete) {
+            // Milestone Multipliers
+            const newStreak = slayerTaskStreak + 1;
+            setSlayerTaskStreak(newStreak);
+
+            let multiplier = 1;
+            if (newStreak % 100 === 0) multiplier = 25;
+            else if (newStreak % 50 === 0) multiplier = 10;
+            else if (newStreak % 10 === 0) multiplier = 5;
+
+            const baseCredits = master.creditsPerTask || 5;
+            const awardedCredits = baseCredits * multiplier;
+            const totalCredits = slayerCredits + awardedCredits;
+            setSlayerCredits(totalCredits);
+
+            // Log completion with credits
+            addLog(`You have completed your task. ${awardedCredits} Credits awarded, bringing you to ${totalCredits} credits.`);
+
+            // Original coin reward
             const monster = MONSTERS[slayerTask.monsterId];
             const coinReward = Math.floor(monster.level * slayerTask.requiredCount * 1.5);
-            
             if (coinReward > 0) {
-                addLog(`You report your success to Kaelen. Well done! You've earned ${coinReward} coins for your efforts.`);
+                addLog(`Well done! You've also earned ${coinReward} coins for your efforts.`);
                 modifyItem('coins', coinReward);
-            } else {
-                addLog(`You report your success to Kaelen. Well done!`);
             }
             
             setSlayerTask(null);
-            // Chain into getting a new task
-            getTask();
+            // Chain into getting a new task from this master
+            getTask(masterId, true);
         } else {
             const monster = MONSTERS[slayerTask.monsterId];
             const remaining = slayerTask.requiredCount - slayerTask.progress;
-            addLog(`Kaelen tells you: "You still need to slay ${remaining} more ${monster.name}s."`);
+            addLog(`${master.name} tells you: "You still need to slay ${remaining} more ${monster.name}s."`);
         }
-    }, [slayerTask, getTask, addLog, modifyItem]);
+    }, [slayerTask, getTask, addLog, modifyItem, slayerCredits, slayerTaskStreak, setSlayerCredits, setSlayerTaskStreak, slayerLevel]);
+
+    const resetTask = useCallback((masterId: string) => {
+        if (!slayerTask) return;
+        
+        const master = SLAYER_MASTERS[masterId] || SLAYER_MASTERS.kaelen;
+        const currentMaster = SLAYER_MASTERS[slayerTask.masterId] || SLAYER_MASTERS.kaelen;
+
+        // "Easier task" reset (no cost, resets streak)
+        if (master.requiredSlayerLevel < currentMaster.requiredSlayerLevel) {
+            setSlayerTaskStreak(0);
+            setSlayerTask(null);
+            addLog(`${master.name} sighs. "Fine, I'll give you something simpler. Your streak has been reset."`);
+            getTask(masterId, true, 20); // Force level 1-20 range for easier tasks
+            return;
+        }
+
+        // Paid reset (20 credits, no streak penalty)
+        if (slayerCredits < 20) {
+            addLog("You don't have enough Slayer Credits to reset your task. (Cost: 20)");
+            return;
+        }
+
+        setSlayerCredits(slayerCredits - 20);
+        setSlayerTask(null);
+        addLog(`Task reset for 20 Slayer Credits. You now have ${slayerCredits - 20} credits remaining.`);
+    }, [slayerTask, slayerCredits, setSlayerCredits, setSlayerTaskStreak, addLog]);
+
+    const expandTask = useCallback(() => {
+        if (!slayerTask || slayerTask.isComplete) return false;
+        if (slayerTask.progress > 0) {
+            addLog("You can only expand a task before you have started killing the target.");
+            return false;
+        }
+        
+        const newCount = slayerTask.requiredCount * 2;
+        setSlayerTask({ ...slayerTask, requiredCount: newCount });
+        addLog(`Task expanded! You now need to slay ${newCount} ${MONSTERS[slayerTask.monsterId].name}s.`);
+        return true;
+    }, [slayerTask, addLog]);
+
+    const shrinkTask = useCallback(() => {
+        if (!slayerTask || slayerTask.isComplete) return false;
+        if (slayerTask.progress > 0) {
+            addLog("You can only shrink a task before you have started killing the target.");
+            return false;
+        }
+        
+        setSlayerTask({ ...slayerTask, requiredCount: 5 });
+        addLog(`Task shrunk! You only need to slay 5 ${MONSTERS[slayerTask.monsterId].name}s.`);
+        return true;
+    }, [slayerTask, addLog]);
+
+    const openSlayerShop = useCallback(() => {
+        setActiveShopId('slayer_master_shop');
+    }, [setActiveShopId]);
     
     const checkKill = useCallback((monsterId: string) => {
-        setSlayerTask(prev => {
-            if (prev && !prev.isComplete) {
-                let taskMatches = false;
-                const taskMonsterId = prev.monsterId;
+        if (!slayerTask || slayerTask.isComplete) return;
 
-                // Direct match check
-                if (taskMonsterId === monsterId) {
+        let taskMatches = false;
+        const taskMonsterId = slayerTask.monsterId;
+
+        // Direct match check
+        if (taskMonsterId === monsterId) {
+            taskMatches = true;
+        } else {
+            // Generic type match check
+            const genericTypes = ['goblin', 'wyvern', 'golem', 'skeletal', 'wyrm', 'zombie', 'bear', 'wolf', 'spider'];
+            for (const type of genericTypes) {
+                if (taskMonsterId.includes(type) && monsterId.includes(type)) {
                     taskMatches = true;
-                } else {
-                    // Generic type match check
-                    const genericTypes = ['goblin', 'wyvern', 'golem', 'skeletal', 'wyrm', 'zombie', 'bear', 'wolf', 'spider'];
-                    for (const type of genericTypes) {
-                        if (taskMonsterId.includes(type) && monsterId.includes(type)) {
-                            taskMatches = true;
-                            break;
-                        }
-                    }
-                }
-                
-                if (taskMatches) {
-                    const monster = MONSTERS[monsterId];
-                    if (monster) {
-                        const xpReward = monster.maxHp;
-                        addXp(SkillName.Slayer, xpReward);
-                    }
-
-                    const newProgress = prev.progress + 1;
-                    if (newProgress >= prev.requiredCount) {
-                        addLog(`You have completed your slayer task! Return to a Slayer Master for a new one.`);
-                        return { ...prev, progress: newProgress, isComplete: true };
-                    } else {
-                        const taskMonsterName = MONSTERS[prev.monsterId]?.name || 'monsters';
-                        addLog(`Task progress: ${newProgress}/${prev.requiredCount} ${taskMonsterName}s defeated.`);
-                    }
-                    return { ...prev, progress: newProgress };
+                    break;
                 }
             }
-            return prev;
-        });
-    }, [addLog, addXp]);
+        }
+        
+        if (taskMatches) {
+            const monster = MONSTERS[monsterId];
+            if (monster) {
+                const xpReward = monster.maxHp;
+                addXp(SkillName.Slayer, xpReward);
+            }
+
+            const newProgress = slayerTask.progress + 1;
+            const isComplete = newProgress >= slayerTask.requiredCount;
+            
+            if (isComplete) {
+                addLog(`You have completed your slayer task! Return to a Slayer Master for a new one.`);
+            } else {
+                const taskMonsterName = MONSTERS[slayerTask.monsterId]?.name || 'monsters';
+                addLog(`Task progress: ${newProgress}/${slayerTask.requiredCount} ${taskMonsterName}s defeated.`);
+            }
+
+            setSlayerTask({ ...slayerTask, progress: newProgress, isComplete });
+        }
+    }, [slayerTask, addLog, addXp]);
 
     return {
         slayerTask,
         setSlayerTask,
         handleSlayerMasterInteraction,
         checkKill,
+        resetTask,
+        expandTask,
+        shrinkTask,
+        openSlayerShop,
+        slayerCredits,
+        slayerTaskStreak,
+        setSlayerCredits,
+        setSlayerTaskStreak,
     };
 };

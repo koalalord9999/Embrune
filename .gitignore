@@ -27,3 +27,9 @@ ship.bat
 0.2.6 Changelog
 new 1.txt
 Embrune*.zip
+brain
+generate-item-ids.js
+fiximports.cjs
+refactorIconify.cjs
+refactorJSX.cjs
+changelog.txt

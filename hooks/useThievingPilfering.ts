@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { WorldState, PlayerSkill, SkillName, POIActivity, ActivePilferingSession, InventorySlot, Item } from '../types';
-import { THIEVING_CONTAINER_TARGETS, HOUSE_TIERS, PILFERING_DURATION, ITEMS } from '../constants';
+import {  THIEVING_CONTAINER_TARGETS, HOUSE_TIERS, PILFERING_DURATION, ITEMS  } from '../constants';
 import { useNavigation } from './useNavigation';
 import { useCharacter } from './useCharacter';
 import { POIS } from '../data/pois';
@@ -88,11 +88,16 @@ export const useThievingPilfering = (deps: PilferingDependencies) => {
                 
                 setWorldState(ws => ({ ...ws, activePilferingSession: newSession }));
             } else {
-                log("You fail to pick the lock.");
-                
-                if (bestLockpick && !bestLockpick.lockpick!.unbreakable && Math.random() < bestLockpick.lockpick!.breakChance) {
-                    modifyItem(bestLockpick.id, -1, false);
-                    log(`Your ${bestLockpick.name} breaks.`);
+                if (containerData.level <= 12) {
+                    log("The doorknob jiggles, but the door remains shut.");
+                    // No breakage or damage for Dusty homes
+                } else {
+                    log("You fail to pick the lock.");
+                    
+                    if (bestLockpick && !bestLockpick.lockpick!.unbreakable && Math.random() < bestLockpick.lockpick!.breakChance) {
+                        modifyItem(bestLockpick.id, -1, false);
+                        log(`Your ${bestLockpick.name} breaks.`);
+                    }
                 }
             }
     
@@ -107,11 +112,16 @@ export const useThievingPilfering = (deps: PilferingDependencies) => {
 
         if (session) {
             moveItems('pilfering_house_instance', session.entryPoiId);
-            setWorldState(ws => ({
-                ...ws,
-                activePilferingSession: null,
-                depletedHouses: [...(ws.depletedHouses || []), session.housePoiId]
-            }));
+            setWorldState(ws => {
+                const newGeneratedHouses = { ...(ws.generatedHouses || {}) };
+                delete newGeneratedHouses[session.housePoiId];
+                return {
+                    ...ws,
+                    activePilferingSession: null,
+                    depletedHouses: [...(ws.depletedHouses || []), session.housePoiId],
+                    generatedHouses: newGeneratedHouses
+                };
+            });
             setDynamicActivities(null);
             navigation.handleForcedNavigate(session.entryPoiId);
         } else {
@@ -233,10 +243,13 @@ export const useThievingPilfering = (deps: PilferingDependencies) => {
                 depsRef.current.setWorldState(ws => {
                     const houseId = ws.activePilferingSession?.housePoiId;
                     if (houseId && !(ws.depletedHouses || []).includes(houseId)) {
+                        const newGeneratedHouses = { ...(ws.generatedHouses || {}) };
+                        delete newGeneratedHouses[houseId];
                         return {
                             ...ws,
                             activePilferingSession: null,
-                            depletedHouses: [...(ws.depletedHouses || []), houseId]
+                            depletedHouses: [...(ws.depletedHouses || []), houseId],
+                            generatedHouses: newGeneratedHouses
                         };
                     }
                     return { ...ws, activePilferingSession: null };
@@ -269,11 +282,16 @@ export const useThievingPilfering = (deps: PilferingDependencies) => {
                 if (newHp > 0) {
                     moveItems('pilfering_house_instance', session.entryPoiId);
                     const entryPoiId = session.entryPoiId;
-                    setWorldState(ws => ({
-                        ...ws,
-                        activePilferingSession: null,
-                        depletedHouses: [...(ws.depletedHouses || []), session.housePoiId]
-                    }));
+                    setWorldState(ws => {
+                        const newGeneratedHouses = { ...(ws.generatedHouses || {}) };
+                        delete newGeneratedHouses[session.housePoiId];
+                        return {
+                            ...ws,
+                            activePilferingSession: null,
+                            depletedHouses: [...(ws.depletedHouses || []), session.housePoiId],
+                            generatedHouses: newGeneratedHouses
+                        };
+                    });
                     setDynamicActivities(null);
                     navigation.handleForcedNavigate(entryPoiId);
                 }

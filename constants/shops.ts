@@ -222,9 +222,14 @@ export const SHOPS: Record<string, Shop> = {
     slayer_master_shop: {
         id: 'slayer_master_shop',
         name: 'Slayer Rewards',
+        currency: 'slayer_credits',
         inventory: [
-            { itemId: 'x_mix', quantity: 1000, priceModifier: 1.0 },
-        ]
+            { itemId: 'x_mix', quantity: 10000, priceModifier: 1 },
+            { itemId: 'slayer_rune_pack', quantity: 10000, priceModifier: 10 },
+            { itemId: 'slayer_task_expansion', quantity: 10000, priceModifier: 30 },
+            { itemId: 'slayer_task_shrink', quantity: 10000, priceModifier: 50 },
+        ],
+        sellingDisabled: true,
     },
     isle_of_whispers_general: {
         id: 'isle_of_whispers_general',

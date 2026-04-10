@@ -44,8 +44,11 @@ export const depthsOfDespair: Quest = {
     id: 'depths_of_despair',
     name: "Depths of Despair",
     description: "The dwarves of the outpost have broken through into a new cavern, but the tremors have worsened and strange creatures are emerging.",
+    requirements: {
+        skills: [{ skill: SkillName.Smithing, level: 40 }, { skill: SkillName.Mining, level: 40 }]
+    },
     isHidden: false,
-    startHint: "Speak to Durin in the Dwarven Outpost. (Requires Smithing 40).",
+    startHint: "Speak to Durin in the Dwarven Outpost.",
     playerStagePerspectives: [
         "Durin is worried about tremors from a new passage in the Outpost Mine. I need to investigate the entrance to the Chasm of Woe.",
         "I've entered the chasm. I must find the source of the tremors deep within.",
@@ -109,7 +112,7 @@ export const depthsOfDespair: Quest = {
             responses: [
                 { text: "Tremors? What's causing them?", next: 'dod_durin_explain' },
                 { text: "Maybe you just have wobbly knees from all the ale?", next: 'dod_durin_silly' },
-                { text: "I'm not an engineer, but I can fight." , next: 'dod_durin_explain_2'},
+                { text: "I'm not an engineer, but I can fight.", next: 'dod_durin_explain_2' },
             ]
         },
         dod_durin_silly: {
@@ -125,15 +128,15 @@ export const depthsOfDespair: Quest = {
             npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
             text: "That's what I need to find out! My miners are too spooked to go back down. They say the very rock groans, and strange, chitinous creatures are crawling out of the dark. We've dubbed it the 'Chasm of Woe'.",
             responses: [
-                 { text: "So you need someone to go in and take a look?", next: 'dod_durin_task' }
+                { text: "So you need someone to go in and take a look?", next: 'dod_durin_task' }
             ]
         },
-         dod_durin_explain_2: {
+        dod_durin_explain_2: {
             npcName: 'Durin',
             npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
             text: "And fighting might be just what's needed! My miners are too spooked to go back down. They say the very rock groans, and strange, chitinous creatures are crawling out of the dark. We've dubbed it the 'Chasm of Woe'.",
             responses: [
-                 { text: "So you need someone to go in and take a look?", next: 'dod_durin_task' }
+                { text: "So you need someone to go in and take a look?", next: 'dod_durin_task' }
             ]
         },
         dod_durin_task: {
@@ -212,15 +215,15 @@ export const depthsOfDespair: Quest = {
         },
         dod_enter_chasm: {
             npcName: 'Enter the Chasm',
-            npcIcon: 'https://api.iconify.design/game-icons:cave-entrance.svg',
+            npcIcon: 'cave-entrance',
             text: "A gust of cold, ancient air blows from the chasm. The tremors are stronger here. You can hear the skittering of unseen things in the darkness below.",
             responses: [
-                { text: "(Descend)", actions: [{ type: 'advance_quest', questId: 'depths_of_despair' }, {type: 'teleport', poiId: 'chasm_ledge_1'}] }
+                { text: "(Descend)", actions: [{ type: 'advance_quest', questId: 'depths_of_despair' }, { type: 'teleport', poiId: 'chasm_ledge_1' }] }
             ]
         },
         dod_approach_golem: {
             npcName: 'Approach the Golem',
-            npcIcon: 'https://api.iconify.design/game-icons:rock-golem.svg',
+            npcIcon: 'rock-golem',
             text: "As you step into the cavern's heart, the tremors intensify. Dust rains from the ceiling. Before you, a colossal figure of stone and crystal begins to move. It was not a statue. It was sleeping. Its single, glowing eye fixes on you. The Earth-Render has awoken.",
             responses: [
                 { text: "(Prepare for battle!)", actions: [{ type: 'advance_quest', questId: 'depths_of_despair' }, { type: 'start_mandatory_combat', monsterId: 'the_earth_render' }] }

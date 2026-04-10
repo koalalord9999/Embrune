@@ -54,7 +54,7 @@ export const oakhavenRoadPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Investigate Debris',
-                icon: 'https://api.iconify.design/game-icons:magnifying-glass.svg',
+                icon: 'magnifying-glass',
                 questCondition: { questId: 'capitals_call', stages: [0] },
                 startNode: 'investigate_debris_start'
             },

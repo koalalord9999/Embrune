@@ -15,7 +15,7 @@ const QuestsPanel: React.FC<QuestsPanelProps> = ({ playerQuests, activeRepeatabl
 
     const getRepeatableQuestProgressText = () => {
         if (!activeRepeatableQuest) return '';
-        
+
         const { generatedQuest, progress } = activeRepeatableQuest;
 
         if (generatedQuest.type === 'gather') {
@@ -25,7 +25,7 @@ const QuestsPanel: React.FC<QuestsPanelProps> = ({ playerQuests, activeRepeatabl
             }, 0);
             return `(${currentAmount} / ${generatedQuest.requiredQuantity})`;
         }
-        
+
         if (generatedQuest.type === 'kill') {
             const monsterName = MONSTERS[generatedQuest.target.monsterId!]?.name ?? 'monsters';
             return `(${progress}/${generatedQuest.requiredQuantity} ${monsterName}s)`;
@@ -43,21 +43,21 @@ const QuestsPanel: React.FC<QuestsPanelProps> = ({ playerQuests, activeRepeatabl
     const completedHiddenQuests = completedQuests.filter(q => q.isHidden);
 
     return (
-        <div className="flex flex-col h-full text-gray-300">
+        <div className="flex flex-col h-full text-gray-300 font-pixel-rpg">
             <div className="overflow-y-auto pr-1 space-y-4">
                 {/* Tasks Section */}
                 {(slayerTask || activeRepeatableQuest) && (
                     <div>
-                        <h4 className="font-bold text-purple-300 border-b border-purple-300/50 mb-2 pb-1">Tasks</h4>
+                        <h4 className="text-xl font-bold text-purple-300 border-b border-purple-300/50 mb-2 pb-1">Tasks</h4>
                         {slayerTask && (
-                             <div className="mb-2">
-                                <h5 className="font-semibold text-red-400">Slayer Task</h5>
+                            <div className="mb-2">
+                                <h5 className="text-xl font-bold text-red-400">Slayer Task</h5>
                                 {slayerTask.isComplete ? (
-                                    <p className="text-sm text-green-400 italic mt-1">
+                                    <p className="text-xl text-green-400 italic mt-1 leading-none">
                                         Task Complete! Return to a Slayer Master for a new assignment and a reward.
                                     </p>
                                 ) : (
-                                    <p className="text-sm text-gray-400 italic mt-1">
+                                    <p className="text-xl text-gray-400 italic mt-1 leading-none">
                                         - Slay {slayerTask.requiredCount} {MONSTERS[slayerTask.monsterId].name}s.
                                         {` (${slayerTask.progress}/${slayerTask.requiredCount})`}
                                     </p>
@@ -66,10 +66,10 @@ const QuestsPanel: React.FC<QuestsPanelProps> = ({ playerQuests, activeRepeatabl
                         )}
                         {activeRepeatableQuest && (
                             <div>
-                                <h5 className="font-semibold text-blue-300">
-                                   Active Task: {activeRepeatableQuest.generatedQuest.title}
+                                <h5 className="text-xl font-bold text-blue-300">
+                                    Active Task: {activeRepeatableQuest.generatedQuest.title}
                                 </h5>
-                                <p className="text-sm text-gray-400 italic mt-1">
+                                <p className="text-xl text-gray-400 italic mt-1 leading-none">
                                     - {activeRepeatableQuest.generatedQuest.description}
                                     {` ${getRepeatableQuestProgressText()}`}
                                 </p>
@@ -80,32 +80,32 @@ const QuestsPanel: React.FC<QuestsPanelProps> = ({ playerQuests, activeRepeatabl
 
                 {/* Main Quests Section */}
                 <div>
-                     <h4 className="font-bold text-purple-300 border-b border-purple-300/50 mb-2 pb-1">Quests</h4>
-                     {inProgressQuests.length === 0 && notStartedQuests.length === 0 && completedQuests.filter(q => !q.isHidden).length === 0 && (
+                    <h4 className="text-xl font-bold text-purple-300 border-b border-purple-300/50 mb-2 pb-1">Quests</h4>
+                    {inProgressQuests.length === 0 && notStartedQuests.length === 0 && completedQuests.filter(q => !q.isHidden).length === 0 && (
                         <p className="text-center text-gray-400 italic">You have no active quests.</p>
-                     )}
-                     {inProgressQuests.map(quest => {
+                    )}
+                    {inProgressQuests.map(quest => {
                         const playerQuestState = playerQuests.find(pq => pq.questId === quest.id);
                         const stageInfo = playerQuestState ? ` (Stage ${playerQuestState.currentStage})` : '';
                         return (
-                            <button key={quest.id} onClick={() => onSelectQuest(quest.id)} className="w-full text-left text-yellow-300 hover:text-yellow-200 py-1">{quest.name}{stageInfo}</button>
+                            <button key={quest.id} onClick={() => onSelectQuest(quest.id)} className="w-full text-left text-yellow-300 hover:text-yellow-200 py-1 text-xl">{quest.name}{stageInfo}</button>
                         );
-                     })}
-                     {notStartedQuests.map(quest => (
-                        <button key={quest.id} onClick={() => onSelectQuest(quest.id)} className="w-full text-left text-red-400 hover:text-red-300 py-1">{quest.name}</button>
-                     ))}
-                     {completedQuests.filter(q => !q.isHidden).map(quest => (
-                        <button key={quest.id} onClick={() => onSelectQuest(quest.id)} className="w-full text-left text-green-400 hover:text-green-300 py-1">{quest.name}</button>
-                     ))}
+                    })}
+                    {notStartedQuests.map(quest => (
+                        <button key={quest.id} onClick={() => onSelectQuest(quest.id)} className="w-full text-left text-red-400 hover:text-red-300 py-1 text-xl">{quest.name}</button>
+                    ))}
+                    {completedQuests.filter(q => !q.isHidden).map(quest => (
+                        <button key={quest.id} onClick={() => onSelectQuest(quest.id)} className="w-full text-left text-green-400 hover:text-green-300 py-1 text-xl">{quest.name}</button>
+                    ))}
                 </div>
 
                 {/* Mysteries/Hidden Quests Section */}
                 {completedHiddenQuests.length > 0 && (
                     <div>
-                        <h4 className="font-bold text-purple-300 border-b border-purple-300/50 mb-2 pb-1">Mysteries Solved</h4>
-                         {completedHiddenQuests.map(quest => (
+                        <h4 className="text-xl font-bold text-purple-300 border-b border-purple-300/50 mb-2 pb-1">Mysteries Solved</h4>
+                        {completedHiddenQuests.map(quest => (
                             <button key={quest.id} onClick={() => onSelectQuest(quest.id)} className="w-full text-left text-green-400 hover:text-green-300 py-1 line-through">{quest.name}</button>
-                         ))}
+                        ))}
                     </div>
                 )}
             </div>

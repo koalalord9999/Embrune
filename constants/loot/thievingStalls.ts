@@ -69,13 +69,13 @@ export const THIEVING_STALL_TARGETS: Record<string, ThievingStall> = {
         name: 'Dwarven Stall',
         level: 70, xp: 190, respawnTime: 240000,
         loot: [
-            { itemId: 'iron_ore', chance: "5/36", noted: true },
-            { itemId: 'coal', chance: "5/36", noted: true },
+            { itemId: 'iron_ore', chance: "5/36", minQuantity: 1, maxQuantity: 20, noted: true },
+            { itemId: 'coal', chance: "5/36", minQuantity: 1, maxQuantity: 20, noted: true },
             { itemId: 'bronze_pickaxe', chance: "35/144" },
             { itemId: 'iron_pickaxe', chance: "23/144" },
             { itemId: 'steel_pickaxe', chance: "7/48" },
-            { itemId: 'iron_bar', chance: "5/72", noted: true },
-            { itemId: 'steel_bar', chance: "5/144", noted: true },
+            { itemId: 'iron_bar', chance: "5/72", minQuantity: 1, maxQuantity: 10, noted: true },
+            { itemId: 'steel_bar', chance: "5/144", minQuantity: 1, maxQuantity: 10, noted: true },
             { itemId: 'mithril_pickaxe', chance: "1/24" },
             { itemId: 'adamantite_pickaxe', chance: "1/48" },
             { itemId: 'runic_pickaxe', chance: "1/144" },
@@ -99,7 +99,7 @@ export const THIEVING_STALL_TARGETS: Record<string, ThievingStall> = {
         name: 'Water Stall',
         level: 35, xp: 50, respawnTime: 6000,
         loot: [
-            { itemId: 'waterskin_full', chance: 1 },
+            { itemId: 'waterskin_full', chance: "1/1" },
         ]
     },
     thieving_stall_spices: {

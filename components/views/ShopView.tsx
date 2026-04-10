@@ -1,6 +1,6 @@
 import React from 'react';
 import { InventorySlot, ShopStates, Item } from '../../types';
-import { SHOPS, ITEMS, getIconClassName } from '../../constants';
+import {  SHOPS, ITEMS, getIconClassName, getIconUrl  } from '../../constants';
 import Button from '../common/Button';
 import { ContextMenuOption } from '../common/ContextMenu';
 import { MakeXPrompt, ContextMenuState, TooltipState } from '../../hooks/useUIState';
@@ -131,7 +131,7 @@ const ShopSlot: React.FC<ShopSlotProps> = ({ slot, price, stock, shopId, playerC
             onMouseEnter={handleMouseEnter}
             onMouseLeave={() => setTooltip(null)}
         >
-            <img src={item.iconUrl} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
             {stock !== undefined && stock > 0 && (
                 <span className={`absolute bottom-0 right-1 text-xs font-bold ${getQuantityColor(stock)}`} style={{ textShadow: '1px 1px 1px black' }}>
                     {formatItemQuantity(stock)}

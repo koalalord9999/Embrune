@@ -1,26 +1,28 @@
 import { SkillName, Item } from '../types';
 
+export const getIconUrl = (iconName: string) => `https://api.iconify.design/game-icons:${iconName}.svg`;
+
 export const SKILL_ICONS: Record<SkillName, string> = {
-    [SkillName.Attack]: 'https://api.iconify.design/game-icons:gladius.svg',
-    [SkillName.Strength]: 'https://api.iconify.design/game-icons:biceps.svg',
-    [SkillName.Defence]: 'https://api.iconify.design/game-icons:checked-shield.svg',
-    [SkillName.Ranged]: 'https://api.iconify.design/game-icons:high-shot.svg',
-    [SkillName.Magic]: 'https://api.iconify.design/game-icons:pointy-hat.svg',
-    [SkillName.Hitpoints]: 'https://api.iconify.design/game-icons:hearts.svg',
-    [SkillName.Prayer]: 'https://api.iconify.design/game-icons:polar-star.svg',
-    [SkillName.Woodcutting]: 'https://api.iconify.design/game-icons:beech.svg',
-    [SkillName.Fletching]: 'https://api.iconify.design/game-icons:whiplash.svg',
-    [SkillName.Firemaking]: 'https://api.iconify.design/game-icons:campfire.svg',
-    [SkillName.Fishing]: 'https://api.iconify.design/game-icons:fishing.svg',
-    [SkillName.Cooking]: 'https://api.iconify.design/game-icons:cauldron.svg',
-    [SkillName.Crafting]: 'https://api.iconify.design/game-icons:sewing-needle.svg',
-    [SkillName.Mining]: 'https://api.iconify.design/game-icons:mining.svg',
-    [SkillName.Smithing]: 'https://api.iconify.design/game-icons:anvil.svg',
-    [SkillName.Herblore]: 'https://api.iconify.design/game-icons:three-leaves.svg',
-    [SkillName.Runecrafting]: 'https://api.iconify.design/game-icons:rune-stone.svg',
-    [SkillName.Slayer]: 'https://api.iconify.design/game-icons:william-tell-skull.svg',
-    [SkillName.Thieving]: 'https://api.iconify.design/game-icons:domino-mask.svg',
-    [SkillName.Agility]: 'https://api.iconify.design/game-icons:sprint.svg',
+    [SkillName.Attack]: 'gladius',
+    [SkillName.Strength]: 'biceps',
+    [SkillName.Defence]: 'checked-shield',
+    [SkillName.Ranged]: 'high-shot',
+    [SkillName.Magic]: 'pointy-hat',
+    [SkillName.Hitpoints]: 'hearts',
+    [SkillName.Prayer]: 'polar-star',
+    [SkillName.Woodcutting]: 'beech',
+    [SkillName.Fletching]: 'whiplash',
+    [SkillName.Firemaking]: 'campfire',
+    [SkillName.Fishing]: 'fishing',
+    [SkillName.Cooking]: 'cauldron',
+    [SkillName.Crafting]: 'sewing-needle',
+    [SkillName.Mining]: 'mining',
+    [SkillName.Smithing]: 'anvil',
+    [SkillName.Herblore]: 'three-leaves',
+    [SkillName.Runecrafting]: 'rune-stone',
+    [SkillName.Slayer]: 'william-tell-skull',
+    [SkillName.Thieving]: 'domino-mask',
+    [SkillName.Agility]: 'sprint',
 };
 
 // FIX: Added SKILL_DISPLAY_ORDER constant for consistent skill display order across components.
@@ -38,6 +40,7 @@ export const getIconClassName = (item?: Item | null): string => {
     if (!item) return 'item-icon-default';
 
     switch (item.material) {
+        case 'gold-runic': return 'item-icon-gold-runic';
         case 'bronze': return 'item-icon-bronze';
         case 'iron': return 'item-icon-iron';
         case 'steel': return 'item-icon-steel';

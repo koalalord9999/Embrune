@@ -17,7 +17,7 @@ export const southernRoadPois: Record<string, POI> = {
     dusty_crossroads: {
         id: 'dusty_crossroads',
         name: 'Dusty Crossroads',
-        description: 'The road splits here. A weathered signpost points west to a farm, east towards a swamp, and north to Oakhaven.',
+        description: 'The road splits here. A weathered signpost points west to a farm, east towards a swamp, and south to Oakhaven.',
         connections: ['south_meadow_road', 'abandoned_farmstead', 'boggy_trail', 'oakhaven_road_1'],
         activities: [
             { type: 'skilling', id: 'dusty_crossroads_tree', name: 'Chop Tree', skill: SkillName.Woodcutting, requiredLevel: 1, loot: [{ itemId: 'logs', chance: 1, xp: 25 }], resourceCount: { min: 1, max: 2 }, respawnTime: 12000, gatherTime: 2000 },
@@ -75,7 +75,7 @@ export const southernRoadPois: Record<string, POI> = {
         description: 'A small, isolated cabin stands on stilts at the edge of the swamp. There is a road going east, you see some walls in the distance',
         connections: ['swamp_path_east_1', 'murkwallow_swamp'],
         activities: [
-             {
+            {
                 type: 'npc',
                 name: 'Old Man Hemlock',
                 icon: '/assets/npcChatHeads/old_man_hemlock.png',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { InventorySlot } from '../../../types';
-import { ITEMS, getIconClassName } from '../../../constants';
+import {  ITEMS, getIconClassName, getIconUrl  } from '../../../constants';
 import Button from '../../common/Button';
 import { TooltipState, ContextMenuState, MakeXPrompt } from '../../../hooks/useUIState';
 import { getDisplayName } from '../../panels/InventorySlot';
@@ -176,11 +176,11 @@ const PriceCheckerView: React.FC<PriceCheckerViewProps> = ({ inventory, onClose,
     return (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-60 p-4 animate-fade-in" onClick={onClose}>
             <div 
-                className="bg-gray-800 border-4 border-gray-600 rounded-lg shadow-xl w-full max-w-3xl"
+                className="bg-gray-800 border-4 border-gray-600 rounded-lg shadow-xl w-full max-w-3xl font-pixel-rpg"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center p-4 bg-gray-900/50 border-b-2 border-gray-600">
-                    <h1 className="text-2xl font-bold text-yellow-400">Price Checker</h1>
+                    <h1 className="text-3xl font-bold text-yellow-400">Price Checker</h1>
                     <Button onClick={onClose} size="sm">Close</Button>
                 </div>
                 <div className="flex p-4 gap-4">
@@ -195,15 +195,15 @@ const PriceCheckerView: React.FC<PriceCheckerViewProps> = ({ inventory, onClose,
                                         <>
                                             {slot.noted ? (
                                                 <div className="item-note-wrapper">
-                                                    <img src="https://api.iconify.design/game-icons:folded-paper.svg" alt="Note" className="item-note-paper" />
-                                                    <img src={item.iconUrl} alt={item.name} className={`item-note-icon ${getIconClassName(item)}`} />
+                                                    <img src={getIconUrl("folded-paper")} alt="Note" className="item-note-paper" />
+                                                    <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`item-note-icon ${getIconClassName(item)}`} />
                                                 </div>
                                             ) : (
-                                                <img src={item.iconUrl} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+                                                <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
                                             )}
                                             {slot.statsOverride?.poisoned && (
                                                 <img 
-                                                    src="https://api.iconify.design/game-icons:boiling-bubbles.svg" 
+                                                    src={getIconUrl("boiling-bubbles")} 
                                                     alt="Poisoned"
                                                     className="poison-overlay-icon item-icon-uncut-emerald"
                                                     title="Poisoned"
@@ -225,7 +225,7 @@ const PriceCheckerView: React.FC<PriceCheckerViewProps> = ({ inventory, onClose,
                                )
                            })}
                         </div>
-                        <div className="mt-2 p-2 text-center bg-gray-900 rounded-md border border-gray-600">
+                        <div className="mt-2 p-2 text-center bg-gray-900 rounded-md border border-gray-600 text-xl">
                              Total Value: <span className="font-bold text-yellow-400">{totalValue.toLocaleString()} Coins</span>
                         </div>
                     </div>
@@ -250,15 +250,15 @@ const PriceCheckerView: React.FC<PriceCheckerViewProps> = ({ inventory, onClose,
                                         <>
                                             {slot.noted ? (
                                                 <div className="item-note-wrapper">
-                                                    <img src="https://api.iconify.design/game-icons:folded-paper.svg" alt="Note" className="item-note-paper" />
-                                                    <img src={item.iconUrl} alt={item.name} className={`item-note-icon ${getIconClassName(item)}`} />
+                                                    <img src={getIconUrl("folded-paper")} alt="Note" className="item-note-paper" />
+                                                    <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`item-note-icon ${getIconClassName(item)}`} />
                                                 </div>
                                             ) : (
-                                                <img src={item.iconUrl} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+                                                <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
                                             )}
                                             {slot.statsOverride?.poisoned && (
                                                 <img 
-                                                    src="https://api.iconify.design/game-icons:boiling-bubbles.svg" 
+                                                    src={getIconUrl("boiling-bubbles")} 
                                                     alt="Poisoned"
                                                     className="poison-overlay-icon item-icon-uncut-emerald"
                                                     title="Poisoned"

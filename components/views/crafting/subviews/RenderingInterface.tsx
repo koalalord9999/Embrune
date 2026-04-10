@@ -1,6 +1,6 @@
 import React from 'react';
 import { SkillName } from '../../../../types';
-import { RENDERING_RECIPES, ITEMS, getIconClassName } from '../../../../constants';
+import {  RENDERING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../../constants';
 import { CraftingViewProps } from '../CraftingView';
 import { useLongPress } from '../../../../hooks/useLongPress';
 import { useIsTouchDevice } from '../../../../hooks/useIsTouchDevice';
@@ -91,10 +91,10 @@ const RenderingSlot: React.FC<{
             <div className={`crafting-slot-level ${hasLevel ? 'met' : 'unmet'}`}>
                 Lvl {recipe.level}
             </div>
-            <img src={fatItem.iconUrl} alt={fatItem.name} className={`crafting-slot-icon ${getIconClassName(fatItem)}`} />
+            <img src={getIconUrl(fatItem.iconUrl)} alt={fatItem.name} className={`crafting-slot-icon ${getIconClassName(fatItem)}`} />
             <div className="crafting-slot-ingredients">
                 <div className="ingredient-icon" title={`${fatItem.name} (${fatCount})`}>
-                    <img src={fatItem.iconUrl} alt={fatItem.name} className={getIconClassName(fatItem)} />
+                    <img src={getIconUrl(fatItem.iconUrl)} alt={fatItem.name} className={getIconClassName(fatItem)} />
                     <span className="ingredient-quantity">{fatCount}</span>
                 </div>
             </div>

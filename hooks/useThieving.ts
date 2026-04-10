@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Monster, SkillName, PlayerSkill, InventorySlot, Equipment, Item, POIActivity, ActiveBuff, ThievingContainerState, WorldState } from '../types';
-import { ITEMS, rollOnLootTable, LootRollResult, THIEVING_POCKET_TARGETS, THIEVING_CONTAINER_TARGETS, THIEVING_STALL_TARGETS } from '../constants';
+import {  ITEMS, rollOnLootTable, LootRollResult, THIEVING_POCKET_TARGETS, THIEVING_CONTAINER_TARGETS, THIEVING_STALL_TARGETS  } from '../constants';
 import { useNavigation } from './useNavigation';
 
 type LockpickActivity = Extract<POIActivity, { type: 'thieving_lockpick' }>;
@@ -126,7 +126,8 @@ export const useThieving = (
         }
     
         let bestLockpick: Item | undefined = undefined;
-        const isLockpickRequired = !containerData.unlocked;
+        // Dusty homes (Level 12) do not need a lockpick
+        const isLockpickRequired = !containerData.unlocked && containerData.level > 12;
 
         if (isLockpickRequired) {
             bestLockpick = inventory
@@ -250,12 +251,21 @@ export const useThieving = (
                     }
                 }
             } else {
-                log("You fail to pick the lock.");
+                if (containerData.level <= 12) {
+                    const dustyMessages = [
+                        `A spider jumps out of the ${activity.targetName} and bites you. You scream!`,
+                        `You reach inside, but a spider's nest greets your hand. Ouch!`,
+                        `A small spider skitters across your hand as you fumble with the lock. You recoil in pain!`
+                    ];
+                    log(dustyMessages[Math.floor(Math.random() * dustyMessages.length)]);
+                } else {
+                    log("You fail to pick the lock.");
+                }
                 
                 if (activity.id.startsWith('pilfer_')) {
                     setWorldState(ws => {
                         if (ws.activePilferingSession) {
-                            log("The noise you made has attracted attention! You have less time.");
+                            if (containerData.level > 12) log("The noise you made has attracted attention! You have less time.");
                             return {
                                 ...ws,
                                 activePilferingSession: {
@@ -269,12 +279,12 @@ export const useThieving = (
                 }
     
                 if (containerData.trap) {
-                    log("You've triggered a trap!");
+                    if (containerData.level > 12) log("You've triggered a trap!");
                     const newHp = currentHp - (containerData.trap.damage || 0);
                     setPlayerHp(newHp);
                 }
     
-                if (bestLockpick && !bestLockpick.lockpick!.unbreakable && Math.random() < bestLockpick.lockpick!.breakChance) {
+                if (containerData.level > 12 && bestLockpick && !bestLockpick.lockpick!.unbreakable && Math.random() < bestLockpick.lockpick!.breakChance) {
                     modifyItem(bestLockpick.id, -1, false);
                     log(`Your ${bestLockpick.name} breaks.`);
                 }

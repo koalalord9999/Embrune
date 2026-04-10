@@ -26,7 +26,7 @@ export const useKillHandler = (deps: KillHandlerDependencies) => {
 
     const handleKill = useCallback((uniqueInstanceId: string, attackStyle?: 'melee' | 'ranged' | 'magic') => {
         const monsterId = uniqueInstanceId.split(':')[1];
-        
+
         questLogic.checkQuestProgressOnKill(monsterId, attackStyle);
         repeatableQuests.checkProgressOnKill(monsterId);
         slayer.checkKill(monsterId);
@@ -46,10 +46,10 @@ export const useKillHandler = (deps: KillHandlerDependencies) => {
         const poiId = defeatedInstanceIds[0].split(':')[0];
         const poi = POIS[poiId];
         if (!poi) return;
-        
+
         // Temporarily flag these monsters as "dying" to prevent instant re-attack
         setWorldState(ws => ({ ...ws, recentlyKilled: [...(ws.recentlyKilled || []), ...defeatedInstanceIds] }));
-        
+
         // After a delay, clear the "dying" flag.
         // This gives React enough time to render the respawn timer.
         setTimeout(() => {
@@ -57,7 +57,7 @@ export const useKillHandler = (deps: KillHandlerDependencies) => {
                 ...ws,
                 recentlyKilled: (ws.recentlyKilled || []).filter(id => !defeatedInstanceIds.includes(id))
             }));
-        }, 2200);
+        }, 7000);
 
         const isInstanceQuestLocation = repeatableQuests.activePlayerQuest?.generatedQuest.isInstance && repeatableQuests.activePlayerQuest?.generatedQuest.instancePoiId === poiId;
 
@@ -68,7 +68,7 @@ export const useKillHandler = (deps: KillHandlerDependencies) => {
             const monsterId = uniqueInstanceId.split(':')[1];
             const instanceType = uniqueInstanceId.split(':')[2];
             const monsterData = MONSTERS[monsterId];
-            
+
             // Do not set a respawn timer for instanced repeatable quest monsters.
             if (isInstanceQuestLocation) {
                 return;

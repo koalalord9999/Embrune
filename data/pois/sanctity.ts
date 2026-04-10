@@ -31,11 +31,11 @@ export const sanctityPois: Record<string, POI> = {
         description: 'The western gate of Sanctity, facing the swamps. It is well-maintained and watched by a vigilant guard.',
         connections: ['swamp_path_east_2', 'sanctity_slums'],
         activities: [
-            { 
-                type: 'npc', 
-                name: 'Guard Cassia', 
-                icon: '/assets/npcChatHeads/guard_captain_elara.png', 
-                dialogue: GUARD_CASSIA_DIALOGUE, 
+            {
+                type: 'npc',
+                name: 'Guard Cassia',
+                icon: '/assets/npcChatHeads/guard_captain_elara.png',
+                dialogue: GUARD_CASSIA_DIALOGUE,
                 startNode: 'start',
                 questTopics: ['the_trial_of_war'],
             }
@@ -88,7 +88,7 @@ export const sanctityPois: Record<string, POI> = {
         activities: [
             { type: 'thieving_pilfer', id: 'sanctity_house_1', name: 'Locked Shack' },
             { type: 'thieving_pilfer', id: 'sanctity_house_2', name: 'Locked Hovel' },
-            { type: 'npc', name: 'Refugee', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Refugee', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.sanctity.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random' }
+            { type: 'npc', name: 'Refugee', icon: 'person', dialogue: { start: { npcName: 'Refugee', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.sanctity.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random' }
         ],
         regionId: 'sanctity',
         x: 150, y: 250, type: 'internal',
@@ -100,7 +100,7 @@ export const sanctityPois: Record<string, POI> = {
         connections: ['sanctity_slums', 'sanctity_north_district', 'sanctity_east_district', 'sanctity_south_district'],
         activities: [
             { type: 'water_source', name: 'Gather from Holy Fountain', isHoly: true },
-            { type: 'npc', name: 'Worshipper', icon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', dialogue: { start: { npcName: 'Worshipper', npcIcon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', text: CIVILLIAN_DIALOGUE.sanctity.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random' },
+            { type: 'npc', name: 'Worshipper', icon: 'woman-elf-face', dialogue: { start: { npcName: 'Worshipper', npcIcon: 'woman-elf-face', text: CIVILLIAN_DIALOGUE.sanctity.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random' },
         ],
         regionId: 'sanctity',
         x: 250, y: 250, type: 'internal',
@@ -120,7 +120,7 @@ export const sanctityPois: Record<string, POI> = {
         description: 'A grassy path leads east towards the inn and the town gate. There is a sense of foreboding in the air.',
         connections: ['sanctity_square', 'sanctity_inn', 'sanctity_east_gate', 'graces_agility_shop'],
         activities: [
-            { type: 'npc', name: 'Concerned Citizen', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Concerned Citizen', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.sanctity.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random' }
+            { type: 'npc', name: 'Concerned Citizen', icon: 'person', dialogue: { start: { npcName: 'Concerned Citizen', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.sanctity.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random' }
         ],
         regionId: 'sanctity',
         x: 350, y: 250, type: 'internal',
@@ -140,15 +140,15 @@ export const sanctityPois: Record<string, POI> = {
         description: 'A large, beautiful chapel dedicated to the gods of light and order.',
         connections: ['sanctity_north_district'],
         activities: [
-            { type: 'npc', name: 'Brother Thaddeus', icon: 'https://api.iconify.design/game-icons:priest-hat.svg', dialogue: BROTHER_THADDEUS_DIALOGUE, startNode: 'start', questTopics: ['the_saints_first_step'] },
+            { type: 'npc', name: 'Brother Thaddeus', icon: 'priest-hat', dialogue: BROTHER_THADDEUS_DIALOGUE, startNode: 'start', questTopics: ['the_saints_first_step'] },
             {
                 type: 'npc',
                 name: 'Altar',
-                icon: 'https://api.iconify.design/game-icons:altar.svg',
+                icon: 'altar',
                 dialogue: {
                     start: {
                         npcName: 'Altar',
-                        npcIcon: 'https://api.iconify.design/game-icons:altar.svg',
+                        npcIcon: 'altar',
                         text: 'You feel a divine presence. Your prayer may be answered here.',
                         responses: [
                             { text: 'Pray', actions: [{ type: 'restore_prayer' }] },
@@ -161,11 +161,11 @@ export const sanctityPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Reliquary Grinder',
-                icon: 'https://api.iconify.design/game-icons:grindstone.svg',
+                icon: 'grindstone',
                 dialogue: {
                     start: {
                         npcName: 'Reliquary Grinder',
-                        npcIcon: 'https://api.iconify.design/game-icons:grindstone.svg',
+                        npcIcon: 'grindstone',
                         text: 'An old stone grinder used for sacred rituals. Select a bone to grind.',
                         responses: [{ text: "Leave" }],
                         conditionalResponses: [
@@ -183,6 +183,11 @@ export const sanctityPois: Record<string, POI> = {
                                 text: 'Grind Consecrated Dragon Bones',
                                 check: { requirements: [{ type: 'items', items: [{ itemId: 'consecrated_dragon_bones', quantity: 1 }] }], successNode: '', failureNode: '' },
                                 actions: [{ type: 'open_make_x_for_grinding', itemId: 'consecrated_dragon_bones' }]
+                            },
+                            {
+                                text: 'Grind Consecrated Frost Dragon Bones',
+                                check: { requirements: [{ type: 'items', items: [{ itemId: 'consecrated_frost_dragon_bones', quantity: 1 }] }], successNode: '', failureNode: '' },
+                                actions: [{ type: 'open_make_x_for_grinding', itemId: 'consecrated_frost_dragon_bones' }]
                             }
                         ]
                     }
@@ -200,7 +205,38 @@ export const sanctityPois: Record<string, POI> = {
         description: 'A repository of holy texts and historical records.',
         connections: ['sanctity_north_district'],
         activities: [
-            { type: 'npc', name: 'Librarian Anya', icon: '/assets/npcChatHeads/librarian_elara.png', dialogue: LIBRARIAN_ANYA_DIALOGUE, startNode: 'start', questTopics: ['the_sorcerers_trial'] }
+            {
+                type: 'npc',
+                name: 'Librarian Anya',
+                icon: '/assets/npcChatHeads/librarian_elara.png',
+                dialogue: LIBRARIAN_ANYA_DIALOGUE,
+                startNode: 'start',
+                questTopics: ['the_sorcerers_trial'],
+                conditionalGreetings: [
+                    {
+                        text: "Archmage. Your achievement will be whispered in these halls for generations to come. The Elemental Shrine in Wyrmwood still resonates with your power; you may return there whenever you wish to face the mirror once more.",
+                        check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'completed' }] }
+                    },
+                    {
+                        text: "Welcome to the Sanctity Library. Most seekers come here for the comfort of the holy texts, but I sense you are looking for the raw principles that bind them. I've been observing your progress... are you ready for a challenge that goes beyond these shelves?",
+                        check: {
+                            requirements: [
+                                { type: 'quest_requirements', questId: 'the_sorcerers_trial' },
+                                { type: 'quest', questId: 'the_sorcerers_trial', status: 'not_started' }
+                            ]
+                        }
+                    },
+                    { text: "The fragments of Intent and Shape are essential for the Rune of Attunement. Have you located them?", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', operator: 'lt', stage: 3 }] } },
+                    { text: "The Rune remains inert. It requires the spark of raw elemental fury to wake it.", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 4 }] } },
+                    { text: "You have channeled the storm! The first pillar is mastered. Speak to me when you are ready for the second.", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 5 }] } },
+                    { text: "Zafira in Fouthia will teach you what books cannot: the discipline of Controlled Destruction.", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', operator: 'gte', stage: 6 }, { type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', operator: 'lt', stage: 13 }] } },
+                    { text: "The Core of Controlled Destruction is complete. Now, we turn to the final pillar: Transmutation.", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 13 }] } },
+                    { text: "A Runic Bar, Shard of True Ice, and a Sunstone. Only they can anchor the spell at the Astral Altar.", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 14 }] } },
+                    { text: "The ritual must be performed at the apex of the Magus Spire. The astral convergence there is key.", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 15 }] } },
+                    { text: "You have rewritten reality itself. The Bar of Transmuted Gold is a testament to your mastery. Are you ready for the final trial?", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', stage: 16 }] } },
+                    { text: "The three foci—Creation, Destruction, and Transmutation—must be placed at the Elemental Shrine in Wyrmwood.", check: { requirements: [{ type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', operator: 'gte', stage: 17 }, { type: 'quest', questId: 'the_sorcerers_trial', status: 'in_progress', operator: 'lt', stage: 20 }] } }
+                ]
+            }
         ],
         regionId: 'sanctity',
         x: 300, y: 100, type: 'internal',
@@ -252,7 +288,7 @@ export const sanctityPois: Record<string, POI> = {
             { type: 'start_agility_course', name: 'Start Cathedral Climb (Lvl 46)', courseId: 'sanctity_cathedral_climb' },
         ],
         regionId: 'sanctity',
-        x: 220, y: 380,
+        x: 200, y: 350,
         type: 'internal',
     }
 };

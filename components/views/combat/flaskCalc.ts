@@ -1,5 +1,5 @@
 import { ActiveBuff, Monster, SkillName, MonsterStatusEffect, InventorySlot } from '../../../types';
-import { ITEMS, FIRE_FLASK_DATA } from '../../../constants';
+import {  ITEMS, FIRE_FLASK_DATA  } from '../../../constants';
 import { calculateAccuracy, DamageCalculationResult } from './combatUtils';
 
 export const calculateFlaskDamage = (

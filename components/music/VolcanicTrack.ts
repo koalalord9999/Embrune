@@ -1,21 +1,37 @@
 import * as NOTES from '../../constants/musicScore';
-import { mulberry32, getTileSeed } from '../../prototyping/prng';
+import { mulberry32, xmur3 } from '../../utils/prng';
 import { MusicTrackMetadata } from '../../hooks/useMusicEngine';
 
 export const getVolcanicScore = (track: MusicTrackMetadata): string => {
-    const rng = mulberry32(getTileSeed(track.id.length, track.name.length + (track.style.length * 83))); 
+    // Generate a robust seed based on the track ID string
+    const seed = xmur3(track.id)();
+    const rng = mulberry32(seed);
+    
     let score = "";
     const totalDuration = 240000; 
-    
-    const bpm = 112;
+
+    // --- CHAOS SEEDING: CORE PARAMETERS ---
+    // Intense, driving tempo: 105 - 145 bpm
+    const bpm = 105 + Math.floor(rng() * 41);
     const beat = 60000 / bpm;
     const stepMs = beat / 4; 
 
-    const progression = [
-        [NOTES.C2, NOTES.Db2, NOTES.E2, NOTES.G2], // C Phrygian Dominant fragment
-        [NOTES.Db2, NOTES.E2, NOTES.G2, NOTES.Bb2], // Db Diminished
-        [NOTES.C2, NOTES.Db2, NOTES.E2, NOTES.G2]
+    // Dynamic Scale Selection (Phrygian/Diminished)
+    const scales = [
+        [NOTES.C2, NOTES.Db2, NOTES.E2, NOTES.G2, NOTES.Ab2, NOTES.Bb2], // Phrygian Dominant
+        [NOTES.D2, NOTES.Eb2, NOTES.F2, NOTES.Gb2, NOTES.Ab2, NOTES.A2], // Diminished
+        [NOTES.A2, NOTES.Bb2, NOTES.Cs3, NOTES.D3, NOTES.E3, NOTES.F3, NOTES.G3], // Hijaz
     ];
+    const scale = scales[Math.floor(rng() * scales.length)];
+
+    // Dynamic Instrument Selection
+    const leadInstruments = ['epic_brass', 'french_horn', 'synth_lead', 'piano_forte'];
+    const padInstruments = ['strings_staccato', 'choir_aahs', 'strings_legato'];
+    const bassInstruments = ['timpani', 'fretless_bass'];
+    
+    const leadInstr = leadInstruments[Math.floor(rng() * leadInstruments.length)];
+    const padInstr = padInstruments[Math.floor(rng() * padInstruments.length)];
+    const bassInstr = bassInstruments[Math.floor(rng() * bassInstruments.length)];
 
     for (let t = 0; t < totalDuration; t += stepMs) {
         const step = Math.floor(t / stepMs);
@@ -25,12 +41,10 @@ export const getVolcanicScore = (track: MusicTrackMetadata): string => {
         const phase = t / totalDuration;
         
         const isIntro = phase < 0.1;
-        const isDev = phase >= 0.1 && phase < 0.4;
         const isPeak = phase >= 0.4 && phase < 0.8;
         const isOutro = phase >= 0.8;
 
-        const currentChord = progression[bar % progression.length];
-        const root = currentChord[0];
+        const currentRoot = scale[bar % scale.length];
 
         // --- LAYER 1: LAVA AMBIENCE / ERUPTIONS ---
         if (step % 32 === 0) {
@@ -38,33 +52,37 @@ export const getVolcanicScore = (track: MusicTrackMetadata): string => {
             score += `${t}:noise:brown|dur:8|vol:${heatVol}|filter:300|attack:4|decay:4\n`;
             
             // Occasional "eruption" swell
-            if (isPeak && rng() < 0.2) {
-                score += `${t}:noise:brown|dur:2|vol:0.04|filter:150|attack:1.5|decay:0.5\n`;
+            if (isPeak && rng() < 0.3) {
+                score += `${t}:instr:timpani|freq:${NOTES.C1}|dur:2.0|vol:0.5\n`;
             }
         }
 
         // --- LAYER 2: THRASHING BASS ---
-        if (subStep % 2 === 0 && !isOutro && (isDev || isPeak)) {
-            const bassVol = isPeak ? 0.03 : 0.015;
-            const note = (step % 8 < 3) ? root : currentChord[1];
-            score += `${t}:osc:sawtooth|freq:${note / 2}|dur:0.2|vol:${bassVol}|filter:400|attack:0.01|decay:0.15\n`;
+        if (subStep % 2 === 0 && !isOutro && (isPeak || step % 16 < 8)) {
+            const bassVol = isPeak ? 0.4 : 0.25;
+            const note = (step % 8 < 3) ? currentRoot / 2 : currentRoot;
+            score += `${t}:instr:${bassInstr}|freq:${note}|dur:0.2|vol:${bassVol}\n`;
         }
 
-        // --- LAYER 3: AGGRESSIVE LEAD ---
-        let melodyChance = isPeak ? 0.85 : isDev ? 0.5 : 0.2;
-        if (isOutro) melodyChance = 0.1;
+        // --- LAYER 3: STACCATO STRINGS ---
+        if (step % 4 === 1 && isPeak) {
+             const chordNote = scale[(bar + 2) % scale.length];
+             score += `${t}:instr:strings_staccato|freq:${chordNote}|dur:0.2|vol:0.35\n`;
+        }
+
+        // --- LAYER 4: AGGRESSIVE BRASS LEAD ---
+        let melodyChance = isPeak ? 0.9 : isIntro ? 0.25 : 0.6;
+        if (isOutro) melodyChance = 0.15;
 
         if (rng() < melodyChance && (step % 4 === 0 || (isPeak && subStep === 1))) {
             const nRng = rng();
-            const noteIndex = Math.floor(nRng * currentChord.length);
-            let note = currentChord[noteIndex] * 2;
-            if (isPeak && nRng > 0.7) note *= 2;
+            const noteIndex = Math.floor(nRng * scale.length);
+            let note = scale[noteIndex] * (nRng > 0.6 ? 2 : 1);
+            if (isPeak && nRng > 0.8) note *= 2;
 
-            const leadVol = isPeak ? 0.03 : 0.018;
-            const filt = isPeak ? 4000 : 2000;
-            const type = (isPeak && nRng > 0.5) ? 'sawtooth' : 'triangle';
-            score += `${t}:osc:${type}|freq:${note}|dur:0.4|vol:${leadVol}|filter:${filt}|attack:0.01|decay:0.3\n`;
+            const leadVol = isPeak ? 0.5 : 0.35;
+            score += `${t}:instr:${leadInstr}|freq:${note}|dur:0.6|vol:${leadVol}\n`;
         }
     }
     return score;
-};
+};

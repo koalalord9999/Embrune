@@ -9,7 +9,7 @@ import { HERBLORE_RECIPES } from './herblore';
 interface LootTableItem {
     itemId?: string;
     tableId?: string;
-    chance: number | string; // A weight, not a percentage
+    chance: number | string | 'filler'; // A weight, percentage, or 'filler' to hit the total
     minQuantity?: number;
     maxQuantity?: number;
     noted?: boolean;
@@ -22,6 +22,27 @@ export interface LootRollResult {
 }
 
 type LootTable = LootTableItem[];
+
+const TABLE_TOTAL_WEIGHT = 10000;
+
+const parseChanceValue = (chance: number | string | 'filler'): number => {
+    if (chance === 'filler') return 0; // Handled separately
+    if (typeof chance === 'number') return chance;
+    if (typeof chance === 'string') {
+        const parts = chance.split('/');
+        if (parts.length === 2) {
+            const numerator = parseFloat(parts[0]);
+            const denominator = parseFloat(parts[1]);
+            if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+                // If it looks like a fraction (e.g. 1/32), we treat it as a fraction of 10,000
+                return (numerator / denominator) * TABLE_TOTAL_WEIGHT;
+            }
+        }
+        const numericValue = parseFloat(chance);
+        return isNaN(numericValue) ? 0 : numericValue;
+    }
+    return 0;
+};
 
 // Loot tables define weighted drops. The `rollOnLootTable` function will pick one.
 const LOOT_TABLES: Record<string, LootTable> = {
@@ -48,14 +69,14 @@ const LOOT_TABLES: Record<string, LootTable> = {
         { itemId: 'grimy_stonebloom', chance: 0.5 },
     ],
     global_gem_and_key_table: [
-        { itemId: 'uncut_sapphire', chance: 4822 },
-        { itemId: 'uncut_emerald', chance: 2893 },
-        { itemId: 'uncut_ruby', chance: 1447 },
-        { itemId: 'uncut_diamond', chance: 386 },
-        { itemId: 'strange_key_loop', chance: 50 }, // Approx 1/200
-        { itemId: 'strange_key_tooth', chance: 50 }, // Approx 1/200
-        { itemId: 'talisman_drop', chance: 313 }, // Approx 1/32
-        { tableId: 'super_rare_table', chance: 39 }, // Approx 1/256
+        { itemId: 'strange_key_loop', chance: '1/200' },
+        { itemId: 'strange_key_tooth', chance: '1/200' },
+        { itemId: 'talisman_drop', chance: '1/32' },
+        { tableId: 'super_rare_table', chance: '1/256' },
+        { itemId: 'uncut_emerald', chance: '3/10' }, // ~3000
+        { itemId: 'uncut_ruby', chance: '15/100' },  // ~1500
+        { itemId: 'uncut_diamond', chance: '4/100' }, // ~400
+        { itemId: 'uncut_sapphire', chance: 'filler' }, // Fills the remaining ~4800
     ],
     super_rare_table: [
         // Total table weight is 10,000
@@ -88,7 +109,7 @@ const LOOT_TABLES: Record<string, LootTable> = {
         { itemId: 'aquatite_full_helm', chance: 100 },
         { itemId: 'aquatite_kiteshield', chance: 100 },
         { itemId: 'aquatite_sword', chance: 100 },
-        
+
         // Nothing (2000 weight)
         { chance: 2000 },
     ],
@@ -108,32 +129,68 @@ const LOOT_TABLES: Record<string, LootTable> = {
         { itemId: 'diamond_lockpick', chance: 0.2, minQuantity: 1, maxQuantity: 3 }, // 1 in 5 chance
         { itemId: 'skeleton_key', chance: 0.01, minQuantity: 1, maxQuantity: 1 }, // 1 in 100 chance
     ],
-        affinity_robes_table: [
+    affinity_robes_table: [
         { itemId: 'affinity_hat', chance: 20 },
         { itemId: 'affinity_top', chance: 20 },
         { itemId: 'affinity_bottoms', chance: 20 },
         { itemId: 'affinity_gloves', chance: 20 },
         { itemId: 'affinity_boots', chance: 20 },
     ],
+    ancient_chest_master_table: [
+        // Weights based on OSRS Crystal Chest (128 base)
+        { itemId: 'pkg_coins_food', chance: '34/128' },
+        { itemId: 'pkg_runes', chance: '12/128' },
+        { itemId: 'pkg_gems', chance: '12/128' },
+        { itemId: 'pkg_bars', chance: '12/128' },
+        { itemId: 'pkg_key_halves', chance: '10/128' },
+        { itemId: 'pkg_mining', chance: '20/128' },
+        { itemId: 'pkg_fishing', chance: '8/128' },
+        { itemId: 'pkg_adamantite_square_shield', chance: '2/128' },
+        { itemId: 'pkg_runic_armor', chance: '1/128' },
+        { itemId: 'sunstone_bonus', chance: '17/128' },
+
+        // Rare slot (1/500)
+        { tableId: 'ancient_chest_aquatite_table', chance: '1/500' },
+    ],
+    ancient_chest_aquatite_table: [
+        { itemId: 'aquatite_sword', chance: 1 },
+        { itemId: 'aquatite_kiteshield', chance: 1 },
+        { itemId: 'aquatite_platebody', chance: 1 },
+        { itemId: 'aquatite_platelegs', chance: 1 },
+        { itemId: 'aquatite_full_helm', chance: 1 },
+    ],
+    fishing_casket_table: [
+        { itemId: 'coins', chance: 'filler', minQuantity: 20, maxQuantity: 640 },
+        { itemId: 'uncut_sapphire', chance: '24/128', minQuantity: 1, maxQuantity: 1 },
+        { itemId: 'uncut_emerald', chance: '16/128', minQuantity: 1, maxQuantity: 1 },
+        { itemId: 'uncut_ruby', chance: '8/128', minQuantity: 1, maxQuantity: 1 },
+        { itemId: 'uncut_diamond', chance: '2/128', minQuantity: 1, maxQuantity: 1 },
+        { itemId: 'verdant_talisman', chance: '8/128', minQuantity: 1, maxQuantity: 1 },
+        { itemId: 'strange_key_loop', chance: '1/128', minQuantity: 1, maxQuantity: 1 },
+        { itemId: 'strange_key_tooth', chance: '1/128', minQuantity: 1, maxQuantity: 1 },
+    ],
     ...THIEVING_STALL_LOOT_TABLES,
 };
 
-const parseChance = (chance: number | string): number => {
-    if (typeof chance === 'number') {
-        return chance;
-    }
+
+
+const parseChance = (chance: number | string | 'filler'): number => {
+    if (chance === 'filler') return 0; // Handled specially in rollOnLootTable
+    if (typeof chance === 'number') return chance;
     if (typeof chance === 'string') {
         const parts = chance.split('/');
         if (parts.length === 2) {
             const numerator = parseFloat(parts[0]);
             const denominator = parseFloat(parts[1]);
             if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
-                return numerator / denominator;
+                // Fractions are relative to the 10,000 standard base
+                return (numerator / denominator) * TABLE_TOTAL_WEIGHT;
             }
         }
+        const numericValue = parseFloat(chance);
+        return isNaN(numericValue) ? 0 : numericValue;
     }
-    console.warn('Invalid chance format:', chance);
-    return 0; // fallback
+    return 0;
 };
 
 /**
@@ -149,12 +206,36 @@ export const rollOnLootTable = (tableId: string): LootRollResult | string | null
         return null;
     }
 
-    const totalWeight = table.reduce((sum, item) => sum + parseChance(item.chance), 0);
+    // 1. First, identify if there is a filler and calculate the base weight
+    let nonFillerWeight = 0;
+    let fillerItem: LootTableItem | null = null;
+
+    for (const item of table) {
+        if (item.chance === 'filler') {
+            fillerItem = item;
+        } else {
+            nonFillerWeight += parseChance(item.chance);
+        }
+    }
+
+    // 2. Determine total weight (Standard is 10k, but we grow if the weights exceed 10k)
+    const totalWeight = (fillerItem || table.some(i => typeof i.chance === 'string'))
+        ? Math.max(TABLE_TOTAL_WEIGHT, nonFillerWeight)
+        : nonFillerWeight;
+
     const roll = Math.random() * totalWeight;
     let cumulativeWeight = 0;
 
+    // 3. Roll through the entries
     for (const item of table) {
-        cumulativeWeight += parseChance(item.chance);
+        let currentWeight = 0;
+        if (item.chance === 'filler') {
+            currentWeight = Math.max(0, TABLE_TOTAL_WEIGHT - nonFillerWeight);
+        } else {
+            currentWeight = parseChance(item.chance);
+        }
+
+        cumulativeWeight += currentWeight;
         if (roll < cumulativeWeight) {
             if (item.tableId) {
                 return rollOnLootTable(item.tableId);
@@ -162,7 +243,7 @@ export const rollOnLootTable = (tableId: string): LootRollResult | string | null
             if (!item.itemId) {
                 return null;
             }
-            // If it has quantity or noted, return an object. Otherwise, return string for backward compatibility.
+
             if (item.minQuantity || item.maxQuantity || item.noted) {
                 const min = item.minQuantity ?? 1;
                 const max = item.maxQuantity ?? min;

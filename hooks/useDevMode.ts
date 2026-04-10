@@ -1,7 +1,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useUIState } from './useUIState';
-import { REGIONS, MONSTERS } from '../constants';
+import {  REGIONS, MONSTERS  } from '../constants';
 import { POIS } from '../data/pois';
 import { POI, Region, Monster, MonsterType, SkillName, SpellElement, PlayerType } from '../types';
 
@@ -174,7 +174,7 @@ export const useDevMode = (deps: DevModeDependencies) => {
     const [showAllPois, setShowAllPois] = useState(false);
     
     const [devPanelState, setDevPanelState] = useState({
-        activeTab: 'cheats' as 'cheats' | 'items' | 'teleport' | 'game-manager' | 'monsters',
+        activeTab: 'cheats' as 'cheats' | 'items' | 'teleport' | 'game-manager' | 'monsters' | 'slayer',
         itemSearchTerm: '',
         selectedItemId: null as string | null,
         spawnQuantity: 1,

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { POIActivity, ResourceNodeState, SkillName, PlayerSkill, InventorySlot, ToolType, Equipment, Item } from '../types';
-import { INVENTORY_CAPACITY, ITEMS, rollOnLootTable, LootRollResult, LOG_HARDNESS, ORE_HARDNESS } from '../constants';
+import {  INVENTORY_CAPACITY, ITEMS, rollOnLootTable, LootRollResult, LOG_HARDNESS, ORE_HARDNESS  } from '../constants';
 import { POIS } from '../data/pois';
 import { useSoundEngine } from './useSoundEngine';
 import { useUIState } from './useUIState';
@@ -136,26 +136,76 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                             addXp(activity.skill, potentialLoot.xp);
                         }
                         
-                        // --- APPLE LOGIC ---
-                        // If chopping 'logs', 10% chance to get 'apple' instead.
+                        const { equipment, addLog, modifyItem, setEquipment, checkQuestProgressOnShear } = depsRef.current;
+                        
+                        // --- APPLE LOGIC & WOODSMAN RING ---
                         let itemToGive = potentialLoot.itemId;
-                        if (activity.skill === SkillName.Woodcutting && itemToGive === 'logs') {
-                            if (Math.random() < 0.10) {
+                        let shouldDecrementResource = potentialLoot.itemId !== 'rune_essence';
+                        
+                        if (activity.skill === SkillName.Woodcutting) {
+                            const ring = equipment.ring;
+                            // Check item string directly against the literal itemId
+                            const ringId = ring?.itemId;
+                            const hasWoodsman = ringId === 'ring_of_the_woodsman' && (ring!.charges ?? 0) > 0;
+                            let rolledApple = false;
+
+                            if (itemToGive === 'logs' && Math.random() < 0.10) {
                                 itemToGive = 'apple';
+                                rolledApple = true;
                                 addLog("You found an apple in the tree!");
                             }
+                            
+                            if (hasWoodsman && !rolledApple) {
+                                if (Math.random() < 0.25) {
+                                    modifyItem(itemToGive, 1); // Extra log
+                                    shouldDecrementResource = false;
+                                    addLog("Your Ring of the Woodsman perfectly harvests the tree, saving its vitality!");
+                                    
+                                    const newCharges = (ring!.charges ?? 1) - 1;
+                                    if (newCharges > 0) {
+                                        setEquipment(prev => ({ ...prev, ring: { ...ring!, charges: newCharges } }));
+                                    } else {
+                                        setEquipment(prev => ({ ...prev, ring: null }));
+                                        addLog("Your Ring of the Woodsman shatters into sawdust.");
+                                    }
+                                }
+                            } else if (hasWoodsman && rolledApple) {
+                                shouldDecrementResource = false;
+                            }
                         }
-                        // -------------------
+                        
+                        // --- PROSPECTING RING (+1 ORE) ---
+                        if (activity.skill === SkillName.Mining) {
+                            const ring = equipment.ring;
+                            const ringId = ring?.itemId;
+                            const hasProspecting = ringId === 'ring_of_prospecting' && (ring!.charges ?? 0) > 0;
+                            if (hasProspecting && Math.random() < 0.10) {
+                                modifyItem(itemToGive, 1);
+                                addLog("Your Ring of Prospecting extracts an extra ore!");
+                                const newCharges = (ring!.charges ?? 1) - 1;
+                                if (newCharges > 0) {
+                                    setEquipment(prev => ({ ...prev, ring: { ...ring!, charges: newCharges } }));
+                                } else {
+                                    setEquipment(prev => ({ ...prev, ring: null }));
+                                    addLog("Your Ring of Prospecting breaks into pieces.");
+                                }
+                            }
+                        }
+                        // -----------------------------------
 
                         modifyItem(itemToGive, 1);
                         
                         if (itemToGive === 'wool') checkQuestProgressOnShear();
 
-                        if (potentialLoot.itemId !== 'rune_essence') {
+                        if (shouldDecrementResource) {
                             setResourceNodeStates(prev => {
                                 const node = prev[nodeId];
                                 if (!node) return prev;
-                                const newResources = node.resources - 1;
+                                
+                                // FIX: Safety check for NaN or undefined resources from old saves
+                                const currentResources = (typeof node.resources !== 'number' || isNaN(node.resources)) ? 1 : node.resources;
+                                const newResources = currentResources - 1;
+                                
                                 if (newResources <= 0) {
                                     setActiveSkilling(null);
                                     return { ...prev, [nodeId]: { resources: 0, respawnTimer: activity.respawnTime } };
@@ -170,7 +220,11 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                 // Gem finding logic for mining
                 if (activity.skill === SkillName.Mining) {
                     const { equipment, addLog, modifyItem } = depsRef.current;
-                    const gemChance = equipment.necklace?.itemId === 'amulet_of_fate' ? 1 / 625 : 1 / 1000;
+                    const ring = equipment.ring;
+                    const hasProspecting = ring?.itemId === 'ring_of_prospecting' && (ring.charges ?? 0) > 0;
+                    
+                    let gemChance = equipment.necklace?.itemId === 'amulet_of_fate' ? 1 / 625 : 1 / 1000;
+                    if (hasProspecting) gemChance *= 1.25;
 
                     if (Math.random() < gemChance) {
                         if (equipment.ring?.itemId === 'ring_of_greed') {
@@ -296,7 +350,7 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
 
     const initializeNodeState = useCallback((nodeId: string, activity: SkillingActivity | GroundItemActivity) => {
         setResourceNodeStates(prev => {
-            if (prev[nodeId]) return prev;
+            if (prev[nodeId] && typeof (prev[nodeId] as any).resources === 'number') return prev;
             
             if (activity.type === 'ground_item') {
                 return {
@@ -506,9 +560,12 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                 let changed = false;
                 const newStates = { ...prev };
                 for (const nodeId in newStates) {
-                    if (newStates[nodeId].respawnTimer > 0) {
+                    const node = newStates[nodeId];
+                    const isDepleted = node.resources <= 0 || typeof node.resources !== 'number' || isNaN(node.resources);
+                    
+                    if (node.respawnTimer > 0) {
                         changed = true;
-                        const newTimer = newStates[nodeId].respawnTimer - 1000;
+                        const newTimer = node.respawnTimer - 1000;
                         newStates[nodeId].respawnTimer = Math.max(0, newTimer);
 
                         if (newTimer <= 0) {
@@ -522,6 +579,21 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                                     const { min, max } = activity.resourceCount;
                                     newStates[nodeId].resources = Math.floor(Math.random() * (max - min + 1)) + min;
                                 }
+                            }
+                        }
+                    } else if (isDepleted) {
+                        // KICKSTARTER: If a node is depleted but the timer is at 0, 
+                        // it might be stuck from a corrupted save Load. Check if it should respawn.
+                        const poi = Object.values(POIS).find(p => p.activities.some(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId));
+                        const activity = poi?.activities.find(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId);
+                        
+                        if (activity && (activity as any).respawnTime > 0) {
+                             changed = true;
+                             if (activity.type === 'ground_item') {
+                                newStates[nodeId].resources = 1;
+                            } else if (activity.type === 'skilling') {
+                                const { min, max } = activity.resourceCount;
+                                newStates[nodeId].resources = Math.floor(Math.random() * (max - min + 1)) + min;
                             }
                         }
                     }

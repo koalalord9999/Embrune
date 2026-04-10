@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { InventorySlot, PlayerSkill, PlayerQuestState, SkillName, WeaponType } from '../../../types';
-import { SMITHING_RECIPES, ITEMS, getIconClassName } from '../../../constants';
+import {  SMITHING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../constants';
 import Button from '../../common/Button';
 import { ContextMenuOption } from '../../common/ContextMenu';
 import { MakeXPrompt, ContextMenuState } from '../../../hooks/useUIState';
@@ -136,7 +136,7 @@ const SmithingView: React.FC<SmithingViewProps> = ({ smithingType, inventory, sk
                             onContextMenu={(e) => createSmeltingContextMenu(e, recipe)}
                         >
                             <div className="flex items-center gap-3 mb-2">
-                                <img src={item.iconUrl} alt={item.name} className={`w-10 h-10 bg-black/30 p-1 rounded ${getIconClassName(item)}`} />
+                                <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-10 h-10 bg-black/30 p-1 rounded ${getIconClassName(item)}`} />
                                 <h3 className="text-lg font-semibold text-yellow-300">{item.name}</h3>
                             </div>
                             <div className="text-sm space-y-1 mb-3">
@@ -188,7 +188,7 @@ const SmithingView: React.FC<SmithingViewProps> = ({ smithingType, inventory, sk
                                     onContextMenu={(e) => createSmithingContextMenu(e, recipe)}
                                 >
                                     <div className="flex items-center gap-3 mb-2">
-                                        <img src={item.iconUrl} alt={item.name} className={`w-10 h-10 bg-black/30 p-1 rounded ${getIconClassName(item)}`} />
+                                        <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-10 h-10 bg-black/30 p-1 rounded ${getIconClassName(item)}`} />
                                         <h3 className="text-lg font-semibold text-yellow-300">{item.name}</h3>
                                     </div>
                                     <div className="text-sm space-y-1 mb-3">

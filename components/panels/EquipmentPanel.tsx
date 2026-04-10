@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Equipment, InventorySlot, Item } from '../../types';
-import { ITEMS, getIconClassName } from '../../constants';
+import {  ITEMS, getIconClassName, getIconUrl  } from '../../constants';
 import Button from '../common/Button';
 import { useUIState, TooltipState, ContextMenuState } from '../../hooks/useUIState';
 import { ContextMenuOption } from '../common/ContextMenu';
@@ -17,24 +17,24 @@ interface EquipmentPanelProps {
     setTooltip: (tooltip: TooltipState | null) => void;
     ui: ReturnType<typeof useUIState>;
     addLog: (message: string) => void;
-    onExamine: (item: Item) => void;
+    onExamine: (item: Item, quantity?: number) => void;
     isTouchSimulationEnabled: boolean;
     isOneClickMode: boolean;
     onTeleport: (itemSlot: InventorySlot, slotIdentifier: number | keyof Equipment, from: 'inventory' | keyof Equipment, poiId: string) => void;
 }
 
 const SLOT_PLACEHOLDERS: Record<keyof Equipment, string> = {
-    head: 'https://api.iconify.design/game-icons:light-helm.svg',
-    cape: 'https://api.iconify.design/game-icons:cloak.svg',
-    necklace: 'https://api.iconify.design/game-icons:gem-pendant.svg',
-    ammo: 'https://api.iconify.design/game-icons:broadhead-arrow.svg',
-    weapon: 'https://api.iconify.design/game-icons:broadsword.svg',
-    body: 'https://api.iconify.design/game-icons:leather-vest.svg',
-    shield: 'https://api.iconify.design/game-icons:shield.svg',
-    legs: 'https://api.iconify.design/game-icons:armored-pants.svg',
-    gloves: 'https://api.iconify.design/game-icons:gloves.svg',
-    boots: 'https://api.iconify.design/game-icons:leather-boot.svg',
-    ring: 'https://api.iconify.design/game-icons:ring.svg',
+    head: 'light-helm',
+    cape: 'cloak',
+    necklace: 'gem-pendant',
+    ammo: 'broadhead-arrow',
+    weapon: 'broadsword',
+    body: 'leather-vest',
+    shield: 'shield',
+    legs: 'armored-pants',
+    gloves: 'gloves',
+    boots: 'leather-boot',
+    ring: 'ring',
 };
 
 interface EquipmentSlotDisplayProps {
@@ -44,7 +44,7 @@ interface EquipmentSlotDisplayProps {
     setTooltip: (tooltip: TooltipState | null) => void;
     setContextMenu: (menu: ContextMenuState | null) => void;
     addLog: (message: string) => void;
-    onExamine: (item: Item) => void;
+    onExamine: (item: Item, quantity?: number) => void;
     isTouchSimulationEnabled: boolean;
     isOneClickMode: boolean;
     onTeleport: (itemSlot: InventorySlot, slotIdentifier: number | keyof Equipment, from: 'inventory' | keyof Equipment, poiId: string) => void;
@@ -117,7 +117,7 @@ const EquipmentSlotDisplay: React.FC<EquipmentSlotDisplayProps> = ({ slotKey, it
             });
         }
         
-        options.push({ label: 'Examine', onClick: () => performAction(() => onExamine(item)) });
+        options.push({ label: 'Examine', onClick: () => performAction(() => onExamine(item, itemSlot.quantity)) });
         setContextMenu({ options, triggerEvent: eventForMenu, isTouchInteraction: 'touches' in e || 'changedTouches' in e, title: getDisplayName(itemSlot) });
     };
 
@@ -144,23 +144,23 @@ const EquipmentSlotDisplay: React.FC<EquipmentSlotDisplayProps> = ({ slotKey, it
         >
             {item ? (
                 <>
-                    <img src={item.iconUrl} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+                    <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
                     {itemSlot?.statsOverride?.poisoned && (
                         <img 
-                            src="https://api.iconify.design/game-icons:boiling-bubbles.svg" 
+                            src={getIconUrl("boiling-bubbles")} 
                             alt="Poisoned"
                             className="poison-overlay-icon item-icon-uncut-emerald"
                             title="Poisoned"
                         />
                     )}
                     {item.stackable && itemSlot && itemSlot.quantity > 0 && (
-                        <span className="absolute bottom-0 right-1 text-xs font-bold text-yellow-300" style={{ textShadow: '1px 1px 1px black' }}>
+                        <span className="absolute bottom-0 right-1 text-lg font-pixel-rpg font-bold text-yellow-300" style={{ textShadow: '1px 1px 1px black' }}>
                             {itemSlot.quantity > 999 ? `${Math.floor(itemSlot.quantity/1000)}k` : itemSlot.quantity.toLocaleString()}
                         </span>
                     )}
                 </>
             ) : (
-                <img src={SLOT_PLACEHOLDERS[slotKey]} alt={slotKey} className="w-8 h-8 opacity-20 filter invert" />
+                <img src={getIconUrl(SLOT_PLACEHOLDERS[slotKey])} alt={slotKey} className="w-8 h-8 opacity-20 filter invert" />
             )}
         </div>
     );
@@ -208,15 +208,30 @@ const EquipmentPanel: React.FC<EquipmentPanelProps> = (props) => {
                 </div>
             </div>
             
-            <div className="mt-auto pt-4 p-2 bg-gray-900 rounded-md border border-gray-600 flex justify-around gap-2">
-                <button onClick={() => ui.setIsEquipmentStatsViewOpen(true)} className="flex-1 text-center py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded border border-gray-500 transition-colors">
-                    Equipment Stats
+            <div className="mt-auto pt-2 p-1 bg-gray-900 rounded-md border border-gray-600 grid grid-cols-3 gap-1 font-pixel-rpg">
+                <button 
+                    onClick={() => ui.setIsEquipmentStatsViewOpen(true)} 
+                    onMouseEnter={(e) => setTooltip({ content: <p className="font-bold text-yellow-300">Equipment Stats</p>, position: { x: e.clientX, y: e.clientY } })}
+                    onMouseLeave={() => setTooltip(null)}
+                    className="text-center py-2 text-lg bg-gray-700 hover:bg-gray-600 rounded border border-gray-500 transition-colors leading-none truncate"
+                >
+                    Stats
                 </button>
-                 <button onClick={() => ui.setItemsOnDeathData({ inventory, equipment, coins })} className="flex-1 text-center py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded border border-gray-500 transition-colors">
-                    Items Kept on Death
+                 <button 
+                    onClick={() => ui.setItemsOnDeathData({ inventory, equipment, coins })} 
+                    onMouseEnter={(e) => setTooltip({ content: <p className="font-bold text-yellow-300">Items Kept on Death</p>, position: { x: e.clientX, y: e.clientY } })}
+                    onMouseLeave={() => setTooltip(null)}
+                    className="text-center py-2 text-lg bg-gray-700 hover:bg-gray-600 rounded border border-gray-500 transition-colors leading-none truncate"
+                >
+                    Death
                 </button>
-                <button onClick={() => ui.setPriceCheckerInventory(inventory)} className="flex-1 text-center py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded border border-gray-500 transition-colors">
-                    Price Checker
+                <button 
+                    onClick={() => ui.setPriceCheckerInventory(inventory)} 
+                    onMouseEnter={(e) => setTooltip({ content: <p className="font-bold text-yellow-300">Price Checker</p>, position: { x: e.clientX, y: e.clientY } })}
+                    onMouseLeave={() => setTooltip(null)}
+                    className="text-center py-2 text-lg bg-gray-700 hover:bg-gray-600 rounded border border-gray-500 transition-colors leading-none truncate"
+                >
+                    Price
                 </button>
             </div>
         </div>

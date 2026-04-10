@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Slot, PlayerType, PlayerSkill, SkillName } from '../../types';
-import { SKILL_ICONS, SKILL_DISPLAY_ORDER, XP_TABLE, getSkillColorClass } from '../../constants';
+import {  SKILL_ICONS, SKILL_DISPLAY_ORDER, XP_TABLE, getSkillColorClass, ALL_SKILLS, getIconUrl  } from '../../constants';
 import Button from '../common/Button';
 import DeadCharacterView from './DeadCharacterView';
 import { TooltipState } from '../../hooks/useUIState';
@@ -11,7 +11,7 @@ interface SaveSlotScreenProps {
     onCreateNew: (slotId: number) => void;
     onDelete: (slotId: number) => void;
     onExport: (slotId: number) => void;
-    onImport: (slotId: number) => void;
+    onImport: () => void;
     assets: Record<string, string> | null;
     setTooltip: (tooltip: TooltipState | null) => void;
 }
@@ -21,6 +21,13 @@ const formatDate = (date: Date | string | undefined): string => {
     const d = typeof date === 'string' ? new Date(date) : date;
     if (isNaN(d.getTime())) return 'N/A';
     return d.toLocaleString();
+};
+
+const getLevel = (skill: PlayerSkill): number => {
+    if (skill.level !== undefined) return skill.level;
+    // Classic XP Table calculation: find first XP value greater than current XP
+    const level = XP_TABLE.findIndex(xpVal => xpVal > skill.xp);
+    return level === -1 ? 99 : level;
 };
 
 const SkillDisplay: React.FC<{
@@ -33,10 +40,12 @@ const SkillDisplay: React.FC<{
         return <div className="bg-gray-900/50 p-2 h-10 rounded-md" />;
     }
 
+    const level = getLevel(skill);
+
     const handleMouseEnter = (e: React.MouseEvent) => {
-        const isMaxLevel = skill.level >= 99;
-        const xpForCurrentLevel = XP_TABLE[skill.level - 1] ?? 0;
-        const xpForNextLevel = isMaxLevel ? skill.xp : (XP_TABLE[skill.level] ?? skill.xp);
+        const isMaxLevel = level >= 99;
+        const xpForCurrentLevel = XP_TABLE[level - 1] ?? 0;
+        const xpForNextLevel = isMaxLevel ? skill.xp : (XP_TABLE[level] ?? skill.xp);
         
         const xpInLevel = skill.xp - xpForCurrentLevel;
         const xpToNextLevel = xpForNextLevel - xpForCurrentLevel;
@@ -70,6 +79,14 @@ const SkillDisplay: React.FC<{
         });
     };
 
+    useEffect(() => {
+        return () => {
+             // Only clear if this specific skill was the one in the tooltip
+             // But simpler to just clear it on unmount for this view
+             setTooltip(null);
+        };
+    }, []);
+
     return (
         <div
             className="bg-gray-900/50 p-2 h-10 rounded-md flex items-center gap-2 cursor-pointer hover:bg-gray-700/50 transition-colors"
@@ -79,21 +96,33 @@ const SkillDisplay: React.FC<{
             <div
                 className={`w-6 h-6 flex-shrink-0 ${getSkillColorClass(skill.name)}`}
                 style={{
-                    maskImage: `url(${SKILL_ICONS[skill.name]})`,
+                    maskImage: `url(${getIconUrl(SKILL_ICONS[skill.name])})`,
                     maskSize: 'contain',
                     maskRepeat: 'no-repeat',
                     maskPosition: 'center',
-                    WebkitMaskImage: `url(${SKILL_ICONS[skill.name]})`,
+                    WebkitMaskImage: `url(${getIconUrl(SKILL_ICONS[skill.name])})`,
                     WebkitMaskSize: 'contain',
                     WebkitMaskRepeat: 'no-repeat',
                     WebkitMaskPosition: 'center',
                 }}
             />
             <div className="flex-1 text-right leading-none">
-                <span className="text-base font-bold align-super text-white">{skill.level}</span>
+                <span className="text-base font-bold align-super text-white">{level}</span>
             </div>
         </div>
     );
+};
+
+const getCombatLevel = (skills: { name: string; xp: number; level?: number }[]): number => {
+    const getLvl = (n: string) => {
+        const s = skills.find(s => s.name === n);
+        return s ? getLevel(s as PlayerSkill) : 1;
+    };
+    const atk = getLvl('Attack'); const str = getLvl('Strength'); const def = getLvl('Defence');
+    const rng = getLvl('Ranged'); const mag = getLvl('Magic'); const pry = getLvl('Prayer'); const hp = getLvl('Hitpoints');
+    const b = 0.25 * (def + hp + Math.floor(pry / 2));
+    const ml = 0.325 * (atk + str); const rg = 0.325 * Math.floor(rng * 1.5); const mg = 0.325 * Math.floor(mag * 1.5);
+    return Math.floor(b + Math.max(ml, rg, mg));
 };
 
 
@@ -121,7 +150,6 @@ const SaveSlotScreen: React.FC<SaveSlotScreenProps> = ({ slots, onSelectSlot, on
     const selectedSlot = useMemo(() => slots.find(s => s.slotId === selectedSlotId), [slots, selectedSlotId]);
     const isSelectedEmpty = !selectedSlot?.data;
     const isSelectedDeadHardcore = selectedSlot?.data?.isDead && selectedSlot?.metadata?.playerType === PlayerType.Hardcore;
-    const isTechDemoSlot = selectedSlotId === 5; // Slot 6 is index 5
 
     const handleDelete = () => {
         if (confirmDelete === null || confirmDeleteText !== selectedSlot?.metadata?.username) {
@@ -133,6 +161,7 @@ const SaveSlotScreen: React.FC<SaveSlotScreenProps> = ({ slots, onSelectSlot, on
         onDelete(confirmDelete);
         setConfirmDelete(null);
         setConfirmDeleteText('');
+        setTooltip(null);
     };
 
     return (
@@ -145,12 +174,11 @@ const SaveSlotScreen: React.FC<SaveSlotScreenProps> = ({ slots, onSelectSlot, on
                         <DeadCharacterView slot={selectedSlot!} onDelete={() => setConfirmDelete(selectedSlotId)} setTooltip={setTooltip} />
                     ) : isSelectedEmpty ? (
                         <div className="flex flex-col items-center gap-4">
-                            <h2 className="text-4xl font-bold text-gray-400">{isTechDemoSlot ? "Proof of Concept" : "Empty Slot"}</h2>
-                            {isTechDemoSlot && <p className="text-yellow-400 mb-4">Warning: This is an experimental Isometric Engine prototype.</p>}
+                            <h2 className="text-4xl font-bold text-gray-400">Empty Slot</h2>
                             <Button onClick={() => onCreateNew(selectedSlotId)} size="md" variant="primary">
-                                {isTechDemoSlot ? "Enter Simulation" : "Create New Character"}
+                                Create New Character
                             </Button>
-                            {!isTechDemoSlot && <Button onClick={() => onImport(selectedSlotId)} size="md" variant="secondary">Import Save</Button>}
+                            <Button onClick={() => onImport()} size="md" variant="secondary">Import Save</Button>
                             <a
                                 href="https://discord.gg/vFUhYWWafx"
                                 target="_blank"
@@ -169,31 +197,42 @@ const SaveSlotScreen: React.FC<SaveSlotScreenProps> = ({ slots, onSelectSlot, on
                     ) : selectedSlot && selectedSlot.metadata ? (
                         <div className="animate-fade-in space-y-2 w-full max-w-lg">
                             
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm my-2 text-left">
-                                <p>Combat Level:</p><p className="font-semibold text-right">{selectedSlot.metadata.combatLevel}</p>
-                                <p>Location:</p><p className="font-semibold text-right">{selectedSlot.metadata.currentPoiName}</p>
-                                <p>Game Mode:</p><p className="font-semibold text-right">{selectedSlot.metadata.playerType}</p>
-                            </div>
-                            
-                            <div className="p-4 bg-black/20 rounded-lg border border-gray-700">
-                                <h3 className="font-bold text-yellow-300 mb-2">Total Level: {selectedSlot.metadata.totalLevel}</h3>
-                                {selectedSlot.data.skills ? (
-                                    <div className="grid grid-cols-4 gap-1">
-                                        {SKILL_DISPLAY_ORDER.map(skillName => (
-                                            <SkillDisplay key={skillName} skillName={skillName} skills={selectedSlot.data.skills} setTooltip={setTooltip} />
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-500">Skill data not available.</p>
-                                )}
-                            </div>
-                            
+                            {(() => {
+                                const displaySkills = selectedSlot.data.skills || (selectedSlot.data._v === 2 && Array.isArray(selectedSlot.data.s) 
+                                    ? ALL_SKILLS.map((skillDef, i) => ({ name: skillDef.name, xp: selectedSlot.data.s[i] || 0 }))
+                                    : null);
+                                const combatLvl = displaySkills ? getCombatLevel(displaySkills) : (selectedSlot.metadata.combatLevel || 3);
+
+                                return (
+                                    <>
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm my-2 text-left">
+                                            <p>Combat Level:</p><p className="font-semibold text-right">{combatLvl}</p>
+                                            <p>Location:</p><p className="font-semibold text-right">{selectedSlot.metadata.currentPoiName}</p>
+                                            <p>Game Mode:</p><p className="font-semibold text-right">{selectedSlot.metadata.playerType}</p>
+                                        </div>
+                                        
+                                        <div className="p-4 bg-black/20 rounded-lg border border-gray-700">
+                                            <h3 className="font-bold text-yellow-300 mb-2">Total Level: {selectedSlot.metadata.totalLevel}</h3>
+                                            {displaySkills ? (
+                                                <div className="grid grid-cols-4 gap-1">
+                                                    {SKILL_DISPLAY_ORDER.map(skillName => (
+                                                        <SkillDisplay key={skillName} skillName={skillName} skills={displaySkills as any} setTooltip={setTooltip} />
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-gray-500">Skill data not available.</p>
+                                            )}
+                                        </div>
+                                    </>
+                                );
+                            })()}
+
                             <div className="pt-2 flex flex-col items-center gap-2 w-full">
                                 <Button onClick={() => onSelectSlot(selectedSlotId)} size="md" variant="primary">Play</Button>
                                 <div className="flex justify-between items-center w-full max-w-xs">
                                     <div className="flex gap-2">
                                         <Button onClick={() => onExport(selectedSlotId)} size="sm" variant="secondary">Export</Button>
-                                        <Button onClick={() => onImport(selectedSlotId)} size="sm" variant="secondary">Import</Button>
+                                        <Button onClick={() => onImport()} size="sm" variant="secondary">Import</Button>
                                         <Button onClick={() => setConfirmDelete(selectedSlotId)} size="sm" variant="secondary">Delete</Button>
                                     </div>
                                     <a
@@ -223,13 +262,12 @@ const SaveSlotScreen: React.FC<SaveSlotScreenProps> = ({ slots, onSelectSlot, on
                         const isSelected = slot.slotId === selectedSlotId;
                         const isEmpty = !slot.data;
                         const isDeadHardcore = slot.data?.isDead && slot.metadata?.playerType === PlayerType.Hardcore;
-                        const isTechDemo = slot.slotId === 5;
                         const metadata = slot.metadata;
 
                         return (
                             <button
                                 key={slot.slotId}
-                                onClick={() => { setSelectedSlotId(slot.slotId); setConfirmDelete(null); setConfirmDeleteText(''); }}
+                                onClick={() => { setSelectedSlotId(slot.slotId); setConfirmDelete(null); setConfirmDeleteText(''); setTooltip(null); }}
                                 className={`w-full p-3 rounded-lg border-2 text-left transition-all duration-200 ${
                                     isSelected ? 'bg-yellow-800/50 border-yellow-500 scale-105' : 
                                     isEmpty ? 'bg-black/30 border-dashed border-gray-600 hover:bg-gray-700/50' : 
@@ -237,12 +275,17 @@ const SaveSlotScreen: React.FC<SaveSlotScreenProps> = ({ slots, onSelectSlot, on
                                     'bg-gray-800/50 border-gray-600 hover:bg-gray-700/50'
                                 }`}
                             >
-                                <p className={`font-bold ${isTechDemo ? 'text-cyan-400' : isEmpty ? 'text-gray-500' : isDeadHardcore ? 'text-red-300' : 'text-yellow-300'}`}>
-                                    {isTechDemo ? "Proof of Concept" : `Slot ${slot.slotId + 1}: ${metadata?.username || 'Empty Slot'}`}
+                                <p className={`font-bold ${isEmpty ? 'text-gray-500' : isDeadHardcore ? 'text-red-300' : 'text-yellow-300'}`}>
+                                    {`Slot ${slot.slotId + 1}: ${metadata?.username || 'Empty Slot'}`}
                                 </p>
                                 {!isEmpty && metadata && (
                                     <div className="text-xs mt-1 text-gray-400 space-y-0.5">
-                                        <p>Lvl: {metadata.combatLevel} (Total: {metadata.totalLevel})</p>
+                                        <p>Lvl: {(() => {
+                                            const displaySkills = slot.data.skills || (slot.data._v === 2 && Array.isArray(slot.data.s) 
+                                                ? ALL_SKILLS.map((skillDef, i) => ({ name: skillDef.name, xp: slot.data.s[i] || 0 }))
+                                                : null);
+                                            return displaySkills ? getCombatLevel(displaySkills) : (metadata.combatLevel || 3);
+                                        })()} (Total: {metadata.totalLevel})</p>
                                         <p>Location: {metadata.currentPoiName}</p>
                                         <p>Last Played: {formatDate(slot.updatedAt)}</p>
                                     </div>

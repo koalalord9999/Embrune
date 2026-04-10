@@ -1,5 +1,6 @@
 import { POI, SkillName } from '../../types';
 import { CIVILLIAN_DIALOGUE } from '../../constants/dialogue';
+import { KAELEN_DIALOGUE } from '../dialogues/slayerDialogues';
 
 export const silverhavenPois: Record<string, POI> = {
     silverhaven_gates: {
@@ -36,17 +37,17 @@ export const silverhavenPois: Record<string, POI> = {
                 dialogueType: 'random',
             },
             { type: 'water_source', name: 'Collect Water' },
-            { type: 'npc', name: 'Man', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Man', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
-            { type: 'npc', name: 'Woman', icon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', dialogue: { start: { npcName: 'Woman', npcIcon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
+            { type: 'npc', name: 'Man', icon: 'person', dialogue: { start: { npcName: 'Man', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
+            { type: 'npc', name: 'Woman', icon: 'woman-elf-face', dialogue: { start: { npcName: 'Woman', npcIcon: 'woman-elf-face', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
             {
                 type: 'npc',
                 name: 'Citizen',
-                icon: 'https://api.iconify.design/game-icons:person.svg',
+                icon: 'person',
                 pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' },
                 dialogue: {
                      start: {
                         npcName: 'Citizen',
-                        npcIcon: 'https://api.iconify.design/game-icons:person.svg',
+                        npcIcon: 'person',
                         text: CIVILLIAN_DIALOGUE.silverhaven.join('\n\n'),
                         responses: []
                     }
@@ -68,11 +69,11 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Altar',
-                icon: 'https://api.iconify.design/game-icons:altar.svg',
+                icon: 'altar',
                 dialogue: {
                     start: {
                         npcName: 'Altar',
-                        npcIcon: 'https://api.iconify.design/game-icons:altar.svg',
+                        npcIcon: 'altar',
                         text: 'You feel a divine presence. Your prayer may be answered here.',
                         responses: [
                             { text: 'Pray', actions: [{ type: 'restore_prayer' }] },
@@ -94,8 +95,8 @@ export const silverhavenPois: Record<string, POI> = {
         connections: ['silverhaven_square', 'silverhaven_bank', 'silverhaven_general_store'],
         activities: [
             { type: 'thieving_stall', id: 'silverhaven_trade_district_gem_stall', name: 'Steal from Gem Stall', lootTableId: 'thieving_stall_gem' },
-            { type: 'npc', name: 'Man', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Man', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
-            { type: 'npc', name: 'Woman', icon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', dialogue: { start: { npcName: 'Woman', npcIcon: 'https://api.iconify.design/game-icons:woman-elf-face.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
+            { type: 'npc', name: 'Man', icon: 'person', dialogue: { start: { npcName: 'Man', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
+            { type: 'npc', name: 'Woman', icon: 'woman-elf-face', dialogue: { start: { npcName: 'Woman', npcIcon: 'woman-elf-face', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'woman', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
             {
                 type: 'npc',
                 name: 'Merchant Theron',
@@ -241,7 +242,7 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Archmage Theron',
-                icon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+                icon: 'wizard-face',
                 startNode: 'theron_default',
                 questTopics: ['the_arcane_awakening'],
                 conditionalGreetings: [
@@ -270,7 +271,7 @@ export const silverhavenPois: Record<string, POI> = {
                 dialogue: {
                     theron_default: {
                         npcName: 'Archmage Theron',
-                        npcIcon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+                        npcIcon: 'wizard-face',
                         text: "Hmm... The weave of magic is a delicate thing. One must always be vigilant.",
                         responses: [],
                     }
@@ -395,7 +396,7 @@ export const silverhavenPois: Record<string, POI> = {
         description: 'A quieter area with well-kept houses. Citizens go about their daily lives.',
         connections: ['silverhaven_square', 'the_gilded_goblet'],
         activities: [
-             { type: 'npc', name: 'Man', icon: 'https://api.iconify.design/game-icons:person.svg', dialogue: { start: { npcName: 'Man', npcIcon: 'https://api.iconify.design/game-icons:person.svg', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
+             { type: 'npc', name: 'Man', icon: 'person', dialogue: { start: { npcName: 'Man', npcIcon: 'person', text: CIVILLIAN_DIALOGUE.general.join('\n\n'), responses: [] } }, startNode: 'start', dialogueType: 'random', attackableMonsterId: 'man', pickpocket: { lootTableId: 'pickpocket_silverhaven_citizen' } },
              {
                 type: 'npc',
                 name: 'Elara',
@@ -513,7 +514,14 @@ export const silverhavenPois: Record<string, POI> = {
         description: 'A tall tower dedicated to the elite monster hunters of the realm. At its peak, a strange, lighter-than-air vessel is moored.',
         connections: ['silverhaven_castle_approach'],
         activities: [
-            { type: 'slayer_master', name: 'Kaelen', icon: '/assets/npcChatHeads/kaelen.png' },
+            { 
+                type: 'slayer_master', 
+                name: 'Kaelen', 
+                icon: '/assets/npcChatHeads/kaelen.png', 
+                masterId: 'kaelen',
+                dialogue: KAELEN_DIALOGUE,
+                startNode: 'start'
+            },
             { type: 'blimp_travel', requiredSlayerLevel: 50, name: 'Slayer\'s Blimp (NYA)' }
         ],
         regionId: 'silverhaven',
@@ -526,12 +534,12 @@ export const silverhavenPois: Record<string, POI> = {
         description: 'The immaculate grounds of the Royal Castle. Powerful adventurers patrol the area.',
         connections: ['silverhaven_castle_approach'],
         activities: [
-            { type: 'npc', name: 'Adventurer', icon: 'https://api.iconify.design/game-icons:adventurer.svg', pickpocket: { lootTableId: 'pickpocket_adventurer_table' }, attackableMonsterId: 'adventurer', dialogue: { start: { npcName: 'Adventurer', npcIcon: 'https://api.iconify.design/game-icons:adventurer.svg', text: "Best be on your way. Only authorized personnel beyond this point.", responses: [] } }, startNode: 'start' },
-            { type: 'npc', name: 'Adventurer', icon: 'https://api.iconify.design/game-icons:adventurer.svg', pickpocket: { lootTableId: 'pickpocket_adventurer_table' }, attackableMonsterId: 'adventurer', dialogue: { start: { npcName: 'Adventurer', npcIcon: 'https://api.iconify.design/game-icons:adventurer.svg', text: "Stop loitering.", responses: [] } }, startNode: 'start' },
-            { type: 'npc', name: 'Adventurer', icon: 'https://api.iconify.design/game-icons:adventurer.svg', pickpocket: { lootTableId: 'pickpocket_adventurer_table' }, attackableMonsterId: 'adventurer', dialogue: { start: { npcName: 'Adventurer', npcIcon: 'https://api.iconify.design/game-icons:adventurer.svg', text: "Seen any dragons lately?", responses: [] } }, startNode: 'start' },
-            { type: 'npc', name: 'Yeoman', icon: 'https://api.iconify.design/game-icons:yeoman-archer.svg', pickpocket: { lootTableId: 'pickpocket_yeoman_table' }, attackableMonsterId: 'yeoman', dialogue: { start: { npcName: 'Yeoman', npcIcon: 'https://api.iconify.design/game-icons:yeoman-archer.svg', text: "Keeping the castle grounds free of weeds is hard work, I wish they would hire another Master Farmer like myself to help with this task.", responses: [] } }, startNode: 'start' },
-            { type: 'npc', name: 'Knight', icon: 'https://api.iconify.design/game-icons:knight-helmet.svg', pickpocket: { lootTableId: 'pickpocket_knight_table' }, attackableMonsterId: 'knight', dialogue: { start: { npcName: 'Knight', npcIcon: 'https://api.iconify.design/game-icons:knight-helmet.svg', text: "For the King!", responses: [] } }, startNode: 'start' },
-            { type: 'npc', name: 'Knight', icon: 'https://api.iconify.design/game-icons:knight-helmet.svg', pickpocket: { lootTableId: 'pickpocket_knight_table' }, attackableMonsterId: 'knight', dialogue: { start: { npcName: 'Knight', npcIcon: 'https://api.iconify.design/game-icons:knight-helmet.svg', text: "Watch your step.", responses: [] } }, startNode: 'start' },
+            { type: 'npc', name: 'Adventurer', icon: 'adventurer', pickpocket: { lootTableId: 'pickpocket_adventurer_table' }, attackableMonsterId: 'adventurer', dialogue: { start: { npcName: 'Adventurer', npcIcon: 'adventurer', text: "Best be on your way. Only authorized personnel beyond this point.", responses: [] } }, startNode: 'start' },
+            { type: 'npc', name: 'Adventurer', icon: 'adventurer', pickpocket: { lootTableId: 'pickpocket_adventurer_table' }, attackableMonsterId: 'adventurer', dialogue: { start: { npcName: 'Adventurer', npcIcon: 'adventurer', text: "Stop loitering.", responses: [] } }, startNode: 'start' },
+            { type: 'npc', name: 'Adventurer', icon: 'adventurer', pickpocket: { lootTableId: 'pickpocket_adventurer_table' }, attackableMonsterId: 'adventurer', dialogue: { start: { npcName: 'Adventurer', npcIcon: 'adventurer', text: "Seen any dragons lately?", responses: [] } }, startNode: 'start' },
+            { type: 'npc', name: 'Yeoman', icon: 'yeoman-archer', pickpocket: { lootTableId: 'pickpocket_yeoman_table' }, attackableMonsterId: 'yeoman', dialogue: { start: { npcName: 'Yeoman', npcIcon: 'yeoman-archer', text: "Keeping the castle grounds free of weeds is hard work, I wish they would hire another Master Farmer like myself to help with this task.", responses: [] } }, startNode: 'start' },
+            { type: 'npc', name: 'Knight', icon: 'knight-helmet', pickpocket: { lootTableId: 'pickpocket_knight_table' }, attackableMonsterId: 'knight', dialogue: { start: { npcName: 'Knight', npcIcon: 'knight-helmet', text: "For the King!", responses: [] } }, startNode: 'start' },
+            { type: 'npc', name: 'Knight', icon: 'knight-helmet', pickpocket: { lootTableId: 'pickpocket_knight_table' }, attackableMonsterId: 'knight', dialogue: { start: { npcName: 'Knight', npcIcon: 'knight-helmet', text: "Watch your step.", responses: [] } }, startNode: 'start' },
         ],
         regionId: 'silverhaven',
         x: 100, y: 340,

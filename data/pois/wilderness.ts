@@ -10,7 +10,9 @@ export const wildernessPois: Record<string, POI> = {
         activities: [
             { type: 'skilling', id: 'whispering_woods_trees', name: 'Chop Trees', skill: SkillName.Woodcutting, requiredLevel: 1, loot: [{ itemId: 'logs', chance: 1, xp: 25 }], resourceCount: { min: 1, max: 4 }, respawnTime: 12000, gatherTime: 2000 },
             { type: 'skilling', id: 'whispering_woods_trees_2', name: 'Chop Trees', skill: SkillName.Woodcutting, requiredLevel: 1, loot: [{ itemId: 'logs', chance: 1, xp: 25 }], resourceCount: { min: 1, max: 4 }, respawnTime: 12000, gatherTime: 2000 },
-            { type: 'combat', monsterId: 'giant_rat'}
+            { type: 'combat', monsterId: 'giant_rat' },
+            { type: 'combat', monsterId: 'giant_rat' },
+            { type: 'combat', monsterId: 'giant_rat' },
         ],
         regionId: 'wilderness',
         x: 1000, y: 800
@@ -21,7 +23,7 @@ export const wildernessPois: Record<string, POI> = {
         description: 'The bank of a slow-moving river. The water is murky, but you can see small fish darting about.',
         connections: ['whispering_woods', 'treacherous_ascent', 'windswept_clearing'],
         activities: [
-            { type: 'skilling', id: 'murky_river_fishing', name: 'Net Fish', skill: SkillName.Fishing, requiredLevel: 1, loot: [{ itemId: 'raw_shrimp', chance: 1, xp: 10 }, { itemId: 'raw_anchovy', chance: 0.4, xp: 20, requiredLevel: 5}], resourceCount: { min: 5, max: 10 }, respawnTime: 8000, gatherTime: 1800, requiredTool: ToolType.FishingNet },
+            { type: 'skilling', id: 'murky_river_fishing', name: 'Net Fish', skill: SkillName.Fishing, requiredLevel: 1, loot: [{ itemId: 'raw_shrimp', chance: 1, xp: 10 }, { itemId: 'raw_anchovy', chance: 0.4, xp: 20, requiredLevel: 5 }], resourceCount: { min: 5, max: 10 }, respawnTime: 8000, gatherTime: 1800, requiredTool: ToolType.FishingNet },
             { type: 'skilling', id: 'murky_river_bait_fishing', name: 'Bait Fish', skill: SkillName.Fishing, requiredLevel: 5, loot: [{ itemId: 'raw_sardine', chance: 1, xp: 20 }, { itemId: 'raw_herring', chance: 0.5, xp: 30, requiredLevel: 10 }], resourceCount: { min: 5, max: 10 }, respawnTime: 8000, gatherTime: 1800, requiredTool: ToolType.FishingRod },
             { type: 'water_source', name: 'Collect Water' },
             { type: 'ground_item', id: 'river_berry_1', itemId: 'red_berries', resourceCount: 1, respawnTimer: 60000 },
@@ -51,14 +53,14 @@ export const wildernessPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Use Resonator',
-                icon: 'https://api.iconify.design/game-icons:orb-wand.svg',
+                icon: 'orb-wand',
                 questCondition: { questId: 'the_arcane_awakening', stages: [0] },
                 startNode: 'use_resonator_gust'
             },
             {
                 type: 'npc',
                 name: 'Approach the altar',
-                icon: 'https://api.iconify.design/game-icons:rune-stone.svg',
+                icon: 'rune-stone',
                 questCondition: { questId: 'magical_runestone_discovery', stages: [4, 6] },
                 startNode: 'gust_altar_router',
                 conditionalGreetings: [
@@ -93,6 +95,8 @@ export const wildernessPois: Record<string, POI> = {
         connections: ['whispering_woods', 'overgrown_path', 'ancient_clearing'],
         activities: [
             { type: 'combat', monsterId: 'giant_rat' },
+            { type: 'combat', monsterId: 'giant_rat' },
+            { type: 'combat', monsterId: 'giant_rat' },
             { type: 'skilling', id: 'deep_woods_trees_1', name: 'Chop Trees', skill: SkillName.Woodcutting, requiredLevel: 1, loot: [{ itemId: 'logs', chance: 1, xp: 25 }], resourceCount: { min: 2, max: 5 }, respawnTime: 12000, gatherTime: 2000 },
             { type: 'skilling', id: 'deep_woods_trees_2', name: 'Chop Trees', skill: SkillName.Woodcutting, requiredLevel: 1, loot: [{ itemId: 'logs', chance: 1, xp: 25 }], resourceCount: { min: 2, max: 5 }, respawnTime: 12000, gatherTime: 2000 },
             { type: 'skilling', id: 'deep_woods_trees_3', name: 'Chop Trees', skill: SkillName.Woodcutting, requiredLevel: 1, loot: [{ itemId: 'logs', chance: 1, xp: 25 }], resourceCount: { min: 2, max: 5 }, respawnTime: 12000, gatherTime: 2000 },
@@ -126,11 +130,11 @@ export const wildernessPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Whispering Spirit',
-                icon: 'https://api.iconify.design/game-icons:ghost-ally.svg',
+                icon: 'ghost-ally',
                 dialogue: {
                     start: {
                         npcName: 'Whispering Spirit',
-                        npcIcon: 'https://api.iconify.design/game-icons:ghost-ally.svg',
+                        npcIcon: 'ghost-ally',
                         text: "The paths... they twist and turn...\n\n...do not lose your way...\n\nThe Feywood is not a place of this world. It remembers what mortals forget.\n\nThey say the trees themselves have memories older than the mountains.",
                         responses: []
                     }

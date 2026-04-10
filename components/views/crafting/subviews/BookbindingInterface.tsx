@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SkillName } from '../../../../types';
-import { CRAFTING_RECIPES, ITEMS, getIconClassName } from '../../../../constants';
+import {  CRAFTING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../../constants';
 import { CraftingViewProps } from '../CraftingView';
 import { useLongPress } from '../../../../hooks/useLongPress';
 import { useIsTouchDevice } from '../../../../hooks/useIsTouchDevice';
@@ -124,11 +124,11 @@ const BookbindingSlot: React.FC<{
             <div className={`crafting-slot-level ${hasPrimaryLevel ? 'met' : 'unmet'}`}>
                 Lvl {primarySkillReq.level}
             </div>
-            <img src={item.iconUrl} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
+            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
             <div className="crafting-slot-ingredients">
                 {recipe.ingredients.map(ing => (
                     <div key={ing.itemId} className="ingredient-icon" title={`${ITEMS[ing.itemId].name} (x${ing.quantity})`}>
-                        <img src={ITEMS[ing.itemId].iconUrl} alt={ITEMS[ing.itemId].name} className={getIconClassName(ITEMS[ing.itemId])} />
+                        <img src={getIconUrl(ITEMS[ing.itemId].iconUrl)} alt={ITEMS[ing.itemId].name} className={getIconClassName(ITEMS[ing.itemId])} />
                         {ing.quantity > 1 && <span className="ingredient-quantity">{ing.quantity}</span>}
                     </div>
                 ))}

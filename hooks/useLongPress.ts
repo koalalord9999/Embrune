@@ -22,6 +22,7 @@ export const useLongPress = ({ onLongPress, onClick, delay = 400, isOneClickMode
     }, [onClick]);
 
     const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const lastTouchTime = useRef<number>(0);
     const isLongPressFired = useRef(false);
     const isDrag = useRef(false);
     const pressStartPos = useRef<{ x: number; y: number } | null>(null);
@@ -37,9 +38,18 @@ export const useLongPress = ({ onLongPress, onClick, delay = 400, isOneClickMode
     }, []);
 
     const handlePressStart = useCallback((event: React.MouseEvent | React.TouchEvent) => {
+        const isTouchEvent = 'touches' in event;
+        const now = Date.now();
+
+        if (isTouchEvent) {
+            lastTouchTime.current = now;
+        } else if (now - lastTouchTime.current < 50) {
+            // Ignore mouse events that occur immediately after touch events (simulated/emulated)
+            return;
+        }
+
         if ('button' in event && event.button !== 0) return;
 
-        const isTouchEvent = 'touches' in event;
         if (!isTouchEvent && !isOneClickMode) {
             return;
         }
@@ -58,8 +68,18 @@ export const useLongPress = ({ onLongPress, onClick, delay = 400, isOneClickMode
     }, [delay, cleanup, isOneClickMode]);
 
     const handlePressEnd = useCallback((event: React.MouseEvent | React.TouchEvent) => {
-        if (event.type === 'touchend' && event.cancelable) {
-            event.preventDefault();
+        const isTouchEvent = event.type === 'touchend';
+        const now = Date.now();
+
+        if (isTouchEvent) {
+            lastTouchTime.current = now;
+            if ((event as React.TouchEvent).cancelable) {
+                event.preventDefault();
+            }
+        } else if (now - lastTouchTime.current < 50) {
+            // Ignore mouse events that occur immediately after touch events
+            cleanup();
+            return;
         }
 
         if ('button' in event && event.button !== 0) {
@@ -96,8 +116,8 @@ export const useLongPress = ({ onLongPress, onClick, delay = 400, isOneClickMode
             }
         };
 
-        window.addEventListener('mousemove', handleMove);
-        window.addEventListener('touchmove', handleMove);
+        window.addEventListener('mousemove', handleMove, { passive: true });
+        window.addEventListener('touchmove', handleMove, { passive: true });
 
         const handleBlur = () => cleanup();
         window.addEventListener('blur', handleBlur);

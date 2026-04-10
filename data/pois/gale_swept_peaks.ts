@@ -28,11 +28,11 @@ export const galeSweptPeaksPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Echo of a Watchman',
-                icon: 'https://api.iconify.design/game-icons:ghost-ally.svg',
+                icon: 'ghost-ally',
                 dialogue: {
                     start: {
                         npcName: 'Echo of a Watchman',
-                        npcIcon: 'https://api.iconify.design/game-icons:ghost-ally.svg',
+                        npcIcon: 'ghost-ally',
                         text: "...always watching... the north...\n\nThe great metal... they forged it with the mountain's heart... runs with purple fire...\n\nWe failed... the darkness from the swamp... it rose...",
                         responses: []
                     }

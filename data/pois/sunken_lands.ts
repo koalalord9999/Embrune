@@ -9,6 +9,7 @@ export const sunkenLandsPois: Record<string, POI> = {
         activities: [
             { type: 'skilling', id: 'tangled_entry_willow_1', name: 'Chop Willow Tree', skill: SkillName.Woodcutting, requiredLevel: 30, loot: [{ itemId: 'willow_logs', chance: 1, xp: 90 }], resourceCount: { min: 14, max: 30 }, respawnTime: 25000, gatherTime: 3500 },
             { type: 'combat', monsterId: 'giant_toad' },
+            { type: 'combat', monsterId: 'giant_toad' },
         ],
         regionId: 'sunken_lands',
         x: 1200, y: 1400
@@ -19,8 +20,8 @@ export const sunkenLandsPois: Record<string, POI> = {
         description: 'A quiet, monster-free offshoot of the main swamp path. It is an excellent spot for fishing and chopping willows.',
         connections: ['tangled_entry'],
         activities: [
-             { type: 'skilling', id: 'murky_shallows_willow_1', name: 'Chop Willow Tree', skill: SkillName.Woodcutting, requiredLevel: 30, loot: [{ itemId: 'willow_logs', chance: 1, xp: 90 }], resourceCount: { min: 14, max: 30 }, respawnTime: 25000, gatherTime: 3500 },
-             { type: 'skilling', id: 'murky_shallows_fishing_1', name: 'Set Basket Trap', skill: SkillName.Fishing, requiredLevel: 38, loot: [{ itemId: 'raw_eel', chance: 1, xp: 70 }], resourceCount: { min: 1, max: 70 }, respawnTime: 20000, gatherTime: 2800, requiredTool: ToolType.BasketTrap },
+            { type: 'skilling', id: 'murky_shallows_willow_1', name: 'Chop Willow Tree', skill: SkillName.Woodcutting, requiredLevel: 30, loot: [{ itemId: 'willow_logs', chance: 1, xp: 90 }], resourceCount: { min: 14, max: 30 }, respawnTime: 25000, gatherTime: 3500 },
+            { type: 'skilling', id: 'murky_shallows_fishing_1', name: 'Set Basket Trap', skill: SkillName.Fishing, requiredLevel: 38, loot: [{ itemId: 'raw_eel', chance: 1, xp: 70 }], resourceCount: { min: 1, max: 70 }, respawnTime: 20000, gatherTime: 2800, requiredTool: ToolType.BasketTrap },
         ],
         regionId: 'sunken_lands',
         x: 1220, y: 1440
@@ -68,6 +69,7 @@ export const sunkenLandsPois: Record<string, POI> = {
         connections: ['mire_of_sorrow', 'leech_infested_waters'],
         activities: [
             { type: 'combat', monsterId: 'giant_toad' },
+            { type: 'combat', monsterId: 'giant_toad' },
             { type: 'skilling', id: 'toadstool_bog_fishing_1', name: 'Set Basket Trap', skill: SkillName.Fishing, requiredLevel: 38, loot: [{ itemId: 'raw_eel', chance: 1, xp: 70 }], resourceCount: { min: 3, max: 8 }, respawnTime: 20000, gatherTime: 2800, requiredTool: ToolType.BasketTrap },
         ],
         regionId: 'sunken_lands',
@@ -91,6 +93,7 @@ export const sunkenLandsPois: Record<string, POI> = {
         connections: ['submerged_pathway'],
         activities: [
             { type: 'combat', monsterId: 'swamp_horror' },
+            { type: 'combat', monsterId: 'swamp_horror' },
             { type: 'skilling', id: 'sunken_ruins_adamantite_1', name: 'Mine Adamantite Rock', skill: SkillName.Mining, requiredLevel: 65, loot: [{ itemId: 'adamantite_ore', chance: 1, xp: 120 }], resourceCount: { min: 1, max: 1 }, respawnTime: 50000, gatherTime: 5000 },
             { type: 'thieving_lockpick', id: 'sl_ruins_chest_1', targetName: 'Submerged Chest', lootTableId: 'thieving_dungeon_chest_mid' },
         ],
@@ -100,7 +103,7 @@ export const sunkenLandsPois: Record<string, POI> = {
     submerged_pathway: {
         id: 'submerged_pathway',
         name: 'Submerged Pathway',
-        description: 'An ancient stone pathway, now mostly underwater. It offers a shortcut back to the swamp entrance, but also leads towards a dark, flooded crypt.',
+        description: 'An ancient stone pathway, now mostly underwater. It offers a shortcut to the serpent\'s coil, but also leads towards a dark, flooded crypt.',
         connections: ['sunken_ruins', 'tangled_entry', 'flooded_crypt_hallway'],
         activities: [],
         regionId: 'sunken_lands',
@@ -112,6 +115,19 @@ export const sunkenLandsPois: Record<string, POI> = {
         description: 'The water is waist-deep here. Sarcophagi line the walls, their lids slightly ajar.',
         connections: ['submerged_pathway', 'flooded_crypt_chamber'],
         activities: [
+            {
+                type: 'agility_shortcut',
+                id: 'serpents_coil_entrance_shortcut',
+                name: 'Stepping Stones (Lvl 50)',
+                toPoiId: 'serpents_coil_entrance',
+                level: 50,
+                xp: 100,
+                baseFailChance: 50,
+                failDamage: { min: 1, max: 5 },
+                failMessage: 'You misjudge the jump and tumble down the edge, taking some damage.',
+                successMessage: 'You leap across the chasm with surprising grace.'
+            },
+            { type: 'combat', monsterId: 'swamp_horror' },
             { type: 'combat', monsterId: 'swamp_horror' },
         ],
         regionId: 'sunken_lands',

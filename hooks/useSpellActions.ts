@@ -1,7 +1,7 @@
 
 import React, { useCallback } from 'react';
 import { InventorySlot, PlayerSkill, SkillName, Spell, Equipment, WeaponType } from '../types';
-import { ITEMS } from '../constants';
+import {  ITEMS  } from '../constants';
 import { useUIState } from './useUIState';
 import { POIS } from '../data/pois';
 import { useCharacter } from './useCharacter';

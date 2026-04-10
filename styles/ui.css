@@ -1,0 +1,207 @@
+/* ============================================================
+   UI — Bank, Crafting, Notes, Inventory icon transforms, etc.
+   ============================================================ */
+
+/* ---- Crafting Grid ---- */
+.crafting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.crafting-slot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 2px solid #4a5568;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px;
+}
+
+.crafting-slot:hover {
+  border-color: #f59e0b;
+  transform: translateY(-2px);
+}
+
+.crafting-slot.disabled {
+  cursor: not-allowed;
+  filter: grayscale(80%) brightness(0.7);
+}
+
+.crafting-slot-icon {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+  margin: auto;
+}
+
+.crafting-slot-level {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 0.25rem;
+  line-height: 1;
+  z-index: 10;
+}
+
+.crafting-slot-level.met   { color: #4ade80; }
+.crafting-slot-level.unmet { color: #f87171; }
+
+.crafting-slot-ingredients {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.ingredient-icon {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 1px solid #4a5568;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ingredient-icon img {
+  width: 14px;
+  height: 14px;
+}
+
+.ingredient-quantity {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 0.6rem;
+  font-weight: bold;
+  color: #f59e0b;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  padding: 0 2px;
+  line-height: 1;
+  text-shadow: 1px 1px 1px black;
+}
+
+/* ---- Item icon rotations ---- */
+img[src*="game-icons:bone-knife"]:not(.item-note-icon)    { transform: rotate(-90deg); }
+img[src*="game-icons:curvy-knife"]:not(.item-note-icon)   { transform: rotate(-75deg); }
+img[src*="game-icons:arrow-flights"]:not(.item-note-icon),
+img[src*="game-icons:arrowhead"]:not(.item-note-icon),
+img[src*="game-icons:broadhead-arrow"]:not(.item-note-icon) { transform: rotate(-90deg); }
+img[src*="game-icons:key-skeleton"]:not(.item-note-icon)  { transform: rotate(180deg); }
+img[src*="game-icons:key.svg#loop"]:not(.item-note-icon)  { transform: rotate(180deg); }
+
+.item-note-icon[src*="game-icons:bone-knife"]    { transform: translate(-50%, -50%) rotate(-90deg); }
+.item-note-icon[src*="game-icons:curvy-knife"]   { transform: translate(-50%, -50%) rotate(-75deg); }
+.item-note-icon[src*="game-icons:arrow-flights"],
+.item-note-icon[src*="game-icons:arrowhead"],
+.item-note-icon[src*="game-icons:broadhead-arrow"] { transform: translate(-50%, -50%) rotate(-90deg); }
+.item-note-icon[src*="game-icons:key-skeleton"]  { transform: translate(-50%, -50%) rotate(180deg); }
+.item-note-icon[src*="game-icons:key.svg#loop"]  { transform: translate(-50%, -50%) rotate(180deg); }
+
+/* ---- Noted Items ---- */
+.item-note-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.item-note-paper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(2.2);
+  filter: invert(75%) sepia(21%) saturate(300%) hue-rotate(356deg) brightness(95%) contrast(80%);
+  opacity: 0.9;
+}
+
+.item-note-icon {
+  position: absolute;
+  width: 90%;
+  height: 90%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.bank-action-bg-icon {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(2.2);
+  filter: invert(60%) sepia(80%) saturate(1500%) hue-rotate(80deg) brightness(1.0) contrast(0.9);
+  opacity: 0.9;
+}
+
+.poison-overlay-icon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* ---- Bank ---- */
+.bank-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #4a5568;
+  background-color: #2d3748;
+  border-radius: 0.375rem 0.375rem 0 0;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border-bottom: none;
+}
+
+.bank-tab:hover        { background-color: #4a5568; }
+.bank-tab.active       { background-color: #1a202c; border-color: #f59e0b; border-bottom: 2px solid #f59e0b; transform: translateY(2px); }
+.bank-tab-icon         { width: 3rem; height: 3rem; }
+.bank-tab-drag-over    { border-color: #4ade80; background-color: #166534; }
+
+.bank-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  overflow-y: auto;
+  align-content: start;
+}
+
+@media (max-width: 768px) {
+  .bank-tabs-container {
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .bank-tabs-container::-webkit-scrollbar { display: none; }
+  .bank-tab  { flex-shrink: 0; padding: 0.5rem; }
+  .bank-grid { grid-template-columns: repeat(auto-fill, 48px); justify-content: center; overflow-y: auto; padding-right: 4px; }
+}

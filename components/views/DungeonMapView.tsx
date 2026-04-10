@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { POIS } from '../../data/pois';
 import Button from '../common/Button';
-import { MONSTERS } from '../../constants';
+import {  MONSTERS  } from '../../constants';
 import { TooltipState } from '../../hooks/useUIState';
 import { POIActivity } from '../../types';
 

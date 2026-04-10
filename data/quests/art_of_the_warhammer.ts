@@ -5,8 +5,12 @@ export const artOfTheWarhammer: Quest = {
     id: 'art_of_the_warhammer',
     name: "Art of the Warhammer",
     description: "Bronn the retired adventurer in Oakhaven's tavern seems to think modern smiths have lost the touch for making proper warhammers. He has challenged you to prove him wrong.",
+    requirements: {
+        quests: ['capitals_call'],
+        notes: ['33 Smithing (Required for completion)']
+    },
     isHidden: false,
-    startHint: "Speak to Bronn in The Carved Mug after proving your worth by completing 'The Capital's Call'.",
+    startHint: "Speak to Bronn in The Carved Mug to prove your worth.",
     playerStagePerspectives: [
         "Bronn wants me to learn the 'true' art of smithing warhammers from Valerius in Meadowdale.",
         "Valerius has taught me the technique. Now I need to prove my skill by smithing a Steel Warhammer.",

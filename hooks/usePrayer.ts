@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { PlayerSkill, SkillName, Prayer, PlayerQuestState } from '../types';
-import { PRAYERS, QUESTS } from '../constants';
+import {  PRAYERS, QUESTS  } from '../constants';
 
 export const usePrayer = (
     initialActivePrayers: string[], 

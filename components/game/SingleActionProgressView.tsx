@@ -1,3 +1,4 @@
+import {  getIconUrl  } from '../../constants';
 import React, { useState, useEffect } from 'react';
 import { ActiveSingleAction } from '../../hooks/useUIState';
 import Button from '../common/Button';
@@ -30,7 +31,7 @@ const SingleActionProgressView: React.FC<SingleActionProgressViewProps> = ({ act
             <h2 className="text-2xl font-bold text-yellow-400 mb-4">{action.title}</h2>
             
             <div className="w-24 h-24 bg-gray-900 border-4 border-gray-600 rounded-lg flex items-center justify-center mb-4">
-                <img src={action.iconUrl} alt={action.title} className={`w-16 h-16 ${action.iconClassName}`} />
+                <img src={getIconUrl(action.iconUrl)} alt={action.title} className={`w-16 h-16 ${action.iconClassName}`} />
             </div>
 
             <div className="w-full max-w-md bg-black/50 p-4 rounded-lg space-y-3">

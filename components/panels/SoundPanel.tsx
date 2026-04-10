@@ -1,9 +1,10 @@
+import {  getIconUrl  } from '../../constants';
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { AUDIO_MANIFEST, SoundID } from '../../constants/audioManifest';
 import { useSoundEngine } from '../../hooks/useSoundEngine';
 import { useUIState } from '../../hooks/useUIState';
-import { useMusicEngine, MUSIC_TRACKS } from '../../hooks/useMusicEngine';
+import { useMusicEngine, MUSIC_TRACKS, MusicMode } from '../../hooks/useMusicEngine';
 import Button from '../common/Button';
 import { WorldState } from '../../types';
 
@@ -13,11 +14,27 @@ interface SoundPanelProps {
     ui: ReturnType<typeof useUIState>;
 }
 
+const MUSIC_CONTROL_BUTTONS: { mode: MusicMode; icon: string; title: string }[] = [
+    { mode: 'stop', icon: 'stop-sign', title: 'Stop' },
+    { mode: 'play', icon: 'play-button', title: 'Play' },
+    { mode: 'pause', icon: 'pause-button', title: 'Pause' },
+    { mode: 'loop', icon: 'anticlockwise-rotation', title: 'Loop' },
+    { mode: 'random', icon: 'uncertainty', title: 'Random' },
+];
+
 const SoundPanel: React.FC<SoundPanelProps> = ({ addLog, worldState, ui }) => {
     const { play, playRecipe, getContextTime } = useSoundEngine();
-    
-    // Pass undefined as regionId to prevent automatic track changes when opening this panel.
-    const { musicLibrary, playMusicSegment, stopMusic } = useMusicEngine(undefined);
+
+    // Pass undefined as regionId/poiId to prevent automatic track changes when opening this panel.
+    const { 
+        musicLibrary, 
+        playMusicSegment, 
+        stopMusic, 
+        musicMode, 
+        setMusicMode, 
+        selectedTrackId, 
+        activeTrackId 
+    } = useMusicEngine(undefined, undefined, worldState);
 
     // Creator State
     const [type, setType] = useState<'osc' | 'noise'>('osc');
@@ -54,7 +71,7 @@ const SoundPanel: React.FC<SoundPanelProps> = ({ addLog, worldState, ui }) => {
             const firstLayer = newMultiLayerRecipe[0];
             const timeOffsetMatch = firstLayer.match(/^(d+):/);
             const timeOffset = timeOffsetMatch ? timeOffsetMatch[0] : '';
-            
+
             newMultiLayerRecipe[0] = timeOffset + recipeString;
 
             const baseTime = getContextTime();
@@ -63,7 +80,7 @@ const SoundPanel: React.FC<SoundPanelProps> = ({ addLog, worldState, ui }) => {
             playRecipe(recipeString);
         }
     }, [baseMultiLayerRecipe, recipeString, getContextTime, playRecipe]);
-    
+
     const handleSliderRelease = () => {
         playCurrentRecipe();
     };
@@ -72,43 +89,40 @@ const SoundPanel: React.FC<SoundPanelProps> = ({ addLog, worldState, ui }) => {
         navigator.clipboard.writeText(recipeString);
         addLog("Recipe copied to clipboard!");
     };
-    
+
     const handleLoadRecipe = useCallback((e: React.MouseEvent, soundId: SoundID) => {
         e.preventDefault();
-        
+
         let recipeOrArray = AUDIO_MANIFEST[soundId];
         let recipeToParse: string;
 
         if (Array.isArray(recipeOrArray)) {
-            setBaseMultiLayerRecipe(recipeOrArray); // Store the whole array
-            recipeToParse = recipeOrArray[0]; // Get the first layer to parse
+            setBaseMultiLayerRecipe(recipeOrArray);
+            recipeToParse = recipeOrArray[0];
             addLog(`Loaded multi-layer sound '${soundId}' for editing.`);
         } else {
-            setBaseMultiLayerRecipe(null); // It's a single sound
+            setBaseMultiLayerRecipe(null);
             recipeToParse = recipeOrArray;
             addLog(`Loaded '${soundId}' for editing.`);
         }
-    
-        // Strip time offset if present for parsing
+
         if (recipeToParse.match(/^d+:/)) {
             recipeToParse = recipeToParse.split(/:(.+)/)[1];
         }
-        
+
         const params = recipeToParse.split('|').reduce((acc, part) => {
             const [key, val] = part.split(':');
             acc[key] = val;
             return acc;
         }, {} as Record<string, any>);
-    
-        // Reset to defaults to clear old params from other types
+
         setType('osc'); setSubType('sine'); setFreq(440);
         setDur(0.1); setVol(0.3); setAttack(0.005);
         setDecay(0.1); setFilter(2000); setPitchMod(0);
-        
-        // Apply parsed params
-        if (params.osc) { setType('osc'); setSubType(params.osc); } 
+
+        if (params.osc) { setType('osc'); setSubType(params.osc); }
         else if (params.noise) { setType('noise'); setSubType(params.noise); }
-        
+
         if (params.freq) setFreq(parseFloat(params.freq));
         if (params.dur) setDur(parseFloat(params.dur));
         if (params.vol) setVol(parseFloat(params.vol));
@@ -118,12 +132,24 @@ const SoundPanel: React.FC<SoundPanelProps> = ({ addLog, worldState, ui }) => {
         if (params.pitchMod) setPitchMod(parseFloat(params.pitchMod));
     }, [addLog]);
 
+    const handleModeToggle = useCallback((mode: MusicMode) => {
+        setMusicMode(mode);
+        const labels: Record<MusicMode, string> = {
+            stop: selectedTrackId ? 'Music stopped. Manual track selection cleared.' : 'Music stopped.',
+            play: selectedTrackId ? 'Resuming selected track.' : 'Resuming zone music.',
+            pause: 'Music paused.',
+            loop: selectedTrackId ? `Looping current track.` : 'Select a track to loop.',
+            random: 'Playing random tracks.',
+        };
+        addLog(labels[mode]);
+    }, [setMusicMode, addLog, selectedTrackId]);
+
     if (ui.isSoundCreatorOpen) {
         return (
             <div className="flex flex-col h-full text-gray-300 gap-4 overflow-y-auto pr-1">
                 <div className="flex justify-between items-center border-b border-gray-700 pb-1">
                     <h3 className="text-sm font-bold text-yellow-400">Sound Creator</h3>
-                    <button 
+                    <button
                         onClick={() => ui.setIsSoundCreatorOpen(false)}
                         className="text-[10px] bg-gray-700 hover:bg-gray-600 px-2 py-0.5 rounded"
                     >
@@ -136,9 +162,9 @@ const SoundPanel: React.FC<SoundPanelProps> = ({ addLog, worldState, ui }) => {
                     <h3 className="text-sm font-bold text-yellow-400 border-b border-gray-700 pb-1">SFX Recipes</h3>
                     <div className="grid grid-cols-2 gap-1">
                         {(Object.keys(AUDIO_MANIFEST) as SoundID[]).map(id => (
-                            <button 
-                                key={id} 
-                                onClick={() => play(id)} 
+                            <button
+                                key={id}
+                                onClick={() => play(id)}
                                 onContextMenu={(e) => handleLoadRecipe(e, id)}
                                 className="text-[10px] text-left p-1 bg-gray-800 hover:bg-gray-700 rounded border border-gray-600 truncate"
                             >
@@ -196,25 +222,40 @@ const SoundPanel: React.FC<SoundPanelProps> = ({ addLog, worldState, ui }) => {
     // Default Library View
     return (
         <div className="flex flex-col h-full text-gray-300 gap-2 overflow-y-auto pr-1">
-            <div className="flex justify-between items-center border-b border-gray-700 pb-1 mb-2">
+            <div className="flex justify-between items-center border-b border-gray-700 pb-1 mb-1">
                 <h3 className="font-bold text-yellow-400 text-sm">Music Player</h3>
-                <button 
-                    onClick={() => {
-                        stopMusic(0.5);
-                        addLog("Music stopped.");
-                    }} 
-                    className="text-[10px] bg-red-900/40 hover:bg-red-800/60 px-2 py-0.5 rounded border border-red-700/50 uppercase font-bold text-red-200"
-                >
-                    Stop
-                </button>
+                <div className="flex items-center gap-1">
+                    {MUSIC_CONTROL_BUTTONS.map(btn => (
+                        <button
+                            key={btn.mode}
+                            onClick={() => handleModeToggle(btn.mode)}
+                            title={btn.title}
+                            className="p-0 border-0 bg-transparent cursor-pointer transition-opacity hover:opacity-80"
+                        >
+                            <img
+                                src={getIconUrl(btn.icon)}
+                                alt={btn.title}
+                                className="w-5 h-5 transition-all"
+                                style={{
+                                    filter: musicMode === btn.mode
+                                        ? 'invert(85%) sepia(50%) saturate(500%) hue-rotate(0deg) brightness(110%)'
+                                        : 'invert(60%) brightness(80%)',
+                                }}
+                            />
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="flex flex-col gap-1">
                 {MUSIC_TRACKS.map(track => {
                     const isUnlocked = worldState.unlockedMusicTracks.includes(track.id);
+                    const isSelected = activeTrackId === track.id;
+                    const isManuallySelected = selectedTrackId === track.id;
+                    
                     return (
-                        <button 
-                            key={track.id} 
+                        <button
+                            key={track.id}
                             onClick={() => {
                                 if (isUnlocked) {
                                     addLog(`Playing ${track.name}...`);
@@ -222,15 +263,22 @@ const SoundPanel: React.FC<SoundPanelProps> = ({ addLog, worldState, ui }) => {
                                 } else {
                                     addLog(`You haven't discovered ${track.name} yet!`);
                                 }
-                            }} 
-                            className={`text-left px-2 py-1.5 rounded transition-colors text-xs ${isUnlocked ? 'text-green-400 hover:bg-green-900/20' : 'text-red-500/60 cursor-not-allowed'}`}
+                            }}
+                            className={`text-left px-2 py-1.5 rounded transition-colors text-xs ${isUnlocked
+                                    ? isSelected
+                                        ? 'text-yellow-300 bg-yellow-900/20'
+                                        : isManuallySelected
+                                            ? 'text-yellow-100/80 bg-yellow-900/10'
+                                            : 'text-green-400 hover:bg-green-900/20'
+                                    : 'text-red-500/60 cursor-not-allowed'
+                                }`}
                         >
-                            {track.name}
+                            {isSelected && '♪ '}{track.name}
                         </button>
                     );
                 })}
             </div>
-            
+
             <p className="mt-auto text-[10px] text-gray-500 italic text-center p-2">
                 Discover more regions to unlock their music.
             </p>

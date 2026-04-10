@@ -22,8 +22,8 @@ const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', size = '
     };
 
     const sizeClasses = {
-        sm: 'px-2 py-1 text-xs',
-        md: 'px-4 py-2 text-base'
+        sm: 'px-2 py-1 text-sm',
+        md: 'px-4 py-2 text-xl'
     };
     
     const disabledClasses = 'disabled:bg-gray-800 disabled:text-gray-500 disabled:border-gray-700 disabled:cursor-not-allowed';

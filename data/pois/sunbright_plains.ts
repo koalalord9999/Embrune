@@ -145,9 +145,13 @@ export const sunbrightPlainsPois: Record<string, POI> = {
         connections: ['sp_lions_savanna'],
         activities: [
             { type: 'combat', monsterId: 'sunstone_golem' },
+            { type: 'combat', monsterId: 'sunstone_golem' },
+            { type: 'combat', monsterId: 'sunstone_golem' },
             { type: 'skilling', id: 'sp_quarry_gold_1', name: 'Mine Gold', skill: SkillName.Mining, requiredLevel: 40, loot: [{ itemId: 'gold_ore', chance: 1, xp: 65 }], resourceCount: { min: 1, max: 1 }, respawnTime: 60000, gatherTime: 4500 },
         ],
-        regionId: 'sunbright_plains', x: 1690, y: 1350,
+        regionId: 'sunbright_plains',
+        maxGroupSize: 2,
+        x: 1690, y: 1350,
     },
     sp_serpents_gulch: {
         id: 'sp_serpents_gulch',
@@ -167,8 +171,12 @@ export const sunbrightPlainsPois: Record<string, POI> = {
         connections: ['sp_serpents_gulch'],
         activities: [
             { type: 'combat', monsterId: 'roc_hatchling' },
+            { type: 'combat', monsterId: 'roc_hatchling' },
+            { type: 'combat', monsterId: 'roc_hatchling' },
         ],
-        regionId: 'sunbright_plains', x: 1630, y: 1330,
+        regionId: 'sunbright_plains',
+        maxGroupSize: 2,
+        x: 1630, y: 1330,
     },
     sp_zealots_plateau: {
         id: 'sp_zealots_plateau',
@@ -177,8 +185,12 @@ export const sunbrightPlainsPois: Record<string, POI> = {
         connections: ['sp_plains_crossroads', 'sp_passage_altar'],
         activities: [
             { type: 'combat', monsterId: 'zealous_nomad' },
+            { type: 'combat', monsterId: 'zealous_nomad' },
+            { type: 'combat', monsterId: 'zealous_nomad' },
         ],
-        regionId: 'sunbright_plains', x: 1650, y: 1310,
+        regionId: 'sunbright_plains',
+        maxGroupSize: 2,
+        x: 1650, y: 1310,
     },
     sp_passage_altar: {
         id: 'sp_passage_altar',
@@ -229,13 +241,26 @@ export const sunbrightPlainsPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Ancient Monolith',
-                icon: 'https://api.iconify.design/game-icons:standing-stones.svg',
+                icon: 'standing-stones',
                 startNode: 'monolith_default',
             },
-            { type: 'npc', name: 'Empty Fire Pit', icon: 'https://api.iconify.design/game-icons:fire-pit.svg' },
-            { type: 'npc', name: 'Empty Fire Pit', icon: 'https://api.iconify.design/game-icons:fire-pit.svg' },
-            { type: 'npc', name: 'Empty Fire Pit', icon: 'https://api.iconify.design/game-icons:fire-pit.svg' },
-            { type: 'npc', name: 'Empty Fire Pit', icon: 'https://api.iconify.design/game-icons:fire-pit.svg' },
+            // Monolith Fire Pits - Each pit has 3 states: Empty, Lit (Normal Logs), and Mystical (Feywood Logs)
+            // Pit 1
+            { id: 'monolith_pit_1_empty', type: 'npc', name: 'Empty Fire Pit', icon: 'fire-pit', startNode: 'tst_pit_1_empty', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_1', value: false, operator: 'eq' }] },
+            { id: 'monolith_pit_1_lit', type: 'npc', name: 'Lit Fire Pit', icon: 'fire-lit', startNode: 'tst_pit_1_lit', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_1', value: 'normal_logs', operator: 'eq' }] },
+            { id: 'monolith_pit_1_mystical', type: 'npc', name: 'Mystical Fire Pit', icon: 'fire-mystical', startNode: 'tst_pit_1_mystical', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_1', value: 'feywood_logs', operator: 'eq' }] },
+            // Pit 2
+            { id: 'monolith_pit_2_empty', type: 'npc', name: 'Empty Fire Pit', icon: 'fire-pit', startNode: 'tst_pit_2_empty', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_2', value: false, operator: 'eq' }] },
+            { id: 'monolith_pit_2_lit', type: 'npc', name: 'Lit Fire Pit', icon: 'fire-lit', startNode: 'tst_pit_2_lit', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_2', value: 'normal_logs', operator: 'eq' }] },
+            { id: 'monolith_pit_2_mystical', type: 'npc', name: 'Mystical Fire Pit', icon: 'fire-mystical', startNode: 'tst_pit_2_mystical', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_2', value: 'feywood_logs', operator: 'eq' }] },
+            // Pit 3
+            { id: 'monolith_pit_3_empty', type: 'npc', name: 'Empty Fire Pit', icon: 'fire-pit', startNode: 'tst_pit_3_empty', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_3', value: false, operator: 'eq' }] },
+            { id: 'monolith_pit_3_lit', type: 'npc', name: 'Lit Fire Pit', icon: 'fire-lit', startNode: 'tst_pit_3_lit', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_3', value: 'normal_logs', operator: 'eq' }] },
+            { id: 'monolith_pit_3_mystical', type: 'npc', name: 'Mystical Fire Pit', icon: 'fire-mystical', startNode: 'tst_pit_3_mystical', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_3', value: 'feywood_logs', operator: 'eq' }] },
+            // Pit 4
+            { id: 'monolith_pit_4_empty', type: 'npc', name: 'Empty Fire Pit', icon: 'fire-pit', startNode: 'tst_pit_4_empty', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_4', value: false, operator: 'eq' }] },
+            { id: 'monolith_pit_4_lit', type: 'npc', name: 'Lit Fire Pit', icon: 'fire-lit', startNode: 'tst_pit_4_lit', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_4', value: 'normal_logs', operator: 'eq' }] },
+            { id: 'monolith_pit_4_mystical', type: 'npc', name: 'Mystical Fire Pit', icon: 'fire-mystical', startNode: 'tst_pit_4_mystical', visibilityCheck: [{ type: 'world_state', property: 'monolith_pit_4', value: 'feywood_logs', operator: 'eq' }] },
         ],
         regionId: 'sunbright_plains',
         x: 1580, y: 1390,

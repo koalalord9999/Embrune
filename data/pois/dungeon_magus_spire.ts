@@ -10,13 +10,13 @@ export const magusSpirePois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Enter the Spire',
-                icon: 'https://api.iconify.design/game-icons:rune-gate.svg',
+                icon: 'rune-gate',
                 questCondition: { questId: 'the_arcane_awakening', stages: [7], visibleAfterCompletion: true },
                 startNode: 'enter_spire_start',
             }
         ],
         regionId: 'magus_spire',
-        unlockRequirement: { type: 'quest', questId: 'the_arcane_awakening', stage: 7 },
+        unlockRequirement: { type: 'quest', questId: 'the_arcane_awakening', stage: 7, operator: 'gte' },
         x: 1954, y: 720,
     },
 
@@ -78,6 +78,7 @@ export const magusSpirePois: Record<string, POI> = {
         description: 'A large chamber with inactive crystal golems lining the walls.',
         connections: ['ms_f2_hall_west_2', 'ms_f2_hall_south_1'],
         activities: [
+            { type: 'combat', monsterId: 'crystalline_spider' },
             { type: 'combat', monsterId: 'crystalline_spider' },
             {
                 type: 'agility_shortcut',
@@ -165,18 +166,19 @@ export const magusSpirePois: Record<string, POI> = {
     // --- FLOOR 5 - APEX (3x3 Grid) ---
     // Quadrant: x: 6000-6200, y: 800-1000
     ms_f5_landing: { id: 'ms_f5_landing', name: 'Spire Apex Landing (F5)', description: 'You arrive at the top of the spire. A short path leads to an open-air platform. A staircase leads back down.', connections: ['ms_f4_stairwell_up', 'ms_f5_crossroads'], activities: [], regionId: 'magus_spire', x: 6100, y: 1000, type: 'internal' },
-    ms_f5_crossroads: { id: 'ms_f5_crossroads', name: 'Apex Crossroads (F5)', description: 'The path splits, leading to the west and east sides of the apex.', connections: ['ms_f5_landing', 'ms_f5_wyvern_roost', 'ms_f5_challenge_chamber'], activities: [
-        {
+    ms_f5_crossroads: {
+        id: 'ms_f5_crossroads', name: 'Apex Crossroads (F5)', description: 'The path splits, leading to the west and east sides of the apex.', connections: ['ms_f5_landing', 'ms_f5_wyvern_roost', 'ms_f5_challenge_chamber'], activities: [
+            {
                 type: 'npc',
                 name: 'Slumped Adventurer',
-                icon: 'https://api.iconify.design/game-icons:dead-head.svg',
+                icon: 'dead-head',
                 pickpocket: { lootTableId: 'pickpocket_adventurer_table' },
                 dialogue: {
                     main: {
                         npcName: 'Slumped Adventurer',
-                        npcIcon: 'https://api.iconify.design/game-icons:dead-head.svg',
+                        npcIcon: 'dead-head',
                         text: "The adventurer is slumped against the wall, clearly deceased. Their shield seems to be radiating a faint warmth.",
-                        responses: [ { text: "Leave them be." } ],
+                        responses: [{ text: "Leave them be." }],
                         conditionalResponses: [
                             {
                                 text: "(Take the Mysterious Shield)",
@@ -191,14 +193,15 @@ export const magusSpirePois: Record<string, POI> = {
                     },
                     shield_taken: {
                         npcName: 'Slumped Adventurer',
-                        npcIcon: 'https://api.iconify.design/game-icons:dead-head.svg',
+                        npcIcon: 'dead-head',
                         text: "You take the shield. It feels surprisingly light. You have already taken what you can.",
                         responses: []
                     }
                 },
                 startNode: 'main'
             }
-    ], regionId: 'magus_spire', x: 6100, y: 900, type: 'internal' },
+        ], regionId: 'magus_spire', x: 6100, y: 900, type: 'internal'
+    },
     ms_f5_challenge_chamber: { id: 'ms_f5_challenge_chamber', name: 'Challenge Chamber (F5)', description: 'A dead-end chamber filled with the spire\'s most powerful guardians.', connections: ['ms_f5_crossroads'], activities: [{ type: 'combat', monsterId: 'spire_justicar' }, { type: 'combat', monsterId: 'spire_justicar' }, { type: 'combat', monsterId: 'arcane_elemental' }], regionId: 'magus_spire', x: 6200, y: 900, type: 'internal' },
     ms_f5_wyvern_roost: { id: 'ms_f5_wyvern_roost', name: 'Wyvern\'s Roost (F5)', description: 'The apex of the spire, open to the swirling cosmos. A massive arcane wyvern guards a floating altar further on.', connections: ['ms_f5_crossroads', 'ms_f5_astral_altar'], activities: [{ type: 'combat', monsterId: 'arcane_wyvern' }], regionId: 'magus_spire', x: 6000, y: 900, type: 'internal' },
     ms_f5_astral_altar: {
@@ -208,6 +211,13 @@ export const magusSpirePois: Record<string, POI> = {
         connections: ['ms_f5_wyvern_roost'],
         activities: [
             { type: 'runecrafting_altar', runeId: 'astral_rune' },
+            {
+                type: 'npc',
+                name: 'Astral Altar',
+                icon: 'star-altar',
+                startNode: 'tst_astral_altar_hub',
+                questCondition: { questId: 'the_sorcerers_trial', stages: [15, 16, 17, 18] }
+            },
             { type: 'ladder', name: 'Telepad to Entrance', direction: 'down', toPoiId: 'magus_spire_entrance' }
         ],
         regionId: 'magus_spire',

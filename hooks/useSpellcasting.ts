@@ -4,7 +4,7 @@ import { useCharacter } from './useCharacter';
 import { useInventory } from './useInventory';
 import { useNavigation } from './useNavigation';
 import { useUIState } from './useUIState';
-import { ITEMS } from '../constants';
+import {  ITEMS  } from '../constants';
 
 interface SpellcastingDependencies {
     char: ReturnType<typeof useCharacter>;

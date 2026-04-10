@@ -43,6 +43,7 @@ export const frostfangPeaksPois: Record<string, POI> = {
         connections: ['fp_wolf_pass'],
         activities: [
             { type: 'combat', monsterId: 'glacial_bear' },
+            { type: 'combat', monsterId: 'glacial_bear' },
             { type: 'skilling', id: 'fp_bear_cave_silver', name: 'Mine Large Silver Vein', skill: SkillName.Mining, requiredLevel: 35, loot: [{ itemId: 'silver_ore', chance: 1, xp: 40 }], resourceCount: { min: 8, max: 18 }, respawnTime: 18000, gatherTime: 4000 },
         ],
         regionId: 'frostfang_peaks',
@@ -103,6 +104,8 @@ export const frostfangPeaksPois: Record<string, POI> = {
         connections: ['fp_ice_imp_clearing', 'fp_golem_fields'],
         activities: [
             { type: 'combat', monsterId: 'rime_coated_serpent' },
+            { type: 'combat', monsterId: 'rime_coated_serpent' },
+            { type: 'combat', monsterId: 'rime_coated_serpent' },
         ],
         regionId: 'frostfang_peaks',
         x: 1670, y: 1650,
@@ -113,6 +116,8 @@ export const frostfangPeaksPois: Record<string, POI> = {
         description: 'A wide, open field where hulking Frost Golems wander aimlessly. The ground is rich with minerals.',
         connections: ['fp_serpent_trail', 'fp_yeti_ascent', 'fp_troll_outpost', 'fp_wyrms_approach', 'fp_ice_elemental_rift'],
         activities: [
+            { type: 'combat', monsterId: 'frost_golem' },
+            { type: 'combat', monsterId: 'frost_golem' },
             { type: 'combat', monsterId: 'frost_golem' },
             { type: 'skilling', id: 'fp_golem_gold', name: 'Mine Gold', skill: SkillName.Mining, requiredLevel: 40, loot: [{ itemId: 'gold_ore', chance: 1, xp: 65 }], resourceCount: { min: 1, max: 3 }, respawnTime: 60000, gatherTime: 4500 },
             { type: 'skilling', id: 'fp_golem_mithril', name: 'Mine Mithril', skill: SkillName.Mining, requiredLevel: 50, loot: [{ itemId: 'mithril_ore', chance: 1, xp: 80 }], resourceCount: { min: 1, max: 2 }, respawnTime: 20000, gatherTime: 4000 },
@@ -186,6 +191,7 @@ export const frostfangPeaksPois: Record<string, POI> = {
         connections: ['fp_golem_fields', 'fp_shade_crypt', 'fp_abandoned_mine'],
         activities: [
             { type: 'combat', monsterId: 'ice_troll' },
+            { type: 'combat', monsterId: 'ice_troll' },
             { type: 'skilling', id: 'fp_troll_adamantite', name: 'Mine Adamantite', skill: SkillName.Mining, requiredLevel: 65, loot: [{ itemId: 'adamantite_ore', chance: 1, xp: 120 }], resourceCount: { min: 1, max: 2 }, respawnTime: 45000, gatherTime: 5000 },
         ],
         regionId: 'frostfang_peaks',
@@ -242,9 +248,10 @@ export const frostfangPeaksPois: Record<string, POI> = {
     fp_wyrms_lair: {
         id: 'fp_wyrms_lair',
         name: 'Glacial Wyrm\'s Lair',
-        description: 'A colossal ice cavern, the lair of a mighty Glacial Wyrm. It guards a vast hoard of minerals.',
+        description: 'A colossal ice cavern, the lair of the Glacial Wyrms. They guard a vast hoard of minerals.',
         connections: ['fp_wyrms_approach'],
         activities: [
+            { type: 'combat', monsterId: 'glacial_wyrm' },
             { type: 'combat', monsterId: 'glacial_wyrm' },
             { type: 'skilling', id: 'fp_wyrm_mithril', name: 'Mine Large Mithril Vein', skill: SkillName.Mining, requiredLevel: 60, loot: [{ itemId: 'mithril_ore', chance: 1, xp: 80 }], resourceCount: { min: 15, max: 30 }, respawnTime: 120000, gatherTime: 4000 },
             { type: 'skilling', id: 'fp_wyrm_gold', name: 'Mine Large Gold Vein', skill: SkillName.Mining, requiredLevel: 55, loot: [{ itemId: 'gold_ore', chance: 1, xp: 65 }], resourceCount: { min: 10, max: 20 }, respawnTime: 180000, gatherTime: 4500 },
@@ -273,11 +280,11 @@ export const frostfangPeaksPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Frozen Gate',
-                icon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+                icon: 'locked-fortress',
                 dialogue: {
                     start: {
                         npcName: 'Frozen Gate',
-                        npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+                        npcIcon: 'locked-fortress',
                         text: "The gate hums with a powerful, chilling magic. A single, ornate keyhole glows with a cold, blue light.",
                         responses: [],
                         conditionalResponses: [
@@ -304,7 +311,7 @@ export const frostfangPeaksPois: Record<string, POI> = {
                     },
                     unlock_gate: {
                         npcName: 'Frozen Gate',
-                        npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+                        npcIcon: 'locked-fortress',
                         text: "You insert the icy key. It melts into the lock as the gate groans open, revealing a path into the dragon's domain. The key is consumed and the gate is now permanently unlocked.",
                         responses: [
                             { text: "(Enter)", actions: [{ type: 'take_item', itemId: 'frostfang_key', quantity: 1 }, { type: 'complete_quest', questId: 'the_frozen_gate' }, { type: 'teleport', poiId: 'fp_roost_entrance' }] }
@@ -312,13 +319,13 @@ export const frostfangPeaksPois: Record<string, POI> = {
                     },
                     fail_key: {
                         npcName: 'Frozen Gate',
-                        npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+                        npcIcon: 'locked-fortress',
                         text: "A key forged of enchanted ice seems to be required. The gate remains sealed.",
                         responses: []
                     },
                     gate_unlocked: {
                         npcName: 'Frozen Gate',
-                        npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+                        npcIcon: 'locked-fortress',
                         text: "The gate stands unlocked. Beyond this point lies the domain of the Frosthide Dragons. Be wary.",
                         responses: [
                             { text: "(Enter)", actions: [{ type: 'teleport', poiId: 'fp_roost_entrance' }] }

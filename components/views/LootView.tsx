@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { GroundItem, InventorySlot, Item, WorldState } from '../../types';
-import { ITEMS, getIconClassName } from '../../constants';
+import {  ITEMS, getIconClassName, getIconUrl  } from '../../constants';
 import Button from '../common/Button';
 import { TooltipState } from '../../hooks/useUIState';
 import { getDisplayName } from '../panels/InventorySlot';
@@ -93,15 +93,15 @@ const LootSlot: React.FC<{
             />
             {item.noted ? (
                 <div className="item-note-wrapper">
-                    <img src="https://api.iconify.design/game-icons:folded-paper.svg" alt="Note" className="item-note-paper" />
-                    <img src={itemData.iconUrl} alt={itemData.name} className={`item-note-icon ${getIconClassName(itemData)}`} />
+                    <img src={getIconUrl("folded-paper")} alt="Note" className="item-note-paper" />
+                    <img src={getIconUrl(itemData.iconUrl)} alt={itemData.name} className={`item-note-icon ${getIconClassName(itemData)}`} />
                 </div>
             ) : (
-                <img src={itemData.iconUrl} alt={itemData.name} className={`w-full h-full ${getIconClassName(itemData)}`} />
+                <img src={getIconUrl(itemData.iconUrl)} alt={itemData.name} className={`w-full h-full ${getIconClassName(itemData)}`} />
             )}
              {item.statsOverride?.poisoned && (
                 <img 
-                    src="https://api.iconify.design/game-icons:boiling-bubbles.svg" 
+                    src={getIconUrl("boiling-bubbles")} 
                     alt="Poisoned"
                     className="poison-overlay-icon item-icon-uncut-emerald"
                     title="Poisoned"

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { InventorySlot, PlayerSkill, PlayerQuestState, SkillName } from '../../../../types';
-import { COOKING_RECIPES, ITEMS, getIconClassName } from '../../../../constants';
+import {  COOKING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../../constants';
 import Button from '../../../common/Button';
 import { ContextMenuOption } from '../../../common/ContextMenu';
 import { MakeXPrompt, ContextMenuState } from '../../../../hooks/useUIState';
@@ -105,11 +105,11 @@ const CookingSlot: React.FC<CookingSlotProps> = ({ recipe, cookingLevel, getItem
             <div className={`crafting-slot-level ${hasLevel ? 'met' : 'unmet'}`}>
                 Lvl {recipe.level}
             </div>
-            <img src={item.iconUrl} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
+            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
             <div className="crafting-slot-ingredients">
                 {recipe.ingredients.map(ing => (
                     <div key={ing.itemId} className="ingredient-icon" title={`${ITEMS[ing.itemId].name} (${getItemCount(ing.itemId)})`}>
-                        <img src={ITEMS[ing.itemId].iconUrl} alt={ITEMS[ing.itemId].name} className={getIconClassName(ITEMS[ing.itemId])} />
+                        <img src={getIconUrl(ITEMS[ing.itemId].iconUrl)} alt={ITEMS[ing.itemId].name} className={getIconClassName(ITEMS[ing.itemId])} />
                         {ing.quantity > 1 && <span className="ingredient-quantity">{ing.quantity}</span>}
                     </div>
                 ))}

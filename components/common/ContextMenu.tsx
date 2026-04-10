@@ -49,7 +49,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ options, triggerEvent, onClos
             if (!gameContainer) return;
             const gameRect = gameContainer.getBoundingClientRect();
 
-            const touchOffset = 20;
+            const touchOffset = isTouchInteraction ? 20 : 0;
             let x = triggerEvent.clientX + touchOffset;
             let y = triggerEvent.clientY + touchOffset;
 
@@ -81,8 +81,8 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ options, triggerEvent, onClos
             >
                 <ul>
                     {title ? (
-                        <li className="px-4 pt-1 pb-2 border-b border-gray-700 mb-1">
-                            <span className="font-bold text-yellow-400 text-sm whitespace-nowrap">{title}</span>
+                        <li className="px-4 pt-1 pb-2 border-b border-gray-700 mb-1 font-pixel-rpg">
+                            <span className="font-bold text-yellow-400 text-xl whitespace-nowrap">{title}</span>
                         </li>
                     ) : (
                         <li aria-hidden="true" className="h-2"></li>
@@ -99,7 +99,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ options, triggerEvent, onClos
                                     }
                                 }}
                                 disabled={option.disabled}
-                                className={`w-full text-left px-4 py-2 text-sm text-gray-200 transition-colors hover:bg-yellow-700 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center`}
+                                className={`w-full text-left px-4 py-2 text-xl font-pixel-rpg text-gray-200 transition-colors hover:bg-yellow-700 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center leading-none`}
                             >
                                 <span>{option.label}</span>
                             </button>
@@ -108,7 +108,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ options, triggerEvent, onClos
                     {content && (
                         <>
                             <li className="border-t border-gray-700 my-1" />
-                            <li className="px-4 py-2 text-sm text-gray-200">
+                            <li className="px-4 py-2 text-lg text-gray-200 font-pixel-rpg leading-tight">
                                 {content}
                             </li>
                         </>

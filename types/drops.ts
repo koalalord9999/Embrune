@@ -4,12 +4,15 @@ export interface DropCondition {
     stage?: number;
 }
 
+import { ItemId } from './ItemIds';
+
 export interface BaseDrop {
-    itemId?: string;
+    itemId?: ItemId;
     tableId?: string;
     minQuantity?: number;
     maxQuantity?: number;
     noted?: boolean;
+    doses?: number;
     questReq?: DropCondition;
     multiRoll?: {
         tableId: string;

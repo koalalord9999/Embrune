@@ -28,10 +28,10 @@ const renderStats = (item: Item, slot: InventorySlot) => {
     const hasRequirements = equipment.requiredLevels && equipment.requiredLevels.length > 0;
 
     return (
-        <div className="mt-2 pt-2 border-t border-gray-500 text-xs">
+        <div className="mt-2 pt-2 border-t border-gray-500 text-lg leading-none font-pixel-rpg">
             <div className="grid grid-cols-2 gap-x-4">
                 <div>
-                    <p className="font-bold text-yellow-400 mb-1">Attack</p>
+                    <p className="font-bold text-yellow-400 mb-1 text-xl">Attack</p>
                     <StatRow label="Stab" value={equipment.stabAttack ?? 0} />
                     <StatRow label="Slash" value={equipment.slashAttack ?? 0} />
                     <StatRow label="Crush" value={equipment.crushAttack ?? 0} />
@@ -39,7 +39,7 @@ const renderStats = (item: Item, slot: InventorySlot) => {
                     <StatRow label="Magic" value={equipment.magicAttack ?? 0} />
                 </div>
                 <div>
-                    <p className="font-bold text-yellow-400 mb-1">Defence</p>
+                    <p className="font-bold text-yellow-400 mb-1 text-xl">Defence</p>
                     <StatRow label="Stab" value={equipment.stabDefence ?? 0} />
                     <StatRow label="Slash" value={equipment.slashDefence ?? 0} />
                     <StatRow label="Crush" value={equipment.crushDefence ?? 0} />
@@ -48,7 +48,7 @@ const renderStats = (item: Item, slot: InventorySlot) => {
                 </div>
                 <div className="col-span-2 mt-1 pt-1 border-t border-gray-700" />
                 <div className="col-span-2">
-                    <p className="font-bold text-yellow-400 mb-1">Other</p>
+                    <p className="font-bold text-yellow-400 mb-1 text-xl">Other</p>
                     <StatRow label="Strength" value={equipment.strengthBonus ?? 0} />
                     <StatRow label="Ranged Str" value={equipment.rangedStrength ?? 0} />
                     {(() => {
@@ -73,7 +73,7 @@ const renderStats = (item: Item, slot: InventorySlot) => {
                 </div>
                  {hasRequirements && (
                     <div className="col-span-2 mt-1 pt-1 border-t border-gray-700">
-                        <p className="font-bold text-yellow-400 mb-1">Requirements</p>
+                        <p className="font-bold text-yellow-400 mb-1 text-xl">Requirements</p>
                         {equipment.requiredLevels?.map(req => (
                             <div key={req.skill} className="flex justify-between">
                                 <span>{req.skill}:</span>
@@ -100,7 +100,7 @@ const Tooltip: React.FC<TooltipProps> = ({ tooltipState, isCtrlPressed }) => {
         if (item && slot) {
             return (
                 <div>
-                    <p className="font-bold text-yellow-300">{getDisplayName(slot)}</p>
+                    <p className="font-bold text-yellow-300 text-xl">{getDisplayName(slot)}</p>
                     {isCtrlPressed && renderStats(item, slot)}
                     {content} 
                 </div>
@@ -137,7 +137,7 @@ const Tooltip: React.FC<TooltipProps> = ({ tooltipState, isCtrlPressed }) => {
     return (
         <div
             ref={tooltipRef}
-            className="fixed top-0 left-0 bg-black/80 border border-gray-500 text-white text-sm rounded-md shadow-lg p-2 max-w-xs pointer-events-none z-50"
+            className="fixed top-0 left-0 bg-black/80 border border-gray-500 text-white text-xl font-pixel-rpg rounded-md shadow-lg p-2 max-w-xs pointer-events-none z-50"
             style={style}
         >
             {tooltipContent}

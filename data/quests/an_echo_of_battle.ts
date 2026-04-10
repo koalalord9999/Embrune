@@ -5,7 +5,11 @@ export const anEchoOfBattle: Quest = {
     id: 'an_echo_of_battle',
     name: "An Echo of Battle",
     description: "Bronn, the retired adventurer in Oakhaven's tavern, is troubled by memories of a past battle and a sealed foe.",
-    startHint: "Speak to Bronn in The Carved Mug after proving your worth by completing 'The Capital's Call' and 'Art of the Warhammer'.",
+    requirements: {
+        quests: ['art_of_the_warhammer'],
+        recommendedCombatLevel: 55
+    },
+    startHint: "Speak to Bronn in The Carved Mug to prove your worth.",
     playerStagePerspectives: [
         "Bronn is worried a sealed enemy has returned. He's asked me to investigate the Forgotten Barrow in the Verdant Fields.", // 0
         "The barrow's seal is weakening. I should report this to Bronn.", // 1
@@ -57,26 +61,26 @@ export const anEchoOfBattle: Quest = {
     },
     dialogueEntryPoints: [
         //QUEST START
-        { npcName: 'Bronn the Retired Adventurer', response: { text: "You seem troubled, Bronn.", check: { requirements: [ { type: 'quest', questId: 'art_of_the_warhammer', status: 'completed' }, { type: 'quest', questId: 'capitals_call', status: 'completed' }, { type: 'quest', questId: 'an_echo_of_battle', status: 'not_started' } ], successNode: 'aeb_intro', failureNode: '' } } },
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "You seem troubled, Bronn.", check: { requirements: [{ type: 'quest', questId: 'art_of_the_warhammer', status: 'completed' }, { type: 'quest', questId: 'capitals_call', status: 'completed' }, { type: 'quest', questId: 'an_echo_of_battle', status: 'not_started' }], successNode: 'aeb_intro', failureNode: '' } } },
         //FOUND SEAL
-        { npcName: 'Bronn the Retired Adventurer', response: { text: "I have found the seal, and it does appear to be weakening.", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 1 } ], successNode: 'aeb_bronn_return_from_barrow', failureNode: '' } } },
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "I have found the seal, and it does appear to be weakening.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 1 }], successNode: 'aeb_bronn_return_from_barrow', failureNode: '' } } },
         //BEFORE SEARCHING SEAL
-        { npcName: 'Bronn the Retired Adventurer', response: { text: "I have not found anything yet.", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 0 } ], successNode: 'aeb_bronn_nothing_yet', failureNode: '' } } },
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "I have not found anything yet.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 0 }], successNode: 'aeb_bronn_nothing_yet', failureNode: '' } } },
         //AFTER TAKING THE BROKEN KEY
-        { npcName: 'Bronn the Retired Adventurer', response: { text: "What should I do with this key?", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 2 } ], successNode: 'aeb_bronn_remind_valerius', failureNode: '' } } },
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "What should I do with this key?", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 2 }], successNode: 'aeb_bronn_remind_valerius', failureNode: '' } } },
         //AFTER ACCEPTING THE PART FROM VALERIUS
-        { npcName: 'Bronn the Retired Adventurer', response: { text: "Where can I find Glimmerhorn Dust?", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 3 } ], successNode: 'aeb_bronn_remind_dust', failureNode: '' } } },
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "Where can I find Glimmerhorn Dust?", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 3 }], successNode: 'aeb_bronn_remind_dust', failureNode: '' } } },
         //AFTER REFORGING THE KEY, BEFORE OPENING
-        { npcName: 'Bronn the Retired Adventurer', response: { text: "Sorry, I just forgot what I needed to do..", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 5 } ], successNode: 'aeb_bronn_remind_barrow', failureNode: '' } } },
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "Sorry, I just forgot what I needed to do..", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 5 }], successNode: 'aeb_bronn_remind_barrow', failureNode: '' } } },
         //AFTER OPENING THE SEAL (OPTIONAL)
-        { npcName: 'Bronn the Retired Adventurer', response: { text: "I managed to break the seal.", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 6 } ], successNode: 'aeb_bronn_seal_broken', failureNode: '' } } },
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "I managed to break the seal.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 6 }], successNode: 'aeb_bronn_seal_broken', failureNode: '' } } },
         //AFTER KILLING REV LORD
-        { npcName: 'Bronn the Retired Adventurer', response: { text: "I think I found the monster that killed your comrade.", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 7 } ], successNode: 'aeb_bronn_complete_check', failureNode: '' } } },
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "I think I found the monster that killed your comrade.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 7 }], successNode: 'aeb_bronn_complete_check', failureNode: '' } } },
 
         //VALERIUS ENTRY POINTS
-        { npcName: 'Valerius the Master Smith', response: { text: "I have a broken key from Bronn.", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 2 } ], successNode: 'aeb_valerius_intro', failureNode: '' } } },
-        { npcName: 'Valerius the Master Smith', response: { text: "I'm still looking for the dust you need.", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 3 } ], successNode: 'aeb_valerius_no_dust', failureNode: '' } } },
-        { npcName: 'Valerius the Master Smith', response: { text: "I have the Glimmerhorn Dust for the key.", check: { requirements: [ { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 4 } ], successNode: 'aeb_valerius_has_dust_check', failureNode: '' } } },
+        { npcName: 'Valerius the Master Smith', response: { text: "I have a broken key from Bronn.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 2 }], successNode: 'aeb_valerius_intro', failureNode: '' } } },
+        { npcName: 'Valerius the Master Smith', response: { text: "I'm still looking for the dust you need.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 3 }], successNode: 'aeb_valerius_no_dust', failureNode: '' } } },
+        { npcName: 'Valerius the Master Smith', response: { text: "I have the Glimmerhorn Dust for the key.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 4 }], successNode: 'aeb_valerius_has_dust_check', failureNode: '' } } },
     ],
     dialogue: {
         // Bronn's Dialogue
@@ -170,25 +174,25 @@ export const anEchoOfBattle: Quest = {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "We broke the key after we sealed the barrow, so no one could ever open that cursed place again. But now... I feel it stirring. The seal is weakening. The dreams... they feel like a warning.",
-            responses: [ { text: "What do you need me to do?", next: 'aeb_story_3' } ]
+            responses: [{ text: "What do you need me to do?", next: 'aeb_story_3' }]
         },
         aeb_story_3: {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "I need you to go there, to the Forgotten Barrow in the Verdant Fields, and see if my fears are true. Check the seal.",
-            responses: [ { text: "I'll investigate the barrow for you.", actions: [{ type: 'start_quest', questId: 'an_echo_of_battle' }] } ]
+            responses: [{ text: "I'll investigate the barrow for you.", actions: [{ type: 'start_quest', questId: 'an_echo_of_battle' }] }]
         },
         aeb_bronn_return_from_barrow: {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "Weakening, you say? I knew it. Pregai's sacrifice... it can't be for nothing. We have to reinforce the seal, or destroy the beast once and for all. Take these. *He pulls two tarnished, broken pieces of metal from a pouch.* It's the key. Or what's left of it. There's only one smith I'd trust to reforge something this old. Valerius, in Meadowdale. Show it to him.",
-            responses: [ { text: "I'll take the key to Valerius.", actions: [{ type: 'give_item', itemId: 'broken_barrow_key', quantity: 1 }, { type: 'advance_quest', questId: 'an_echo_of_battle' }] } ]
+            responses: [{ text: "I'll take the key to Valerius.", actions: [{ type: 'give_item', itemId: 'broken_barrow_key', quantity: 1 }, { type: 'advance_quest', questId: 'an_echo_of_battle' }] }]
         },
         aeb_bronn_nothing_yet: {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "Well get a move on, the longer we wait the weaker the seal will become!",
-            responses: [ { text: "Okay, I'll go look for it." } ]
+            responses: [{ text: "Okay, I'll go look for it." }]
         },
         aeb_bronn_remind_valerius: {
             npcName: 'Bronn the Retired Adventurer',
@@ -212,13 +216,13 @@ export const anEchoOfBattle: Quest = {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "You did? I knew you could do it. The way is open then. Be careful in there. That Revenant Lord is no ordinary foe. Strike true.",
-            responses: [ { text: "I will." } ]
+            responses: [{ text: "I will." }]
         },
         aeb_bronn_complete_check: {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "You did?! And since you're back here, you must have slain the beast! Wow. I wish we would have had you in our company back in the day, then Pregai might still be alive today... Did you find the shield?",
-            responses: [ { text: "Yea, I killed it.. it was holding a shield during our fight.", check: { requirements: [{ type: 'items', items: [{ itemId: 'pregais_shield', quantity: 1 }] }], successNode: 'aeb_bronn_complete_success', failureNode: 'aeb_bronn_no_shield' } } ]
+            responses: [{ text: "Yea, I killed it.. it was holding a shield during our fight.", check: { requirements: [{ type: 'items', items: [{ itemId: 'pregais_shield', quantity: 1 }] }], successNode: 'aeb_bronn_complete_success', failureNode: 'aeb_bronn_no_shield' } }]
         },
         aeb_bronn_no_shield: {
             npcName: 'Bronn the Retired Adventurer',
@@ -230,32 +234,32 @@ export const anEchoOfBattle: Quest = {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "*Bronn takes the shield, his hands trembling as he traces the worn crest.* Pregai's shield... After all these years. You've done it. You've laid the ghosts of my past to rest. Thank you, warrior. Truly.",
-            responses: [ { text: "I'm glad I could help.", next: 'aeb_bronn_final_reward' } ]
+            responses: [{ text: "I'm glad I could help.", next: 'aeb_bronn_final_reward' }]
         },
         aeb_bronn_final_reward: {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "I have no more use for this. My battles are over. A shield like this belongs on the arm of a hero. Take it. Let it protect you as it once protected my friend. Now, if you'll excuse me... I think I can finally enjoy a quiet drink.",
-            responses: [ { text: "(Take the shield)", actions: [{ type: 'take_item', itemId: 'pregais_shield', quantity: 1 }, { type: 'advance_quest', questId: 'an_echo_of_battle' }] } ]
+            responses: [{ text: "(Take the shield)", actions: [{ type: 'take_item', itemId: 'pregais_shield', quantity: 1 }, { type: 'advance_quest', questId: 'an_echo_of_battle' }] }]
         },
         // Valerius's Dialogue
         aeb_valerius_intro: {
             npcName: 'Valerius the Master Smith',
             npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
             text: "Bronn sent you? That old warhorse. What trouble has he gotten you into? Let me see... *He takes the key fragments.* This is Old Kingdom steel, but... it's bound by magic. Simply reforging it won't be enough.",
-            responses: [ { text: "What do you mean?", next: 'aeb_valerius_needs_dust' } ]
+            responses: [{ text: "What do you mean?", next: 'aeb_valerius_needs_dust' }]
         },
         aeb_valerius_needs_dust: {
             npcName: 'Valerius the Master Smith',
             npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
             text: "I need a magical binding agent to restore its power. Glimmerhorn Dust. It's made from the antlers of the Glimmerhorn Stags in the Verdant Fields. Bring me a pouch of the dust, and I will mend this key for you.",
-            responses: [ { text: "I'll get the Glimmerhorn Dust.", actions: [{ type: 'advance_quest', questId: 'an_echo_of_battle' }] } ]
+            responses: [{ text: "I'll get the Glimmerhorn Dust.", actions: [{ type: 'advance_quest', questId: 'an_echo_of_battle' }] }]
         },
         aeb_valerius_has_dust_check: {
             npcName: 'Valerius the Master Smith',
             npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
             text: "Do you have the Glimmerhorn Dust I need to reforge the key?",
-            responses: [ { text: "(Give him the dust and key fragments)", check: { requirements: [{ type: 'items', items: [{ itemId: 'glimmerhorn_dust', quantity: 1 }] }], successNode: 'aeb_valerius_reforge', failureNode: 'aeb_valerius_no_dust' } } ]
+            responses: [{ text: "(Give him the dust and key fragments)", check: { requirements: [{ type: 'items', items: [{ itemId: 'glimmerhorn_dust', quantity: 1 }] }], successNode: 'aeb_valerius_reforge', failureNode: 'aeb_valerius_no_dust' } }]
         },
         aeb_valerius_no_dust: {
             npcName: 'Valerius the Master Smith',
@@ -267,18 +271,18 @@ export const anEchoOfBattle: Quest = {
             npcName: 'Valerius the Master Smith',
             npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
             text: "Excellent. Give them here. *He works the forge, sprinkling the dust into the molten metal. It glows with an ethereal light.* It is done. Stronger than it was before. Be careful, adventurer. Whatever this key opens, it was locked for a reason.",
-            responses: [ { text: "Thank you, Valerius. I will.", actions: [{ type: 'take_item', itemId: 'broken_barrow_key', quantity: 1 }, { type: 'take_item', itemId: 'glimmerhorn_dust', quantity: 1 }, { type: 'give_item', itemId: 'reforged_barrow_key', quantity: 1 }, { type: 'advance_quest', questId: 'an_echo_of_battle' }] } ]
+            responses: [{ text: "Thank you, Valerius. I will.", actions: [{ type: 'take_item', itemId: 'broken_barrow_key', quantity: 1 }, { type: 'take_item', itemId: 'glimmerhorn_dust', quantity: 1 }, { type: 'give_item', itemId: 'reforged_barrow_key', quantity: 1 }, { type: 'advance_quest', questId: 'an_echo_of_battle' }] }]
         },
         // Barrow POI Dialogue
         aeb_barrow_seal: {
             npcName: 'Ancient Seal',
-            npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+            npcIcon: 'locked-fortress',
             text: "You place your hand on the stone door. It's cold, but a faint, rhythmic pulse of magic emanates from within. You can feel the ancient locking spell, but it feels frayed, like a rope worn thin. Bronn was right; the seal is weakening.",
-            responses: [ { text: "(Return to Bronn)", actions: [{ type: 'advance_quest', questId: 'an_echo_of_battle' }] } ]
+            responses: [{ text: "(Return to Bronn)", actions: [{ type: 'advance_quest', questId: 'an_echo_of_battle' }] }]
         },
         aeb_barrow_door_puzzle_start: {
             npcName: 'Barrow Door',
-            npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+            npcIcon: 'locked-fortress',
             text: "You insert the reforged key. It turns with a heavy clunk. Three carvings appear on the door: a Shield, a Feather, and a Wave. A riddle echoes from the stone: 'Three stood against the one. Honor them in the order they were named, and the path shall open.'",
             responses: [
                 { text: "Press the Wave", next: 'aeb_barrow_door_puzzle_fail' },
@@ -288,7 +292,7 @@ export const anEchoOfBattle: Quest = {
         },
         aeb_barrow_door_puzzle_step2: {
             npcName: 'Barrow Door',
-            npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+            npcIcon: 'locked-fortress',
             text: "The Shield carving glows with a faint light. It seems you are on the right path.",
             responses: [
                 { text: "Press the Wave", next: 'aeb_barrow_door_puzzle_fail' },
@@ -298,7 +302,7 @@ export const anEchoOfBattle: Quest = {
         },
         aeb_barrow_door_puzzle_step3: {
             npcName: 'Barrow Door',
-            npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+            npcIcon: 'locked-fortress',
             text: "The Feather carving glows, joining the Shield's light. The hum from the door grows stronger.",
             responses: [
                 { text: "Press the Wave", next: 'aeb_door_success' },
@@ -308,15 +312,15 @@ export const anEchoOfBattle: Quest = {
         },
         aeb_door_success: {
             npcName: 'Barrow Door',
-            npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+            npcIcon: 'locked-fortress',
             text: "The three carvings glow in unison. The stone door grinds open, revealing a dark passage into the earth. The key crumbles to dust in your hand.",
-            responses: [ { text: "(Enter the Barrow)", actions: [{ type: 'take_item', itemId: 'reforged_barrow_key', quantity: 1 }, { type: 'advance_quest', questId: 'an_echo_of_battle' }, { type: 'teleport', poiId: 'barrow_entrance_hall' }] } ]
+            responses: [{ text: "(Enter the Barrow)", actions: [{ type: 'take_item', itemId: 'reforged_barrow_key', quantity: 1 }, { type: 'advance_quest', questId: 'an_echo_of_battle' }, { type: 'teleport', poiId: 'barrow_entrance_hall' }] }]
         },
         aeb_barrow_door_puzzle_fail: {
             npcName: 'Barrow Door',
-            npcIcon: 'https://api.iconify.design/game-icons:locked-fortress.svg',
+            npcIcon: 'locked-fortress',
             text: "A low groan echoes from the stone. The lights on the carvings fade, and they reset.",
-            responses: [ { text: "Try again.", next: 'aeb_barrow_door_puzzle_start' } ]
+            responses: [{ text: "Try again.", next: 'aeb_barrow_door_puzzle_start' }]
         }
     }
 };

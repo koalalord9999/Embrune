@@ -4,7 +4,7 @@ import { WorldState, InventorySlot } from '../types';
 import { useGameSession } from './useGameSession';
 import { useCharacter } from './useCharacter';
 import { useInventory } from './useInventory';
-import { POIS, REGIONS } from '../constants';
+import {  POIS, REGIONS  } from '../constants';
 
 interface DehydrationDependencies {
     session: ReturnType<typeof useGameSession>;

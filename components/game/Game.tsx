@@ -34,10 +34,12 @@ import { useDehydration } from '../../hooks/useDehydration';
 import { useAgility } from '../../hooks/useAgility';
 import { useMusicEngine } from '../../hooks/useMusicEngine';
 import { PRAYERS, ITEMS, SKILL_ICONS } from '../../constants';
+import { useKeyboardManager, Direction } from '../../hooks/useKeyboardManager';
 
 
 import SidePanel from '../panels/SidePanel';
 import ActivityLog from './ActivityLog';
+import { ContextMenuOption } from '../common/ContextMenu';
 import XpTracker, { XpDrop } from '../ui/XpTracker';
 import MainViewController from './MainViewController';
 import QuestDetailView from '../views/overlays/QuestDetailView';
@@ -94,8 +96,8 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     const [combatStance, setCombatStance] = useState<CombatStance>(initialState.combatStance);
     const [rangeCooldowns, setRangeCooldowns] = useState<Record<string, number>>({});
 
+    const containerRef = useRef<HTMLDivElement>(null);
     const isBusy = ui.isBusy || isTraveling || !!ui.activeSingleAction;
-
     const [worldState, setWorldState] = useState<WorldState>(initialState.worldState);
 
     // Music System Integration
@@ -104,7 +106,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         return poi ? poi.regionId : undefined;
     }, [session.currentPoiId]);
 
-    useMusicEngine(currentRegionId, worldState, setWorldState);
+    useMusicEngine(currentRegionId, session.currentPoiId, worldState, setWorldState);
 
     // DEV MODE STATE INITIALIZATION
     const handleTogglePermAggro = useCallback(() => {
@@ -245,9 +247,11 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     // Logic Hooks
     const [clearedSkillObstacles, setClearedSkillObstacles] = useState(initialState.clearedSkillObstacles);
     const [monsterRespawnTimers, setMonsterRespawnTimers] = useState(initialState.monsterRespawnTimers);
+    const [slayerCredits, setSlayerCredits] = useState(initialState.slayerCredits || 0);
+    const [slayerTaskStreak, setSlayerTaskStreak] = useState(initialState.slayerTaskStreak || 0);
     const isInCombat = ui.combatQueue.length > 0;
 
-    const questLogic = useQuestLogic({ playerQuests: quests.playerQuests, setPlayerQuests: quests.setPlayerQuests, addLog, modifyItem: inv.modifyItem, addXp: char.addXp, hasItems: inv.hasItems, setLockedPois: quests.setLockedPois, setClearedSkillObstacles });
+    const questLogic = useQuestLogic({ playerQuests: quests.playerQuests, setPlayerQuests: quests.setPlayerQuests, addLog, modifyItem: inv.modifyItem, addXp: char.addXp, hasItems: inv.hasItems, setLockedPois: quests.setLockedPois, setClearedSkillObstacles, worldState, setWorldState });
 
     const onQuestAcceptedCallback = useCallback((quest: GeneratedRepeatableQuest) => {
         const tutorialQuest = quests.playerQuests.find(q => q.questId === 'embrune_101');
@@ -326,9 +330,9 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         }
 
         const hops = path.length - 1;
-        const costPerHop = char.activeBuffs.some(b => b.type === 'stamina') ? 5 : 20;
+        const costPerHop = char.activeBuffs.some(b => b.type === 'stamina') ? 1 : 10;
         const energyCost = hops * costPerHop;
-        const travelTime = hops * 200; // in ms
+        const travelTime = hops * 1000; // in ms
 
         if (char.runEnergy < energyCost) {
             addLog(`You don't have enough run energy to travel that far (Cost: ${energyCost}).`);
@@ -418,17 +422,36 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     }, [session.currentPoiId, repeatableQuests.activePlayerQuest, dynamicActivities]);
 
     const shops = useShops(initialState.shopStates, inv.coins, inv.modifyItem, addLog, inv.inventory);
-    const slayer = useSlayer(initialState.slayerTask, quests.playerQuests, { addLog, addXp: char.addXp, combatLevel: char.combatLevel, modifyItem: inv.modifyItem });
+    const slayer = useSlayer(initialState.slayerTask, quests.playerQuests, { 
+        addLog, 
+        addXp: char.addXp, 
+        modifyItem: inv.modifyItem,
+        combatLevel: char.combatLevel,
+        slayerLevel: char.skills.find(s => s.name === SkillName.Slayer)?.level ?? 1,
+        slayerCredits,
+        slayerTaskStreak,
+        setSlayerCredits,
+        setSlayerTaskStreak,
+        setActiveShopId: ui.setActiveShopId,
+    });
 
     const startCombat = useCallback((ids: string[]) => {
+        // Guard: Prevent starting combat with monsters that are currently respawning
+        const validIds = ids.filter(id => {
+            const respawnTime = monsterRespawnTimers[id];
+            return !respawnTime || respawnTime <= Date.now();
+        });
+
+        if (validIds.length === 0) return;
+
         cancelCurrentAction();
         if (ui.activeDialogue) {
             ui.setActiveDialogue(null);
         }
-        ui.setCombatQueue(ids);
+        ui.setCombatQueue(validIds);
         ui.setIsMandatoryCombat(false);
         setPoisonEvent(null); // Clear poison event on combat start
-    }, [ui, cancelCurrentAction]);
+    }, [ui, cancelCurrentAction, monsterRespawnTimers]);
 
     // Add a wrapper for onStartCombat to handle single monster IDs from SceneView
     const onStartSingleCombat = useCallback((id: string) => {
@@ -585,15 +608,59 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                 inv.setEquipment(newEquipment);
             }
 
+            // Monolith Fire Burnout
+            const monolithFires = worldState.monolithFires || {};
+            let monolithFiresChanged = false;
+            const newMonolithFires = { ...monolithFires };
+
+            Object.entries(monolithFires).forEach(([pitId, fire]) => {
+                if (fire && fire.expiresAt && now >= fire.expiresAt) {
+                    delete newMonolithFires[pitId];
+                    monolithFiresChanged = true;
+                    // Drop ashes at the monolith
+                    onItemDropped({ itemId: 'ashes', quantity: 1 }, 'sp_ancient_monolith');
+                    addLog(`The fire in the ${pitId.replace('monolith_pit_', 'fire pit ')} has burnt out, leaving only ashes.`);
+                }
+            });
+
+            if (monolithFiresChanged) {
+                setWorldState(prev => ({ ...prev, monolithFires: newMonolithFires }));
+            }
+
         }, 1000); // Check every second
 
         return () => clearInterval(interval);
-    }, [inv.inventory, inv.equipment, inv.setInventory, inv.setEquipment, addLog]);
+    }, [inv.inventory, inv.equipment, inv.setInventory, inv.setEquipment, addLog, worldState.monolithFires, setWorldState, onItemDropped]);
 
-    const crafting = useCrafting({ skills: char.skills, hasItems: inv.hasItems, addLog, activeCraftingAction: ui.activeCraftingAction, setActiveCraftingAction: ui.setActiveCraftingAction, inventory: inv.inventory, modifyItem: inv.modifyItem, addXp: char.addXp, checkQuestProgressOnSpin: questLogic.checkQuestProgressOnSpin, checkQuestProgressOnSmith: questLogic.checkQuestProgressOnSmith, checkQuestProgressOnOffer: questLogic.checkQuestProgressOnOffer, advanceTutorial: (condition: string) => { }, closeCraftingView: ui.closeCraftingView, setWindmillFlour, equipment: inv.equipment, setEquipment: inv.setEquipment, worldState, setWorldState, onCreateBonfire, onRefreshBonfire, isInCombat, currentPrayer: char.currentPrayer, setCurrentPrayer: char.setCurrentPrayer, setIsResting: char.setIsResting, setInventory: inv.setInventory });
+    const crafting = useCrafting({ skills: char.skills, hasItems: inv.hasItems, addLog, activeCraftingAction: ui.activeCraftingAction, setActiveCraftingAction: ui.setActiveCraftingAction, inventory: inv.inventory, modifyItem: inv.modifyItem, addXp: char.addXp, checkQuestProgressOnSpin: questLogic.checkQuestProgressOnSpin, checkQuestProgressOnSmith: questLogic.checkQuestProgressOnSmith, checkQuestProgressOnOffer: questLogic.checkQuestProgressOnOffer, advanceTutorial: (condition: string) => { }, closeCraftingView: ui.closeCraftingView, setWindmillFlour, equipment: inv.equipment, setEquipment: inv.setEquipment, worldState, setWorldState, onCreateBonfire, onRefreshBonfire, isInCombat, currentPrayer: char.currentPrayer, setCurrentPrayer: char.setCurrentPrayer, setIsResting: char.setIsResting, setInventory: inv.setInventory, setBank });
     const worldActions = useWorldActions({ hasItems: inv.hasItems, inventory: inv.inventory, modifyItem: inv.modifyItem, addLog, coins: inv.coins, skills: char.skills, addXp: char.addXp, setClearedSkillObstacles, playerQuests: quests.playerQuests, setMakeXPrompt: ui.setMakeXPrompt, windmillFlour: worldState.windmillFlour, setWindmillFlour, setActiveCraftingAction: ui.setActiveCraftingAction, setInventory: inv.setInventory, equipment: inv.equipment, setIsResting: char.setIsResting });
-    const dialogueActions = useDialogueActions({ quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session, setIsResting: char.setIsResting, });
+    const dialogueActions = useDialogueActions({ quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session, setIsResting: char.setIsResting, slayer });
     const { handleDialogueCheck, onResponse, handleDialogueAction } = dialogueActions;
+
+    useEffect(() => {
+        questLogic.checkGatherQuests();
+    }, [inv.inventory, quests.playerQuests.length, quests.playerQuests.map(q => q.currentStage).join(',')]);
+
+    // Auto-trigger Leo's dialogue for new players
+    useEffect(() => {
+        const tutorialQuest = quests.playerQuests.find(q => q.questId === 'embrune_101');
+        const isFirstSpawn = tutorialQuest && tutorialQuest.currentStage === 0 && !tutorialQuest.isComplete && session.currentPoiId === 'tutorial_entrance';
+
+        if (isFirstSpawn && !ui.activeDialogue && !isTraveling && !ui.isBusy) {
+            const questData = QUESTS['embrune_101'];
+            if (questData && questData.dialogue && questData.dialogue['in_progress_embrune_101_0']) {
+                ui.setActiveDialogue({
+                    npcName: questData.dialogue['in_progress_embrune_101_0'].npcName,
+                    npcIcon: questData.dialogue['in_progress_embrune_101_0'].npcIcon,
+                    nodes: questData.dialogue,
+                    currentNodeKey: 'in_progress_embrune_101_0',
+                    onEnd: () => ui.setActiveDialogue(null),
+                    onResponse: onResponse,
+                    handleDialogueCheck: handleDialogueCheck
+                });
+            }
+        }
+    }, [quests.playerQuests, session.currentPoiId, ui, onResponse, handleDialogueCheck, isTraveling]);
 
     const itemActions = useItemActions({
         addLog, currentHp: char.currentHp, maxHp: char.maxHp, setCurrentHp: char.setCurrentHp,
@@ -614,6 +681,8 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         setRangeCooldowns,
         worldState,
         setWorldState,
+        setIsResting: char.setIsResting,
+        combatSpeedMultiplier,
         crafting: {
             handleCooking: crafting.handleCooking,
             handleSmelting: crafting.handleSmelting,
@@ -755,6 +824,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         return () => clearInterval(interval);
     }, []);
 
+
     const handleToggleBankPlaceholders = useCallback(() => {
         setWorldState(ws => ({ ...ws, bankPlaceholders: !ws.bankPlaceholders }));
     }, []);
@@ -777,6 +847,29 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
 
     useEffect(() => {
         const interval = setInterval(() => deathMarkerCallbackRef.current(), 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleMonsterRespawnCleanup = useCallback(() => {
+        const now = Date.now();
+        setMonsterRespawnTimers(prev => {
+            let changed = false;
+            const next = { ...prev };
+            for (const [id, time] of Object.entries(next)) {
+                if ((time as number) <= now) {
+                    delete next[id];
+                    changed = true;
+                }
+            }
+            return changed ? next : prev;
+        });
+    }, []);
+
+    const monsterRespawnCleanupRef = useRef(handleMonsterRespawnCleanup);
+    useEffect(() => { monsterRespawnCleanupRef.current = handleMonsterRespawnCleanup; });
+
+    useEffect(() => {
+        const interval = setInterval(() => monsterRespawnCleanupRef.current(), 5000);
         return () => clearInterval(interval);
     }, []);
 
@@ -875,7 +968,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             return;
         } else if (activity.type === 'start_agility_course') {
             agility.startCourse(activity.courseId);
-        } else if (activity.type === 'npc') {
+        } else if (activity.type === 'npc' || activity.type === 'slayer_master') {
             sceneInteractions.handleActivityClick(activity);
         } else {
             handleNonNpcActivity(activity);
@@ -889,13 +982,12 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         if (char.isStunned) { addLog("You are stunned and cannot perform actions."); return; }
         if (activity.type === 'shop') ui.setActiveShopId(activity.shopId);
         else if (activity.type === 'bank') ui.setActivePanel('bank');
-        else if (activity.type === 'slayer_master') slayer.handleSlayerMasterInteraction();
         else if (activity.type === 'blimp_travel') {
             const slayerLevel = char.skills.find(s => s.name === SkillName.Slayer)?.level ?? 1;
             if (slayerLevel < activity.requiredSlayerLevel) addLog(`You need a Slayer level of ${activity.requiredSlayerLevel} to use this service.`);
             else addLog("The blimp service to other regions is not yet available.");
         }
-        else if (activity.type === 'cooking_range') ui.openCraftingView({ type: 'cooking_range' });
+        else if (activity.type === 'cooking_range' || activity.type === 'bonfire') ui.openCraftingView({ type: 'cooking_range' });
         else if (activity.type === 'furnace') ui.openCraftingView({ type: 'furnace' });
         else if (activity.type === 'anvil') ui.openCraftingView({ type: 'anvil' });
         else if (activity.type === 'bookbinding_workbench') ui.openCraftingView({ type: 'bookbinding' });
@@ -911,11 +1003,280 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         else if (activity.type === 'thieving_stall') thieving.handleStealFromStall(activity);
         else if (activity.type === 'thieving_pilfer') thievingPilfering.handlePilfer(activity);
         else if (activity.type === 'cut_cactus') worldActions.handleCutCactus();
+        else if (activity.type === 'sand_pit') worldActions.handleSandPit();
         else if (activity.type === 'ground_item') skilling.handlePickupGroundItem(activity);
         else if (activity.type === 'quest_board') ui.setActiveQuestBoardId(session.currentPoiId);
     }, [char, addLog, ui, slayer, worldActions, crafting, navigation, session, thieving, thievingPilfering, skilling]);
 
-    useEffect(() => { if (ui.activePanel === null) ui.setActivePanel('inventory'); }, [ui]);
+    const gridItems = useMemo(() => {
+        const grid: (POI | { type: 'obstacle'; fromPoiId: string; toPoiId: string; requirement: any })[][] = Array(9).fill(null).map(() => []);
+        if (!poi || !poi.connections) return grid;
+
+        const getDirectionalGridIndex = (angle: number): number => {
+            if (angle > -22.5 && angle <= 22.5) return 5; // E
+            if (angle > 22.5 && angle <= 67.5) return 8; // SE
+            if (angle > 67.5 && angle <= 112.5) return 7; // S
+            if (angle > 112.5 && angle <= 157.5) return 6; // SW
+            if (angle > 157.5 || angle <= -157.5) return 3; // W
+            if (angle > -157.5 && angle <= -112.5) return 0; // NW
+            if (angle > -112.5 && angle <= -67.5) return 1; // N
+            if (angle > -67.5 && angle <= -22.5) return 2; // NE
+            return 1; // Fallback
+        };
+
+        poi.connections.forEach(connId => {
+            const destinationPoi = POIS[connId];
+            if (!destinationPoi) return;
+
+            let startX = poi.internalX ?? poi.x;
+            let startY = poi.internalY ?? poi.y;
+            let endX, endY;
+
+            if (poi.type === 'internal' && destinationPoi.type !== 'internal') {
+                startX = poi.eX ?? startX;
+                startY = poi.eY ?? startY;
+                endX = destinationPoi.x;
+                endY = destinationPoi.y;
+            } else if (poi.type !== 'internal' && destinationPoi.type === 'internal') {
+                startX = poi.x;
+                startY = poi.y;
+                endX = destinationPoi.eX ?? destinationPoi.x;
+                endY = destinationPoi.eY ?? destinationPoi.y;
+            } else {
+                endX = destinationPoi.internalX ?? destinationPoi.x;
+                endY = destinationPoi.internalY ?? destinationPoi.y;
+            }
+
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            const gridIndex = getDirectionalGridIndex(angle);
+
+            const obstacleId = `${poi.id}-${connId}`;
+            const requirement = poi.connectionRequirements?.[connId];
+            if (requirement && !clearedSkillObstacles.includes(obstacleId)) {
+                grid[gridIndex].push({ type: 'obstacle', fromPoiId: poi.id, toPoiId: connId, requirement });
+            } else {
+                grid[gridIndex].push(destinationPoi);
+            }
+        });
+
+        return grid;
+    }, [poi, clearedSkillObstacles]);
+
+    const handleTravelKey = useCallback((direction: Direction) => {
+        const dirMap: Record<Direction, number> = {
+            'NW': 0, 'N': 1, 'NE': 2,
+            'W': 3, 'E': 5,
+            'SW': 6, 'S': 7, 'SE': 8
+        };
+        const gridIndex = dirMap[direction];
+        const cellItems = gridItems[gridIndex];
+
+        if (cellItems && cellItems.length > 0) {
+            const item = cellItems[0];
+            if ('id' in item) {
+                navigation.handleNavigate(item.id);
+            } else if ('type' in item && item.type === 'obstacle') {
+                worldActions.handleClearObstacle(item.fromPoiId, item.toPoiId, item.requirement);
+            }
+        }
+    }, [gridItems, navigation]);
+
+    const handleActionKey = useCallback((index: number, isShiftPressed: boolean) => {
+        if (!poi) return;
+
+        let activity: POIActivity | BonfireActivity | null = null;
+        let isCombat = false;
+        let uniqueId = "";
+
+        // Filter activities like SceneView does to ensure matching indices
+        const visibleActivities = poi.activities.filter(act => {
+            const pAct = act as any;
+            if (pAct.questCondition) {
+                const questCond = pAct.questCondition;
+                const activeRepeatableQuest = repeatableQuests.activePlayerQuest;
+                const isRepeatableQuestActive = activeRepeatableQuest?.questId === questCond.questId;
+                const mainQuest = quests.playerQuests.find(q => q.questId === questCond.questId);
+
+                let isMainQuestVisible = false;
+                if (mainQuest) {
+                    if (mainQuest.isComplete) {
+                        isMainQuestVisible = !!questCond.visibleAfterCompletion;
+                    } else {
+                        isMainQuestVisible = questCond.stages.includes(mainQuest.currentStage);
+                    }
+                }
+                if (!isRepeatableQuestActive && !isMainQuestVisible) return false;
+            }
+            return true;
+        });
+
+        if (index < visibleActivities.length) {
+            activity = visibleActivities[index];
+            if (activity.type === 'combat') {
+                isCombat = true;
+                uniqueId = `${poi.id}:${activity.monsterId}:${index}`;
+            }
+        } else {
+            let offset = visibleActivities.length;
+            if (bonfires.length > 0) {
+                const bonfireIdx = index - offset;
+                if (bonfireIdx >= 0 && bonfireIdx < bonfires.length) {
+                    activity = bonfires[bonfireIdx];
+                }
+                offset += bonfires.length;
+            }
+
+            if (!activity && repeatableQuests.activePlayerQuest && index === offset) {
+                interactQuest.handleStartInteractQuest(repeatableQuests.activePlayerQuest);
+                return;
+            }
+        }
+
+        if (!activity) return;
+
+        if (isShiftPressed) {
+            let options: ContextMenuOption[] = [];
+            let title = 'Options';
+
+            if (activity && typeof activity === 'object' && 'type' in activity) {
+                const act = activity as POIActivity;
+                if (act.type === 'npc') {
+                    title = act.name;
+                    const isBanker = act.actions?.some(a => a.action === 'open_bank');
+                    const isAltar = act.name === 'Altar';
+
+                    if (!isBanker && !isAltar) {
+                        options.push({ label: 'Talk to', onClick: () => { handleActivityClickWrapper(act); return false; } });
+                    }
+                    if (isAltar) {
+                        options.push({ label: 'Pray', onClick: () => { handleActivityClickWrapper(act); return false; } });
+                    }
+                    if (act.pickpocket) {
+                        options.push({
+                            label: 'Pickpocket',
+                            onClick: () => {
+                                const pickpocketId = `${poi.id}:${act.name}:${index}`;
+                                thieving.handlePickpocket({ name: act.name, pickpocket: act.pickpocket }, pickpocketId);
+                                return false;
+                            }
+                        });
+                    }
+                    if (act.attackableMonsterId) {
+                        options.push({
+                            label: 'Attack',
+                            onClick: () => {
+                                const combatId = `${poi.id}:${act.attackableMonsterId}:${index}`;
+                                startCombat([combatId]);
+                                return false;
+                            }
+                        });
+                    }
+                    if (act.actions) {
+                        act.actions.forEach(action => {
+                            let onClick = () => { };
+                            if (action.action === 'open_bank') onClick = () => ui.setActivePanel('bank');
+                            else if (action.action === 'deposit_backpack') onClick = () => bankLogic.handleDepositBackpack(ui.activeBankTabId);
+                            else if (action.action === 'deposit_equipment') onClick = () => bankLogic.handleDepositEquipment(ui.activeBankTabId);
+                            options.push({ label: action.label, onClick: () => { onClick(); return false; } });
+                        });
+                    }
+                } else if (act.type === 'furnace') {
+                    title = 'Furnace';
+                    options = [
+                        { label: 'Smelt', onClick: () => { ui.openCraftingView({ type: 'furnace' }); return false; } },
+                        { label: 'Craft Jewelry', onClick: () => { ui.openCraftingView({ type: 'jewelry' }); return false; } }
+                    ];
+                } else if (act.type === 'anvil') {
+                    title = 'Anvil';
+                    options = [{ label: 'Smith', onClick: () => { ui.openCraftingView({ type: 'anvil' }); return false; } }];
+                } else if (act.type === 'cooking_range') {
+                    title = 'Cooking Range';
+                    options = [
+                        { label: 'Cook', onClick: () => { handleActivityClickWrapper(act); return false; } },
+                        { label: 'Rendering', onClick: () => { ui.openCraftingView({ type: 'rendering' }); return false; } }
+                    ];
+                }
+            }
+
+            // Fallback for missing context menu
+            if (options.length === 0) {
+                options.push({ label: 'Close', onClick: () => false });
+                ui.setContextMenu({
+                    options,
+                    title: 'System Info',
+                    triggerEvent: {
+                        clientX: window.innerWidth / 2,
+                        clientY: window.innerHeight / 2
+                    } as any,
+                    isTouchInteraction: false,
+                    content: (
+                        <div className="text-xs text-gray-400 italic mt-2 px-2 pb-1 text-center">
+                            Please report this entry to the developer with a screenshot if you expected options here.
+                        </div>
+                    )
+                });
+                return;
+            }
+
+            const buttonEl = document.querySelector(`[data-tutorial-id="activity-button-${index}"]`);
+            const rect = buttonEl?.getBoundingClientRect();
+            const mockEvent = {
+                clientX: rect ? rect.left : window.innerWidth / 2,
+                clientY: rect ? rect.bottom : window.innerHeight / 2,
+            } as any as React.MouseEvent;
+
+            ui.setContextMenu({
+                options,
+                title,
+                triggerEvent: mockEvent,
+                isTouchInteraction: false
+            });
+        } else {
+            if (isCombat) {
+                startCombat([uniqueId]);
+            } else {
+                handleActivityClickWrapper(activity as POIActivity);
+            }
+        }
+    }, [poi, bonfires, repeatableQuests.activePlayerQuest, handleActivityClickWrapper, interactQuest.handleStartInteractQuest, onStartSingleCombat, addLog, thieving, ui, bankLogic, startCombat, quests.playerQuests]);
+
+    const handleToggleDevPanel = useCallback(() => {
+        ui.setIsDevPanelOpen(prev => !prev);
+        if (containerRef.current) {
+            containerRef.current.scrollTo({ top: 0, behavior: 'auto' });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'auto' });
+        }
+    }, [ui]);
+
+    useKeyboardManager({
+        keybindings: ui.keybindings,
+        isBusy,
+        onTravel: handleTravelKey,
+        onAction: handleActionKey,
+        onEsc: () => {
+            ui.closeAllModals();
+        },
+        onPanelSwitch: (panel) => {
+            if (panel === 'dev') {
+                // Dev Panel restriction
+                if (initialState.playerType === PlayerType.Cheats) {
+                    handleToggleDevPanel();
+                }
+                return;
+            }
+
+            ui.setActivePanel(panel);
+        },
+        onSlash: () => {
+            // This will be handled by ActivityLog focusing on /
+        },
+        onR: () => {
+            // This will be handled by ActivityLog focusing on /r
+        }
+    });
 
     const isBankOpen = ui.activePanel === 'bank';
     const isShopOpen = !!ui.activeShopId;
@@ -925,18 +1286,71 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     const handleKillMonster = useCallback(() => { if (ui.combatQueue.length > 0) setKillTrigger(k => k + 1); }, [ui.combatQueue]);
     const handleAddCoins = useCallback((amount: number) => inv.modifyItem('coins', amount, false), [inv]);
     const handleSetSkillLevel = useCallback((skill: SkillName, level: number) => char.setSkillLevel(skill, level), [char]);
-    const handleResetQuest = useCallback((questId: string) => quests.resetQuest(questId, addLog), [quests, addLog]);
+    const handleResetQuest = useCallback((questId: string) => {
+        quests.resetQuest(questId, addLog);
+        questLogic.cleanupQuestState(questId);
+    }, [quests, questLogic, addLog]);
     const handleMaxCharacter = useCallback(() => char.setAllSkillsLevel(99), [char]);
+    const handleTrialTestBoost = useCallback(() => {
+        const requiredQuestIds = ['the_saints_first_step', 'the_arcane_awakening', 'whispers_of_the_divine'];
+        quests.setPlayerQuests(prev => {
+            let next = [...prev];
+            requiredQuestIds.forEach(id => {
+                const existingIndex = next.findIndex(q => q.questId === id);
+                if (existingIndex >= 0) {
+                    next[existingIndex] = { ...next[existingIndex], isComplete: true };
+                } else {
+                    next.push({ questId: id, currentStage: 99, isComplete: true, progress: 0 });
+                }
+            });
+            return next;
+        });
 
-    const handleToggleDevPanel = useCallback(() => {
-        ui.setIsDevPanelOpen(true);
-        const container = document.querySelector('.game-container');
-        if (container) {
-            container.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    }, [ui]);
+        const combatSkills = [SkillName.Attack, SkillName.Strength, SkillName.Defence, SkillName.Ranged, SkillName.Magic, SkillName.Hitpoints, SkillName.Prayer];
+        (Object.values(SkillName) as SkillName[]).forEach(name => {
+            let targetLevel = 45;
+            if (combatSkills.includes(name)) {
+                targetLevel = 65;
+            } else if (name === SkillName.Runecrafting) {
+                targetLevel = 60;
+            }
+            char.setSkillLevel(name, targetLevel);
+        });
+        char.setCurrentHp(char.maxHp);
+        char.setCurrentPrayer(char.maxPrayer);
+        addLog("Dev: Trial test boost applied! Skills 65/45 and required quests completed.");
+    }, [quests, char, addLog]);
+
+
+    const handleAdjustQuestStage = useCallback((questId: string, amount: number) => {
+        questLogic.cleanupQuestState(questId);
+        quests.setPlayerQuests(prev => {
+            const existingIndex = prev.findIndex(q => q.questId === questId);
+            if (existingIndex === -1) {
+                // If quest not started, start at stage 0 (amount 1) or don't do anything for -1
+                if (amount <= 0) return prev;
+                return [...prev, { questId, currentStage: 0, isComplete: false, progress: 0 }];
+            }
+
+            const quest = prev[existingIndex];
+            const questData = QUESTS[questId];
+            if (!questData) return prev;
+
+            const next = [...prev];
+            const newStage = Math.max(0, quest.currentStage + amount);
+            const isComplete = newStage >= questData.stages.length;
+
+            next[existingIndex] = {
+                ...quest,
+                currentStage: isComplete ? questData.stages.length - 1 : newStage,
+                isComplete: isComplete,
+                progress: 0 // Reset progress when jumping stages
+            };
+            return next;
+        });
+        addLog(`Dev: Adjusted ${questId} stage by ${amount}.`);
+    }, [quests, questLogic, addLog]);
+
 
     const handleLogout = useCallback(() => {
         handleReturnToMenuWithLogout(gameState);
@@ -1040,12 +1454,14 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         onSetSkillLevel: handleSetSkillLevel,
         onMaxCharacter: handleMaxCharacter,
         onResetQuest: handleResetQuest,
+        onAdjustQuestStage: handleAdjustQuestStage,
         onResetQuestBoards: repeatableQuests.resetBoards,
         onResetPilferingHouses: thievingPilfering.resetPilferingTimers,
+        onTrialTestBoost: handleTrialTestBoost,
         isGodModeOn: devMode.isGodModeOn,
         setIsGodModeOn: devMode.setIsGodModeOn,
         ui,
-        agility,
+        slayer,
     }), [
         inv, ui, devMode.devPanelState, devMode.updateDevPanelState, devMode.combatSpeedMultiplier, devMode.setCombatSpeedMultiplier,
         devMode.isInstantRespawnOn, devMode.setIsInstantRespawnOn, devMode.instantRespawnCounter, devMode.setInstantRespawnCounter,
@@ -1054,8 +1470,8 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         devMode.onToggleTouchSimulation, devMode.isMapManagerEnabled, devMode.onToggleMapManager, devMode.handleCommitMapChanges, devMode.modifiedPois, devMode.modifiedRegions,
         devMode.showAllPois, devMode.setShowAllPois, navigation.handleForcedNavigate,
         devMode.xpMultiplier, devMode.setXpMultiplier, devMode.isGodModeOn, devMode.setIsGodModeOn,
-        handleHealPlayer, handleKillMonster, handleAddCoins, handleSetSkillLevel, handleMaxCharacter, handleResetQuest,
-        repeatableQuests.resetBoards, thievingPilfering.resetPilferingTimers, agility
+        handleHealPlayer, handleKillMonster, handleAddCoins, handleSetSkillLevel, handleMaxCharacter, handleResetQuest, handleAdjustQuestStage,
+        handleTrialTestBoost, repeatableQuests.resetBoards, thievingPilfering.resetPilferingTimers, slayer
     ]);
 
     // Centralized death check
@@ -1066,11 +1482,11 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     }, [char.currentHp, gameState, handlePlayerDeath, isInCombat]);
 
     return (
-        <div className="w-full h-full p-2 flex flex-col md:flex-row gap-2 relative overflow-y-auto md:overflow-hidden">
+        <div ref={containerRef} className="w-full h-full p-2 flex flex-col md:flex-row gap-2 relative overflow-y-auto md:overflow-hidden">
             <div className="w-full md:w-4/5 flex flex-col gap-2 relative">
-                <BuffBar statModifiers={char.statModifiers} activeBuffs={buffsForDisplay} />
+                <BuffBar statModifiers={char.statModifiers} activeBuffs={buffsForDisplay} activePrayers={prayer.activePrayers} setTooltip={ui.setTooltip} />
                 <div className="bg-black/70 border-2 border-gray-600 rounded-lg p-4 flex-grow min-h-0 relative overflow-y-auto md:overflow-visible">
-                    {ui.activeSingleAction && (
+                    {ui.activeSingleAction && !agility.agilityState.activeCourseId && (
                         <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center">
                             <SingleActionProgressView
                                 action={ui.activeSingleAction}
@@ -1080,14 +1496,22 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                     )}
                     <MainViewController onFastTravel={handleFastTravel} onCommitMapChanges={devMode.handleCommitMapChanges} {...{
                         char: { ...char, setCombatStance },
-                        itemActions, inv, quests, bank, bankLogic, shops, crafting, repeatableQuests, navigation, worldActions, slayer, questLogic, skilling, interactQuest, session, clearedSkillObstacles, monsterRespawnTimers, handlePlayerDeath: () => handlePlayerDeath(gameState), handleKill, onWinCombat, onFleeSuccess: onFleeFromCombat, onResponse, handleDialogueCheck, combatSpeedMultiplier: devMode.combatSpeedMultiplier, activeCombatStyleHighlight: null, isTouchSimulationEnabled: devMode.isTouchSimulationEnabled, isMapManagerEnabled: false, poiCoordinates: undefined, regionCoordinates: undefined, onUpdatePoiCoordinate: undefined, poiConnections: undefined, addLog, ui, initialState, showAllPois: devMode.showAllPois, groundItemsForCurrentPoi, onPickUpItem: handlePickUpItem, onTakeAllLoot: handleTakeAllLoot, onItemDropped, isAutoBankOn: devMode.isAutoBankOn, handleCombatXpGain: char.addXp, poiImmunityTimeLeft, killTrigger, bankPlaceholders: worldState.bankPlaceholders ?? false, handleToggleBankPlaceholders, bonfires: bonfires.filter(b => b.uniqueId.startsWith(session.currentPoiId)), onStokeBonfire: crafting.handleStokeBonfire, isStunned: char.isStunned, addBuff: char.addBuff, isDevMode: devMode.isDevMode, onToggleDevPanel: handleToggleDevPanel, onToggleTouchSimulation: devMode.onToggleTouchSimulation, onDepositEquipment: () => bankLogic.handleDepositEquipment(ui.activeBankTabId), deathMarker: worldState.deathMarker, activeRepeatableQuest: repeatableQuests.activePlayerQuest, onActivity: handleActivityClickWrapper, onResetGame, onImportGame, onExportGame, isOneClickMode: ui.isOneClickMode, poi, thievingContainerStates: thieving.containerStates, onPickpocket: thieving.handlePickpocket, onLockpick: thieving.handleLockpick, onPilfer: thievingPilfering.handlePilfer, onStealFromStall: thieving.handleStealFromStall, worldState, onStartCombat: onStartSingleCombat, onEncounterWin: handleEncounterWin, activePrayers: prayer.activePrayers, onJewelryCraft: crafting.handleJewelryCrafting, setEquipment: inv.setEquipment, poisonEvent, runEnergy: char.runEnergy, setRunEnergy: char.setRunEnergy, playerCombatLevel: char.combatLevel, addXp: char.addXp, setCurrentHp: char.setCurrentHp, agility
+                        itemActions, inv, quests, bank, bankLogic, shops, crafting, repeatableQuests, navigation, worldActions, slayer, questLogic, skilling, interactQuest, session, clearedSkillObstacles, monsterRespawnTimers, handlePlayerDeath: () => handlePlayerDeath(gameState), handleKill, onWinCombat, onFleeSuccess: onFleeFromCombat, onResponse, handleDialogueCheck, combatSpeedMultiplier: devMode.combatSpeedMultiplier, activeCombatStyleHighlight: null, isTouchSimulationEnabled: devMode.isTouchSimulationEnabled, isMapManagerEnabled: false, poiCoordinates: undefined, regionCoordinates: undefined, onUpdatePoiCoordinate: undefined, poiConnections: undefined, addLog, ui, initialState, showAllPois: devMode.showAllPois, groundItemsForCurrentPoi, onPickUpItem: handlePickUpItem, onTakeAllLoot: handleTakeAllLoot, onItemDropped, isAutoBankOn: devMode.isAutoBankOn, handleCombatXpGain: char.addXp, poiImmunityTimeLeft, killTrigger, bankPlaceholders: worldState.bankPlaceholders ?? false, handleToggleBankPlaceholders, bonfires: bonfires.filter(b => b.uniqueId.startsWith(session.currentPoiId)), onStokeBonfire: crafting.handleStokeBonfire, isStunned: char.isStunned, addBuff: char.addBuff, isDevMode: devMode.isDevMode, onToggleDevPanel: handleToggleDevPanel, onToggleTouchSimulation: devMode.onToggleTouchSimulation, onDepositEquipment: () => bankLogic.handleDepositEquipment(ui.activeBankTabId), deathMarker: worldState.deathMarker, activeRepeatableQuest: repeatableQuests.activePlayerQuest, onActivity: handleActivityClickWrapper, onResetGame, onImportGame, onExportGame, isOneClickMode: ui.isOneClickMode, poi, thievingContainerStates: thieving.containerStates, onPickpocket: thieving.handlePickpocket, onLockpick: thieving.handleLockpick, onPilfer: thievingPilfering.handlePilfer, onStealFromStall: thieving.handleStealFromStall, worldState, onStartCombat: onStartSingleCombat, onEncounterWin: handleEncounterWin, activePrayers: prayer.activePrayers, onJewelryCraft: crafting.handleJewelryCrafting, setEquipment: inv.setEquipment, poisonEvent, runEnergy: char.runEnergy, setRunEnergy: char.setRunEnergy, playerCombatLevel: char.combatLevel, addXp: char.addXp, setCurrentHp: char.setCurrentHp, agility, setActivePrayers: prayer.setActivePrayers
                     }} />
                     {levelUpInfo && <LevelUpAnimation skill={levelUpInfo.skill} level={levelUpInfo.level} />}
                     <LootButtonOverlay groundItems={groundItemsForCurrentPoi} onOpenLootView={() => ui.setIsLootViewOpen(true)} />
                 </div>
                 <div className={`md:flex-shrink-0 relative`}>
                     <ActivityLog logs={activityLog} chatMessages={messages} onSendMessage={handleSendMessage} isDialogueActive={!!ui.activeDialogue} username={initialState.username} />
-                    {ui.activeDialogue && <DialogueOverlay dialogue={ui.activeDialogue} setActivePanel={ui.setActivePanel} />}
+                    {ui.activeDialogue && (
+                        <DialogueOverlay
+                            dialogue={ui.activeDialogue}
+                            setActivePanel={ui.setActivePanel}
+                            onResponse={onResponse}
+                            handleDialogueCheck={handleDialogueCheck}
+                            onNavigate={(nodeKey) => ui.setActiveDialogue(prev => prev ? { ...prev, currentNodeKey: nodeKey } : null)}
+                        />
+                    )}
                 </div>
             </div>
             <div className="w-full md:w-1/5 flex flex-col">
@@ -1138,7 +1562,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                     <div className="bg-gray-800 border-4 border-gray-600 rounded-lg shadow-xl w-full max-w-md h-full flex flex-col pointer-events-auto"
                         onClick={e => e.stopPropagation()}
                     >
-                        <DevPanel {...devPanelProps} isCurrentMonsterAggro={devMode.isCurrentMonsterAggro} onToggleAggro={devMode.onToggleAggro} />
+                        <DevPanel {...devPanelProps} slayer={slayer} isCurrentMonsterAggro={devMode.isCurrentMonsterAggro} onToggleAggro={devMode.onToggleAggro} />
                     </div>
                 </div>
             )}

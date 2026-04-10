@@ -15,15 +15,15 @@ export const volcanicSteamVentsPois: Record<string, POI> = {
         id: 'vsv_ashfall_plains',
         name: 'Ashfall Plains',
         description: 'A wide plain covered in a thick blanket of grey ash. The ground is unnaturally warm beneath your feet.',
-        connections: ['vsv_entrance', 'vsv_fissure_crossing', 'vsv_sulfur_springs_entrance'],
-        activities: [ { type: 'combat', monsterId: 'fire_fiend' } ],
+        connections: ['vsv_entrance', 'vsv_fissure_crossing', 'vsv_sulfur_springs_entrance', 'vsv_ashfall_canyon', 'vsv_ash_dunes'],
+        activities: [{ type: 'combat', monsterId: 'fire_fiend' }],
         regionId: 'volcanic_steam_vents', x: -42, y: 1150
     },
     vsv_fissure_crossing: {
         id: 'vsv_fissure_crossing',
         name: 'Fissure Crossing',
         description: 'A deep fissure cuts through the plains, bridged by a natural formation of obsidian. Hot steam rises from the depths.',
-        connections: ['vsv_ashfall_plains', 'vsv_obsidian_fields'],
+        connections: ['vsv_ashfall_plains', 'vsv_obsidian_fields', 'vsv_obsidian_pass'],
         activities: [
             { type: 'start_agility_course', name: 'Start Brimstone Run (Lvl 90)', courseId: 'volcanic_brimstone_run' }
         ],
@@ -68,9 +68,12 @@ export const volcanicSteamVentsPois: Record<string, POI> = {
     vsv_emberscale_roost: {
         id: 'vsv_emberscale_roost',
         name: 'Emberscale Roost',
-        description: 'A high plateau where the heat is intense. Emberscale Dragons can be seen circling overhead.',
+        description: 'A high plateau where the heat is intense. Emberscale Dragons circle and roost here.',
         connections: ['vsv_dragons_ascent', 'vsv_deathscythe_lair'],
-        activities: [ { type: 'combat', monsterId: 'emberscale_dragon' } ],
+        activities: [
+            { type: 'combat', monsterId: 'emberscale_dragon' },
+            { type: 'combat', monsterId: 'emberscale_dragon' },
+        ],
         regionId: 'volcanic_steam_vents', x: -42, y: 850
     },
     vsv_deathscythe_lair: {
@@ -144,7 +147,7 @@ export const volcanicSteamVentsPois: Record<string, POI> = {
         description: 'A dead-end area where superheated steam erupts from the ground. The area is exceptionally rich in brimstone.',
         connections: ['vsv_lava_river_crossing'],
         activities: [
-            { type: 'skilling', id: 'vsv_brimstone_2', name: 'Mine Brimstone', skill: SkillName.Mining, requiredLevel: 45, loot: [{ itemId: 'brimstone', chance: 1, xp: 100 }], resourceCount: { min: 3, max: 6 }, respawnTime: 60000, gatherTime: 4000 },
+            { type: 'skilling', id: 'vsv_brimstone_2', name: 'Mine Brimstone', skill: SkillName.Mining, requiredLevel: 45, loot: [{ itemId: 'brimstone', chance: 1, xp: 100 }], resourceCount: { min: 3, max: 6 }, respawnTime: 30000, gatherTime: 4000 },
         ],
         regionId: 'volcanic_steam_vents', x: 200, y: 1050
     },
@@ -155,7 +158,12 @@ export const volcanicSteamVentsPois: Record<string, POI> = {
         name: 'Sulfur Springs Entrance',
         description: 'A path branches west into an area choked with yellow, sulfurous gas.',
         connections: ['vsv_ashfall_plains', 'vsv_fire_fiend_fields'],
-        activities: [],
+        activities: [
+            { type: 'skilling', id: 'vsv_sulfur_springs_brimstone_1', name: 'Mine Brimstone', skill: SkillName.Mining, requiredLevel: 45, loot: [{ itemId: 'brimstone', chance: 1, xp: 100 }], resourceCount: { min: 3, max: 6 }, respawnTime: 30000, gatherTime: 4000 },
+            { type: 'skilling', id: 'vsv_sulfur_springs_coal_1', name: 'Mine Coal', skill: SkillName.Mining, requiredLevel: 30, loot: [{ itemId: 'coal', chance: 1, xp: 50 }], resourceCount: { min: 3, max: 6 }, respawnTime: 40000, gatherTime: 4000 },
+            { type: 'skilling', id: 'vsv_sulfur_springs_large_iron_1', name: 'Mine Large Iron', skill: SkillName.Mining, requiredLevel: 30, loot: [{ itemId: 'iron_ore', chance: 1, xp: 35 }], resourceCount: { min: 8, max: 15 }, respawnTime: 16000, gatherTime: 4000 },
+            { type: 'skilling', id: 'vsv_sulfur_springs_brimstone_2', name: 'Mine Brimstone', skill: SkillName.Mining, requiredLevel: 45, loot: [{ itemId: 'brimstone', chance: 1, xp: 100 }], resourceCount: { min: 3, max: 6 }, respawnTime: 30000, gatherTime: 4000 },
+        ],
         regionId: 'volcanic_steam_vents', x: -80, y: 1150
     },
     vsv_fire_fiend_fields: {
@@ -212,9 +220,10 @@ export const volcanicSteamVentsPois: Record<string, POI> = {
     vsv_succubus_chamber: {
         id: 'vsv_succubus_chamber',
         name: 'Succubus Chamber',
-        description: 'The air is thick with a cloying perfume and a sense of dread. A powerful Succubus resides here.',
+        description: 'The air is thick with a cloying perfume and a sense of dread. Powerful Succubi reside here.',
         connections: ['vsv_greater_incubus_den'],
         activities: [
+            { type: 'combat', monsterId: 'succubus' },
             { type: 'combat', monsterId: 'succubus' },
         ],
         regionId: 'volcanic_steam_vents', x: -250, y: 1000
@@ -233,7 +242,7 @@ export const volcanicSteamVentsPois: Record<string, POI> = {
         id: 'vsv_obsidian_pass',
         name: 'Obsidian Pass',
         description: 'A narrow pass cut through a field of razor-sharp obsidian.',
-        connections: ['vsv_fissure_crossing'],
+        connections: ['vsv_fissure_crossing', 'vsv_obsidian_spire'],
         activities: [],
         regionId: 'volcanic_steam_vents', x: -80, y: 1100
     },
@@ -274,7 +283,9 @@ export const volcanicSteamVentsPois: Record<string, POI> = {
         name: 'Molten Sea',
         description: 'A vast, shimmering sea of lava. The heat is unbearable. The path ends here.',
         connections: ['vsv_petrified_heartwood'],
-        activities: [],
+        activities: [
+            { type: 'skilling', id: 'vsv_molten_sea_lava_eel', name: 'Fish Molten Eel', skill: SkillName.Fishing, requiredLevel: 53, requiredTool: ToolType.Harpoon, loot: [{ itemId: 'molten_eel', chance: 1, xp: 110 }], resourceCount: { min: 4, max: 10 }, respawnTime: 10000, gatherTime: 4000 }
+        ],
         regionId: 'volcanic_steam_vents', x: 50, y: 1000
     },
     vsv_ashfall_canyon: {
@@ -289,7 +300,7 @@ export const volcanicSteamVentsPois: Record<string, POI> = {
         id: 'vsv_obsidian_spire',
         name: 'Obsidian Spire',
         description: 'A towering spire of natural volcanic glass pierces the sky.',
-        connections: ['vsv_obsidian_fields'],
+        connections: ['vsv_obsidian_fields', 'vsv_obsidian_pass'],
         activities: [],
         regionId: 'volcanic_steam_vents', x: -80, y: 1050
     },

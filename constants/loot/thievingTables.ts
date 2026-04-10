@@ -33,6 +33,9 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
             { itemId: 'fishing_bait', chance: "1/10", minQuantity: 1, maxQuantity: 10 },
             { itemId: 'bobby_pin', chance: "1/7", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'spider_eggs', chance: "1/15", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'dull_rock', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'rusty_nail', chance: "1/12", minQuantity: 1, maxQuantity: 3 },
+            { itemId: 'tattered_cloth', chance: "1/15", minQuantity: 1, maxQuantity: 1 },
         ],
         trap: { type: 'damage', damage: 1 }
     },
@@ -45,6 +48,8 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
             { itemId: 'shears', chance: "2/25", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'bobby_pin', chance: "1/5", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'cave_slime_globule', chance: "1/15", minQuantity: 1, maxQuantity: 2 },
+            { itemId: 'old_boot', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'gnawed_bone', chance: "1/20", minQuantity: 1, maxQuantity: 1 },
         ],
         trap: { type: 'damage', damage: 1 }
     },
@@ -92,9 +97,9 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
             { itemId: 'uncut_sapphire', chance: "1/20", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'bronze_dagger', chance: "2/25", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'uncut_sapphire', chance: "1/23", minQuantity: 1, maxQuantity: 1 },
-            { itemId: 'iron_helm', chance: "1/25", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'iron_med_helm', chance: "1/25", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'bronze_battleaxe', chance: "1/25", minQuantity: 1, maxQuantity: 1 },
-            { itemId: 'iron_platebody', chance: "1/256", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'iron_chainbody', chance: "1/256", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'bronze_bar', chance: "4/25", minQuantity: 1, maxQuantity: 2, noted: true },
             { itemId: 'iron_ore', chance: "1/5", minQuantity: 1, maxQuantity: 5, noted: true },
             { itemId: 'bobby_pin', chance: "1/6", minQuantity: 1, maxQuantity: 2 },
@@ -118,6 +123,8 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
             { itemId: 'leather_gloves', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'uncut_sapphire', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'bobby_pin', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'tattered_cloth', chance: "1/12", minQuantity: 1, maxQuantity: 2 },
+            { itemId: 'broken_arrow', chance: "1/15", minQuantity: 1, maxQuantity: 5 },
         ],
         trap: { type: 'damage', damage: 3 }
     },
@@ -183,7 +190,7 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
             { itemId: 'steel_bar', chance: "1/10", minQuantity: 1, maxQuantity: 1, noted: true },
             { itemId: 'uncut_emerald', chance: "1/20", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'iron_sword', chance: "2/25", minQuantity: 1, maxQuantity: 1 },
-            { itemId: 'steel_dagger', chance: "1/25", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'steel_longsword', chance: "1/25", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'mithril_dagger', chance: "1/125", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'coal', chance: "4/25", minQuantity: 5, maxQuantity: 15, noted: true },
             { itemId: 'uncut_emerald', chance: "2/25", minQuantity: 1, maxQuantity: 1 },
@@ -500,7 +507,7 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
         name: 'Royal Drawer',
         level: 78, xp: 280, respawnTime: 180000,
         loot: [
-            { itemId: 'coins', chance: "2/5", minQuantity: 600, maxQuantity: 1200 },
+            { itemId: 'coins', chance: "2/5", minQuantity: 1000, maxQuantity: 2500 },
             { itemId: 'diamond_ring', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'uncut_diamond', chance: "1/5", minQuantity: 1, maxQuantity: 2 },
             { itemId: 'runic_bar', chance: "1/10", minQuantity: 1, maxQuantity: 1, noted: true },
@@ -519,7 +526,7 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
             { itemId: 'cooked_shark', chance: "4/25", minQuantity: 1, maxQuantity: 3, noted: true },
             { itemId: 'diamond_lockpick', chance: "1/96", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'skeleton_key', chance: "1/62500" },
-            { itemId: 'mystic_page', chance: "1/20", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'mystic_page', chance: "1/20", minQuantity: 10, maxQuantity: 30 },
             { itemId: 'super_magic_potion', chance: "1/30", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'yew_logs', chance: "1/5", minQuantity: 3, maxQuantity: 8, noted: true },
         ],
@@ -582,7 +589,7 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
         name: 'Royal Strongbox',
         level: 78, xp: 1100, respawnTime: 400000,
         loot: [
-            { itemId: 'coins', chance: "1/5", minQuantity: 500, maxQuantity: 1000 },
+            { itemId: 'coins', chance: "1/5", minQuantity: 800, maxQuantity: 1500 },
             { itemId: 'runic_bar', chance: "1/5", minQuantity: 1, maxQuantity: 1, noted: true },
             { itemId: 'uncut_diamond', chance: "1/10", minQuantity: 1, maxQuantity: 1 },
             { itemId: 'anima_rune', chance: "1/10", minQuantity: 10, maxQuantity: 20 },
@@ -613,7 +620,7 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
             { itemId: 'gust_rune', chance: "1/20", minQuantity: 10, maxQuantity: 30 },
             { itemId: 'stone_rune', chance: "1/20", minQuantity: 10, maxQuantity: 30 },
         ],
-        trap: { type: 'damage', damage: 3, mimicChance: 0.01  }
+        trap: { type: 'damage', damage: 3, mimicChance: 0.01 }
     },
     // TIER 2 - Dungeon Chest (Medium) (Level 45+)
     thieving_dungeon_chest_mid: {
@@ -659,7 +666,7 @@ export const THIEVING_CONTAINER_TARGETS: Record<string, LockpickContainer> = {
             { itemId: 'anima_rune', chance: "1/16", minQuantity: 100, maxQuantity: 200 },
             { itemId: 'nexus_rune', chance: "1/8", minQuantity: 100, maxQuantity: 200 },
             { itemId: 'diamond_lockpick', chance: "1/64", minQuantity: 1, maxQuantity: 2 },
-            { itemId: 'skeleton_key', chance: "1/12000", minQuantity: 1, maxQuantity: 1 }, 
+            { itemId: 'skeleton_key', chance: "1/12000", minQuantity: 1, maxQuantity: 1 },
         ],
         trap: { type: 'damage', damage: 9, mimicChance: 0.1 }
     },

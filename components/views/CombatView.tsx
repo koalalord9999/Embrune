@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Monster, PlayerSkill, SkillName, Equipment, CombatStance, WeaponType, MonsterType, InventorySlot, WeightedDrop, Spell, MonsterSpecialAttack, SpellElement, Item, MonsterStatusEffect } from '../../types';
-import { MONSTERS, ITEMS, rollOnLootTable, LootRollResult, REGIONS, getIconClassName, QUESTS, POIS } from '../../constants';
+import { MONSTERS, ITEMS, rollOnLootTable, LootRollResult, REGIONS, getIconClassName, QUESTS, POIS, getIconUrl } from '../../constants';
 import Button from '../common/Button';
 import ProgressBar from '../common/ProgressBar';
 import { ActiveBuff } from '../../types';
@@ -50,6 +50,7 @@ interface CombatViewProps {
     showEnemyHealthNumbers: boolean;
     showHitsplats: boolean;
     activePrayers: string[];
+    setActivePrayers: React.Dispatch<React.SetStateAction<string[]>>;
     poisonEvent: { damage: number, timestamp: number } | null;
     getEffectiveLevel: (skill: SkillName) => number;
     playerQuests?: any[];
@@ -107,7 +108,7 @@ const parseChance = (chance: number | string): number => {
     return 0; // fallback
 };
 
-const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, playerSkills, playerHp, equipment, combatStance, setCombatStance, setPlayerHp, onCombatEnd, onFleeSuccess, addXp, addLoot, onDropLoot, isAutoBankOn, addLog, onPlayerDeath, onKill, onEncounterWin, onConsumeAmmo, activeBuffs, combatSpeedMultiplier, advanceTutorial, autocastSpell, inv, ui, killTrigger, applyStatModifier, isStunned, addBuff, showPlayerHealthNumbers, showEnemyHealthNumbers, showHitsplats, activePrayers, poisonEvent, getEffectiveLevel, playerQuests = [], runEnergy, setRunEnergy, playerCombatLevel }) => {
+const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, playerSkills, playerHp, equipment, combatStance, setCombatStance, setPlayerHp, onCombatEnd, onFleeSuccess, addXp, addLoot, onDropLoot, isAutoBankOn, addLog, onPlayerDeath, onKill, onEncounterWin, onConsumeAmmo, activeBuffs, combatSpeedMultiplier, advanceTutorial, autocastSpell, inv, ui, killTrigger, applyStatModifier, isStunned, addBuff, showPlayerHealthNumbers, showEnemyHealthNumbers, showHitsplats, activePrayers, setActivePrayers, poisonEvent, getEffectiveLevel, playerQuests = [], runEnergy, setRunEnergy, playerCombatLevel }) => {
     const [currentMonsterIndex, setCurrentMonsterIndex] = useState(0);
     const currentInstanceId = monsterQueue[currentMonsterIndex];
     const monsterId = currentInstanceId.split(':')[1];
@@ -128,14 +129,14 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
     const [nextMonsterAttackTime, setNextMonsterAttackTime] = useState(0);
     const [isPreparing, setIsPreparing] = useState(true);
     const [isCombatEnding, setIsCombatEnding] = useState(false);
-    
+
     useEffect(() => {
         if (playerHp <= 0 && !isCombatEnding) {
             setIsCombatEnding(true);
             setTimeout(() => onPlayerDeath(), 1500);
         }
     }, [playerHp, isCombatEnding, onPlayerDeath]);
-    
+
     const playerAttackInProgress = useRef(false);
     const monsterAttackInProgress = useRef(false);
 
@@ -145,10 +146,10 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
     const prevKillTrigger = useRef(killTrigger);
 
     const gameTickMs = 600 / combatSpeedMultiplier;
-    
+
     const poisonTickCallback = useRef<(() => void) | undefined>(undefined);
 
-        useEffect(() => {
+    useEffect(() => {
         setDefeatedInThisEncounter([]);
     }, [monsterQueue]);
 
@@ -247,12 +248,12 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 const drop: LootRollResult = typeof lootResult === 'string'
                     ? { itemId: lootResult, quantity: 1, noted: false }
                     : lootResult;
-                
+
                 if (drop.itemId === 'coins' && equipment.ring?.itemId === 'ring_of_greed') {
                     addLoot(drop.itemId, drop.quantity, false, {});
                     return; // Stop further processing for this item
                 }
-                
+
                 if (isAutoBankOn) {
                     addLoot(drop.itemId, drop.quantity, false, { noted: drop.noted });
                 } else {
@@ -260,23 +261,28 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 }
             }
         };
-    
+
         // 1. Guaranteed Drops
         monster.guaranteedDrops?.forEach(drop => {
             if (!checkDropRequirement(drop)) return;
-            const quantity = Math.floor(Math.random() * (drop.maxQuantity - drop.minQuantity + 1)) + drop.minQuantity;
-            if (drop.itemId) {
+            const quantity = Math.floor(Math.random() * ((drop.maxQuantity ?? 1) - (drop.minQuantity ?? 1) + 1)) + (drop.minQuantity ?? 1);
+
+            if (drop.tableId) {
+                for (let i = 0; i < quantity; i++) {
+                    processLootResult(rollOnLootTable(drop.tableId));
+                }
+            } else if (drop.itemId) {
                 const dropData: LootRollResult = { itemId: drop.itemId, quantity, noted: drop.noted ?? false };
                 processLootResult(dropData);
             }
         });
-    
+
         // 2. Main Drops
         if (monster.mainDrops && monster.mainDrops.length > 0) {
             // Filter drops based on quest requirements
             const validDrops = monster.mainDrops.filter(checkDropRequirement);
             let finalDrop: WeightedDrop | null = null;
-    
+
             if (validDrops.length > 0) {
                 if (monster.useWeightedMainDrops) {
                     const totalWeight = validDrops.reduce((sum, item) => sum + parseChance(item.chance), 0);
@@ -297,7 +303,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                             successfulDrops.push(drop);
                         }
                     }
-            
+
                     if (successfulDrops.length > 0) {
                         let rarestChance = Infinity;
                         successfulDrops.forEach(drop => {
@@ -309,7 +315,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         const potentialRarestDrops = successfulDrops.filter(d => parseChance(d.chance) === rarestChance);
                         finalDrop = potentialRarestDrops[Math.floor(Math.random() * potentialRarestDrops.length)];
                     } else if (monster.alwaysDrops) {
-                         // Only fallback to always drops if no successful drops occurred from the VALID list
+                        // Only fallback to always drops if no successful drops occurred from the VALID list
                         const totalWeight = validDrops.reduce((sum, item) => sum + parseChance(item.chance), 0);
                         if (totalWeight > 0) {
                             let roll = Math.random() * totalWeight;
@@ -345,7 +351,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 }
             }
         }
-    
+
         // 3. Tertiary Drops
         monster.tertiaryDrops?.forEach(drop => {
             if (!checkDropRequirement(drop)) return;
@@ -362,7 +368,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         if (monster.level >= 80) rareDropChance = 1 / 64;
         else if (monster.level >= 40) rareDropChance = 1 / 96;
         else if (monster.level >= 10) rareDropChance = 1 / 128;
-    
+
         let isFortuneActive = false;
         if (equipment.necklace?.itemId === 'necklace_of_fortune') {
             rareDropChance *= 1.5; // 50% increase
@@ -376,10 +382,10 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                     addLog("Your Necklace of Fortune glows, guiding your hand to a rare treasure!");
                 }
 
-                let itemToDrop: LootRollResult = typeof rareDropResult === 'string' 
-                    ? { itemId: rareDropResult, quantity: 1, noted: false } 
+                let itemToDrop: LootRollResult = typeof rareDropResult === 'string'
+                    ? { itemId: rareDropResult, quantity: 1, noted: false }
                     : rareDropResult;
-        
+
                 if (itemToDrop.itemId === 'talisman_drop') {
                     const poiId = currentInstanceId.split(':')[0];
                     const poi = POIS[poiId];
@@ -387,7 +393,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                     const isUnderground = region?.type === 'dungeon' || region?.type === 'underground';
                     itemToDrop.itemId = isUnderground ? 'flux_talisman' : 'verdant_talisman';
                 }
-                
+
                 const itemData = ITEMS[itemToDrop.itemId];
                 if (itemData) {
                     processLootResult(itemToDrop);
@@ -411,12 +417,12 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 setCurrentElementalWeakness(null);
             }
             if (monsterQueue.length > 1) addLog(`(${currentMonsterIndex + 1}/${monsterQueue.length}) A ${monsterData.name} steps forward!`);
-    
+
             setIsCombatEnding(false);
             setIsPreparing(true);
         }
     }, [currentInstanceId, monsterId, addLog, monsterQueue.length, currentMonsterIndex]);
-    
+
     useEffect(() => {
         if (isPreparing && monster) {
             const preparationTimer = setTimeout(() => {
@@ -460,17 +466,17 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         });
         return totals;
     }, [equipment]);
-    
+
 
     const handleMonsterDefeated = useCallback((attackStyle: 'melee' | 'ranged' | 'magic') => {
         setIsCombatEnding(true);
         setTimeout(() => {
             onKill(currentInstanceId, attackStyle);
             handleLootDistribution();
-    
+
             const newDefeated = [...defeatedInThisEncounter, currentInstanceId];
             setDefeatedInThisEncounter(newDefeated);
-    
+
             if (currentMonsterIndex + 1 < monsterQueue.length) {
                 setCurrentMonsterIndex(prev => prev + 1);
             } else {
@@ -496,11 +502,11 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         // Magic
         const spell = queuedSpell || (autocastSpell && (combatStance === CombatStance.Autocast || combatStance === CombatStance.DefensiveAutocast) ? autocastSpell : null);
         if (spell) {
-             const baseMaxHit = spell.maxHit ?? 0;
-             const magicBuff = activeBuffs.find(b => b.type === 'magic_damage_boost');
-             const buffBonus = magicBuff ? (magicBuff.value / 100) : 0;
-             const bonus = 1 + (playerStats.magicDamageBonus / 100) + buffBonus;
-             return Math.floor(baseMaxHit * bonus);
+            const baseMaxHit = spell.maxHit ?? 0;
+            const magicBuff = activeBuffs.find(b => b.type === 'magic_damage_boost');
+            const buffBonus = magicBuff ? (magicBuff.value / 100) : 0;
+            const bonus = 1 + (playerStats.magicDamageBonus / 100) + buffBonus;
+            return Math.floor(baseMaxHit * bonus);
         }
 
         // Melee
@@ -512,19 +518,17 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
 
     const monsterMaxHit = useMemo(() => {
         if (!monster) return 0;
-    
+
         if (monster.attackStyle === 'magic') {
             const monsterMagicStat = monster.magic ?? monster.attack;
             return monster.customMaxHit ?? Math.floor(monsterMagicStat / 6) + 1;
         }
-    
+
         // New Symmetrical Melee formula
         // monster.strength is equivalent to player Strength level
-        // monster.attack is equivalent to player equipment Strength bonus
         const effectiveStrength = monster.strength;
-        const strengthBonus = monster.attack;
-        const maxHit = Math.ceil(0.5 + effectiveStrength * ((strengthBonus + 64) / 640));
-    
+        const maxHit = Math.ceil(0.5 + effectiveStrength * (64 / 640));
+
         return monster.customMaxHit ?? maxHit;
     }, [monster]);
 
@@ -536,7 +540,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         setLastSpellCast(spell);
 
         const magicLevel = playerSkills.find(s => s.name === SkillName.Magic)?.currentLevel ?? 1;
-        
+
         const result = calculateMagicDamage(
             spell, playerStats, monster, combatStance, getEffectiveLevel, activeBuffs, currentElementalWeakness,
             equipment.weapon, invRef.current.hasItems, magicLevel
@@ -546,25 +550,25 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
             addLog(result.error);
             return;
         }
-        
+
         const equippedStaff = equipment.weapon ? ITEMS[equipment.weapon.itemId] : null;
         const providedRune = equippedStaff?.equipment?.providesRune;
         const runesNeeded = spell.runes.filter(r => r.itemId !== providedRune);
         runesNeeded.forEach(r => invRef.current.modifyItem(r.itemId, -r.quantity, true));
 
         if (result.logMessage) addLog(result.logMessage);
-        
+
         for (const skillName in result.xpGains) {
             const totalXp = result.xpGains[skillName as SkillName];
             if (totalXp && totalXp > 0) {
                 addXp(skillName as SkillName, Math.round(totalXp));
             }
         }
-        
+
         const damageToDeal = Math.min(result.damage, monsterHp);
         const newMonsterHp = Math.max(0, monsterHp - damageToDeal);
         setMonsterHp(newMonsterHp);
-        
+
         addHitSplat(damageToDeal > 0 ? damageToDeal : 'miss', 'monster', { isMaxHit: result.isMaxHit, isMagic: true });
 
         if (result.animationOptions) {
@@ -577,7 +581,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 options,
             }]);
         }
-        
+
         if (result.statusEffectsToApply.length > 0) {
             setMonsterStatus(prev => {
                 let newStatus = [...prev];
@@ -633,7 +637,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
             ui.setManualCastTrigger(null);
         }
     }, [ui.manualCastTrigger, isPreparing, monster, playerHp, monsterHp, handleManualCast, ui]);
-    
+
     useEffect(() => {
         if (isPreparing || isCombatEnding) return;
 
@@ -663,15 +667,15 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                     combatFrameId = requestAnimationFrame(combatLoop);
                     return;
                 }
-                
+
                 setPlayerAttacking(true);
                 setTimeout(() => setPlayerAttacking(false), 300);
-                
+
                 const isAutocasting = playerWeapon.type === WeaponType.Staff && autocastSpell && (combatStance === CombatStance.Autocast || combatStance === CombatStance.DefensiveAutocast);
-                
+
                 let result: DamageCalculationResult | null = null;
                 let attackStyle: 'melee' | 'ranged' | 'magic' = 'melee';
-                
+
                 if (isAutocasting) {
                     attackStyle = 'magic';
                     const magicLevel = playerSkills.find(s => s.name === SkillName.Magic)?.currentLevel ?? 1;
@@ -681,13 +685,13 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         setCombatStance(CombatStance.Accurate); // Revert to melee
                         result = null; // Prevent processing
                     } else {
-                         const equippedStaff = equipment.weapon ? ITEMS[equipment.weapon.itemId] : null;
+                        const equippedStaff = equipment.weapon ? ITEMS[equipment.weapon.itemId] : null;
                         const providedRune = equippedStaff?.equipment?.providesRune ? equippedStaff.equipment.providesRune : null;
                         const runesNeeded = autocastSpell!.runes.filter((r: { itemId: string; quantity: number }) => r.itemId !== providedRune);
-                        runesNeeded.forEach((r: {itemId: string, quantity: number}) => inv.modifyItem(r.itemId, -r.quantity, true));
+                        runesNeeded.forEach((r: { itemId: string, quantity: number }) => inv.modifyItem(r.itemId, -r.quantity, true));
                     }
-                } 
-                
+                }
+
                 if (!result) {
                     setLastSpellCast(null);
                     const isRangedWeapon = playerWeapon.type === WeaponType.Bow || playerWeapon.type === WeaponType.Crossbow;
@@ -712,13 +716,13 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                     } else {
                         if (result.logMessage) addLog(result.logMessage);
                         if (result.ammoConsumed) onConsumeAmmo();
-                        
+
                         const damageToDeal = Math.min(result.damage, monsterHp);
                         const newMonsterHp = Math.max(0, monsterHp - damageToDeal);
                         setMonsterHp(newMonsterHp);
-                        
+
                         if (showHitsplats) addHitSplat(result.successfulHit ? damageToDeal : 'miss', 'monster', { isMaxHit: result.isMaxHit, isMagic: attackStyle === 'magic' });
-                        if (result.successfulHit && result.animationOptions) {
+                        if (result.animationOptions) {
                             const { type, ...options } = result.animationOptions;
                             setAnimationTriggers(prev => [...prev, {
                                 id: Date.now() + Math.random(),
@@ -735,7 +739,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         }
 
                         if (result.statusEffectsToApply.length > 0) {
-                             setMonsterStatus(prev => {
+                            setMonsterStatus(prev => {
                                 let newStatus = [...prev];
                                 result!.statusEffectsToApply.forEach(newEffect => {
                                     const existingIndex = newStatus.findIndex(s => s.type === newEffect.type);
@@ -759,7 +763,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         }
                     }
                 }
-                
+
                 const speedBuff = activeBuffs.find(b => b.type === 'attack_speed_boost');
                 let effectiveSpeed = playerWeapon.speed;
                 if (speedBuff) effectiveSpeed = Math.max(1, effectiveSpeed + speedBuff.value);
@@ -778,7 +782,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
 
                 setMonsterAttacking(true);
                 setTimeout(() => setMonsterAttacking(false), 300);
-            
+
                 let monsterDamage = 0;
                 let monsterHit = false;
                 let isDragonfireAttack = false;
@@ -786,87 +790,97 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 let triggeredSpecial: MonsterSpecialAttack | null = null;
                 let performNormalAttack = true;
 
-                let prayerProtected = false;
-                if (monster.attackStyle === 'magic' && activePrayers.includes('protect_from_magic')) {
-                    prayerProtected = true;
-                } else if (monster.attackStyle === 'ranged' && activePrayers.includes('protect_from_ranged')) {
-                    prayerProtected = true;
-                } else if (['stab', 'slash', 'crush'].includes(monster.attackStyle) && activePrayers.includes('protect_from_melee')) {
-                    prayerProtected = true;
+                if (monster.specialAttacks) {
+                    for (const special of monster.specialAttacks) {
+                        if (Math.random() < special.chance) {
+                            triggeredSpecial = special;
+                            break;
+                        }
+                    }
                 }
-                
+
+                if (triggeredSpecial) {
+                    addLog(`The ${monster.name} uses ${triggeredSpecial.name}!`);
+                    switch (triggeredSpecial.effect) {
+                        case 'stun':
+                            addBuff({ type: 'stun', value: 0, duration: triggeredSpecial.duration });
+                            performNormalAttack = false;
+                            break;
+                        case 'magic_bypass_defence':
+                            isMagicAttack = true;
+                            const effectiveDefence = getEffectiveLevel(SkillName.Magic);
+                            const monsterAttackStat = monster.magic ?? monster.attack;
+                            const monsterAccuracy = calculateAccuracy(monsterAttackStat, effectiveDefence);
+                            if (Math.random() < monsterAccuracy) {
+                                monsterHit = true;
+                                monsterDamage = Math.floor(Math.random() * (triggeredSpecial.maxHit + 1));
+                            }
+                            performNormalAttack = false;
+                            break;
+                        case 'stat_drain': {
+                            const skillToDrain = triggeredSpecial.skill;
+                            const skillData = playerSkills.find(s => s.name === skillToDrain);
+                            applyStatModifier(skillToDrain, triggeredSpecial.value, skillData?.level ?? 1);
+                            break;
+                        }
+                        case 'stat_drain_multi':
+                            triggeredSpecial.skills.forEach(drain => {
+                                const skillData = playerSkills.find(s => s.name === drain.skill);
+                                applyStatModifier(drain.skill, drain.value, skillData?.level ?? 1);
+                            });
+                            break;
+                        case 'elemental_shift':
+                            if (monster.elementalWeaknessCycle && currentElementalWeakness) {
+                                const cycle = monster.elementalWeaknessCycle;
+                                const currentIndex = cycle.indexOf(currentElementalWeakness);
+                                const nextIndex = (currentIndex + 1) % cycle.length;
+                                const newWeakness = cycle[nextIndex];
+                                setCurrentElementalWeakness(newWeakness);
+                                addLog(`The ${monster.name} shifts its attunement to ${newWeakness}!`);
+                            }
+                            performNormalAttack = false;
+                            break;
+                        case 'damage_multiplier':
+                            // This will be handled after the normal damage calculation.
+                            break;
+                        case 'damage_multiplier_prayer_drain': {
+                            const prayersToDisable = triggeredSpecial.prayers;
+                            if (activePrayers.some(p => prayersToDisable.includes(p))) {
+                                setActivePrayers(current => current.filter(p => !prayersToDisable.includes(p)));
+                                addLog(`Your prayers have been disabled by ${triggeredSpecial.name}!`);
+                            }
+                            break;
+                        }
+                        case 'poison': {
+                            const applyPoisonChance = triggeredSpecial.poisonChance ?? 1;
+                            if (Math.random() < applyPoisonChance) {
+                                addBuff({ type: 'poison', value: triggeredSpecial.damage, duration: Number.MAX_SAFE_INTEGER });
+                            } else {
+                                addLog(`The ${monster.name}'s venomous attack misses its mark!`);
+                            }
+                            performNormalAttack = false;
+                            break;
+                        }
+                    }
+                }
+
+                let prayerProtected = false;
+                if (!triggeredSpecial || (triggeredSpecial.effect !== 'damage_multiplier_prayer_drain')) {
+                    if (monster.attackStyle === 'magic' && activePrayers.includes('protect_from_magic')) {
+                        prayerProtected = true;
+                    } else if (monster.attackStyle === 'ranged' && activePrayers.includes('protect_from_ranged')) {
+                        prayerProtected = true;
+                    } else if (['stab', 'slash', 'crush'].includes(monster.attackStyle) && activePrayers.includes('protect_from_melee')) {
+                        prayerProtected = true;
+                    }
+                }
+
                 if (prayerProtected) {
                     monsterDamage = 0;
                     monsterHit = false;
                     addLog("Your prayer absorbs the damage!");
                     performNormalAttack = false;
                 } else {
-                    if (monster.specialAttacks) {
-                        for (const special of monster.specialAttacks) {
-                            if (Math.random() < special.chance) {
-                                triggeredSpecial = special;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (triggeredSpecial) {
-                        addLog(`The ${monster.name} uses ${triggeredSpecial.name}!`);
-                        switch (triggeredSpecial.effect) {
-                            case 'stun':
-                                addBuff({ type: 'stun', value: 0, duration: triggeredSpecial.duration });
-                                performNormalAttack = false;
-                                break;
-                            case 'magic_bypass_defence':
-                                isMagicAttack = true;
-                                const effectiveDefence = getEffectiveLevel(SkillName.Magic);
-                                const monsterAttackStat = monster.magic ?? monster.attack;
-                                const monsterAccuracy = calculateAccuracy(monsterAttackStat, effectiveDefence);
-                                if (Math.random() < monsterAccuracy) {
-                                    monsterHit = true;
-                                    monsterDamage = Math.floor(Math.random() * (triggeredSpecial.maxHit + 1));
-                                }
-                                performNormalAttack = false;
-                                break;
-                            case 'stat_drain': {
-                                const skillToDrain = triggeredSpecial.skill;
-                                const skillData = playerSkills.find(s => s.name === skillToDrain);
-                                applyStatModifier(skillToDrain, triggeredSpecial.value, skillData?.level ?? 1);
-                                break;
-                            }
-                            case 'stat_drain_multi':
-                                triggeredSpecial.skills.forEach(drain => {
-                                    const skillData = playerSkills.find(s => s.name === drain.skill);
-                                    applyStatModifier(drain.skill, drain.value, skillData?.level ?? 1);
-                                });
-                                break;
-                            case 'elemental_shift':
-                                if (monster.elementalWeaknessCycle && currentElementalWeakness) {
-                                    const cycle = monster.elementalWeaknessCycle;
-                                    const currentIndex = cycle.indexOf(currentElementalWeakness);
-                                    const nextIndex = (currentIndex + 1) % cycle.length;
-                                    const newWeakness = cycle[nextIndex];
-                                    setCurrentElementalWeakness(newWeakness);
-                                    addLog(`The ${monster.name} shifts its attunement to ${newWeakness}!`);
-                                }
-                                performNormalAttack = false;
-                                break;
-                            case 'damage_multiplier':
-                                // This will be handled after the normal damage calculation.
-                                break;
-                            case 'poison': {
-                                const applyPoisonChance = triggeredSpecial.poisonChance ?? 1;
-                                if (Math.random() < applyPoisonChance) {
-                                    addBuff({ type: 'poison', value: triggeredSpecial.damage, duration: Number.MAX_SAFE_INTEGER });
-                                } else {
-                                    addLog(`The ${monster.name}'s venomous attack misses its mark!`);
-                                }
-                                performNormalAttack = false;
-                                break;
-                            }
-                        }
-                    }
-                
                     if (performNormalAttack) {
                         if (monster.types.includes(MonsterType.Dragon) && Math.random() < 0.3) {
                             isDragonfireAttack = true;
@@ -874,7 +888,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                             const dragonfireMaxHit = 60;
                             monsterDamage = Math.floor(Math.random() * (dragonfireMaxHit + 1));
                             addLog(`The ${monster.name} unleashes a blast of dragonfire!`);
-                            
+
                             const antiFireBuff = activeBuffs.find(b => b.type === 'antifire');
                             const dragonfireResistance = equipment.shield ? ITEMS[equipment.shield.itemId]?.equipment?.resistsDragonfire : undefined;
 
@@ -885,9 +899,9 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                             if (dragonfireResistance) {
                                 reductionPercentage += (1 - dragonfireResistance);
                             }
-                            
+
                             reductionPercentage = Math.min(1, reductionPercentage);
-                            
+
                             if (reductionPercentage >= 1) {
                                 monsterDamage = 0;
                                 const shieldName = equipment.shield ? ITEMS[equipment.shield.itemId].name : '';
@@ -896,11 +910,11 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                                 monsterDamage = Math.floor(monsterDamage * (1 - reductionPercentage));
                                 const shieldName = equipment.shield ? ITEMS[equipment.shield.itemId].name : '';
                                 if (shieldName && antiFireBuff) {
-                                     addLog(`Your ${shieldName} and antifire potion protect you from the worst of the heat.`);
+                                    addLog(`Your ${shieldName} and antifire potion protect you from the worst of the heat.`);
                                 } else if (shieldName) {
-                                     addLog(`Your ${shieldName} absorbs a large portion of the fiery breath!`);
+                                    addLog(`Your ${shieldName} absorbs a large portion of the fiery breath!`);
                                 } else {
-                                     addLog("Your antifire potion protects you from some of the heat.");
+                                    addLog("Your antifire potion protects you from some of the heat.");
                                 }
                             }
 
@@ -920,7 +934,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
 
                             let playerDefenceBonus = 0;
                             let monsterAttackStat = monster.attack;
-                            switch(monster.attackStyle) {
+                            switch (monster.attackStyle) {
                                 case 'stab': playerDefenceBonus = playerStats.stabDefence; monsterAttackStat = monster.attack; break;
                                 case 'slash': playerDefenceBonus = playerStats.slashDefence; monsterAttackStat = monster.attack; break;
                                 case 'crush': playerDefenceBonus = playerStats.crushDefence; monsterAttackStat = monster.attack; break;
@@ -931,23 +945,23 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                             let totalDefence = effectiveDefence + Math.floor(playerDefenceBonus * 0.5);
                             if (evasionBuff) totalDefence = Math.floor(totalDefence * (1 + evasionBuff.value / 100));
                             const monsterAccuracy = calculateAccuracy(monsterAttackStat, totalDefence);
-                            
+
                             if (Math.random() < monsterAccuracy) {
                                 monsterHit = true;
                                 monsterDamage = Math.floor(Math.random() * (monsterMaxHit + 1));
                             }
                         }
 
-                        if (triggeredSpecial?.effect === 'damage_multiplier') {
+                        if (triggeredSpecial?.effect === 'damage_multiplier' || triggeredSpecial?.effect === 'damage_multiplier_prayer_drain') {
                             monsterDamage = Math.floor(monsterDamage * triggeredSpecial.value);
                         }
                     }
                 }
-            
-                if (monsterHit && !prayerProtected) {
+
+                if (!prayerProtected) {
                     setAnimationTriggers(prev => [...prev, { id: Date.now() + Math.random(), type: isDragonfireAttack ? 'magic' : monster.attackStyle, source: 'monster', target: 'player', options: { spellTier: isDragonfireAttack ? 5 : (monster.level > 30 ? 3 : (monster.level > 10 ? 2 : 1)), element: isDragonfireAttack ? 'fire' : null } }]);
                 }
-            
+
                 const reductionBuff = activeBuffs.find(b => b.type === 'damage_reduction');
                 if (reductionBuff) {
                     monsterDamage = Math.floor(monsterDamage * (1 - reductionBuff.value / 100));
@@ -965,25 +979,25 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         }
                     }
                 }
-            
+
                 const newPlayerHp = Math.max(0, playerHp - monsterDamage);
                 setPlayerHp(newPlayerHp);
-            
+
                 if (newPlayerHp <= 0) {
                     combatFrameId = requestAnimationFrame(combatLoop);
                     return;
                 }
-                
+
                 if (monsterDamage > 0) {
-                    addXp(SkillName.Defence, Math.round(monsterDamage * 4));
-            
+                    // addXp(SkillName.Defence, Math.round(monsterDamage * 4)); -- This was disabled for now (xp on hit for defence)
+
                     const isMeleeAttack = !isDragonfireAttack && (monster.attackStyle === 'stab' || monster.attackStyle === 'slash' || monster.attackStyle === 'crush');
                     const hasSpikedCape = equipment.cape?.itemId === 'spiked_cape';
                     const recoilBuff = activeBuffs.find(b => b.type === 'recoil');
-            
+
                     let recoilDamage = 0;
                     let recoilSource = '';
-            
+
                     if (recoilBuff && isMeleeAttack) {
                         recoilDamage = Math.ceil(monsterDamage * (recoilBuff.value / 100));
                         recoilSource = 'Your potion';
@@ -991,14 +1005,14 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         recoilDamage = Math.ceil(monsterDamage * 0.1);
                         recoilSource = 'Your cape';
                     }
-            
+
                     if (recoilDamage > 0 && monsterHp > 0) {
                         const recoilDamageToDeal = Math.min(recoilDamage, monsterHp);
                         const monsterHpAfterRecoil = Math.max(0, monsterHp - recoilDamageToDeal);
                         setMonsterHp(monsterHpAfterRecoil);
                         if (showHitsplats) addHitSplat(recoilDamageToDeal, 'monster', {});
                         addLog(`${recoilSource} recoils, dealing ${recoilDamageToDeal} damage to the ${monster.name}!`);
-            
+
                         if (monsterHpAfterRecoil <= 0) {
                             handleMonsterDefeated('melee');
                             combatFrameId = requestAnimationFrame(combatLoop);
@@ -1014,10 +1028,10 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         duration: Number.MAX_SAFE_INTEGER
                     });
                 }
-                
+
                 setNextMonsterAttackTime(now + monster.attackSpeed * gameTickMs);
             }
-            
+
 
             combatFrameId = requestAnimationFrame(combatLoop);
         };
@@ -1025,19 +1039,23 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         combatFrameId = requestAnimationFrame(combatLoop);
         return () => cancelAnimationFrame(combatFrameId);
     }, [
-        isPreparing, isCombatEnding, monster, playerHp, monsterHp, equipment, combatStance, 
+        isPreparing, isCombatEnding, monster, playerHp, monsterHp, equipment, combatStance,
         playerSkills, addXp, addLog, onCombatEnd, onKill, onEncounterWin, onConsumeAmmo, playerWeapon, playerStats, monsterQueue,
         currentMonsterIndex, nextPlayerAttackTime, nextMonsterAttackTime, activeBuffs, monsterStatus,
         handleLootDistribution, autocastSpell, inv, ui, onPlayerDeath, applyStatModifier, isStunned, addBuff,
         currentElementalWeakness, handleMonsterDefeated, playerMaxHit, lastSpellCast,
         combatSpeedMultiplier, showHitsplats, activePrayers, getEffectiveLevel, executeManualCast, addHitSplat
     ]);
-    
+
     useEffect(() => {
         poisonTickCallback.current = () => {
             if (!monster || isCombatEnding || monsterHp <= 0) return;
-    
-            const statusEffects = [...monsterStatus]; // Create a mutable copy
+
+            const statusEffects = [...monsterStatus];
+            let totalDamageDealt = 0;
+            let firemakingXpGain = 0;
+            let isPoisonHit = false;
+            let isBurnHit = false;
 
             for (let i = statusEffects.length - 1; i >= 0; i--) {
                 const effect = statusEffects[i];
@@ -1058,11 +1076,18 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                     } else {
                         statusEffects[i] = { ...effect, ticksApplied: newTicksApplied };
                     }
+                    if (damageToDeal > 0) {
+                        isPoisonHit = true;
+                        totalDamageDealt += damageToDeal;
+                    }
                 } else if (effect.type === 'burn') {
                     damageToDeal = Math.floor(Math.random() * (effect.maxDamagePerTick + 1));
                     if (damageToDeal > 0) {
-                        addXp(SkillName.Firemaking, damageToDeal * 4);
+                        firemakingXpGain += (damageToDeal * 4);
+                        isBurnHit = true;
+                        totalDamageDealt += damageToDeal;
                     }
+
                     const newTicksRemaining = effect.ticksRemaining - 1;
                     if (newTicksRemaining <= 0) {
                         addLog(`The ${monster.name} stops burning.`);
@@ -1071,25 +1096,33 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         statusEffects[i] = { ...effect, ticksRemaining: newTicksRemaining };
                     }
                 }
-                
-                if (damageToDeal > 0) {
-                    setMonsterHp(currentHp => {
-                        if (currentHp <= 0) return 0;
-                        const newHp = Math.max(0, currentHp - damageToDeal);
-                        if (showHitsplats) {
-                            addHitSplat(damageToDeal, 'monster', { isPoison: effect.type === 'poison', isBurn: effect.type === 'burn' });
-                        }
-                        if (newHp <= 0 && currentHp > 0) {
-                            const isMagic = lastSpellCast !== null || (autocastSpell && (combatStance === 'Autocast' || combatStance === 'Defensive Cast'));
-                            const isRanged = playerWeapon.type === WeaponType.Bow || playerWeapon.type === WeaponType.Thrown;
-                            handleMonsterDefeated(isMagic ? 'magic' : isRanged ? 'ranged' : 'melee');
-                        }
-                        return newHp;
-                    });
-                }
-                
+
                 if (removeEffect) {
                     statusEffects.splice(i, 1);
+                }
+            }
+
+            if (totalDamageDealt > 0) {
+                const actualDamage = Math.min(totalDamageDealt, monsterHp);
+                const newHp = Math.max(0, monsterHp - actualDamage);
+
+                // Apply HP update using direct value to avoid side-effect issues with functional updates in Strict Mode
+                setMonsterHp(newHp);
+
+                // Handle hit splats (once, batched outside of the loop)
+                if (showHitsplats) {
+                    addHitSplat(actualDamage, 'monster', { isPoison: isPoisonHit, isBurn: isBurnHit });
+                }
+
+                // Grant XP
+                if (firemakingXpGain > 0) {
+                    addXp(SkillName.Firemaking, firemakingXpGain);
+                }
+
+                if (newHp <= 0 && monsterHp > 0) {
+                    const isMagic = lastSpellCast !== null || (autocastSpell && (combatStance === 'Autocast' || combatStance === 'Defensive Cast'));
+                    const isRanged = playerWeapon.type === WeaponType.Bow || playerWeapon.type === WeaponType.Thrown;
+                    handleMonsterDefeated(isMagic ? 'magic' : isRanged ? 'ranged' : 'melee');
                 }
             }
             setMonsterStatus(statusEffects);
@@ -1109,7 +1142,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
     useEffect(() => {
         if (killTrigger > prevKillTrigger.current && monsterHp > 0 && monster) {
             addLog("DEV: Monster killed by dev command.");
-            setMonsterHp(0); 
+            setMonsterHp(0);
             handleMonsterDefeated('melee');
         }
         prevKillTrigger.current = killTrigger;
@@ -1117,37 +1150,33 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
 
     const handleFlee = useCallback(() => {
         if (isStunned) { addLog("You are stunned and cannot flee."); return; }
-        if (runEnergy < 10) {
-            addLog("You don't have enough run energy to flee.");
-            return;
-        }
-    
-        setRunEnergy(re => re - 10);
-    
+
         const agilityLevel = playerSkills.find(s => s.name === SkillName.Agility)?.level ?? 1;
         const monsterCombatLevel = monster?.level ?? 1;
-    
-        let successChance = 40 + ((agilityLevel - monsterCombatLevel / 2) * 0.75);
-        successChance = Math.max(10, Math.min(95, successChance));
-    
+        let successChance = 0;
+
+        if (playerCombatLevel >= monsterCombatLevel * 2) {
+            successChance = 100;
+        } else {
+            successChance = 40 + ((agilityLevel - monsterCombatLevel / 2) * 0.75);
+            successChance = Math.max(10, Math.min(95, successChance));
+        }
+
         if (Math.random() * 100 < successChance) {
             // Success
-            const successXp = Math.min(20, Math.floor(5 + (monsterCombatLevel / playerCombatLevel) * 4));
-            addXp(SkillName.Agility, successXp);
-            addLog(`You successfully escape! (+${successXp} Agility XP)`);
+            addLog(`You successfully escape!`);
             setQueuedSpell(null);
             setLastSpellCast(null);
             onFleeSuccess(defeatedInThisEncounter);
         } else {
             // Failure
-            addXp(SkillName.Agility, 2);
-            addLog("You fail to escape! (+2 Agility XP)");
+            addLog("You fail to escape!");
             const gameTickMs = 600 / combatSpeedMultiplier;
             // Stun for one attack turn
             const stunDuration = playerWeapon.speed * gameTickMs;
             addBuff({ type: 'stun', value: 0, duration: stunDuration });
         }
-    }, [isStunned, runEnergy, setRunEnergy, playerSkills, monster, addLog, addXp, playerCombatLevel, onFleeSuccess, defeatedInThisEncounter, combatSpeedMultiplier, playerWeapon.speed, addBuff]);
+    }, [isStunned, playerSkills, monster, addLog, addXp, playerCombatLevel, onFleeSuccess, defeatedInThisEncounter, combatSpeedMultiplier, playerWeapon.speed, addBuff]);
 
     const monsterIconClass = useMemo(() => {
         if (monster?.id === 'arcane_wyvern' && currentElementalWeakness) {
@@ -1173,9 +1202,9 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                     <h2 className="text-3xl font-bold text-red-500 animate-pulse">PREPARE FOR BATTLE!</h2>
                 </div>
             )}
-            <AttackAnimationEngine 
-                triggers={animationTriggers} 
-                playerRef={playerRef} 
+            <AttackAnimationEngine
+                triggers={animationTriggers}
+                playerRef={playerRef}
                 monsterRef={monsterRef}
                 onAnimationComplete={(id) => setAnimationTriggers(prev => prev.filter(t => t.id !== id))}
             />
@@ -1183,12 +1212,12 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 Fighting: {monster.name} (Lvl {monster.level})
                 {monsterQueue.length > 1 && ` (${currentMonsterIndex + 1}/${monsterQueue.length})`}
             </h2>
-            
+
             <div className="flex justify-around items-center w-full">
                 <div className="flex flex-col items-center w-32 md:w-48">
                     <div ref={playerRef} className="relative">
-                        <img src="https://api.iconify.design/game-icons:person.svg" alt="Player" className={`w-24 h-24 md:w-32 md:h-32 p-2 bg-gray-900 border-4 border-gray-600 rounded-lg filter invert transition-transform duration-150 pixelated-image ${playerAttacking ? 'scale-110' : ''}`} />
-                         {showHitsplats && hitSplats.filter(s => s.target === 'player').map(splat => <HitSplat key={splat.id} {...splat} />)}
+                        <img src={getIconUrl("person")} alt="Player" className={`w-24 h-24 md:w-32 md:h-32 p-2 bg-gray-900 border-4 border-gray-600 rounded-lg filter invert transition-transform duration-150 pixelated-image ${playerAttacking ? 'scale-110' : ''}`} />
+                        {showHitsplats && hitSplats.filter(s => s.target === 'player').map(splat => <HitSplat key={splat.id} {...splat} />)}
                     </div>
                     <span className="font-bold mt-2">You</span>
                     <div className="relative w-full mt-1">
@@ -1202,7 +1231,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 <div className="flex flex-col items-center w-32 md:w-48">
                     <div ref={monsterRef} className="relative">
                         <div className={`w-24 h-24 md:w-32 md:h-32 p-2 bg-gray-900 border-4 border-gray-600 rounded-lg transition-transform duration-150 ${monsterAttacking ? 'scale-110' : 'scale-100'}`}>
-                            <img src={monster.iconUrl} alt={monster.name} className={`w-full h-full pixelated-image ${monsterIconClass}`} />
+                            <img src={getIconUrl(monster.iconUrl)} alt={monster.name} className={`w-full h-full pixelated-image ${monsterIconClass}`} />
                         </div>
                         {showHitsplats && hitSplats.filter(s => s.target === 'monster').map(splat => <HitSplat key={splat.id} {...splat} />)}
                     </div>
@@ -1218,7 +1247,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 <SmoothCombatCooldownBar label={`Your next attack: ${nextAttackName}`} nextAttackTime={nextPlayerAttackTime} attackSpeedTicks={playerWeapon.speed} combatSpeedMultiplier={combatSpeedMultiplier} color={nextAttackColor} />
                 <SmoothCombatCooldownBar label="Monster Next Attack" nextAttackTime={nextMonsterAttackTime} attackSpeedTicks={monster.attackSpeed} combatSpeedMultiplier={combatSpeedMultiplier} color="bg-gray-600" />
             </div>
-            
+
             <div className="flex flex-col items-center gap-4 mt-2">
                 <Button onClick={handleFlee} variant="secondary" disabled={isMandatory || isPreparing || isCombatEnding || isStunned}>
                     {isStunned ? 'Stunned' : (isMandatory ? 'Cannot Flee' : 'Flee')}

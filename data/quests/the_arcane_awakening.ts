@@ -5,7 +5,11 @@ export const theArcaneAwakening: Quest = {
     id: 'the_arcane_awakening',
     name: "The Arcane Awakening",
     description: "Archmage Theron has detected a dangerous instability in the world's magical weave. He needs help to locate and stop the source of the Resonance Cascade.",
-    startHint: "Speak to Archmage Theron in Silverhaven's Arcane Wares shop. (Requires Magic 40, 'The Capital's Call' completed).",
+    requirements: {
+        quests: ['capitals_call'],
+        skills: [{ skill: SkillName.Magic, level: 40 }]
+    },
+    startHint: "Speak to Archmage Theron in Silverhaven's Arcane Wares shop.",
     playerStagePerspectives: [
         "Theron gave me an Arcane Resonator. I need to take readings from the altars of Gust, Stone, and Aqua.",
         "I have the readings. I must return to Archmage Theron in Silverhaven.",
@@ -38,7 +42,7 @@ export const theArcaneAwakening: Quest = {
     },
     dialogueEntryPoints: [
         // Archmage Theron
-        { npcName: 'Archmage Theron', response: { text: "You mentioned the 'weave' seems unstable?", check: { requirements: [ { type: 'quest', questId: 'the_arcane_awakening', status: 'not_started' }, { type: 'skill', skill: SkillName.Magic, level: 40 }, { type: 'quest', questId: 'capitals_call', status: 'completed' } ], successNode: 'taa_quest_intro', failureNode: '' } } },
+        { npcName: 'Archmage Theron', response: { text: "You mentioned the 'weave' seems unstable?", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'not_started' }, { type: 'skill', skill: SkillName.Magic, level: 40 }, { type: 'quest', questId: 'capitals_call', status: 'completed' }], successNode: 'taa_quest_intro', failureNode: '' } } },
         { npcName: 'Archmage Theron', response: { text: "I'm still working on getting the altar readings.", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'in_progress', stage: 0 }], successNode: '', failureNode: '' } } },
         { npcName: 'Archmage Theron', response: { text: "I have them right here. What do they say?", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'in_progress', stage: 1 }], successNode: 'taa_stage_1_complete', failureNode: '' } } },
         { npcName: 'Archmage Theron', response: { text: "The source of the Resonance Cascade has been eliminated.", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'in_progress', stage: 9 }], successNode: 'taa_stage_9_complete', failureNode: '' } } },
@@ -56,7 +60,7 @@ export const theArcaneAwakening: Quest = {
     dialogue: {
         taa_quest_intro: {
             npcName: 'Archmage Theron',
-            npcIcon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+            npcIcon: 'wizard-face',
             text: "You sense it too? Grave concern is an understatement. I've detected a growing instability in the world's 'Arcane Weave'—a magical feedback loop I call the Resonance Cascade. If left unchecked, it could have catastrophic consequences.",
             responses: [
                 { text: "I'm ready to help. What is the task?", next: 'taa_task_intro' }
@@ -64,7 +68,7 @@ export const theArcaneAwakening: Quest = {
         },
         taa_task_intro: {
             npcName: 'Archmage Theron',
-            npcIcon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+            npcIcon: 'wizard-face',
             text: "To find the source, I must triangulate its position. I've constructed this Arcane Resonator. I need you to take it to the three major runic altars—the Altar of Gusts, the Altar of the Deep, and the Altar of the Spring—and take a reading from each.",
             responses: [
                 { text: "I will handle this. The fate of the world may depend on it.", next: 'taa_task_accept' }
@@ -72,7 +76,7 @@ export const theArcaneAwakening: Quest = {
         },
         taa_task_accept: {
             npcName: 'Archmage Theron',
-            npcIcon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+            npcIcon: 'wizard-face',
             text: "It may indeed. Be wary; awakening the altars may draw out their guardians. Go now. I will await your return.",
             responses: [
                 { text: "(Take the Arcane Resonator)", actions: [{ type: 'start_quest', questId: 'the_arcane_awakening' }, { type: 'give_item', itemId: 'arcane_resonator', quantity: 1 }] }
@@ -80,7 +84,7 @@ export const theArcaneAwakening: Quest = {
         },
         taa_stage_1_complete: {
             npcName: 'Archmage Theron',
-            npcIcon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+            npcIcon: 'wizard-face',
             text: "Let me see... By the arcane! This is worse than I feared. The readings... they don't point to anywhere on the ground. They point... up. High into the sky. To a place of legend: The Crystalline Isles.",
             responses: [
                 { text: "What are the Crystalline Isles?", next: 'taa_stage_1_2' }
@@ -88,15 +92,15 @@ export const theArcaneAwakening: Quest = {
         },
         taa_stage_1_2: {
             npcName: 'Archmage Theron',
-            npcIcon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+            npcIcon: 'wizard-face',
             text: "Floating islands of pure magic, normally shielded from our world. The Resonance Cascade must have weakened their defenses, making them accessible but dangerously unstable. The source is there. You must go. Find the Skyship Captain at the docks. He is your only way up.",
             responses: [
-                { text: "I'll speak with him at once.", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }, { type: 'take_item', itemId: 'gust_reading', quantity: 1 }, { type: 'take_item', itemId: 'stone_reading', quantity: 1 }, { type: 'take_item', itemId: 'aqua_reading', quantity: 1 }, { type: 'take_item', itemId: 'arcane_resonator', quantity: 1}] }
+                { text: "I'll speak with him at once.", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }, { type: 'take_item', itemId: 'gust_reading', quantity: 1 }, { type: 'take_item', itemId: 'stone_reading', quantity: 1 }, { type: 'take_item', itemId: 'aqua_reading', quantity: 1 }, { type: 'take_item', itemId: 'arcane_resonator', quantity: 1 }] }
             ]
         },
         taa_stage_9_complete: {
             npcName: 'Archmage Theron',
-            npcIcon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+            npcIcon: 'wizard-face',
             text: "Astounding! You have not just stopped the cascade but stabilized the entire world's magic. Tell me, what was the source?",
             responses: [
                 { text: "It was an elemental wyvern at the top of a magical spire.", next: 'taa_reward' }
@@ -104,7 +108,7 @@ export const theArcaneAwakening: Quest = {
         },
         taa_reward: {
             npcName: 'Archmage Theron',
-            npcIcon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+            npcIcon: 'wizard-face',
             text: "A wyvern... remarkable. For this grand service, you have proven yourself worthy of advanced knowledge. I will teach you the secrets of Storm magic. Take this as well, a small token of my immense gratitude. You have saved us all.",
             responses: [
                 { text: "Thank you, Archmage.", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }] }
@@ -112,7 +116,7 @@ export const theArcaneAwakening: Quest = {
         },
         post_quest_the_arcane_awakening: {
             npcName: 'Archmage Theron',
-            npcIcon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+            npcIcon: 'wizard-face',
             text: "Thank you again for your help, hero. The Arcane Weave has been stable ever since you defeated the wyvern. The world is in your debt.",
             responses: []
         },
@@ -153,7 +157,7 @@ export const theArcaneAwakening: Quest = {
             text: "By the skies, you actually got one! That old dwarf really came through! I honestly didn't think it was possible. With this... yes, with this, we can make the voyage. Prepare yourself, adventurer. The skies await!",
             responses: [
                 { text: "(Board the Skyship)", actions: [{ type: 'take_item', itemId: 'resonance_dampener', quantity: 1 }, { type: 'advance_quest', questId: 'the_arcane_awakening' }, { type: 'teleport', poiId: 'crystalline_isles_landing' }] },
-                { text: "I'm not ready to leave yet", next: 'taa_air_not_ready'}
+                { text: "I'm not ready to leave yet", next: 'taa_air_not_ready' }
             ]
         },
         taa_captain_free_travel_to_isles: {
@@ -238,42 +242,42 @@ export const theArcaneAwakening: Quest = {
 
         enter_spire_start: {
             npcName: 'Enter the Spire',
-            npcIcon: 'https://api.iconify.design/game-icons:rune-gate.svg',
+            npcIcon: 'rune-gate',
             text: "The shimmering doorway hums with immense power. Stepping through it will take you into the heart of the arcane disturbance.",
             responses: [
-                { text: "(Enter the Spire)", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }, { type: 'teleport', poiId: 'ms_f1_antechamber' }] }
+                { text: "(Enter the Spire)", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }, { type: 'teleport', poiId: 'ms_f1_landing' }] }
             ]
         },
-        
+
         // Altar Dialogues
         use_resonator_gust: {
-            npcName: 'Use Resonator', npcIcon: 'https://api.iconify.design/game-icons:orb-wand.svg',
+            npcName: 'Use Resonator', npcIcon: 'orb-wand',
             text: "You hold the Arcane Resonator up to the Gust Altar. It begins to vibrate violently, and a shimmering creature of pure energy coalesces before you!",
             responses: [
-                { text: "(Face the creature)", check: { requirements: [ { type: 'items', items: [{ itemId: 'arcane_resonator', quantity: 1 }] }, { type: 'items', items: [{ itemId: 'gust_reading', quantity: 0, operator: 'eq' }] } ], successNode: 'trigger_combat', failureNode: 'already_have_reading' }, actions: [{ type: 'set_quest_combat_reward', itemId: 'gust_reading', quantity: 1 }, { type: 'start_mandatory_combat', monsterId: 'mana_wisp' }] }
+                { text: "(Face the creature)", check: { requirements: [{ type: 'items', items: [{ itemId: 'arcane_resonator', quantity: 1 }] }, { type: 'items', items: [{ itemId: 'gust_reading', quantity: 0, operator: 'eq' }] }], successNode: 'trigger_combat', failureNode: 'already_have_reading' }, actions: [{ type: 'set_quest_combat_reward', itemId: 'gust_reading', quantity: 1 }, { type: 'start_mandatory_combat', monsterId: 'mana_wisp' }] }
             ]
         },
         use_resonator_stone: {
-            npcName: 'Use Resonator', npcIcon: 'https://api.iconify.design/game-icons:orb-wand.svg',
+            npcName: 'Use Resonator', npcIcon: 'orb-wand',
             text: "You hold the Arcane Resonator up to the Stone Altar. It begins to vibrate violently, and a shimmering creature of pure energy coalesces before you!",
             responses: [
-                { text: "(Face the creature)", check: { requirements: [ { type: 'items', items: [{ itemId: 'arcane_resonator', quantity: 1 }] }, { type: 'items', items: [{ itemId: 'stone_reading', quantity: 0, operator: 'eq' }] } ], successNode: 'trigger_combat', failureNode: 'already_have_reading' }, actions: [{ type: 'set_quest_combat_reward', itemId: 'stone_reading', quantity: 1 }, { type: 'start_mandatory_combat', monsterId: 'mana_wisp' }] }
+                { text: "(Face the creature)", check: { requirements: [{ type: 'items', items: [{ itemId: 'arcane_resonator', quantity: 1 }] }, { type: 'items', items: [{ itemId: 'stone_reading', quantity: 0, operator: 'eq' }] }], successNode: 'trigger_combat', failureNode: 'already_have_reading' }, actions: [{ type: 'set_quest_combat_reward', itemId: 'stone_reading', quantity: 1 }, { type: 'start_mandatory_combat', monsterId: 'mana_wisp' }] }
             ]
         },
         use_resonator_aqua: {
-            npcName: 'Use Resonator', npcIcon: 'https://api.iconify.design/game-icons:orb-wand.svg',
+            npcName: 'Use Resonator', npcIcon: 'orb-wand',
             text: "You hold the Arcane Resonator up to the Aqua Altar. It begins to vibrate violently, and a shimmering creature of pure energy coalesces before you!",
             responses: [
-                { text: "(Face the creature)", check: { requirements: [ { type: 'items', items: [{ itemId: 'arcane_resonator', quantity: 1 }] }, { type: 'items', items: [{ itemId: 'aqua_reading', quantity: 0, operator: 'eq' }] } ], successNode: 'trigger_combat', failureNode: 'already_have_reading' }, actions: [{ type: 'set_quest_combat_reward', itemId: 'aqua_reading', quantity: 1 }, { type: 'start_mandatory_combat', monsterId: 'mana_wisp' }] }
+                { text: "(Face the creature)", check: { requirements: [{ type: 'items', items: [{ itemId: 'arcane_resonator', quantity: 1 }] }, { type: 'items', items: [{ itemId: 'aqua_reading', quantity: 0, operator: 'eq' }] }], successNode: 'trigger_combat', failureNode: 'already_have_reading' }, actions: [{ type: 'set_quest_combat_reward', itemId: 'aqua_reading', quantity: 1 }, { type: 'start_mandatory_combat', monsterId: 'mana_wisp' }] }
             ]
         },
         trigger_combat: {
-            npcName: 'Arcane Resonator', npcIcon: 'https://api.iconify.design/game-icons:orb-wand.svg',
+            npcName: 'Arcane Resonator', npcIcon: 'orb-wand',
             text: "The Mana Wisp shrieks and attacks!",
             responses: [],
         },
         already_have_reading: {
-            npcName: 'Arcane Resonator', npcIcon: 'https://api.iconify.design/game-icons:orb-wand.svg',
+            npcName: 'Arcane Resonator', npcIcon: 'orb-wand',
             text: "You've already taken a reading from this altar.",
             responses: []
         }

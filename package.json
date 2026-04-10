@@ -1,6 +1,6 @@
 {
   "name": "embrune",
-  "version": "0.0.16",
+  "version": "0.0.18",
   "repository": "koalalord9999/Embrune",
   "author": "John Olivas",
   "description": "Runescape clone, but text based lol",
@@ -8,6 +8,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "generate-items": "node generate-item-ids.js",
     "start": "vite",
     "build": "vite build",
     "package": "electron-builder build --win --publish always",

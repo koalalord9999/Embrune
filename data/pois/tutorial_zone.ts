@@ -281,12 +281,12 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Altar',
-                icon: 'https://api.iconify.design/game-icons:altar.svg',
+                icon: 'altar',
                 startNode: 'altar_default',
                 dialogue: {
                     altar_default: {
                         npcName: 'Altar',
-                        npcIcon: 'https://api.iconify.design/game-icons:altar.svg',
+                        npcIcon: 'altar',
                         text: "An ancient, holy altar. Praying here restores your Prayer points.",
                         responses: [
                             { text: "Pray", actions: [{ type: 'restore_prayer' }] },

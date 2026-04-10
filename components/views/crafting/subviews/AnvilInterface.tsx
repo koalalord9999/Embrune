@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { InventorySlot, PlayerSkill, PlayerQuestState, SkillName, WeaponType } from '../../../../types';
-import { SMITHING_RECIPES, SPECIAL_SMITHING_RECIPES, ITEMS, getIconClassName } from '../../../../constants';
+import {  SMITHING_RECIPES, SPECIAL_SMITHING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../../constants';
 import Button from '../../../common/Button';
 import { CraftingViewProps } from '../CraftingView';
 import { useLongPress } from '../../../../hooks/useLongPress';
@@ -102,10 +102,10 @@ const AnvilSlot: React.FC<{
             <div className={`crafting-slot-level ${hasLevel ? 'met' : 'unmet'}`}>
                 Lvl {recipe.level}
             </div>
-            <img src={item.iconUrl} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
+            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
             <div className="crafting-slot-ingredients">
                 <div className="ingredient-icon">
-                    <img src={ITEMS[recipe.barType].iconUrl} alt={ITEMS[recipe.barType].name} className={getIconClassName(ITEMS[recipe.barType])} />
+                    <img src={getIconUrl(ITEMS[recipe.barType].iconUrl)} alt={ITEMS[recipe.barType].name} className={getIconClassName(ITEMS[recipe.barType])} />
                     {recipe.barsRequired > 1 && <span className="ingredient-quantity">{recipe.barsRequired}</span>}
                 </div>
             </div>
@@ -165,11 +165,11 @@ const SpecialAnvilSlot: React.FC<{
             <div className={`crafting-slot-level ${hasLevel ? 'met' : 'unmet'}`}>
                 Lvl {recipe.level}
             </div>
-            <img src={item.iconUrl} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
+            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
             <div className="crafting-slot-ingredients">
                 {recipe.ingredients.map(ing => (
                     <div key={ing.itemId} className="ingredient-icon">
-                        <img src={ITEMS[ing.itemId].iconUrl} alt={ITEMS[ing.itemId].name} className={getIconClassName(ITEMS[ing.itemId])} />
+                        <img src={getIconUrl(ITEMS[ing.itemId].iconUrl)} alt={ITEMS[ing.itemId].name} className={getIconClassName(ITEMS[ing.itemId])} />
                         {ing.quantity > 1 && <span className="ingredient-quantity">{ing.quantity}</span>}
                     </div>
                 ))}

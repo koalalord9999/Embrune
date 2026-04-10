@@ -114,11 +114,11 @@ export const theFeywoodPois: Record<string, POI> = {
             { 
                 type: 'npc', 
                 name: 'Fey Spirit', 
-                icon: 'https://api.iconify.design/game-icons:fairy.svg', 
+                icon: 'fairy', 
                 dialogue: {
                     start: {
                         npcName: 'Fey Spirit',
-                        npcIcon: 'https://api.iconify.design/game-icons:fairy.svg',
+                        npcIcon: 'fairy',
                         text: "Tread lightly, mortal. This is a sacred place.",
                         responses: []
                     }
@@ -162,7 +162,7 @@ export const theFeywoodPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Use Resonator',
-                icon: 'https://api.iconify.design/game-icons:orb-wand.svg',
+                icon: 'orb-wand',
                 questCondition: { questId: 'the_arcane_awakening', stages: [0] },
                 startNode: 'use_resonator_aqua',
             },
@@ -180,7 +180,7 @@ export const theFeywoodPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Commune with the Altar',
-                icon: 'https://api.iconify.design/game-icons:rune-stone.svg',
+                icon: 'rune-stone',
                 questCondition: { questId: 'whispers_of_the_divine', stages: [0] },
                 startNode: 'wod_verdant_echo'
             },

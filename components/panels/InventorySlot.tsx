@@ -1,6 +1,6 @@
 import React from 'react';
 import { InventorySlot, PlayerSkill, Item, Spell, Equipment } from '../../types';
-import { ITEMS, INVENTORY_CAPACITY, getIconClassName } from '../../constants';
+import {  ITEMS, INVENTORY_CAPACITY, getIconClassName, getIconUrl  } from '../../constants';
 import { ContextMenuOption } from '../common/ContextMenu';
 import { ConfirmationPrompt, ContextMenuState, MakeXPrompt, useUIState } from '../../hooks/useUIState';
 import { useLongPress } from '../../hooks/useLongPress';
@@ -15,7 +15,12 @@ export const getDisplayName = (slot: InventorySlot | null): string => {
     if (!item) return "Unknown Item";
 
     if (slot.itemId === 'rendering_kit' && slot.filled && typeof slot.doses === 'number') {
-        const fatName = ITEMS[slot.filled]?.name.replace(' Fat', '').replace('rich animal', 'Rich Animal');
+        let fatName = '';
+        if (slot.filled === 'refined_grease') {
+            fatName = 'Refined Grease';
+        } else {
+            fatName = ITEMS[slot.filled]?.name.replace(' Fat', '').replace('rich animal', 'Rich Animal') ?? 'Unknown Fat';
+        }
         return `Filled Rendering Kit (${fatName} ${slot.doses})`;
     }
 
@@ -76,8 +81,8 @@ interface InventorySlotProps {
     isBusy?: boolean;
     setConfirmationPrompt: (prompt: ConfirmationPrompt | null) => void;
     setMakeXPrompt: (prompt: MakeXPrompt | null) => void;
-    onExamine: (item: Item) => void;
-    
+    onExamine: (item: Item, quantity?: number) => void;
+
     draggingIndex: number | null;
     setDraggingIndex: (index: number | null) => void;
     dragOverIndex: number | null;
@@ -97,7 +102,7 @@ interface InventorySlotProps {
 }
 
 const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
-    const { index, slot, inventory, skills, onEquip, onConsume, onDropItem, onBury, onEmpty, setTooltip, setContextMenu, addLog, isBankOpen = false, onDeposit = () => {}, itemToUse, setItemToUse, onUseItemOn, isBusy = false, setConfirmationPrompt, onExamine, draggingIndex, setDraggingIndex, dragOverIndex, setDragOverIndex, onDrop, isTouchSimulationEnabled, onDivine, onReadMap, isShopOpen = false, onSell = () => {}, spellToCast, onSpellOnItem, confirmValuableDrops, valuableDropThreshold, isOneClickMode, onTeleport, ui } = props;
+    const { index, slot, inventory, skills, onEquip, onConsume, onDropItem, onBury, onEmpty, setTooltip, setContextMenu, addLog, isBankOpen = false, onDeposit = () => { }, itemToUse, setItemToUse, onUseItemOn, isBusy = false, setConfirmationPrompt, onExamine, draggingIndex, setDraggingIndex, dragOverIndex, setDragOverIndex, onDrop, isTouchSimulationEnabled, onDivine, onReadMap, isShopOpen = false, onSell = () => { }, spellToCast, onSpellOnItem, confirmValuableDrops, valuableDropThreshold, isOneClickMode, onTeleport, ui } = props;
 
     const isTouchDevice = useIsTouchDevice(isTouchSimulationEnabled);
 
@@ -105,7 +110,7 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
         action();
         setTooltip(null);
     };
-    
+
     const handleDropClick = () => {
         if (!slot) return;
         const item = ITEMS[slot.itemId];
@@ -139,9 +144,9 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
         if (!item) return;
 
         const options: ContextMenuOption[] = [];
-        
+
         const performActionAndClose = (action: () => void) => { action(); setTooltip(null); setContextMenu(null); };
-        
+
         if (isBankOpen) {
             let totalQuantity = 0;
             if (item.stackable || slot.noted) {
@@ -151,13 +156,13 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
                     return (invSlot && invSlot.itemId === item.id) ? acc + invSlot.quantity : acc;
                 }, 0);
             }
-    
+
             options.push({ label: 'Deposit 1', onClick: () => performActionAndClose(() => onDeposit(index, 1)), disabled: totalQuantity < 1 });
             if (totalQuantity > 1) {
                 options.push({ label: 'Deposit 5', onClick: () => performActionAndClose(() => onDeposit(index, 5)), disabled: totalQuantity < 5 });
                 options.push({ label: 'Deposit 10', onClick: () => performActionAndClose(() => onDeposit(index, 10)), disabled: totalQuantity < 10 });
             }
-            
+
             options.push({
                 label: 'Deposit X...',
                 onClick: () => {
@@ -170,22 +175,22 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
                 },
                 disabled: totalQuantity < 1
             });
-    
+
             options.push({ label: 'Deposit All', onClick: () => performActionAndClose(() => onDeposit(index, 'all')) });
         } else if (isShopOpen) {
             if (item.value === 0) {
-                options.push({ label: 'Examine', onClick: () => onExamine(item) });
+                options.push({ label: 'Examine', onClick: () => onExamine(item, 1) });
                 setContextMenu({ options, triggerEvent: eventForMenu, isTouchInteraction: isTouchDevice, title: getDisplayName(slot) });
                 return;
             }
-            
+
             let totalQuantity;
             if (item.stackable || slot.noted) {
                 totalQuantity = slot.quantity;
             } else {
                 totalQuantity = inventory.filter(s => s?.itemId === item.id && !s.noted).length;
             }
-            
+
             const sellAction = (quantity: number | 'all') => {
                 performActionAndClose(() => onSell(slot.itemId, quantity, index));
             };
@@ -195,7 +200,7 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
             options.push({ label: 'Sell 10', onClick: () => sellAction(10), disabled: totalQuantity < 1 });
             options.push({ label: 'Sell 50', onClick: () => sellAction(50), disabled: totalQuantity < 1 });
             options.push({ label: 'Sell All', onClick: () => sellAction('all'), disabled: totalQuantity < 1 });
-            
+
         } else if (slot.noted) {
             options.push({ label: 'Use', onClick: () => { setItemToUse({ item: slot, index }); }, disabled: isBusy });
             options.push({ label: 'Drop', onClick: handleDropClick, disabled: isBusy });
@@ -242,20 +247,20 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
             }
 
             options.push({ label: 'Use', onClick: () => { setItemToUse({ item: slot, index }); }, disabled: isBusy });
-            
+
             const isTutorialItem = false; // Tutorial stage logic is removed
 
             if (item.emptyable) options.push({ label: 'Empty', onClick: () => performActionAndClose(() => onEmpty(item.id, index)), disabled: isBusy });
-            
+
             options.push({ label: 'Drop', onClick: handleDropClick, disabled: isBusy || isTutorialItem });
         }
 
-        options.push({ label: 'Examine', onClick: () => onExamine(item) });
+        options.push({ label: 'Examine', onClick: () => onExamine(item, slot.quantity) });
         setContextMenu({ options, triggerEvent: eventForMenu, isTouchInteraction: isTouchDevice, title: getDisplayName(slot) });
     };
 
     const handleSingleTap = (e: React.MouseEvent | React.TouchEvent) => {
-        
+
         if (itemToUse) {
             if (!slot) return;
             setTooltip(null);
@@ -288,10 +293,10 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
                     if (customWithdrawAmount !== null) {
                         quantityToDeposit = customWithdrawAmount;
                     } else {
-                        const maxQty = (item.stackable || slot.noted) 
-                            ? slot.quantity 
+                        const maxQty = (item.stackable || slot.noted)
+                            ? slot.quantity
                             : inventory.filter(s => s?.itemId === item.id && !s.noted).length;
-                        
+
                         setMakeXPrompt({
                             title: `Deposit ${item.name}`,
                             max: maxQty,
@@ -323,7 +328,7 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
             return;
         }
 
-        
+
         if (isBusy) {
             addLog("You are busy and cannot do that right now.");
             return;
@@ -333,13 +338,13 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
             handleDropClick();
             return;
         }
-        
+
         if (slot.noted) {
             setTooltip(null);
             setItemToUse({ item: slot, index: index });
             return;
         }
-        
+
         const isEquippable = !!item.equipment;
         const isBuryable = !!item.buryable;
         const isConsumable = !!item.consumable;
@@ -357,7 +362,7 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
             setItemToUse({ item: slot, index: index });
         }
     };
-    
+
     const combinedHandlers = useLongPress({
         onLongPress: handleLongPress,
         onClick: handleSingleTap,
@@ -403,32 +408,32 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
                 <>
                     {slot.noted ? (
                         <div className="item-note-wrapper">
-                            <img src="https://api.iconify.design/game-icons:folded-paper.svg" alt="Note" className="item-note-paper" />
-                            <img src={item.iconUrl} alt={item.name} className={`item-note-icon ${getIconClassName(item)}`} />
+                            <img src={getIconUrl("folded-paper")} alt="Note" className="item-note-paper" />
+                            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`item-note-icon ${getIconClassName(item)}`} />
                         </div>
                     ) : (
-                        <img src={item.iconUrl} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+                        <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
                     )}
                     {slot.quantity > 1 && !item.doseable && (
-                        <span className={`absolute bottom-0 right-1 text-xs font-bold ${getQuantityColor(slot.quantity)}`} style={{ textShadow: '1px 1px 1px black', zIndex: 2 }}>
+                        <span className={`absolute bottom-0 right-1 text-lg font-pixel-rpg font-bold ${getQuantityColor(slot.quantity)}`} style={{ textShadow: '1px 1px 1px black', zIndex: 2 }}>
                             {formatItemQuantity(slot.quantity)}
                         </span>
                     )}
                     {item.doseable && slot.doses && (
-                         <span className="absolute bottom-0 right-1 text-xs font-bold text-yellow-300" style={{ textShadow: '1px 1px 1px black' }}>
+                        <span className="absolute bottom-0 right-1 text-lg font-pixel-rpg font-bold text-yellow-300" style={{ textShadow: '1px 1px 1px black' }}>
                             {slot.doses}
                         </span>
                     )}
                     {(item.id.startsWith('grimy_') || item.id.startsWith('clean_') || item.id.endsWith('_potion_unf')) && (
-                        <span className="absolute bottom-0.5 left-0 right-0 text-center text-xs font-bold text-yellow-400 pointer-events-none" style={{ textShadow: '1px 1px 2px black', lineHeight: '1' }}>
+                        <span className="absolute bottom-0.5 left-0 right-0 text-center text-lg font-pixel-rpg font-bold text-yellow-400 pointer-events-none" style={{ textShadow: '1px 1px 2px black', lineHeight: '1' }}>
                             {item.id.startsWith('grimy_')
                                 ? `G${item.name.split(' ')[1]?.substring(0, 3) ?? ''}`
                                 : item.name.split(' ')[0].substring(0, 4)}
                         </span>
                     )}
                     {slot?.statsOverride?.poisoned && (
-                        <img 
-                            src="https://api.iconify.design/game-icons:boiling-bubbles.svg" 
+                        <img
+                            src={getIconUrl("boiling-bubbles")}
                             alt="Poisoned"
                             className="poison-overlay-icon item-icon-uncut-emerald"
                             title="Poisoned"

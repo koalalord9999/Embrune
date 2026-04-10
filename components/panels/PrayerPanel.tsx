@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { PlayerSkill, SkillName, Prayer, PlayerQuestState } from '../../types';
-import { PRAYERS, QUESTS } from '../../constants';
+import { PlayerSkill, SkillName, Prayer, PlayerQuestState, PrayerType } from '../../types';
+import {  PRAYERS, QUESTS, getPrayerIconColor, getPrayerShadowColor, getIconUrl  } from '../../constants';
 import { TooltipState } from '../../hooks/useUIState';
 
 interface PrayerPanelProps {
@@ -11,6 +11,8 @@ interface PrayerPanelProps {
     playerQuests: PlayerQuestState[];
 }
 
+
+
 const PrayerDisplay: React.FC<{
     prayer: Prayer;
     prayerLevel: number;
@@ -19,7 +21,7 @@ const PrayerDisplay: React.FC<{
     isActive: boolean;
     playerQuests: PlayerQuestState[];
 }> = ({ prayer, prayerLevel, onTogglePrayer, setTooltip, isActive, playerQuests }) => {
-    
+
     const isLockedByQuest = useMemo(() => {
         if (!prayer.questId) return false;
         const quest = playerQuests.find(q => q.questId === prayer.questId);
@@ -28,16 +30,18 @@ const PrayerDisplay: React.FC<{
 
     const hasLevel = prayerLevel >= prayer.level;
     const canActivate = hasLevel && !isLockedByQuest;
+    const iconColor = getPrayerIconColor(prayer);
+    const shadowColor = getPrayerShadowColor(prayer);
 
     const handleMouseEnter = (e: React.MouseEvent) => {
         const levelColor = hasLevel ? 'text-green-400' : 'text-red-400';
         const tooltipContent = (
-            <div className="text-left w-48">
-                <p className="font-bold text-yellow-300">{prayer.name}</p>
-                <p className={`text-sm italic mb-2 ${levelColor}`}>Lvl {prayer.level} Prayer</p>
-                <p className="text-sm text-gray-300 mb-2">{prayer.description}</p>
-                {prayer.drainRate > 0 && <p className="text-xs text-gray-400">Drain: {prayer.drainRate} pts/min</p>}
-                {isLockedByQuest && <p className="text-xs text-red-400 mt-1">Unlocked by '{QUESTS[prayer.questId!].name}'.</p>}
+            <div className="text-left w-64 font-pixel-rpg">
+                <p className="font-bold text-yellow-300 text-xl">{prayer.name}</p>
+                <p className={`text-lg italic mb-1 ${levelColor}`}>Lvl {prayer.level} Prayer</p>
+                <p className="text-lg text-gray-300 mb-1 leading-tight">{prayer.description}</p>
+                {prayer.drainRate > 0 && <p className="text-lg text-gray-400">Drain: {prayer.drainRate} pts/min</p>}
+                {isLockedByQuest && <p className="text-lg text-red-400 mt-1">Unlocked: {QUESTS[prayer.questId!].name}</p>}
             </div>
         );
 
@@ -52,16 +56,51 @@ const PrayerDisplay: React.FC<{
             onClick={() => { if (canActivate) onTogglePrayer(prayer.id); setTooltip(null); }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={() => setTooltip(null)}
-            className={`w-full aspect-square rounded-md transition-colors flex items-center justify-center text-center hover:bg-gray-700/20 relative isolate border-2 ${isActive ? 'border-yellow-400 bg-yellow-900/50' : 'border-transparent'}`}
+            className={`w-full aspect-square rounded-md transition-colors flex items-center justify-center text-center hover:bg-gray-700/20 relative isolate border-2 border-transparent`}
         >
-            <img 
-                src={prayer.iconUrl} 
-                alt={prayer.name} 
-                className={`w-full h-full p-1 transition-all ${isActive ? 'filter-none' : ''}`}
-                style={!canActivate ? { filter: 'grayscale(0.9) brightness(0.2)', opacity: 0.8 } : { filter: 'invert(1)' }}
-            />
+            {isActive && (
+                <span
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        width: '85%',
+                        height: '85%',
+                        borderRadius: '70%',
+                        backgroundColor: '#ca8a04', // Static goldish color
+                        animation: 'pulse-prayer-glow 1.8s ease-in-out infinite',
+                        zIndex: -1,
+                        boxShadow: `0 0 15px 2px #ca8a04`,
+                        opacity: 0.6,
+                    }}
+                />
+            )}
+            <div
+                className="w-full h-full flex items-center justify-center"
+                style={{
+                    filter: !canActivate
+                        ? 'grayscale(1) brightness(0.2)'
+                        : `drop-shadow(1px 1px 0px black) drop-shadow(-1px -1px 0px black) drop-shadow(1px -1px 0px black) drop-shadow(-1px 1px 0px black) drop-shadow(0 0 2px ${shadowColor}) drop-shadow(0 0 2px ${shadowColor})`,
+                }}
+            >
+                <div
+                    className="w-full h-full p-2 transition-all"
+                    style={{
+                        backgroundColor: iconColor,
+                        maskImage: `url(${getIconUrl(prayer.iconUrl)})`,
+                        WebkitMaskImage: `url(${getIconUrl(prayer.iconUrl)})`,
+                        maskSize: 'contain',
+                        WebkitMaskSize: 'contain',
+                        maskRepeat: 'no-repeat',
+                        WebkitMaskRepeat: 'no-repeat',
+                        maskPosition: 'center',
+                        WebkitMaskPosition: 'center',
+                    }}
+                />
+            </div>
         </button>
     );
+
 };
 
 

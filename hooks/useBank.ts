@@ -1,7 +1,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { InventorySlot, Equipment, CombatStance, BankTab, EquipmentStats } from '../types';
-import { ITEMS, BANK_CAPACITY, INVENTORY_CAPACITY, MAX_BANK_TABS } from '../constants';
+import {  ITEMS, BANK_CAPACITY, INVENTORY_CAPACITY, MAX_BANK_TABS  } from '../constants';
 
 interface BankDependencies {
     addLog: (message: string) => void;
@@ -39,9 +39,7 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
         const originalSlot = inventory[inventoryIndex];
         if (!originalSlot) return;
 
-        // Snuff logic: Revert lit fire pot to un-lit before putting in bank
         const itemSlot = getSnuffedSlot(originalSlot);
-
         const itemData = ITEMS[itemSlot.itemId];
         if (!itemData) return;
 
@@ -56,70 +54,44 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
         }
     
         if (qtyToDeposit <= 0) return;
+
+        // Check space before updating
+        let existingSlotIndex = -1;
+        let foundTabId = -1;
+        for (const tab of bank) {
+            const idx = tab.items.findIndex((s: InventorySlot | null) => 
+                s?.itemId === itemSlot.itemId &&
+                (!itemData.doseable || s?.doses === itemSlot.doses) &&
+                s?.charges === itemSlot.charges &&
+                s.nameOverride === itemSlot.nameOverride &&
+                JSON.stringify(s.statsOverride) === JSON.stringify(itemSlot.statsOverride)
+            );
+            if (idx > -1) {
+                existingSlotIndex = idx;
+                foundTabId = tab.id;
+                break;
+            }
+        }
+
+        const needsNewSlot = existingSlotIndex === -1;
+        if (needsNewSlot && totalBankedItems >= BANK_CAPACITY) {
+            addLog("Your bank does not have enough space.");
+            return;
+        }
     
         setBank(prevBank => {
             const newBank = JSON.parse(JSON.stringify(prevBank));
             let targetTab: BankTab | undefined;
-            let existingSlotIndex = -1;
 
-            // Search all tabs for an existing stack first
-            for (const tab of newBank) {
-                const slotIndex = tab.items.findIndex((s: InventorySlot | null) => 
-                    s?.itemId === itemSlot.itemId &&
-                    (!itemData.doseable || s?.doses === itemSlot.doses) &&
-                    s?.charges === itemSlot.charges &&
-                    s.nameOverride === itemSlot.nameOverride &&
-                    JSON.stringify(s.statsOverride) === JSON.stringify(itemSlot.statsOverride)
-                );
-                if (slotIndex > -1) {
-                    targetTab = tab;
-                    existingSlotIndex = slotIndex;
-                    break;
-                }
+            if (foundTabId !== -1) {
+                targetTab = newBank.find((t: BankTab) => t.id === foundTabId);
             }
 
-            // If not found, fall back to the active tab for a new slot
             if (!targetTab) {
-                targetTab = newBank.find((t: BankTab) => t.id === activeTabId);
-                if (!targetTab) targetTab = newBank.find((t: BankTab) => t.id === 0); // Fallback to main tab
-                if (!targetTab) {
-                    addLog("Error: Could not find any bank tab to deposit into.");
-                    return prevBank;
-                }
+                targetTab = newBank.find((t: BankTab) => t.id === activeTabId) || newBank.find((t: BankTab) => t.id === 0);
             }
-            
-            const needsNewSlot = existingSlotIndex === -1;
 
-            if (needsNewSlot && totalBankedItems >= BANK_CAPACITY) {
-                addLog("Your bank does not have enough space.");
-                return prevBank;
-            }
-            
-            setInventory(prevInv => {
-                const newInv = [...prevInv];
-                // Use originalSlot for inventory removal checks
-                if (originalSlot.noted || ITEMS[originalSlot.itemId].stackable) {
-                    const slot = newInv[inventoryIndex];
-                    if (slot) {
-                        slot.quantity -= qtyToDeposit;
-                        if (slot.quantity <= 0) newInv[inventoryIndex] = null;
-                    }
-                } else {
-                    if (isSingleUnstackable) {
-                        newInv[inventoryIndex] = null;
-                    } else {
-                        let removedCount = 0;
-                        for (let i = 0; i < newInv.length && removedCount < qtyToDeposit; i++) {
-                            const s = newInv[i];
-                            if (s && s.itemId === originalSlot.itemId && !s.noted) {
-                                newInv[i] = null;
-                                removedCount++;
-                            }
-                        }
-                    }
-                }
-                return newInv;
-            });
+            if (!targetTab) return prevBank;
 
             if (needsNewSlot) {
                 const emptySlotIndex = targetTab.items.findIndex((s: InventorySlot | null) => s === null);
@@ -131,23 +103,45 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
                     nameOverride: itemSlot.nameOverride, 
                     statsOverride: itemSlot.statsOverride 
                 };
-                if (emptySlotIndex > -1) {
-                    targetTab.items[emptySlotIndex] = newItem;
-                } else {
-                    targetTab.items.push(newItem);
-                }
+                if (emptySlotIndex > -1) targetTab.items[emptySlotIndex] = newItem;
+                else targetTab.items.push(newItem);
             } else {
-                const existingSlot = targetTab.items[existingSlotIndex]!;
-                existingSlot.quantity = (existingSlot.quantity === 0 ? 0 : existingSlot.quantity) + qtyToDeposit;
-            }
-
-            if (originalSlot.itemId === 'fire_pot_lit') {
-                addLog("The fire pot's embers are snuffed out as you put it in the bank.");
+                const slot = targetTab.items[existingSlotIndex]!;
+                targetTab.items[existingSlotIndex] = { ...slot, quantity: slot.quantity + qtyToDeposit };
             }
 
             return newBank;
         });
-    }, [inventory, setInventory, totalBankedItems, addLog, setBank]);
+
+        setInventory(prevInv => {
+            const newInv = [...prevInv];
+            if (originalSlot.noted || ITEMS[originalSlot.itemId].stackable) {
+                const slot = newInv[inventoryIndex];
+                if (slot) {
+                    newInv[inventoryIndex] = { ...slot, quantity: slot.quantity - qtyToDeposit };
+                    if (newInv[inventoryIndex]!.quantity <= 0) newInv[inventoryIndex] = null;
+                }
+            } else {
+                if (isSingleUnstackable) {
+                    newInv[inventoryIndex] = null;
+                } else {
+                    let removedCount = 0;
+                    for (let i = 0; i < newInv.length && removedCount < qtyToDeposit; i++) {
+                        const s = newInv[i];
+                        if (s && s.itemId === originalSlot.itemId && !s.noted) {
+                            newInv[i] = null;
+                            removedCount++;
+                        }
+                    }
+                }
+            }
+            return newInv;
+        });
+
+        if (originalSlot.itemId === 'fire_pot_lit') {
+            addLog("The fire pot's embers are snuffed out as you put it in the bank.");
+        }
+    }, [inventory, setInventory, totalBankedItems, addLog, setBank, bank]);
     
     const handleWithdraw = useCallback((bankIndex: number, quantity: number | 'all' | 'all-but-1', asNote: boolean, activeTabId: number) => {
         const activeTab = bank.find(t => t.id === activeTabId);
@@ -209,7 +203,7 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
         });
     
         setBank(prevBank => {
-            const newBank = [...prevBank];
+            const newBank = JSON.parse(JSON.stringify(prevBank)) as BankTab[];
             const tabToUpdate = newBank.find(t => t.id === activeTabId);
             if (!tabToUpdate) return prevBank;
             const slot = tabToUpdate.items[bankIndex];
@@ -234,85 +228,95 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
             return;
         }
 
+        const indicesToClear: number[] = [];
+        const deposits: { tabId: number; existingIndex: number; slot: InventorySlot }[] = [];
+        let currentBankedItems = totalBankedItems;
+
+        // Clone bank to simulate space allocation
+        const bankCopy = JSON.parse(JSON.stringify(bank)) as BankTab[];
+
+        itemsToProcess.forEach(({ slot, index }) => {
+            const effectiveSlot = getSnuffedSlot(slot);
+            const itemData = ITEMS[effectiveSlot.itemId];
+            if (!itemData) return;
+
+            let targetTab: BankTab | undefined;
+            let existingSlotIndex = -1;
+
+            for (const tab of bankCopy) {
+                const idx = tab.items.findIndex(s => 
+                    s?.itemId === effectiveSlot.itemId && 
+                    (!itemData.doseable || s.doses === effectiveSlot.doses) &&
+                    s?.charges === effectiveSlot.charges &&
+                    s.nameOverride === effectiveSlot.nameOverride &&
+                    JSON.stringify(s.statsOverride) === JSON.stringify(effectiveSlot.statsOverride)
+                );
+                if (idx > -1) {
+                    targetTab = tab;
+                    existingSlotIndex = idx;
+                    break;
+                }
+            }
+
+            if (!targetTab) {
+                targetTab = bankCopy.find(t => t.id === activeTabId) || bankCopy.find(t => t.id === 0);
+            }
+            if (!targetTab) return;
+
+            const needsNewSlot = existingSlotIndex === -1;
+            if (needsNewSlot && currentBankedItems >= BANK_CAPACITY) return;
+
+            if (needsNewSlot) {
+                const emptyIdx = targetTab.items.findIndex(s => s === null);
+                const newItem = { ...effectiveSlot, noted: false };
+                if (emptyIdx > -1) targetTab.items[emptyIdx] = newItem;
+                else targetTab.items.push(newItem);
+                currentBankedItems++;
+            } else {
+                const stack = targetTab.items[existingSlotIndex]!;
+                targetTab.items[existingSlotIndex] = { ...stack, quantity: stack.quantity + effectiveSlot.quantity };
+            }
+
+            deposits.push({ tabId: targetTab.id, existingIndex: needsNewSlot ? -1 : existingSlotIndex, slot: effectiveSlot });
+            indicesToClear.push(index);
+        });
+
+        if (indicesToClear.length === 0) {
+            addLog("Your bank did not have space for any of your items.");
+            return;
+        }
+
         setBank(prevBank => {
-            const newBank = JSON.parse(JSON.stringify(prevBank));
-            const indicesToClear: number[] = [];
-            let currentBankedItems = totalBankedItems;
-            let potsSnuffed = 0;
-
-            itemsToProcess.forEach(({ slot, index }) => {
-                const effectiveSlot = getSnuffedSlot(slot);
-                if (slot.itemId === 'fire_pot_lit') potsSnuffed++;
-
-                const itemData = ITEMS[effectiveSlot.itemId];
-                let targetTab: BankTab | undefined;
-                let existingSlotIndex = -1;
-
-                for (const tab of newBank) {
-                    const slotIndex = tab.items.findIndex((s: InventorySlot | null) => 
-                        s?.itemId === effectiveSlot.itemId && 
-                        (!itemData.doseable || s?.doses === effectiveSlot.doses) &&
-                        s?.charges === effectiveSlot.charges &&
-                        s.nameOverride === effectiveSlot.nameOverride &&
-                        JSON.stringify(s.statsOverride) === JSON.stringify(effectiveSlot.statsOverride)
-                    );
-                    if (slotIndex > -1) {
-                        targetTab = tab;
-                        existingSlotIndex = slotIndex;
-                        break;
-                    }
-                }
-
-                if (!targetTab) {
-                    targetTab = newBank.find((t: BankTab) => t.id === activeTabId);
-                    if (!targetTab) targetTab = newBank.find((t: BankTab) => t.id === 0);
-                }
-                if (!targetTab) return;
-
-                const needsNewSlot = existingSlotIndex === -1;
-                let canDeposit = true;
-                if (needsNewSlot && currentBankedItems >= BANK_CAPACITY) {
-                    canDeposit = false;
-                }
-
-                if (canDeposit) {
-                    if (needsNewSlot) {
-                        const emptySlotIndex = targetTab.items.findIndex((s: InventorySlot | null) => s === null);
-                        if (emptySlotIndex > -1) {
-                            targetTab.items[emptySlotIndex] = { ...effectiveSlot, noted: false };
-                        } else {
-                            targetTab.items.push({ ...effectiveSlot, noted: false });
-                        }
-                        currentBankedItems++;
-                    } else {
-                        targetTab.items[existingSlotIndex].quantity += effectiveSlot.quantity;
-                    }
-                    indicesToClear.push(index);
+            const newBank = JSON.parse(JSON.stringify(prevBank)) as BankTab[];
+            deposits.forEach(dep => {
+                const tab = newBank.find(t => t.id === dep.tabId);
+                if (!tab) return;
+                
+                if (dep.existingIndex === -1) {
+                    const emptyIdx = tab.items.findIndex(s => s === null);
+                    const newItem = { ...dep.slot, noted: false };
+                    if (emptyIdx > -1) tab.items[emptyIdx] = newItem;
+                    else tab.items.push(newItem);
+                } else {
+                    const stack = tab.items[dep.existingIndex]!;
+                    tab.items[dep.existingIndex] = { ...stack, quantity: stack.quantity + dep.slot.quantity };
                 }
             });
-            
-            if (indicesToClear.length > 0) {
-                setInventory(prevInv => {
-                    const newInv = [...prevInv];
-                    indicesToClear.forEach(idx => newInv[idx] = null);
-                    return newInv;
-                });
-                if (indicesToClear.length === itemsToProcess.length) {
-                    addLog("Deposited all items into your bank.");
-                } else {
-                    addLog("Deposited available items. Bank may be full.");
-                }
-            } else {
-                addLog("Your bank did not have space for any of your items.");
-            }
-
-            if (potsSnuffed > 0) {
-                addLog("Your lit fire pots were snuffed out upon entering the bank.");
-            }
-
             return newBank;
         });
-    }, [inventory, setInventory, totalBankedItems, addLog, setBank]);
+
+        setInventory(prevInv => {
+            const newInv = [...prevInv];
+            indicesToClear.forEach(idx => newInv[idx] = null);
+            return newInv;
+        });
+
+        if (indicesToClear.length === itemsToProcess.length) addLog("Deposited all items into your bank.");
+        else addLog("Deposited available items. Bank may be full.");
+
+        const potsSnuffed = itemsToProcess.filter(p => p.slot.itemId === 'fire_pot_lit' && indicesToClear.includes(p.index)).length;
+        if (potsSnuffed > 0) addLog("Your lit fire pots were snuffed out upon entering the bank.");
+    }, [inventory, setInventory, totalBankedItems, addLog, setBank, bank]);
 
     const handleDepositEquipment = useCallback((activeTabId: number) => {
         const itemsToProcess = (Object.keys(equipment) as Array<keyof Equipment>)
@@ -324,94 +328,100 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
             return;
         }
 
+        const equipmentToClear: (keyof Equipment)[] = [];
+        const deposits: { tabId: number; existingIndex: number; slot: InventorySlot }[] = [];
+        let currentBankedItems = totalBankedItems;
+
+        const bankCopy = JSON.parse(JSON.stringify(bank)) as BankTab[];
+
+        itemsToProcess.forEach(({ slot, slotKey }) => {
+            const effectiveSlot = getSnuffedSlot(slot);
+            const itemData = ITEMS[effectiveSlot.itemId];
+            if (!itemData) return;
+
+            let targetTab: BankTab | undefined;
+            let existingSlotIndex = -1;
+
+            for (const tab of bankCopy) {
+                const idx = tab.items.findIndex(s => 
+                    s?.itemId === effectiveSlot.itemId && 
+                    (!itemData.doseable || s.doses === effectiveSlot.doses) &&
+                    s?.charges === effectiveSlot.charges &&
+                    s.nameOverride === effectiveSlot.nameOverride &&
+                    JSON.stringify(s.statsOverride) === JSON.stringify(effectiveSlot.statsOverride)
+                );
+                if (idx > -1) {
+                    targetTab = tab;
+                    existingSlotIndex = idx;
+                    break;
+                }
+            }
+
+            if (!targetTab) {
+                targetTab = bankCopy.find(t => t.id === activeTabId) || bankCopy.find(t => t.id === 0);
+            }
+            if (!targetTab) return;
+
+            const needsNewSlot = existingSlotIndex === -1;
+            if (needsNewSlot && currentBankedItems >= BANK_CAPACITY) return;
+
+            if (needsNewSlot) {
+                const emptyIdx = targetTab.items.findIndex(s => s === null);
+                if (emptyIdx > -1) targetTab.items[emptyIdx] = { ...effectiveSlot };
+                else targetTab.items.push({ ...effectiveSlot });
+                currentBankedItems++;
+            } else {
+                const stack = targetTab.items[existingSlotIndex]!;
+                targetTab.items[existingSlotIndex] = { ...stack, quantity: stack.quantity + effectiveSlot.quantity };
+            }
+
+            deposits.push({ tabId: targetTab.id, existingIndex: needsNewSlot ? -1 : existingSlotIndex, slot: effectiveSlot });
+            equipmentToClear.push(slotKey);
+        });
+
+        if (equipmentToClear.length === 0) {
+            addLog("Your bank is full. No equipment was deposited.");
+            return;
+        }
+
         setBank(prevBank => {
-            const newBank = JSON.parse(JSON.stringify(prevBank));
-            const equipmentToClear: (keyof Equipment)[] = [];
-            let currentBankedItems = totalBankedItems;
-            let potsSnuffed = 0;
-
-            itemsToProcess.forEach(({ slot, slotKey }) => {
-                const effectiveSlot = getSnuffedSlot(slot);
-                if (slot.itemId === 'fire_pot_lit') potsSnuffed++;
-
-                const itemData = ITEMS[effectiveSlot.itemId];
-                let targetTab: BankTab | undefined;
-                let existingSlotIndex = -1;
-
-                for (const tab of newBank) {
-                    const slotIndex = tab.items.findIndex((s: InventorySlot | null) => 
-                        s?.itemId === effectiveSlot.itemId && 
-                        (!itemData.doseable || s.doses === effectiveSlot.doses) &&
-                        s?.charges === effectiveSlot.charges &&
-                        s.nameOverride === effectiveSlot.nameOverride &&
-                        JSON.stringify(s.statsOverride) === JSON.stringify(effectiveSlot.statsOverride)
-                    );
-                    if (slotIndex > -1) {
-                        targetTab = tab;
-                        existingSlotIndex = slotIndex;
-                        break;
-                    }
-                }
-
-                if (!targetTab) {
-                    targetTab = newBank.find((t: BankTab) => t.id === activeTabId);
-                    if (!targetTab) targetTab = newBank.find((t: BankTab) => t.id === 0);
-                }
-                if (!targetTab) return;
-
-                const needsNewSlot = existingSlotIndex === -1;
-                let canDeposit = true;
-                if (needsNewSlot && currentBankedItems >= BANK_CAPACITY) {
-                    canDeposit = false;
-                }
-
-                if (canDeposit) {
-                    if (needsNewSlot) {
-                        const emptySlotIndex = targetTab.items.findIndex((s: InventorySlot | null) => s === null);
-                        if (emptySlotIndex > -1) {
-                            targetTab.items[emptySlotIndex] = { ...effectiveSlot };
-                        } else {
-                            targetTab.items.push({ ...effectiveSlot });
-                        }
-                        currentBankedItems++;
-                    } else {
-                        targetTab.items[existingSlotIndex].quantity += effectiveSlot.quantity;
-                    }
-                    equipmentToClear.push(slotKey);
+            const newBank = JSON.parse(JSON.stringify(prevBank)) as BankTab[];
+            deposits.forEach(dep => {
+                const tab = newBank.find(t => t.id === dep.tabId);
+                if (!tab) return;
+                if (dep.existingIndex === -1) {
+                    const emptyIdx = tab.items.findIndex(s => s === null);
+                    if (emptyIdx > -1) tab.items[emptyIdx] = { ...dep.slot };
+                    else tab.items.push({ ...dep.slot });
+                } else {
+                    const stack = tab.items[dep.existingIndex]!;
+                    tab.items[dep.existingIndex] = { ...stack, quantity: stack.quantity + dep.slot.quantity };
                 }
             });
-
-            if (equipmentToClear.length > 0) {
-                setEquipment(prevEq => {
-                    const newEq = { ...prevEq };
-                    let didUnequipWeapon = false;
-                    equipmentToClear.forEach(key => {
-                        if (key === 'weapon') didUnequipWeapon = true;
-                        newEq[key] = null;
-                    });
-                    if (didUnequipWeapon) setCombatStance(CombatStance.Accurate);
-                    return newEq;
-                });
-                 if (equipmentToClear.length === itemsToProcess.length) {
-                    addLog("Deposited your equipment into the bank.");
-                } else {
-                    addLog("Deposited available equipment. Bank may be full.");
-                }
-            } else {
-                 addLog("Your bank is full. No equipment was deposited.");
-            }
-
-            if (potsSnuffed > 0) {
-                addLog("Your lit fire pots were snuffed out upon entering the bank.");
-            }
-
             return newBank;
         });
-    }, [equipment, setEquipment, totalBankedItems, addLog, setCombatStance, setBank]);
+
+        setEquipment(prevEq => {
+            const newEq = { ...prevEq };
+            let didUnequipWeapon = false;
+            equipmentToClear.forEach(key => {
+                if (key === 'weapon') didUnequipWeapon = true;
+                newEq[key] = null;
+            });
+            if (didUnequipWeapon) setCombatStance(CombatStance.Accurate);
+            return newEq;
+        });
+
+        if (equipmentToClear.length === itemsToProcess.length) addLog("Deposited your equipment into the bank.");
+        else addLog("Deposited available equipment. Bank may be full.");
+
+        const potsSnuffed = itemsToProcess.filter(p => p.slot.itemId === 'fire_pot_lit' && equipmentToClear.includes(p.slotKey)).length;
+        if (potsSnuffed > 0) addLog("Your lit fire pots were snuffed out upon entering the bank.");
+    }, [equipment, setEquipment, totalBankedItems, addLog, setCombatStance, setBank, bank]);
 
     const moveBankItem = useCallback((fromIndex: number, toIndex: number, activeTabId: number) => {
         setBank(prevBank => {
-            const newBank = [...prevBank];
+            const newBank = JSON.parse(JSON.stringify(prevBank)) as BankTab[];
             const activeTab = newBank.find(t => t.id === activeTabId);
             if (!activeTab) return prevBank;
     
@@ -443,29 +453,34 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
             const tabToRemove = prevBank.find(t => t.id === tabId);
             if (!tabToRemove) return prevBank;
             
-            const newBank = prevBank.filter(t => t.id !== tabId);
-            const mainTab = newBank.find(t => t.id === 0);
-            if (!mainTab) return newBank;
+            const newBank = JSON.parse(JSON.stringify(prevBank)) as BankTab[];
+            const filteredBank = newBank.filter(t => t.id !== tabId);
+            const mainTab = filteredBank.find(t => t.id === 0);
+            if (!mainTab) return filteredBank;
             
-            tabToRemove.items.forEach(item => {
-                if (item) {
-                    const existingStack = mainTab.items.find(i => i?.itemId === item.itemId && (!ITEMS[item.itemId].doseable || i.doses === item.doses));
-                    if (existingStack) {
-                        existingStack.quantity += item.quantity;
-                    } else if (totalBankedItems < BANK_CAPACITY) {
-                        const emptySlot = mainTab.items.findIndex(i => i === null);
-                        if (emptySlot > -1) {
-                            mainTab.items[emptySlot] = item;
+            const tabToReallyRemove = newBank.find(t => t.id === tabId);
+            if (tabToReallyRemove) {
+                tabToReallyRemove.items.forEach(item => {
+                    if (item) {
+                        const existingStackIndex = mainTab.items.findIndex(i => i?.itemId === item.itemId && (!ITEMS[item.itemId].doseable || i.doses === item.doses));
+                        if (existingStackIndex > -1) {
+                            const existingStack = mainTab.items[existingStackIndex]!;
+                            mainTab.items[existingStackIndex] = { ...existingStack, quantity: existingStack.quantity + item.quantity };
+                        } else if (totalBankedItems < BANK_CAPACITY) {
+                            const emptySlot = mainTab.items.findIndex(i => i === null);
+                            if (emptySlot > -1) {
+                                mainTab.items[emptySlot] = item;
+                            } else {
+                                mainTab.items.push(item);
+                            }
                         } else {
-                            mainTab.items.push(item);
+                            addLog(`Could not move ${item.quantity}x ${ITEMS[item.itemId].name} to main tab: Bank is full.`);
                         }
-                    } else {
-                        addLog(`Could not move ${item.quantity}x ${ITEMS[item.itemId].name} to main tab: Bank is full.`);
                     }
-                }
-            });
+                });
+            }
 
-            return newBank;
+            return filteredBank;
         });
     }, [setBank, addLog, totalBankedItems]);
     
@@ -494,7 +509,8 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
             );
 
             if (existingStackIndex > -1) {
-                toTab.items[existingStackIndex].quantity += itemToMove.quantity;
+                const existingStack = toTab.items[existingStackIndex]!;
+                toTab.items[existingStackIndex] = { ...existingStack, quantity: existingStack.quantity + itemToMove.quantity };
             } else {
                 const emptySlotIndex = toTab.items.findIndex((s: InventorySlot | null) => s === null);
                 if (emptySlotIndex > -1) {
@@ -510,7 +526,7 @@ export const useBank = (bankState: BankState, deps: BankDependencies) => {
 
     const handleRenameTab = useCallback((tabId: number, newName: string) => {
         setBank(prevBank => {
-            const newBank = [...prevBank];
+            const newBank = JSON.parse(JSON.stringify(prevBank)) as BankTab[];
             const tabToUpdate = newBank.find(t => t.id === tabId);
             if (tabToUpdate && newName.trim().length > 0 && newName.trim().length <= 12) {
                 tabToUpdate.name = newName.trim();

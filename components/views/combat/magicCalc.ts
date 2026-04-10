@@ -1,5 +1,5 @@
 import { CombatStance, ActiveBuff, Monster, SkillName, MonsterStatusEffect, InventorySlot, Spell, SpellElement } from '../../../types';
-import { ITEMS } from '../../../constants';
+import {  ITEMS  } from '../../../constants';
 import { calculateAccuracy, DamageCalculationResult } from './combatUtils';
 
 export const calculateMagicDamage = (

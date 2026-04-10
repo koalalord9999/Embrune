@@ -1,6 +1,6 @@
 
 import { CombatStance, WeaponType, ActiveBuff, Monster, SkillName, MonsterStatusEffect, InventorySlot } from '../../../types';
-import { ITEMS, AMMO_TIER_LEVELS } from '../../../constants';
+import {  ITEMS, AMMO_TIER_LEVELS  } from '../../../constants';
 import { calculateAccuracy, DamageCalculationResult } from './combatUtils';
 
 export const calculateRangedDamage = (

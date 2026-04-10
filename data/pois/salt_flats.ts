@@ -48,7 +48,8 @@ export const saltFlatsPois: Record<string, POI> = {
     description: 'A faint path marked by cairns leads through the salt flats towards a small settlement.',
     connections: ['scuttler_hunting_grounds', 'mirage_point', 'brinehollow_outpost'],
     activities: [
-        { type: 'combat', monsterId: 'salt_flat_skitterer' }
+        { type: 'combat', monsterId: 'salt_flat_skitterer' },
+        { type: 'combat', monsterId: 'salt_flat_skitterer' },
     ],
     regionId: 'salt_flats',
     x: 529,
@@ -92,6 +93,7 @@ export const saltFlatsPois: Record<string, POI> = {
         { type: 'combat', monsterId: 'mirage_weaver' }
     ],
     regionId: 'salt_flats',
+    maxGroupSize: 1,
     x: 162,
     y: 1441
 },
@@ -101,7 +103,8 @@ export const saltFlatsPois: Record<string, POI> = {
     description: 'The heat haze is intense here, creating shimmering mirages on the horizon. It\'s easy to get disoriented.',
     connections: ['sunken_shipwreck', 'brinehollow_outpost_path'],
     activities: [
-        { type: 'combat', monsterId: 'mirage_weaver' }
+        { type: 'combat', monsterId: 'mirage_weaver' },
+        { type: 'combat', monsterId: 'mirage_weaver' },
     ],
     regionId: 'salt_flats',
     x: 592,
@@ -163,7 +166,8 @@ export const saltFlatsPois: Record<string, POI> = {
     description: 'The shore of a vast, underground salt lake. The water is perfectly still and reflects the glowing crystals above like stars.',
     connections: ['the_crystal_veins', 'salt_lake_crossing'],
     activities: [
-        { type: 'combat', monsterId: 'brine_elemental' }
+        { type: 'combat', monsterId: 'brine_elemental' },
+        { type: 'combat', monsterId: 'brine_elemental' },
     ],
     regionId: 'salt_flats',
     x: 387,
@@ -190,9 +194,12 @@ export const saltFlatsPois: Record<string, POI> = {
     connections: ['cracked_earth', 'brinehollow_outpost_path', 'whispering_canyon_entrance'],
     activities: [
         { type: 'combat', monsterId: 'crystal_scuttler' },
+        { type: 'combat', monsterId: 'crystal_scuttler' },
+        { type: 'combat', monsterId: 'crystal_scuttler' },
         { type: 'cut_cactus', id: 'scuttler_hunting_cactus_1', name: 'Cut Cactus' },
     ],
     regionId: 'salt_flats',
+    maxGroupSize: 2,
     x: 390,
     y: 1598
 },
@@ -233,6 +240,7 @@ export const saltFlatsPois: Record<string, POI> = {
         { type: 'thieving_lockpick', id: 'sf_chest_2', targetName: 'Salt-Encrusted Chest', lootTableId: 'thieving_dungeon_chest_mid' }
     ],
     regionId: 'salt_flats',
+    maxGroupSize: 1,
     x: 669,
     y: 1416
 },
@@ -256,7 +264,8 @@ export const saltFlatsPois: Record<string, POI> = {
     description: 'A colossal pillar of pure salt dominates the center of a large cavern. It hums with a faint energy.',
     connections: ['whispering_canyon_path_2', 'the_crystal_veins'],
     activities: [
-        { type: 'combat', monsterId: 'ancient_ammonite' }
+        { type: 'combat', monsterId: 'ancient_ammonite' },
+        { type: 'combat', monsterId: 'ancient_ammonite' },
     ],
     regionId: 'salt_flats',
     x: 218,
@@ -268,7 +277,8 @@ export const saltFlatsPois: Record<string, POI> = {
     description: 'The entrance to a narrow canyon. The wind passing through it creates an eerie, whispering sound.',
     connections: ['scuttler_hunting_grounds', 'whispering_canyon_path_1'],
     activities: [
-        { type: 'combat', monsterId: 'salt_leaper' }
+        { type: 'combat', monsterId: 'salt_leaper' },
+        { type: 'combat', monsterId: 'salt_leaper' },
     ],
     regionId: 'salt_flats',
     x: 290,
@@ -305,6 +315,7 @@ export const saltFlatsPois: Record<string, POI> = {
     description: 'A flat-topped hill rises from the salt flats. The wind is relentless here, carving strange shapes into the rock.',
     connections: ['skeletal_remains', 'cracked_earth', 'salt_flats_northwest_passage'],
     activities: [
+        { type: 'combat', monsterId: 'salt_cryst_golem' },
         { type: 'combat', monsterId: 'salt_cryst_golem' },
         { type: 'cut_cactus', id: 'wind_scoured_mesa_cactus_1', name: 'Cut Cactus' },
     ],

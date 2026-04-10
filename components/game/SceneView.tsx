@@ -1,7 +1,7 @@
 
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import { POI, POIActivity, PlayerQuestState, SkillName, InventorySlot, ResourceNodeState, PlayerRepeatableQuest, SkillRequirement, PlayerSkill, DialogueNode, GroundItem, DialogueResponse, Quest, BonfireActivity, DialogueAction, DialogueCheckRequirement, ThievingContainerState, Monster, WorldState, WeaponType, Equipment } from '../../types';
-import { MONSTERS, QUESTS, SHOPS, ITEMS, REGIONS, FIREMAKING_RECIPES, SKILL_ICONS, THIEVING_CONTAINER_TARGETS, THIEVING_STALL_TARGETS } from '../../constants';
+import {  MONSTERS, QUESTS, SHOPS, ITEMS, REGIONS, FIREMAKING_RECIPES, SKILL_ICONS, THIEVING_CONTAINER_TARGETS, THIEVING_STALL_TARGETS, getIconUrl  } from '../../constants';
 import { POIS } from '../../data/pois';
 import Button from '../common/Button';
 import { ContextMenuOption } from '../common/ContextMenu';
@@ -12,6 +12,7 @@ import { useIsTouchDevice } from '../../hooks/useIsTouchDevice';
 import { useLongPress } from '../../hooks/useLongPress';
 import { useWorldActions } from '../../hooks/useWorldActions';
 import { useAgility } from '../../hooks/useAgility';
+import { useSlayer } from '../../hooks/useSlayer';
 
 type SkillingActivity = Extract<POIActivity, { type: 'skilling' }>;
 type GroundItemActivity = Extract<POIActivity, { type: 'ground_item' }>;
@@ -25,6 +26,7 @@ interface SceneViewProps {
     poi: POI;
     unlockedPois: string[];
     onNavigate: (poiId: string) => void;
+    onForcedNavigate: (poiId: string) => void;
     onActivity: (activity: POIActivity) => void;
     onStartCombat: (uniqueInstanceId: string) => void;
     playerQuests: PlayerQuestState[];
@@ -59,7 +61,7 @@ interface SceneViewProps {
     isTouchSimulationEnabled: boolean;
     worldActions: ReturnType<typeof useWorldActions>;
     bonfires: BonfireActivity[];
-    onStokeBonfire: (logId: string, bonfireId: string) => void;
+    onStokeBonfire: (logId: string, bonfireId: string, quantity: number) => void;
     isOneClickMode: boolean;
     onPickpocket: (target: { name: string; pickpocket: PickpocketData }, targetInstanceId: string) => void;
     onLockpick: (activity: LockpickActivity) => void;
@@ -73,12 +75,52 @@ interface SceneViewProps {
     addXp: (skill: SkillName, amount: number) => void;
     setCurrentHp: React.Dispatch<React.SetStateAction<number>>;
     agility: ReturnType<typeof useAgility>;
+    slayer: ReturnType<typeof useSlayer>;
 }
+
+const ActivityButton: React.FC<{
+    children: React.ReactNode;
+    onClick?: (e: React.MouseEvent | React.TouchEvent) => void;
+    onMouseEnter?: (e: React.MouseEvent) => void;
+    onMouseLeave?: (e: React.MouseEvent) => void;
+    disabled?: boolean;
+    variant?: 'primary' | 'combat' | 'secondary';
+    className?: string;
+    style?: React.CSSProperties;
+    dataTutorialId?: string;
+    title?: string;
+}> = ({ children, onClick, onMouseEnter, onMouseLeave, disabled, variant = 'primary', className = '', style, dataTutorialId, title, ...props }) => {
+    const text = typeof children === 'string' ? children : '';
+    const isLongText = text.length > 20;
+    const isExtraLongText = text.length > 30;
+    const textSizeClass = isExtraLongText ? 'text-base' : isLongText ? 'text-lg' : 'text-xl';
+    const leadingClass = (isLongText || isExtraLongText) ? 'leading-tight' : 'leading-none';
+    
+    // Combat variant defaults
+    const variantClass = variant === 'combat' ? 'bg-red-900/40 hover:bg-red-800/60 border-red-800' : 'bg-yellow-700 hover:bg-yellow-600 border-yellow-800';
+
+    return (
+        <button
+            {...props}
+            data-tutorial-id={dataTutorialId}
+            onClick={onClick}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            disabled={disabled}
+            title={title}
+            className={`font-bold rounded-md shadow-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 border-2 text-white focus:ring-yellow-500 px-1 py-1 ${textSizeClass} font-pixel-rpg w-full h-14 flex items-center justify-center text-center ${leadingClass} overflow-hidden whitespace-normal break-words shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] disabled:opacity-50 disabled:grayscale ${variantClass} ${className}`}
+            style={style}
+        >
+            {children}
+        </button>
+    );
+};
 
 const PilferButton: React.FC<{
     activity: Extract<POIActivity, { type: 'thieving_pilfer' }>;
+    index: number;
     sceneProps: SceneViewProps;
-}> = ({ activity, sceneProps }) => {
+}> = ({ activity, index, sceneProps }) => {
     const { onPilfer, setTooltip, skills, worldState, setContextMenu, isOneClickMode, isTouchSimulationEnabled } = sceneProps;
     const isTouchDevice = useIsTouchDevice(isTouchSimulationEnabled);
     const isDepleted = worldState.depletedHouses?.includes(activity.id);
@@ -136,14 +178,14 @@ const PilferButton: React.FC<{
     };
 
     return (
-        <Button
+        <ActivityButton
             {...customHandlers}
             disabled={isDepleted}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={() => setTooltip(null)}
         >
-            {isDepleted ? 'Recently Pilfered' : activity.name}
-        </Button>
+            {index + 1}. {isDepleted ? 'Recently Pilfered' : activity.name}
+        </ActivityButton>
     );
 };
 
@@ -194,9 +236,9 @@ const ActionableButton: React.FC<{
     poi: POI;
     onStartCombat: (uniqueInstanceId: string) => void;
     onPickpocket: (target: { name: string; pickpocket: PickpocketData }, targetInstanceId: string) => void;
-}> = ({ activity, index, handleActivityClick, setContextMenu, ui, onDepositBackpack, onDepositEquipment, isTouchDevice, worldActions, isOneClickMode, poi, onStartCombat, onPickpocket }) => {
-    
-    let text = 'Interact';
+    slayer: ReturnType<typeof useSlayer>;
+}> = ({ activity, index, handleActivityClick, setContextMenu, ui, onDepositBackpack, onDepositEquipment, isTouchDevice, worldActions, isOneClickMode, poi, onStartCombat, onPickpocket, slayer }) => {
+        let text = 'Interact';
     switch (activity.type) {
         case 'shop': text = `Visit ${SHOPS[activity.shopId].name}`; break;
         case 'quest_start': text = `Talk about '${QUESTS[activity.questId].name}'`; break;
@@ -215,9 +257,13 @@ const ActionableButton: React.FC<{
         case 'ancient_chest': text = activity.name; break;
         case 'ladder': text = activity.name; break;
         case 'cut_cactus': text = activity.name; break;
+        case 'sand_pit': text = 'Fill Bucket with Sand'; break;
     }
-
-    const hasContextMenu = (activity.type === 'npc' || activity.type === 'furnace' || activity.type === 'anvil');
+    
+    // Prepend index + 1
+    const numberedText = `${index + 1}. ${text}`;
+    
+    const hasContextMenu = (activity.type === 'npc' || activity.type === 'furnace' || activity.type === 'anvil' || activity.type === 'cooking_range' || activity.type === 'slayer_master');
     
     const handleActualClick = () => {
         ui.setTooltip(null);
@@ -295,12 +341,23 @@ const ActionableButton: React.FC<{
             ];
         } else if (activity.type === 'anvil') {
             options = [{ label: 'Smith', onClick: () => { ui.openCraftingView({ type: 'anvil' }); setContextMenu(null); } }];
+        } else if (activity.type === 'cooking_range') {
+            options = [
+                { label: 'Cook', onClick: () => { handleActualClick(); setContextMenu(null); } },
+                { label: 'Rendering', onClick: () => { ui.openCraftingView({ type: 'rendering' }); setContextMenu(null); } }
+            ];
+        } else if (activity.type === 'slayer_master') {
+            options = [
+                { label: 'Talk', onClick: () => { handleActivityClick(activity); setContextMenu(null); } },
+                { label: `Reset Task (20 Credits)`, onClick: () => { slayer.resetTask(activity.masterId || 'kaelen'); setContextMenu(null); }, disabled: !slayer.slayerTask },
+                { label: 'Rewards Shop', onClick: () => { slayer.openSlayerShop(); setContextMenu(null); } }
+            ];
         }
-        
+
         if (options.length > 0) {
             setContextMenu({ options, triggerEvent: eventForMenu, isTouchInteraction: isTouchDevice, title: text });
         }
-    }
+    };
     
     // Call hook unconditionally
     const customHandlers = useLongPress({
@@ -312,27 +369,28 @@ const ActionableButton: React.FC<{
     const tutorialId = `activity-button-${index}`;
 
     return (
-        <button
-            data-tutorial-id={tutorialId}
-            className="font-bold rounded-md shadow-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 bg-yellow-700 hover:bg-yellow-600 border-2 border-yellow-800 hover:border-yellow-700 text-white focus:ring-yellow-500 px-2 py-1 text-sm w-full"
+        <ActivityButton
+            dataTutorialId={tutorialId}
             {...customHandlers}
         >
-            {text}
-        </button>
+            {numberedText}
+        </ActivityButton>
     );
 };
 
 const BonfireButton: React.FC<{
     activity: BonfireActivity;
+    index: number;
     inventory: (InventorySlot | null)[];
     skills: (PlayerSkill & { currentLevel: number; })[];
-    onStokeBonfire: (logId: string, bonfireId: string) => void;
+    onStokeBonfire: (logId: string, bonfireId: string, quantity: number) => void;
     setContextMenu: (menu: ContextMenuState | null) => void;
     isTouchDevice: boolean;
     onActivity: (activity: POIActivity) => void;
     setTooltip: (tooltip: TooltipState | null) => void;
     isOneClickMode: boolean;
-}> = ({ activity, inventory, skills, onStokeBonfire, setContextMenu, isTouchDevice, onActivity, setTooltip, isOneClickMode }) => {
+    ui: ReturnType<typeof useUIState>;
+}> = ({ activity, index, inventory, skills, onStokeBonfire, setContextMenu, isTouchDevice, onActivity, setTooltip, isOneClickMode, ui }) => {
     const [timeLeft, setTimeLeft] = useState(Math.max(0, activity.expiresAt - Date.now()));
     const firemakingLevel = skills.find(s => s.name === SkillName.Firemaking)?.currentLevel ?? 1;
 
@@ -368,7 +426,10 @@ const BonfireButton: React.FC<{
         const stokeOption: ContextMenuOption = bestLogToUse
             ? {
                 label: 'Stoke Fire',
-                onClick: () => onStokeBonfire(bestLogToUse.logId, activity.uniqueId),
+                onClick: () => {
+                    const logCount = inventory.reduce((total, slot) => slot?.itemId === bestLogToUse.logId ? total + slot.quantity : total, 0);
+                    onStokeBonfire(bestLogToUse.logId, activity.uniqueId, logCount);
+                },
               }
             : {
                 label: 'No usable logs',
@@ -377,7 +438,8 @@ const BonfireButton: React.FC<{
               };
 
         const options: ContextMenuOption[] = [
-            { label: 'Cook', onClick: () => { setTooltip(null); onActivity({ type: 'cooking_range' }); } },
+            { label: 'Cook', onClick: () => { setTooltip(null); onActivity(activity); } },
+            { label: 'Rendering', onClick: () => { ui.openCraftingView({ type: 'rendering' }); setContextMenu(null); } },
             stokeOption,
         ];
         
@@ -390,7 +452,7 @@ const BonfireButton: React.FC<{
             return;
         }
         setTooltip(null);
-        onActivity({ type: 'cooking_range' });
+        onActivity(activity);
     };
     
     const longPressHandlers = useLongPress({
@@ -409,16 +471,17 @@ const BonfireButton: React.FC<{
     const heatColor = originalRecipe ? `hsl(${originalRecipe.level * 2.5 + 10}, 80%, 40%)` : '#d97706';
 
     return (
-        <Button
-            variant="primary"
-            className="w-full h-11 flex flex-col items-center justify-center border-orange-600 hover:border-orange-500"
+        <ActivityButton
+            data-tutorial-id={`activity-button-${index}`}
             style={{ backgroundColor: heatColor }}
             {...longPressHandlers}
             title="A bonfire. Click to cook, or right-click/long-press to stoke."
         >
-            <img src={SKILL_ICONS.Firemaking} alt="Bonfire" className="w-6 h-6 filter invert" />
-            <span className="text-xs font-bold">{formatTime(timeLeft)}</span>
-        </Button>
+            <div className="flex flex-col items-center leading-none">
+                 <img src={SKILL_ICONS.Firemaking} alt="Bonfire" className="w-4 h-4 filter invert opacity-50 absolute top-1" />
+                 <span className="mt-1">{index + 1}. {formatTime(timeLeft)}</span>
+            </div>
+        </ActivityButton>
     );
 };
 
@@ -426,7 +489,8 @@ const WindmillButton: React.FC<{
     activity: Extract<POIActivity, { type: 'windmill' }>;
     index: number;
     sceneProps: SceneViewProps;
-}> = ({ activity, index, sceneProps }) => {
+    numberedText: string;
+}> = ({ activity, index, sceneProps, numberedText }) => {
     const { hasItems, worldState, worldActions, setContextMenu, isOneClickMode, setTooltip, skills, isTouchSimulationEnabled } = sceneProps;
     const isTouchDevice = useIsTouchDevice(isTouchSimulationEnabled);
 
@@ -485,19 +549,18 @@ const WindmillButton: React.FC<{
     const tutorialId = `activity-button-${index}`;
 
     return (
-        <Button
-            data-tutorial-id={tutorialId}
-            className="w-full"
+        <ActivityButton
+            dataTutorialId={tutorialId}
             {...longPressHandlers}
         >
-            {buttonText}
-        </Button>
+            {numberedText}
+        </ActivityButton>
     );
 };
 
 
 const SceneView: React.FC<SceneViewProps> = (props) => {
-    const { poi, unlockedPois, onNavigate, onActivity, onStartCombat, playerQuests, inventory, setContextMenu, setMakeXPrompt, setTooltip, addLog, startQuest, hasItems, resourceNodeStates, activeSkillingNodeId, onToggleSkilling, onPickupGroundItem, initializeNodeState, skillingTick, getSuccessChance, activeRepeatableQuest, activeCleanup, onStartInteractQuest, onCancelInteractQuest, clearedSkillObstacles, onClearObstacle, skills, monsterRespawnTimers, setActiveDialogue, handleDialogueCheck, onResponse, onDepositBackpack, onDepositEquipment, ui, isTouchSimulationEnabled, worldActions, bonfires, onStokeBonfire, isOneClickMode, onPickpocket, onLockpick, onPilfer, thievingContainerStates, onStealFromStall, worldState, groundItemsForCurrentPoi, handleCutCactus, equipment, addXp, setCurrentHp, agility } = props;
+    const { poi, unlockedPois, onNavigate, onForcedNavigate, onActivity, onStartCombat, playerQuests, inventory, setContextMenu, setMakeXPrompt, setTooltip, addLog, startQuest, hasItems, resourceNodeStates, activeSkillingNodeId, onToggleSkilling, onPickupGroundItem, initializeNodeState, skillingTick, getSuccessChance, activeRepeatableQuest, activeCleanup, onStartInteractQuest, onCancelInteractQuest, clearedSkillObstacles, onClearObstacle, skills, monsterRespawnTimers, setActiveDialogue, handleDialogueCheck, onResponse, onDepositBackpack, onDepositEquipment, ui, isTouchSimulationEnabled, worldActions, bonfires, onStokeBonfire, isOneClickMode, onPickpocket, onLockpick, onPilfer, thievingContainerStates, onStealFromStall, worldState, groundItemsForCurrentPoi, handleCutCactus, equipment, addXp, setCurrentHp, agility, slayer } = props;
     const { depletedNodesAnimating } = useSkillingAnimations(resourceNodeStates, poi.activities);
     const [countdown, setCountdown] = useState<Record<string, number>>({});
     const [shakingNodeId, setShakingNodeId] = useState<string | null>(null);
@@ -634,16 +697,30 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                 return null;
             }
         }
+
+        if (activity.type === 'npc' && activity.visibilityCheck) {
+            if (!handleDialogueCheck(activity.visibilityCheck)) {
+                return null;
+            }
+        }
         
         if (activity.type === 'windmill') {
-            return <WindmillButton key={`${activity.type}-${index}`} activity={activity} index={index} sceneProps={props} />;
+            return (
+                <WindmillButton 
+                    key={`${activity.type}-${index}`} 
+                    activity={activity} 
+                    index={index} 
+                    sceneProps={props} 
+                    numberedText={`${index + 1}. Windmill`}
+                />
+            );
         }
 
         if (activity.type === 'start_agility_course') {
             return (
-                <Button key={activity.courseId} onClick={() => agility.startCourse(activity.courseId)}>
-                    {activity.name}
-                </Button>
+                <ActivityButton key={activity.courseId} onClick={() => agility.startCourse(activity.courseId)}>
+                    {index + 1}. {activity.name}
+                </ActivityButton>
             );
         }
 
@@ -675,14 +752,14 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                     // Success
                     addLog(successMessage ?? `You successfully use the shortcut. (+${xp} Agility XP)`);
                     addXp(SkillName.Agility, xp);
-                    onNavigate(toPoiId);
+                    onForcedNavigate(toPoiId);
                 }
             };
 
             return (
-                <Button key={id} onClick={handleShortcut}>
-                    {name}
-                </Button>
+                <ActivityButton key={id} onClick={handleShortcut}>
+                    {index + 1}. {name}
+                </ActivityButton>
             );
         }
 
@@ -706,20 +783,20 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
             };
         
             return (
-                <Button
+                <ActivityButton
                     key={activity.id}
                     onClick={() => { handleCutCactus(); setTooltip(null); }}
                     disabled={!hasTool}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={() => setTooltip(null)}
                 >
-                    {activity.name}
-                </Button>
+                    {index + 1}. {activity.name}
+                </ActivityButton>
             );
         }
         
         if (activity.type === 'thieving_pilfer') {
-            return <PilferButton key={activity.id} activity={activity} sceneProps={props} />;
+            return <PilferButton key={activity.id} activity={activity} index={index} sceneProps={props} />;
         }
 
         if (activity.type === 'thieving_lockpick') {
@@ -763,15 +840,15 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
             };
     
             return (
-                <Button
+                <ActivityButton
                     key={activity.id}
                     onClick={() => { onLockpick(activity); setTooltip(null); }}
                     disabled={isDisabled}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={() => setTooltip(null)}
                 >
-                    {buttonText}
-                </Button>
+                    {index + 1}. {buttonText}
+                </ActivityButton>
             );
         }
 
@@ -808,15 +885,15 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
             };
 
             return (
-                <Button
+                <ActivityButton
                     key={activity.id}
                     onClick={() => { onStealFromStall(activity as StallActivity); setTooltip(null); }}
                     disabled={isDisabled}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={() => setTooltip(null)}
                 >
-                    {buttonText}
-                </Button>
+                    {index + 1}. {buttonText}
+                </ActivityButton>
             );
         }
         
@@ -844,15 +921,15 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
             }
 
             return (
-                <Button
+                <ActivityButton
                     key={activity.id}
                     onClick={() => { onPickupGroundItem(activity); setTooltip(null); }}
                     disabled={isDepleted}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={() => setTooltip(null)}
                 >
-                    {buttonText}
-                </Button>
+                    {index + 1}. {buttonText}
+                </ActivityButton>
             )
         }
 
@@ -867,25 +944,25 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                 switch (animationSkill) {
                     case SkillName.Mining:
                         return (
-                            <div key={`${activity.id}-anim`} className="w-full h-11">
-                                <Button variant="primary" className="w-full animate-shatter-fall" disabled>{buttonText}</Button>
+                            <div key={`${activity.id}-anim`} className="w-full">
+                                <ActivityButton disabled className="animate-shatter-fall">{buttonText}</ActivityButton>
                             </div>
                         );
                     case SkillName.Woodcutting:
                         return (
-                             <div key={`${activity.id}-anim`} className="w-full h-11 flex overflow-hidden animate-fade-out-slowly">
+                             <div key={`${activity.id}-anim`} className="w-full flex overflow-hidden animate-fade-out-slowly h-14">
                                 <div className="w-1/2 h-full animate-cut-apart-left">
-                                    <Button variant="primary" className="w-[200%] h-full" disabled>{buttonText}</Button>
+                                    <ActivityButton className="w-[200%] h-full" disabled>{buttonText}</ActivityButton>
                                 </div>
                                 <div className="w-1/2 h-full animate-cut-apart-right">
-                                    <Button variant="primary" className="w-[200%] h-full -ml-[100%]" disabled>{buttonText}</Button>
+                                    <ActivityButton className="w-[200%] h-full -ml-[100%]" disabled>{buttonText}</ActivityButton>
                                 </div>
                             </div>
                         );
                     case SkillName.Fishing:
                          return (
-                            <div key={`${activity.id}-anim`} className="w-full h-11">
-                                <Button variant="primary" className="w-full animate-yank-up" disabled>{buttonText}</Button>
+                            <div key={`${activity.id}-anim`} className="w-full">
+                                <ActivityButton className="animate-yank-up" disabled>{buttonText}</ActivityButton>
                             </div>
                         );
                     default:
@@ -920,16 +997,16 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                     const estimatedXpPerHour = Math.round(avgXpPerAttempt * attemptsPerHour);
 
                     tooltipContent = (
-                        <div>
-                            <p className="font-bold text-yellow-300">{buttonText}</p>
-                            <p className="text-sm">Success Chance: <span className="font-semibold">{chance.toFixed(1)}%</span></p>
-                            <p className="text-sm text-gray-400">Est. XP/hr: <span className="font-semibold text-gray-200">{estimatedXpPerHour.toLocaleString()}</span></p>
+                        <div className="font-pixel-rpg">
+                            <p className="font-bold text-yellow-300 text-xl">{buttonText}</p>
+                            <p className="text-lg">Success Chance: <span className="font-semibold text-white">{chance.toFixed(1)}%</span></p>
+                            <p className="text-lg text-gray-400">Est. XP/hr: <span className="font-semibold text-gray-200">{estimatedXpPerHour.toLocaleString()}</span></p>
                         </div>
                     );
                 } else {
                      tooltipContent = (
-                        <div>
-                            <p className="font-bold text-yellow-300">{buttonText}</p>
+                        <div className="font-pixel-rpg">
+                            <p className="font-bold text-yellow-300 text-xl">{buttonText}</p>
                         </div>
                     );
                 }
@@ -938,20 +1015,13 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
 
             if (isActive) {
                 return (
-                    <div 
+                    <ActivityButton 
                         key={activity.id} 
-                        className={`relative w-full h-11 border-2 border-yellow-800 rounded-md overflow-hidden ${isShaking ? 'animate-shake' : ''}`}
-                        onMouseEnter={(e) => {
-                            setTooltip({ content: <p>Currently gathering...</p>, position: { x: e.clientX, y: e.clientY } });
-                        }}
-                        onMouseLeave={() => setTooltip(null)}
-                        data-tutorial-id={`activity-button-${index}`}
+                        onClick={() => { onToggleSkilling(activity); setTooltip(null); }}
+                        className="animate-pulse-bg"
                     >
-                        <div className="absolute inset-0 animate-pulse-bg"></div>
-                        <button onClick={() => { onToggleSkilling(activity); setTooltip(null); }} className="relative w-full h-full flex items-center justify-center font-bold text-white">
-                            Stop
-                        </button>
-                    </div>
+                        Stop
+                    </ActivityButton>
                 );
             }
 
@@ -969,16 +1039,16 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
             if (isDisabled) buttonText = `Depleted (${respawnTimeSec}s)`;
 
             return (
-                <Button 
+                <ActivityButton 
                     key={activity.id} 
                     onClick={() => { onToggleSkilling(activity); setTooltip(null); }} 
                     disabled={isDisabled}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={() => setTooltip(null)}
-                    data-tutorial-id={`activity-button-${index}`}
+                    dataTutorialId={`activity-button-${index}`}
                 >
-                    {buttonText}
-                </Button>
+                    {index + 1}. {buttonText}
+                </ActivityButton>
             );
         }
 
@@ -987,36 +1057,38 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
             if (!monster) {
                 console.error(`Error: Monster with ID "${activity.monsterId}" not found in MONSTERS constant. This may be due to a data loading issue or circular dependency.`);
                 return (
-                    <Button key={`${activity.type}-${index}`} disabled variant="combat">
+                    <ActivityButton key={`${activity.type}-${index}`} disabled>
                         Error: Unknown Monster
-                    </Button>
+                    </ActivityButton>
                 );
             }
 
             const uniqueInstanceId = `${poi.id}:${activity.monsterId}:${index}`;
-            const remainingTime = countdown[uniqueInstanceId];
+            const respawnTime = monsterRespawnTimers[uniqueInstanceId];
             const isRecentlyKilled = worldState.recentlyKilled?.includes(uniqueInstanceId);
+            const isStillRespawning = respawnTime && respawnTime > Date.now();
+            
             let buttonText = `Fight ${monster.name}`;
 
             if (isRecentlyKilled) {
                 buttonText = 'Defeated...';
-            } else if (remainingTime > 0) {
-                buttonText = `${monster.name} (${remainingTime}s)`;
+            } else if (isStillRespawning) {
+                const remainingSeconds = Math.ceil((respawnTime - Date.now()) / 1000);
+                buttonText = `${monster.name} (${remainingSeconds}s)`;
             }
             
             const textColorClass = monster.aggressive ? 'text-red-400' : 'text-yellow-400';
             
             return (
-                <Button 
+                <ActivityButton 
                     key={uniqueInstanceId} 
                     onClick={() => onStartCombat(uniqueInstanceId)}
-                    variant="combat"
-                    className={textColorClass}
-                    disabled={remainingTime > 0 || !!isRecentlyKilled}
-                    data-tutorial-id={`activity-button-${index}`}
+                    className={`${textColorClass}`}
+                    disabled={isStillRespawning || !!isRecentlyKilled}
+                    dataTutorialId={`activity-button-${index}`}
                 >
-                    {buttonText}
-                </Button>
+                    {index + 1}. {buttonText}
+                </ActivityButton>
             );
         }
         
@@ -1024,9 +1096,9 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
         
         if (activity.type === 'runecrafting_altar') {
             return (
-                <Button onClick={() => onActivity(activity)}>
-                    Craft Runes
-                </Button>
+                <ActivityButton onClick={() => onActivity(activity)}>
+                    {index + 1}. Craft Runes
+                </ActivityButton>
             );
         }
 
@@ -1046,6 +1118,7 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                 poi={poi}
                 onStartCombat={onStartCombat}
                 onPickpocket={props.onPickpocket}
+                slayer={slayer}
             />
         );
     }
@@ -1068,9 +1141,13 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
         }
 
         return (
-            <Button onClick={() => onStartInteractQuest(activeRepeatableQuest)} variant="primary" disabled={!!activeCleanup}>
-                Start Task: {quest.title}
-            </Button>
+            <ActivityButton 
+                onClick={() => onStartInteractQuest(activeRepeatableQuest)} 
+                variant="primary" 
+                disabled={!!activeCleanup}
+            >
+                {poi.activities.length + bonfires.length + 1}. {quest.title}
+            </ActivityButton>
         )
     }
 
@@ -1084,17 +1161,15 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
 
             return (
                 <div key={toPoiId} className="w-full h-full flex flex-col justify-center text-center p-1 border border-dashed border-gray-600 rounded">
-                    <p className="text-xs text-gray-400 mb-1">
+                    <p className="text-lg text-gray-400 mb-1 font-pixel-rpg leading-none">
                         To {destinationPoi?.name ?? 'an unknown area'}:
                     </p>
-                    <Button 
+                    <ActivityButton 
                         onClick={() => { onClearObstacle(fromPoiId, toPoiId, requirement); setTooltip(null); }}
                         disabled={!hasLevel || !hasRequiredItems}
-                        className="w-full"
-                        size="sm"
                     >
                         {requirement.actionText} ({requirement.level})
-                    </Button>
+                    </ActivityButton>
                 </div>
             );
         }
@@ -1133,7 +1208,7 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                 disabled={isLocked} 
                 variant={buttonVariant} 
                 data-tutorial-id={`navigation-button-${connectedPoi.id}`} 
-                className={`w-full h-full ${buttonExtraClass}`}
+                className={`w-full h-full font-pixel-rpg p-2 leading-none text-xl ${buttonExtraClass}`}
                 {...buttonProps}
             >
                 {connectedPoi.name} {isLocked ? '(Locked)' : ''}
@@ -1142,23 +1217,24 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
     };
  // STOP ADDING THE LOOT BUTTON BELOW THIS POINT
     return (
-        <div className="flex flex-col h-full text-gray-200 min-h-0">
-            <h1 onClick={() => setIsDescriptionVisible(v => !v)} className="text-2xl md:text-3xl font-bold text-yellow-400 mb-2 cursor-pointer select-none">{poi.name}</h1>
-            {isDescriptionVisible && <p className="text-base md:text-lg italic mb-6 border-b-2 border-gray-600 pb-4 animate-fade-in">{poi.description}</p>}
+        <div data-tutorial-id="main-view" className="flex flex-col h-full text-gray-200 min-h-0">
+            <h1 onClick={() => setIsDescriptionVisible(v => !v)} className="text-3xl md:text-4xl font-bold text-yellow-400 mb-1 cursor-pointer select-none font-pixel-rpg tracking-tighter">{poi.name}</h1>
+            {isDescriptionVisible && <p className="text-xl italic mb-4 border-b border-gray-700 pb-3 animate-fade-in font-pixel-rpg text-gray-400 leading-none">{poi.description}</p>}
             
             <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
                 <div className="flex flex-col min-h-0">
-                    <h3 className="text-xl font-semibold mb-2 text-yellow-300 cursor-pointer select-none flex-shrink-0" onClick={() => setAreActionsVisible(v => !v)}>
+                    <h3 className="text-xl font-semibold mb-2 text-yellow-300 cursor-pointer select-none flex-shrink-0 font-pixel-rpg" onClick={() => setAreActionsVisible(v => !v)}>
                         Actions <span className={`inline-block transition-transform duration-200 ${areActionsVisible ? 'rotate-180' : ''}`}>▼</span>
                     </h3>
                     {areActionsVisible && (
-                         <div className="overflow-y-auto pr-1 animate-fade-in">
-                            <div className="grid grid-cols-3 gap-2">
+                         <div data-tutorial-id="activity-buttons" className="overflow-y-auto pr-1 animate-fade-in">
+                            <div className="grid grid-cols-3 gap-x-2 gap-y-1">
                                 {poi.activities.map(getActivityButton)}
-                                {bonfires.length > 0 && bonfires.map(bonfire => (
+                                {bonfires.length > 0 && bonfires.map((bonfire, bonfireIdx) => (
                                     <BonfireButton
                                         key={bonfire.uniqueId}
                                         activity={bonfire}
+                                        index={poi.activities.length + bonfireIdx}
                                         inventory={inventory}
                                         skills={skills}
                                         onStokeBonfire={onStokeBonfire}
@@ -1167,6 +1243,7 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                                         onActivity={onActivity}
                                         setTooltip={setTooltip}
                                         isOneClickMode={isOneClickMode}
+                                        ui={ui}
                                     />
                                 ))}
                                 {renderInteractQuestActivity()}
@@ -1178,15 +1255,15 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                     <h3 className="text-xl font-bold mb-2 text-yellow-300 flex-shrink-0">Travel</h3>
                     <div className="flex-grow flex items-center justify-center">
                         <div className="w-full max-w-[280px] lg:w-2/3 lg:max-w-none">
-                            <div className="grid grid-cols-3 gap-2">
+                            <div data-tutorial-id="navigation-buttons" className="grid grid-cols-3 gap-2">
                                 {gridItems.map((cellItems, index) => (
                                     <div key={index} className="aspect-square bg-black/20 rounded-md p-1 flex flex-col items-center justify-center gap-1">
                                     {index === 4 && cellItems.length > 0 ? (
                                             cellItems.map(renderTravelOption)
                                         ) : index === 4 ? (
-                                            <div className="flex flex-col items-center text-gray-500">
-                                                <img src="https://api.iconify.design/game-icons:world.svg" alt="Current Location" className="w-8 h-8 opacity-50 filter invert" />
-                                                <span className="text-xs font-semibold">Here</span>
+                                            <div className="flex flex-col items-center text-gray-500 font-pixel-rpg">
+                                                <img src={getIconUrl("world")} alt="Current Location" className="w-8 h-8 opacity-50 filter invert" />
+                                                <span className="text-lg font-semibold leading-none">Here</span>
                                             </div>
                                         ) : (
                                             cellItems.map(renderTravelOption)

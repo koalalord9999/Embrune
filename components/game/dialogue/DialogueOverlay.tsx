@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ActivePanel, DialogueNode, DialogueResponse } from '../../../types';
+import { ActivePanel, DialogueNode, DialogueResponse, DialogueCheckRequirement } from '../../../types';
 import Button from '../../common/Button';
 import { DialogueState } from '../../../hooks/useUIState';
 
 interface DialogueOverlayProps {
     dialogue: DialogueState;
     setActivePanel: (panel: ActivePanel) => void;
+    onResponse: (response: DialogueResponse) => void;
+    handleDialogueCheck: (requirements: DialogueCheckRequirement[]) => boolean;
+    onNavigate: (nextNodeKey: string) => void;
 }
 
-const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePanel }) => {
-    const { npcName, npcIcon, nodes, currentNodeKey, onEnd, onResponse, handleDialogueCheck, onNavigate } = dialogue;
-    
+const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePanel, onResponse, handleDialogueCheck, onNavigate }) => {
+    const { npcName, npcIcon, nodes, currentNodeKey, onEnd } = dialogue;
+
     const [textPage, setTextPage] = useState(0);
     const [optionPage, setOptionPage] = useState(0);
 
@@ -43,7 +46,7 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
         const node = nodes[currentNodeKey];
         if (node && node.conditionalResponses && onNavigate && handleDialogueCheck) {
             // Find the first matching conditional response that acts as a router
-            const routerResponse = node.conditionalResponses.find(res => 
+            const routerResponse = node.conditionalResponses.find(res =>
                 res.check && (res.text === "" || res.text === undefined) && handleDialogueCheck(res.check.requirements)
             );
             if (routerResponse) {
@@ -55,9 +58,15 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
 
     const visibleResponses = useMemo(() => {
         if (!currentNode) return [];
-        
-        const alwaysVisibleResponses = [...(currentNode.responses || [])];
-        
+
+        const unfilteredResponses = [...(currentNode.responses || [])];
+        const alwaysVisibleResponses = unfilteredResponses.filter(res => {
+            if (!res.check) return true;
+            // Branching checks handle their own success/failure and should remain visible.
+            if (res.check.successNode || res.check.failureNode) return true;
+            return handleDialogueCheck(res.check.requirements);
+        });
+
         let conditionalVisibleResponses: DialogueResponse[] = [];
         if (currentNode.conditionalResponses && handleDialogueCheck) {
             conditionalVisibleResponses = currentNode.conditionalResponses.filter(res => {
@@ -87,7 +96,7 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
     const handleResponseClick = useCallback((response: DialogueResponse) => {
         onResponse(response);
     }, [onResponse]);
-    
+
     useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
             if (!currentNode) return;
@@ -100,7 +109,7 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
                     handleNextPage();
                 }
             }
-            
+
             if (isLastTextPage && hasResponses) {
                 const keyNum = parseInt(e.key, 10);
                 if (keyNum >= 1 && keyNum <= 4) {
@@ -108,9 +117,9 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
                     const optionsPerPage = 4;
                     const displayedOptions = visibleResponses.slice(optionPage * (optionsPerPage - 1), (optionPage + 1) * (optionsPerPage - 1));
                     const hasMore = visibleResponses.length > (optionPage + 1) * (optionsPerPage - 1);
-                    
-                    if(keyNum === 4 && hasMore) {
-                         setOptionPage(p => (p + 1) % Math.ceil(visibleResponses.length / (optionsPerPage -1)));
+
+                    if (keyNum === 4 && hasMore) {
+                        setOptionPage(p => (p + 1) % Math.ceil(visibleResponses.length / (optionsPerPage - 1)));
                     } else if (keyNum <= displayedOptions.length) {
                         handleResponseClick(displayedOptions[keyNum - 1]);
                     }
@@ -157,7 +166,7 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
 
     const isLastTextPage = textPage >= paginatedText.length - 1;
     const hasResponses = visibleResponses && visibleResponses.length > 0;
-    
+
     const optionsPerPage = 4;
     const hasMoreOptions = hasResponses && visibleResponses.length > optionsPerPage;
     const numOptionPages = hasMoreOptions ? Math.ceil(visibleResponses.length / (optionsPerPage - 1)) : 1;
@@ -166,37 +175,42 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
     const displayedResponses = hasResponses ? visibleResponses.slice(optionSliceStart, optionSliceEnd) : [];
 
     return (
-        <div className="absolute inset-0 bg-gray-900/90 border-2 border-yellow-700 rounded-lg shadow-2xl p-3 pointer-events-auto transition-opacity duration-300 ease-in-out opacity-100 flex flex-col md:flex-row h-full gap-3 animate-fade-in md:overflow-y-hidden overflow-y-auto">
-            {/* Left part: Guide info */}
-            <div className="flex items-center gap-3 w-full md:w-1/2">
-                <img src={npcIcon} alt={npcName} className="w-16 h-16 bg-gray-800 border-2 border-gray-600 rounded-full flex-shrink-0 pixelated-image" />
-                <div className="pr-1">
-                    <h3 className="text-lg font-bold text-yellow-400">{npcName}</h3>
-                    <p className="text-base text-gray-300 italic">"{paginatedText[textPage]}"</p>
+        <>
+            {currentNode?.dim && (
+                <div className="fixed inset-0 bg-black/60 z-[55] pointer-events-none animate-fade-in" />
+            )}
+            <div className="absolute inset-0 bg-gray-900/90 border-2 border-yellow-700 rounded-lg shadow-2xl p-3 pointer-events-auto transition-opacity duration-300 ease-in-out opacity-100 flex flex-col md:flex-row h-full gap-3 animate-fade-in md:overflow-y-hidden overflow-y-auto z-[70] font-sans">
+                {/* Left part: Guide info */}
+                <div className="flex items-center gap-3 w-full md:w-1/2">
+                    <img src={npcIcon} alt={npcName} className="w-16 h-16 bg-gray-800 border-2 border-gray-600 rounded-full flex-shrink-0 pixelated-image" />
+                    <div className="pr-1">
+                        <h3 className="font-bold text-yellow-400 font-pixel-rpg text-xl tracking-wide">{npcName}</h3>
+                        <p className="text-xl text-gray-200 font-pixel-rpg py-1 leading-none">{paginatedText[textPage]}</p>
+                    </div>
+                </div>
+                {/* Right part: Objective and action */}
+                <div className="flex flex-col justify-center items-center w-full md:w-1/2 bg-black/50 p-2 rounded-md border border-gray-700 font-sans">
+                    {isLastTextPage && hasResponses ? (
+                        <div className="w-full space-y-2">
+                            {displayedResponses.map((res, i) => (
+                                <Button key={i} size="sm" className="w-full text-left justify-start font-pixel-rpg text-xl py-1 leading-none" onClick={() => handleResponseClick(res)}>
+                                    <span className="text-yellow-400 mr-2">{i + 1}.</span>{res.text}
+                                </Button>
+                            ))}
+                            {hasMoreOptions && (
+                                <Button size="sm" className="w-full text-left justify-start font-pixel-rpg text-xl py-1 leading-none" onClick={() => setOptionPage(p => (p + 1) % numOptionPages)}>
+                                    <span className="text-yellow-400 mr-2">4.</span>View more...
+                                </Button>
+                            )}
+                        </div>
+                    ) : (
+                        <button onClick={handleNextPage} className="text-yellow-400 hover:text-yellow-300 text-sm font-semibold">
+                            (Continue...)
+                        </button>
+                    )}
                 </div>
             </div>
-            {/* Right part: Objective and action */}
-            <div className="flex flex-col justify-center items-center w-full md:w-1/2 bg-black/50 p-2 rounded-md border border-gray-700">
-                {isLastTextPage && hasResponses ? (
-                    <div className="w-full space-y-2">
-                        {displayedResponses.map((res, i) => (
-                            <Button key={i} size="sm" className="w-full text-left justify-start" onClick={() => handleResponseClick(res)}>
-                                <span className="text-yellow-400 mr-2">{i+1}.</span>{res.text}
-                            </Button>
-                        ))}
-                        {hasMoreOptions && (
-                             <Button size="sm" className="w-full text-left justify-start" onClick={() => setOptionPage(p => (p + 1) % numOptionPages)}>
-                                <span className="text-yellow-400 mr-2">4.</span>View more...
-                            </Button>
-                        )}
-                    </div>
-                ) : (
-                    <button onClick={handleNextPage} className="text-yellow-400 hover:text-yellow-300 text-sm font-semibold">
-                        (Continue...)
-                    </button>
-                )}
-            </div>
-        </div>
+        </>
     );
 };
 

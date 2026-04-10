@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Spell, PlayerSkill, SkillName, InventorySlot, Equipment, WeaponType } from '../../types';
-import { SPELLS, ITEMS, getIconClassName } from '../../constants';
+import {  SPELLS, ITEMS, getIconClassName, getIconUrl  } from '../../constants';
 import { TooltipState, useUIState } from '../../hooks/useUIState';
 
 interface SpellbookPanelProps {
@@ -15,20 +15,20 @@ interface SpellbookPanelProps {
 
 const getSpellIconUrl = (spell: Spell): string => {
     if (spell.type === 'combat') {
-        if (spell.id.includes('_dart')) return 'https://api.iconify.design/game-icons:wind-slap.svg';
-        if (spell.id.includes('_bolt')) return 'https://api.iconify.design/game-icons:swirl-ring.svg';
-        if (spell.id.includes('_blast')) return 'https://api.iconify.design/game-icons:cloudy-fork.svg';
-        if (spell.id.includes('_wave')) return 'https://api.iconify.design/game-icons:entangled-typhoon.svg';
-        if (spell.id.includes('_storm')) return 'https://api.iconify.design/game-icons:tornado.svg';
+        if (spell.id.includes('_dart')) return 'wind-slap';
+        if (spell.id.includes('_bolt')) return 'swirl-ring';
+        if (spell.id.includes('_blast')) return 'cloudy-fork';
+        if (spell.id.includes('_wave')) return 'entangled-typhoon';
+        if (spell.id.includes('_storm')) return 'tornado';
     }
     switch (spell.type) {
-        case 'utility-teleport': return 'https://api.iconify.design/game-icons:portal.svg';
-        case 'utility-enchant': return 'https://api.iconify.design/game-icons:glowing-hands.svg';
-        case 'utility-alchemy': return 'https://api.iconify.design/game-icons:shiny-purse.svg';
-        case 'utility-processing': return 'https://api.iconify.design/game-icons:fission.svg';
-        case 'curse': return 'https://api.iconify.design/game-icons:slalom.svg';
-        case 'enhancement': return 'https://api.iconify.design/game-icons:aura.svg';
-        default: return 'https://api.iconify.design/game-icons:book.svg';
+        case 'utility-teleport': return 'portal';
+        case 'utility-enchant': return 'glowing-hands';
+        case 'utility-alchemy': return 'shiny-purse';
+        case 'utility-processing': return 'fission';
+        case 'curse': return 'slalom';
+        case 'enhancement': return 'aura';
+        default: return 'book';
     }
 };
 
@@ -127,20 +127,20 @@ const SpellDisplay: React.FC<SpellDisplayProps> = ({ spell, magicLevel, inventor
         const runeList = spell.runes.map(r => {
             const runeItem = ITEMS[r.itemId];
             if (r.itemId === providedRune) {
-                return `<li class="text-green-400">∞ ${runeItem.name}</li>`;
+                return `<li class="text-green-400 font-bold text-lg">∞ ${runeItem.name}</li>`;
             }
             const playerHas = inventory.reduce((acc, slot) => slot?.itemId === r.itemId ? acc + slot.quantity : acc, 0);
             const color = playerHas >= r.quantity ? 'text-green-400' : 'text-red-400';
-            return `<li class="${color}">${r.quantity}  ${runeItem.name}</li>`;
+            return `<li class="${color} font-bold text-lg">${r.quantity}x ${runeItem.name}</li>`;
         }).join('');
 
         setTooltip({
             content: (
-                <div className="text-left w-48">
-                    <p className="font-bold text-yellow-300">{spell.name}</p>
-                    <p className={`text-sm italic mb-2 ${levelColor}`}>Lvl {spell.level} Magic</p>
-                    <p className="text-sm text-gray-300 mb-2">{spell.description}</p>
-                    <ul className="text-xs list-disc list-inside" dangerouslySetInnerHTML={{ __html: runeList }} />
+                <div className="text-left w-64 font-pixel-rpg">
+                    <p className="font-bold text-yellow-300 text-xl">{spell.name}</p>
+                    <p className={`text-lg italic mb-2 ${levelColor} leading-none`}>Lvl {spell.level} Magic</p>
+                    <p className="text-lg text-gray-300 mb-2 leading-tight">{spell.description}</p>
+                    <ul className="text-lg list-none space-y-1" dangerouslySetInnerHTML={{ __html: runeList }} />
                 </div>
             ),
             position: { x: e.clientX, y: e.clientY }
@@ -175,7 +175,7 @@ const SpellDisplay: React.FC<SpellDisplayProps> = ({ spell, magicLevel, inventor
             onMouseLeave={() => setTooltip(null)}
             className={`w-full aspect-square rounded-md transition-colors flex items-center justify-center text-center hover:bg-gray-700/20 relative isolate ${isAutocasting ? 'autocast-orb-highlight' : ''}`}
         >
-            <img src={getSpellIconUrl(spell)} alt={spell.name} className={`w-full h-full p-1 ${getSpellIconClassName(spell)}`} style={!canCast ? { filter: 'grayscale(0.8) brightness(0.2) drop-shadow(1px 1px 0 #333) drop-shadow(-1px -1px 0 #333)', opacity: 0.9 } : {}} />
+            <img src={getIconUrl(getSpellIconUrl(spell))} alt={spell.name} className={`w-full h-full p-1 ${getSpellIconClassName(spell)}`} style={!canCast ? { opacity: 0.4 } : {}} />
             {teleportOverlay}
         </button>
     );
@@ -194,8 +194,8 @@ const SpellbookPanel: React.FC<SpellbookPanelProps> = ({ skills, inventory, equi
     }, [ui.isSelectingAutocastSpell]);
 
     return (
-        <div className="flex flex-col h-full text-gray-300">
-            {ui.isSelectingAutocastSpell && <h3 className="text-lg font-bold text-center mb-2 text-yellow-400">Select Autocast Spell</h3>}
+        <div className="flex flex-col h-full text-gray-300 font-pixel-rpg">
+            {ui.isSelectingAutocastSpell && <h3 className="text-xl font-bold text-center mb-2 text-yellow-400">Select Autocast Spell</h3>}
             <div className="flex-grow overflow-y-auto pr-1">
                 <div className="grid grid-cols-5 gap-1">
                     {spellsToDisplay.map(spell => (

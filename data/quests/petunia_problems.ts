@@ -5,6 +5,11 @@ export const petuniaProblems: Quest = {
     id: 'petunia_problems',
     name: "Petunia Problems",
     description: "Old Man Fitzwilliam's prize-winning petunias are mysteriously dying, and he's not happy about it. He suspects something unnatural is at play.",
+    requirements: {
+        quests: ['goblin_menace'],
+        recommendedCombatLevel: 7,
+        notes: ['Poison Resistance']
+    },
     isHidden: false,
     startHint: "Speak to a distraught Old Man Fitzwilliam in Meadowdale Square.",
     playerStagePerspectives: [
@@ -56,7 +61,7 @@ export const petuniaProblems: Quest = {
     dialogue: {
         petunia_use_potion: {
             npcName: 'Blighted Soil',
-            npcIcon: 'https://api.iconify.design/game-icons:sprout.svg',
+            npcIcon: 'sprout',
             text: "You pour the shimmering potion onto the blighted soil. The ground hisses and a foul-smelling creature tears its way out of the earth!",
             responses: [
                 { text: "(Face the creature!)", actions: [{ type: 'take_item', itemId: 'blight_ward_potion', quantity: 1 }, { type: 'advance_quest', questId: 'petunia_problems' }, { type: 'start_mandatory_combat', monsterId: 'blight_imp' }] }

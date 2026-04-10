@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { InventorySlot, PlayerSkill, SkillName } from '../../../types';
-import { FLETCHING_RECIPES, ITEMS, getIconClassName } from '../../../constants';
+import {  FLETCHING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../constants';
 import Button from '../../common/Button';
 import { MakeXPrompt } from '../../../hooks/useUIState';
 
@@ -45,7 +45,7 @@ const FletchingView: React.FC<FletchingViewProps> = ({ logId, inventory, skills,
                                 className={`bg-gray-900 p-3 rounded-lg border-2 ${canFletch ? 'border-gray-600' : 'border-red-800/50'}`}
                             >
                                 <div className="flex items-center gap-3 mb-2">
-                                    <img src={item.iconUrl} alt={item.name} className={`w-10 h-10 bg-black/30 p-1 rounded ${getIconClassName(item)}`} />
+                                    <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-10 h-10 bg-black/30 p-1 rounded ${getIconClassName(item)}`} />
                                     <h3 className="text-lg font-semibold text-yellow-300">{item.name} {recipe.quantity ? `x${recipe.quantity}`: ''}</h3>
                                 </div>
                                 <div className="text-sm space-y-1 mb-3">

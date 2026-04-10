@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { InventorySlot, PlayerSkill, SkillName } from '../../../../types';
-import { FLETCHING_RECIPES, ITEMS, getIconClassName } from '../../../../constants';
+import {  FLETCHING_RECIPES, ITEMS, getIconClassName, getIconUrl  } from '../../../../constants';
 import Button from '../../../common/Button';
 import { MakeXPrompt } from '../../../../hooks/useUIState';
 import { CraftingViewProps } from '../CraftingView';
@@ -101,7 +101,7 @@ const FletchingSlot: React.FC<{
             <div className={`crafting-slot-level ${hasLevel ? 'met' : 'unmet'}`}>
                 Lvl {recipe.level}
             </div>
-            <img src={item.iconUrl} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
+            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`crafting-slot-icon ${getIconClassName(item)}`} />
             {recipe.quantity && recipe.quantity > 1 && (
                 <span className="absolute top-1 right-1 text-xs font-bold text-yellow-300" style={{ textShadow: '1px 1px 1px black' }}>
                     x{recipe.quantity}
@@ -109,7 +109,7 @@ const FletchingSlot: React.FC<{
             )}
             <div className="crafting-slot-ingredients">
                 <div className="ingredient-icon" title={ITEMS[logId].name}>
-                    <img src={ITEMS[logId].iconUrl} alt={ITEMS[logId].name} className={getIconClassName(ITEMS[logId])} />
+                    <img src={getIconUrl(ITEMS[logId].iconUrl)} alt={ITEMS[logId].name} className={getIconClassName(ITEMS[logId])} />
                 </div>
             </div>
         </div>

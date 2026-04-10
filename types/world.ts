@@ -2,12 +2,12 @@ import { SkillName, InventorySlot, ToolType } from './';
 import { DialogueNode, DialogueCheckRequirement, QuestId } from './quests';
 
 export interface SkillRequirement {
-    skill: SkillName;
-    level: number;
-    xp: number;
-    description: string;
-    actionText: string;
-    items?: { itemId: string; quantity: number }[];
+  skill: SkillName;
+  level: number;
+  xp: number;
+  description: string;
+  actionText: string;
+  items?: { itemId: string; quantity: number }[];
 }
 
 export interface Region {
@@ -21,14 +21,17 @@ export interface Region {
   recommendedCombatLevel?: number;
   worldMapConnections?: string[]; // POI IDs this region connects to on the world map
   isDesert?: boolean;
+  /** Max number of aggressive monsters that will join a single combat queue. Overridable per-POI. */
+  defaultMaxGroupSize?: number;
+  trackNum?: number;
 }
 
 export type BonfireActivity = { type: 'bonfire', uniqueId: string, logId: string, expiresAt: number, poiId: string };
 
 export interface QuestCondition {
-    questId: QuestId;
-    stages: number[];
-    visibleAfterCompletion?: boolean;
+  questId: QuestId;
+  stages: number[];
+  visibleAfterCompletion?: boolean;
 }
 
 export type POIActivity =
@@ -37,20 +40,22 @@ export type POIActivity =
   | { type: 'cut_cactus'; id: string; name: string; }
   | { type: 'combat'; monsterId: string }
   | { type: 'shop'; shopId: string }
-  | { 
-      type: 'npc'; 
-      name: string; 
-      icon: string; 
-      dialogue?: Record<string, DialogueNode>; 
-      startNode?: string; 
-      questTopics?: QuestId[]; 
-      actions?: { label: string; action: 'open_bank' | 'deposit_backpack' | 'deposit_equipment' }[]; 
-      dialogueType?: 'random'; 
-      questCondition?: QuestCondition; 
-      attackableMonsterId?: string; 
-      pickpocket?: { lootTableId: string; };
-      conditionalGreetings?: { text: string; check: { requirements: DialogueCheckRequirement[] }; }[];
-    }
+  | {
+    type: 'npc';
+    id?: string;
+    name: string;
+    icon: string;
+    dialogue?: Record<string, DialogueNode>;
+    startNode?: string;
+    questTopics?: QuestId[];
+    actions?: { label: string; action: 'open_bank' | 'deposit_backpack' | 'deposit_equipment' }[];
+    dialogueType?: 'random';
+    questCondition?: QuestCondition;
+    attackableMonsterId?: string;
+    pickpocket?: { lootTableId: string; };
+    conditionalGreetings?: { text: string; check: { requirements: DialogueCheckRequirement[] }; }[];
+    visibilityCheck?: DialogueCheckRequirement[];
+  }
   | { type: 'cooking_range' }
   | { type: 'furnace' }
   | { type: 'anvil' }
@@ -61,7 +66,17 @@ export type POIActivity =
   | { type: 'bank' }
   | { type: 'spinning_wheel' }
   | { type: 'blimp_travel'; requiredSlayerLevel: number; name: string; }
-  | { type: 'slayer_master'; name: string; icon: string; }
+  | { 
+      type: 'slayer_master'; 
+      name: string; 
+      icon: string; 
+      masterId: string; 
+      dialogue?: Record<string, DialogueNode>;
+      startNode?: string;
+      questTopics?: QuestId[];
+      dialogueType?: 'random';
+      conditionalGreetings?: { text: string; check: { requirements: DialogueCheckRequirement[] }; }[];
+    }
   | { type: 'water_source', name: string, isHoly?: boolean }
   | { type: 'milking' }
   | { type: 'windmill' }
@@ -69,35 +84,35 @@ export type POIActivity =
   | { type: 'ancient_chest'; name: string; }
   | { type: 'quest_start'; questId: QuestId }
   | { type: 'ladder'; name: string; direction: 'up' | 'down'; toPoiId: string; questCondition?: QuestCondition; }
-  | { 
-      type: 'thieving_lockpick';
-      id: string; // Unique ID for state tracking
-      targetName: string; // e.g., 'Locked Door', 'Ornate Chest'
-      lootTableId: string;
-    }
   | {
-      type: 'thieving_stall';
-      id: string; // Unique ID for state tracking
-      name: string; // e.g., 'Steal from Bakery Stall'
-      lootTableId: string;
-    }
+    type: 'thieving_lockpick';
+    id: string; // Unique ID for state tracking
+    targetName: string; // e.g., 'Locked Door', 'Ornate Chest'
+    lootTableId: string;
+  }
   | {
-      type: 'thieving_pilfer';
-      id: string; // Unique ID for this door, e.g., "meadowdale_house_1"
-      name: string; // e.g., "Locked House"
-    }
+    type: 'thieving_stall';
+    id: string; // Unique ID for state tracking
+    name: string; // e.g., 'Steal from Bakery Stall'
+    lootTableId: string;
+  }
   | {
-      type: 'agility_shortcut';
-      id: string;
-      name: string;
-      toPoiId: string;
-      level: number;
-      xp: number;
-      baseFailChance: number;
-      failDamage?: { min: number; max: number };
-      failMessage?: string;
-      successMessage?: string;
-    }
+    type: 'thieving_pilfer';
+    id: string; // Unique ID for this door, e.g., "meadowdale_house_1"
+    name: string; // e.g., "Locked House"
+  }
+  | {
+    type: 'agility_shortcut';
+    id: string;
+    name: string;
+    toPoiId: string;
+    level: number;
+    xp: number;
+    baseFailChance: number;
+    failDamage?: { min: number; max: number };
+    failMessage?: string;
+    successMessage?: string;
+  }
   | { type: 'start_agility_course'; courseId: string; name: string; }
   | { type: 'sand_pit'; name: string; }
   | BonfireActivity;
@@ -108,7 +123,7 @@ export interface POI {
   description: string;
   connections: string[];
   activities: POIActivity[];
-  unlockRequirement?: { type: 'quest'; questId: QuestId; stage: number }
+  unlockRequirement?: { type: 'quest'; questId: QuestId; stage: number; operator?: 'gte' | 'lte' }
   connectionRequirements?: Record<string, SkillRequirement>; // Key is the destination POI id
   regionId: string;
   x: number; // Coordinate for its own map (world or internal)
@@ -120,16 +135,18 @@ export interface POI {
   cityMapY?: number; // Y coordinate for display on a city map, if this is an exit
   internalX?: number; // Optional separate coordinate for internal navigation if it differs
   internalY?: number; // Optional separate coordinate for internal navigation if it differs
+  /** Overrides Region.defaultMaxGroupSize for this specific POI. */
+  maxGroupSize?: number;
 }
 
 export interface ResourceNodeState {
-    resources: number;
-    respawnTimer: number; // in ms
+  resources: number;
+  respawnTimer: number; // in ms
 }
 
 export interface ThievingContainerState {
-    depleted: boolean;
-    respawnTimer: number; // in ms
+  depleted: boolean;
+  respawnTimer: number; // in ms
 }
 
 export interface GroundItem {
@@ -148,51 +165,51 @@ export interface MapFeature {
 }
 
 export interface ActivePilferingSession {
-    housePoiId: string;
-    entryPoiId: string;
-    startTime: number;
-    tierId: string;
-    tierLevel: number;
-    lootedContainerIds?: string[];
+  housePoiId: string;
+  entryPoiId: string;
+  startTime: number;
+  tierId: string;
+  tierLevel: number;
+  lootedContainerIds?: string[];
 }
 
 export interface WorldState {
-    windmillFlour: number;
-    deathMarker?: {
-        poiId: string;
-        timeRemaining: number; // in ms
-        immunityGranted?: boolean;
-    } | null;
-    poiImmunity?: Record<string, number>; // key: poiId, value: expiry timestamp
-    bankPlaceholders?: boolean;
-    hpBoost?: {
-        amount: number;
-        expiresAt: number;
-    } | null;
-    pendingQuestCombatReward?: InventorySlot | null;
-    recentlyKilled?: string[]; // Array of unique monster instance IDs that were just killed
-    activePilferingSession?: ActivePilferingSession | null;
-    generatedHouses?: Record<string, { tierId: string, level: number, activities: POIActivity[] }>; // Maps door ID to a generated house tier with pre-generated activities
-    depletedHouses?: string[];
-    nextHouseResetTimestamp?: number;
-    dehydrationLevel: number;
-    unlockedMusicTracks: string[];
-    monolithFire?: {
-        poiId: string;
-        logType: string;
-        expiresAt: number;
-    } | null;
-    eventNextTrigger?: {
-        galeSwept?: number;
-        isleOfWhispers?: number;
-        volcanicVents?: number;
-    };
-    destructionTrialProgress?: {
-        heat?: 'started' | 'completed';
-        pressure?: 'started' | 'completed';
-        silence?: 'started' | 'completed';
-        heatEndTime?: number;
-        pressureStartTime?: number;
-        silenceStartTime?: number;
-    };
+  windmillFlour: number;
+  deathMarker?: {
+    poiId: string;
+    timeRemaining: number; // in ms
+    immunityGranted?: boolean;
+  } | null;
+  poiImmunity?: Record<string, number>; // key: poiId, value: expiry timestamp
+  bankPlaceholders?: boolean;
+  hpBoost?: {
+    amount: number;
+    expiresAt: number;
+  } | null;
+  pendingQuestCombatReward?: InventorySlot | null;
+  recentlyKilled?: string[]; // Array of unique monster instance IDs that were just killed
+  activePilferingSession?: ActivePilferingSession | null;
+  generatedHouses?: Record<string, { tierId: string, level: number, activities: POIActivity[] }>; // Maps door ID to a generated house tier with pre-generated activities
+  depletedHouses?: string[];
+  nextHouseResetTimestamp?: number;
+  dehydrationLevel: number;
+  unlockedMusicTracks: string[];
+  monolithFires?: Record<string, {
+    logType: string;
+    expiresAt: number;
+  }>;
+  eventNextTrigger?: {
+    galeSwept?: number;
+    isleOfWhispers?: number;
+    volcanicVents?: number;
+  };
+  destructionTrialProgress?: {
+    heat?: 'started' | 'completed';
+    pressure?: 'started' | 'completed';
+    silence?: 'started' | 'completed';
+    heatEndTime?: number;
+    pressureStartTime?: number;
+    silenceStartTime?: number;
+  };
+  questVariables?: Record<string, number>;
 }

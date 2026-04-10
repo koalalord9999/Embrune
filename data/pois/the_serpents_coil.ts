@@ -6,8 +6,21 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         id: 'serpents_coil_entrance',
         name: "Serpent's Coil Entrance",
         description: 'Beyond the gate, the swamp transforms into a confusing delta of murky waterways and dense mangrove thickets. The air is heavy and smells of salt and decay.',
-        connections: ['serpents_coil_gate', 'mangrove_thicket_west', 'murky_channel_east', 'flooded_crypt_chamber'],
+        connections: ['serpents_coil_gate', 'mangrove_thicket_west', 'murky_channel_east'],
         activities: [
+            {
+                type: 'agility_shortcut',
+                id: 'serpents_coil_shortcut',
+                name: 'Stepping Stones (Lvl 50)',
+                toPoiId: 'flooded_crypt_hallway',
+                level: 50,
+                xp: 100,
+                baseFailChance: 50,
+                failDamage: { min: 1, max: 5 },
+                failMessage: 'You misjudge the jump and tumble down the edge, taking some damage.',
+                successMessage: 'You leap across the chasm with surprising grace.'
+            },
+            { type: 'combat', monsterId: 'giant_toad' },
             { type: 'combat', monsterId: 'giant_toad' },
         ],
         regionId: 'serpents_coil',
@@ -19,6 +32,7 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         description: 'A dense thicket of mangroves with tangled, arching roots that create a maze-like path. Something large slithers through the water nearby.',
         connections: ['serpents_coil_entrance', 'serpent_nesting_ground'],
         activities: [
+            { type: 'combat', monsterId: 'bog_serpent' },
             { type: 'combat', monsterId: 'bog_serpent' },
         ],
         regionId: 'serpents_coil',
@@ -53,6 +67,7 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         connections: ['serpents_coil_entrance', 'isolated_islet'],
         activities: [
             { type: 'combat', monsterId: 'bog_serpent' },
+            { type: 'combat', monsterId: 'bog_serpent' },
         ],
         regionId: 'serpents_coil',
         x: 1595, y: 1259
@@ -66,7 +81,7 @@ export const theSerpentsCoilPois: Record<string, POI> = {
             { type: 'skilling', id: 'isolated_islet_willow', name: 'Chop Willow Tree', skill: SkillName.Woodcutting, requiredLevel: 30, loot: [{ itemId: 'willow_logs', chance: 1, xp: 90 }], resourceCount: { min: 14, max: 1619 }, respawnTime: 30000, gatherTime: 3500 },
         ],
         regionId: 'serpents_coil',
-        x: 1680, y: 1234
+        x: 1640, y: 1234
     },
     shipwreck_shallows: {
         id: 'shipwreck_shallows',
@@ -133,7 +148,7 @@ export const theSerpentsCoilPois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Commune with the Altar',
-                icon: 'https://api.iconify.design/game-icons:rune-stone.svg',
+                icon: 'rune-stone',
                 questCondition: { questId: 'whispers_of_the_divine', stages: [2] },
                 startNode: 'wod_hex_echo'
             },

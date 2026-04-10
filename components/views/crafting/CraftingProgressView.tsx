@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ActiveCraftingAction } from '../../../types';
-import { ITEMS, getIconClassName } from '../../../constants';
+import {  ITEMS, getIconClassName, getIconUrl  } from '../../../constants';
 import Button from '../../common/Button';
 import ProgressBar from '../../common/ProgressBar';
 
@@ -63,7 +63,7 @@ const CraftingProgressView: React.FC<CraftingProgressViewProps> = ({ action, onC
             <h2 className="text-2xl font-bold text-yellow-400 mb-4">{getActionName(action.recipeType)}: {item.name}</h2>
             
             <div className="w-24 h-24 bg-gray-900 border-4 border-gray-600 rounded-lg flex items-center justify-center mb-4">
-                <img src={item.iconUrl} alt={item.name} className={`w-16 h-16 ${getIconClassName(item)}`} />
+                <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-16 h-16 ${getIconClassName(item)}`} />
             </div>
 
             <div className="w-full max-w-md bg-black/50 p-4 rounded-lg space-y-3">

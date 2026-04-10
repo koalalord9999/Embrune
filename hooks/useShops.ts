@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ShopStates, InventorySlot } from '../types';
-import { SHOPS, ITEMS } from '../constants';
+import {  SHOPS, ITEMS  } from '../constants';
 
 export const useShops = (
     initialShopStates: ShopStates, // This is kept for signature compatibility but is no longer used.

@@ -1,12 +1,12 @@
 import { useMemo, useCallback } from 'react';
-import { REGIONS, ITEMS } from '../constants';
+import {  REGIONS, ITEMS  } from '../constants';
 import { POIS } from '../data/pois';
 import { useUIState } from './useUIState';
 import { useSkilling } from './useSkilling';
 import { useInteractQuest } from './useInteractQuest';
 import { useGameSession } from './useGameSession';
 import { ActiveBuff, Equipment, Item } from '../types';
-import { SKILL_ICONS } from '../constants';
+import {  SKILL_ICONS  } from '../constants';
 
 interface NavigationDependencies {
     session: ReturnType<typeof useGameSession>;

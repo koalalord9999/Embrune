@@ -7,7 +7,7 @@ import { useGameSession } from './useGameSession';
 import { useCharacter } from './useCharacter';
 import { useInventory } from './useInventory';
 import { WorldState, InventorySlot, Equipment, PlayerQuestState, PlayerType, POIActivity, PlayerRepeatableQuest } from '../types';
-import { ITEMS, INVENTORY_CAPACITY, REGIONS } from '../constants';
+import {  ITEMS, INVENTORY_CAPACITY, REGIONS  } from '../constants';
 import { POIS } from '../data/pois';
 import { saveSlotState } from '../db';
 import { useRepeatableQuests } from './useRepeatableQuests';

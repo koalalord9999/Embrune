@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { getIconUrl } from '../../constants';
 
 interface HitSplatProps {
     damage: number | 'miss';
@@ -28,16 +29,16 @@ const HitSplat: React.FC<HitSplatProps> = ({ damage, isMaxHit = false, isPoison 
 
     const splatIconUrl = useMemo(() => {
         if (isBurn) {
-            return 'https://api.iconify.design/game-icons:flame.svg';
+            return getIconUrl('flame');
         }
-        return 'https://api.iconify.design/game-icons:gooey-impact.svg';
+        return getIconUrl('gooey-impact');
     }, [isBurn]);
 
-    const [style, setStyle] = useState<React.CSSProperties>({ 
-        top: '50%', 
-        left: '50%', 
-        opacity: 0, 
-        transform: 'translate(-50%, -50%) scale(0.5)' 
+    const [style, setStyle] = useState<React.CSSProperties>({
+        top: '50%',
+        left: '50%',
+        opacity: 0,
+        transform: 'translate(-50%, -50%) scale(0.5)'
     });
 
     useEffect(() => {
@@ -48,9 +49,9 @@ const HitSplat: React.FC<HitSplatProps> = ({ damage, isMaxHit = false, isPoison 
             // Randomize position slightly for visual variety if multiple stack
             const top = `${Math.random() * 60 + 20}%`;
             const left = `${Math.random() * 60 + 20}%`;
-            
+
             setStyle({ top, left, opacity: 1, transform: 'translate(-50%, -50%) scale(1)' });
-            
+
             hideTimer = window.setTimeout(() => {
                 setStyle(s => ({ ...s, opacity: 0, transform: 'translate(-50%, -70%) scale(0.8)' }));
             }, 800);

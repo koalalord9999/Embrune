@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { InventorySlot, GroundItem, WorldState } from '../types';
-import { ITEMS } from '../constants';
+import {  ITEMS  } from '../constants';
 import { useGameSession } from './useGameSession';
 import { useInventory } from './useInventory';
 import { useUIState } from './useUIState';

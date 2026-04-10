@@ -10,6 +10,8 @@ export const REGIONS: Record<string, Region> = {
         y: 950,
         description: "An ancient tomb sealed long ago, now radiating a cold, malevolent energy.",
         recommendedCombatLevel: 25,
+        defaultMaxGroupSize: 2,
+        trackNum: 100,
     },
     chasm_of_woe: {
     id: "chasm_of_woe",
@@ -19,7 +21,9 @@ export const REGIONS: Record<string, Region> = {
     x: 0,
     y: 0,
     description: "A newly discovered chasm, deep beneath the mountains. The tremors have awakened its ancient, rocky inhabitants.",
-    recommendedCombatLevel: 30
+    recommendedCombatLevel: 30,
+    defaultMaxGroupSize: 2,
+    trackNum: 101,
 },
     crystalline_isles: {
     id: "crystalline_isles",
@@ -29,7 +33,8 @@ export const REGIONS: Record<string, Region> = {
     x: 1000,
     y: 200,
     description: "A breathtaking series of floating islands composed of massive, shimmering crystals. The air is thin and hums with a strange, resonant energy.",
-    recommendedCombatLevel: 55
+    recommendedCombatLevel: 55,
+    trackNum: 102,
 },
     dwarven_outpost: {
     id: "dwarven_outpost",
@@ -40,6 +45,8 @@ export const REGIONS: Record<string, Region> = {
     y: 1200,
     description: "A small, functional outpost carved into the rock by industrious dwarves.",
     worldMapConnections: ['mine_depths'],
+    defaultMaxGroupSize: 2,
+    trackNum: 103,
 },
     feywood: {
     id: "feywood",
@@ -47,7 +54,8 @@ export const REGIONS: Record<string, Region> = {
     type: "region",
     entryPoiId: "feywood_entrance",
     x: 0,
-    y: 0
+    y: 0,
+    trackNum: 104,
 },
     fouthia: {
     id: "fouthia",
@@ -57,6 +65,7 @@ export const REGIONS: Record<string, Region> = {
     x: -42,
     y: 1256,
     worldMapConnections: ['vsv_entrance', 'salt_flats_northwest_passage', 'sunken_city_road'],
+    trackNum: 105,
 },
     frostfang_peaks: {
     id: "frostfang_peaks",
@@ -66,7 +75,8 @@ export const REGIONS: Record<string, Region> = {
     x: 1650,
     y: 1550,
     description: "A cold, inhospitable region home to elementals and Frosthide Dragons.",
-    recommendedCombatLevel: 65
+    recommendedCombatLevel: 65,
+    trackNum: 106,
 },
     gale_swept_peaks: {
     id: "gale_swept_peaks",
@@ -74,7 +84,8 @@ export const REGIONS: Record<string, Region> = {
     type: "region",
     entryPoiId: "ancient_pass",
     x: 0,
-    y: 0
+    y: 0,
+    trackNum: 107,
 },
     goblin_dungeon: {
     id: "goblin_dungeon",
@@ -84,7 +95,9 @@ export const REGIONS: Record<string, Region> = {
     x: 0,
     y: 0,
     description: "A filthy warren teeming with goblins of all kinds. Their king is said to hoard stolen treasures.",
-    recommendedCombatLevel: 15
+    recommendedCombatLevel: 15,
+    defaultMaxGroupSize: 3,
+    trackNum: 108,
 },
     isle_of_whispers: {
     id: "isle_of_whispers",
@@ -92,7 +105,8 @@ export const REGIONS: Record<string, Region> = {
     type: "region",
     entryPoiId: "port_wreckage_docks",
     x: 0,
-    y: 0
+    y: 0,
+    trackNum: 109,
 },
     magus_spire: {
     id: "magus_spire",
@@ -102,7 +116,9 @@ export const REGIONS: Record<string, Region> = {
     x: 0,
     y: 0,
     description: "A towering spire of pure magic, protected by crystalline constructs. It is a place of immense arcane power.",
-    recommendedCombatLevel: 60
+    recommendedCombatLevel: 60,
+    defaultMaxGroupSize: 2,
+    trackNum: 110,
 },
     meadowdale: {
     id: "meadowdale",
@@ -112,6 +128,7 @@ export const REGIONS: Record<string, Region> = {
     x: 1000,
     y: 1000,
     worldMapConnections: ['south_meadow_road', 'whispering_woods', 'stonebreak_mine', 'mcgregors_ranch'],
+    trackNum: 111,
 },
     oakhaven: {
     id: "oakhaven",
@@ -121,6 +138,7 @@ export const REGIONS: Record<string, Region> = {
     x: 1000,
     y: 1800,
     worldMapConnections: ['oakhaven_road_2', 'kings_road_west_1'],
+    trackNum: 112,
 },
     path_of_beginnings: {
     id: "path_of_beginnings",
@@ -128,7 +146,8 @@ export const REGIONS: Record<string, Region> = {
     type: "region",
     entryPoiId: "tutorial_entrance",
     x: 50,
-    y: 50
+    y: 50,
+    trackNum: 113,
 },
     salt_flats: {
     id: "salt_flats",
@@ -138,6 +157,8 @@ export const REGIONS: Record<string, Region> = {
     x: 0,
     y: 0,
     isDesert: true,
+    defaultMaxGroupSize: 2,
+    trackNum: 114,
 },
     sanctity: {
         id: "sanctity",
@@ -147,6 +168,7 @@ export const REGIONS: Record<string, Region> = {
         x: 1650,
         y: 1500,
         worldMapConnections: ['swamp_path_east_2', 'sunbright_plains_start', 'wyrmwood_grove_entrance', 'frostfang_peaks_base'],
+        trackNum: 115,
     },
     serpents_coil: {
     id: "serpents_coil",
@@ -154,7 +176,8 @@ export const REGIONS: Record<string, Region> = {
     type: "region",
     entryPoiId: "serpents_coil_entrance",
     x: 0,
-    y: 0
+    y: 0,
+    trackNum: 116,
 },
     silverhaven: {
     id: "silverhaven",
@@ -164,6 +187,7 @@ export const REGIONS: Record<string, Region> = {
     x: 644,
     y: 1813,
     worldMapConnections: ['silverhaven_outskirts'],
+    trackNum: 117,
 },
     sunbright_plains: {
     id: "sunbright_plains",
@@ -173,7 +197,8 @@ export const REGIONS: Record<string, Region> = {
     x: 1650,
     y: 1450,
     description: "A smaller, hilly grassland north of Sanctity.",
-    recommendedCombatLevel: 30
+    recommendedCombatLevel: 30,
+    trackNum: 118,
 },
     sunbright_underground_cave: {
         id: "sunbright_underground_cave",
@@ -184,6 +209,8 @@ export const REGIONS: Record<string, Region> = {
         y: 1438,
         description: "A dark cave system beneath the Sunbright Plains.",
         recommendedCombatLevel: 30,
+        defaultMaxGroupSize: 2,
+        trackNum: 119,
     },
     sunscorched_wastes: {
     id: "sunscorched_wastes",
@@ -195,6 +222,8 @@ export const REGIONS: Record<string, Region> = {
     description: "A vast and barren desert, similar to the Salt Flats but much larger.",
     recommendedCombatLevel: 45,
     isDesert: true,
+    defaultMaxGroupSize: 2,
+    trackNum: 120,
 },
     sunken_labyrinth: {
     id: "sunken_labyrinth",
@@ -204,7 +233,9 @@ export const REGIONS: Record<string, Region> = {
     x: 0,
     y: 0,
     description: "An ancient, flooded temple complex. The original inhabitants are long gone, but their guardians remain.",
-    recommendedCombatLevel: 50
+    recommendedCombatLevel: 50,
+    defaultMaxGroupSize: 2,
+    trackNum: 121,
 },
     sunken_lands: {
     id: "sunken_lands",
@@ -212,7 +243,8 @@ export const REGIONS: Record<string, Region> = {
     type: "region",
     entryPoiId: "tangled_entry",
     x: 0,
-    y: 0
+    y: 0,
+    trackNum: 122,
 },
     the_verdant_fields: {
     id: "the_verdant_fields",
@@ -220,7 +252,8 @@ export const REGIONS: Record<string, Region> = {
     type: "region",
     entryPoiId: "mcgregors_ranch",
     x: 800,
-    y: 1200
+    y: 1200,
+    trackNum: 123,
 },
     volcanic_steam_vents: {
     id: "volcanic_steam_vents",
@@ -230,7 +263,8 @@ export const REGIONS: Record<string, Region> = {
     x: 0,
     y: 0,
     description: "A desolate, high-level region of volcanic activity, rich in rare minerals and home to powerful demons and dragons.",
-    recommendedCombatLevel: 80
+    recommendedCombatLevel: 80,
+    trackNum: 124,
 },
     wilderness: {
     id: "wilderness",
@@ -238,7 +272,8 @@ export const REGIONS: Record<string, Region> = {
     type: "region",
     entryPoiId: "meadowdale_square",
     x: 0,
-    y: 0
+    y: 0,
+    trackNum: 125,
 },
     wyrmwood_grove: {
     id: "wyrmwood_grove",
@@ -248,6 +283,7 @@ export const REGIONS: Record<string, Region> = {
     x: 1700,
     y: 1500,
     description: "An ancient forest where Grove Dragons are said to reside.",
-    recommendedCombatLevel: 60
+    recommendedCombatLevel: 60,
+    trackNum: 126,
 }
 };

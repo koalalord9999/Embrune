@@ -79,7 +79,7 @@ export const minePois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Use Resonator',
-                icon: 'https://api.iconify.design/game-icons:orb-wand.svg',
+                icon: 'orb-wand',
                 questCondition: { questId: 'the_arcane_awakening', stages: [0] },
                 startNode: 'use_resonator_stone',
             },
@@ -97,7 +97,7 @@ export const minePois: Record<string, POI> = {
             {
                 type: 'npc',
                 name: 'Wizard Elmsworth (Projection)',
-                icon: 'https://api.iconify.design/game-icons:wizard-face.svg',
+                icon: 'wizard-face',
                 questCondition: { questId: 'magical_runestone_discovery', stages: [1] },
                 startNode: 'mrd_projection_intro'
             }

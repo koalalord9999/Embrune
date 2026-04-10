@@ -2,7 +2,7 @@
 import React from 'react';
 import { useState, useCallback } from 'react';
 import { InventorySlot, Equipment, CombatStance, WeaponType, PlayerSkill, Item, BankTab, EquipmentStats, PlayerQuestState } from '../types';
-import { ITEMS, INVENTORY_CAPACITY, BANK_CAPACITY, AMMO_TIER_LEVELS } from '../constants';
+import {  ITEMS, INVENTORY_CAPACITY, BANK_CAPACITY, AMMO_TIER_LEVELS  } from '../constants';
 
 // Helper to ensure inventory is always a fixed-size sparse array
 const padInventory = (inv: (InventorySlot | null)[]): (InventorySlot | null)[] => {
@@ -158,15 +158,16 @@ export const useInventory = (
                 const finalExpiresAt = slotOverrides?.expiresAt;
 
                 if (isNoted || itemData.stackable) {
-                    const existingStack = newInv.find(i => 
+                    const stackIndex = newInv.findIndex(i => 
                         i?.itemId === itemId && 
                         !!i.noted === isNoted &&
                         i.nameOverride === nameOverride &&
                         JSON.stringify(i.statsOverride) === JSON.stringify(statsOverride)
                     );
                     
-                    if (existingStack) {
-                        existingStack.quantity += quantity;
+                    if (stackIndex > -1) {
+                        const existingStack = newInv[stackIndex]!;
+                        newInv[stackIndex] = { ...existingStack, quantity: existingStack.quantity + quantity };
                     } else {
                         const emptySlotIndex = newInv.findIndex(slot => slot === null);
                         if (emptySlotIndex === -1) {
@@ -209,10 +210,12 @@ export const useInventory = (
                         const stack = newInv[stackIndex];
                         if (stack) {
                             const amountCanRemove = Math.min(amountToRemove, stack.quantity);
-                            stack.quantity -= amountCanRemove;
+                            const newQty = stack.quantity - amountCanRemove;
                             removedCount = amountCanRemove;
-                            if (stack.quantity <= 0) {
+                            if (newQty <= 0) {
                                 newInv[stackIndex] = null;
+                            } else {
+                                newInv[stackIndex] = { ...stack, quantity: newQty };
                             }
                         }
                     }
@@ -241,9 +244,9 @@ export const useInventory = (
         }
     }, [addLog, isAutoBankOn, setBank, playerQuests, startQuest]);
 
-    const hasItems = useCallback((requirements: { itemId: string, quantity: number, operator?: 'gte' | 'lt' | 'eq' }[]): boolean => {
+    const hasItems = useCallback((requirements: { itemId: string, quantity: number, operator?: 'gte' | 'lt' | 'eq', nameOverride?: string }[]): boolean => {
       return requirements.every(req => {
-        const totalQuantity = inventory.reduce((acc, slot) => (slot && slot.itemId === req.itemId) ? acc + slot.quantity : acc, 0);
+        const totalQuantity = inventory.reduce((acc, slot) => (slot && slot.itemId === req.itemId && !slot.noted) ? acc + slot.quantity : acc, 0);
         
         // Handle old logic for absence check if quantity is negative
         if (req.quantity < 0) {

@@ -65,7 +65,7 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
         modifyItem('coins', -1);
         addLog("You toss a coin into the well and make a wish.");
 
-        const hasPrize = playerQuests.some(q => q.questId === 'ancient_blade' && q.isComplete) || hasItems([{itemId: 'rusty_iron_sword', quantity: 1}]) || hasItems([{itemId: 'iron_sword', quantity: 1}]);
+        const hasPrize = playerQuests.some(q => q.questId === 'ancient_blade' && q.isComplete) || hasItems([{ itemId: 'rusty_iron_sword', quantity: 1 }]) || hasItems([{ itemId: 'iron_sword', quantity: 1 }]);
         if (hasPrize) { addLog("The well remains silent. It seems it has already given you all it can."); return; }
 
         if (Math.random() <= 1 / 1000) {
@@ -95,7 +95,7 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
 
         addXp(requirement.skill, requirement.xp);
         addLog(`You use your ${requirement.skill} skill to clear the path! (+${requirement.xp} XP)`);
-        
+
         const obstacleId = `${fromPoiId}-${toPoiId}`;
         setClearedSkillObstacles(prev => [...prev, obstacleId]);
 
@@ -106,7 +106,7 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
         const isHoly = (activity as any).isHoly === true;
 
         const vialCount = inventory.reduce((total, slot) => slot?.itemId === 'vial' ? total + slot.quantity : total, 0);
-        
+
         if (isHoly) {
             if (vialCount === 0) {
                 addLog("You need an empty vial to collect holy water.");
@@ -134,26 +134,26 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
             const bucketCount = inventory.filter(slot => slot?.itemId === 'bucket').length;
             const waterskinCount = inventory.filter(slot => slot?.itemId === 'waterskin' && (slot.doses === undefined || slot.doses === 0)).length;
             const totalContainers = vialCount + bucketCount + waterskinCount;
-        
+
             if (totalContainers === 0) {
                 addLog("You don't have any empty containers to fill with water.");
                 return;
             }
-        
+
             const onConfirm = (quantity: number) => {
                 if (quantity <= 0) return;
-        
+
                 const vialsToFill = Math.min(quantity, vialCount);
                 const bucketsToFill = Math.min(quantity - vialsToFill, bucketCount);
                 const waterskinsToFill = Math.min(quantity - vialsToFill - bucketsToFill, waterskinCount);
-                
+
                 if (vialsToFill > 0) {
                     modifyItem('vial', -vialsToFill, true);
                     modifyItem('vial_of_water', vialsToFill, true, { bypassAutoBank: true });
                 }
                 if (bucketsToFill > 0) {
                     modifyItem('bucket', -bucketsToFill, true);
-                    modifyItem('bucket_of_water', bucketsToFill, true, { bypassAutoBank: true }); 
+                    modifyItem('bucket_of_water', bucketsToFill, true, { bypassAutoBank: true });
                 }
                 if (waterskinsToFill > 0) {
                     setInventory(prevInv => {
@@ -169,17 +169,17 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
                         return newInv;
                     });
                 }
-    
+
                 const logParts = [];
                 if (vialsToFill > 0) logParts.push(`${vialsToFill} vial${vialsToFill > 1 ? 's' : ''}`);
                 if (bucketsToFill > 0) logParts.push(`${bucketsToFill} bucket${bucketsToFill > 1 ? 's' : ''}`);
                 if (waterskinsToFill > 0) logParts.push(`${waterskinsToFill} waterskin${waterskinsToFill > 1 ? 's' : ''}`);
-        
+
                 if (logParts.length > 0) {
                     addLog(`You fill ${logParts.join(' and ')} with water.`);
                 }
             };
-    
+
             if (totalContainers === 1) {
                 onConfirm(1);
             } else {
@@ -191,7 +191,7 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
             }
         }
     }, [inventory, addLog, modifyItem, setMakeXPrompt, setInventory, setIsResting]);
-    
+
     const handleCutCactus = useCallback(() => {
         setIsResting(false);
         const slashWeapons = [WeaponType.Sword, WeaponType.Scimitar, WeaponType.Dagger, WeaponType.Axe, WeaponType.Battleaxe];
@@ -215,7 +215,7 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
             addLog("You don't have any waterskins that need filling.");
             return;
         }
-        
+
         setInventory(prevInv => {
             const newInv = [...prevInv];
             const waterskinSlot = newInv[waterskinToFillIndex];
@@ -228,6 +228,17 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
         addLog("You skillfully slice the cactus and fill your waterskin.");
         addXp(SkillName.Woodcutting, 15);
     }, [equipment.weapon, hasItems, inventory, addLog, setInventory, addXp, setIsResting]);
+
+    const handleSandPit = useCallback(() => {
+        setIsResting(false);
+        if (!hasItems([{ itemId: 'bucket', quantity: 1 }])) {
+            addLog("You need an empty bucket to collect sand.");
+            return;
+        }
+        modifyItem('bucket', -1, true);
+        modifyItem('bucket_of_sand', 1, false, { bypassAutoBank: true });
+        addLog("You fill your bucket with fine sand.");
+    }, [hasItems, modifyItem, addLog, setIsResting]);
 
     const handleCollectFlour = useCallback(() => {
         setIsResting(false);
@@ -247,7 +258,7 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
             addLog("You have no wheat to mill.");
             return;
         }
-        
+
         const onConfirm = (quantity: number) => {
             if (quantity > 0) {
                 addLog("You add the wheat to the hopper and start the windmill.");
@@ -323,7 +334,7 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
         }
 
         const freeSlots = inventory.filter(s => s === null).length;
-        if (freeSlots < 4) {
+        if (freeSlots < 5) {
             addLog("You need at least 5 free inventory slots to open this chest.");
             return;
         }
@@ -331,33 +342,84 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
         modifyItem('strange_key', -1, true);
         addLog("You insert the strange key into the ancient chest... it clicks open!");
 
-        const randomHighGem = Math.random() < 0.75 ? 'uncut_ruby' : 'uncut_diamond';
-        modifyItem(randomHighGem, 1, false, { bypassAutoBank: true });
-        modifyItem('uncut_sunstone', 1, false, { bypassAutoBank: true });
-        
-        const highRunes = ['nexus_rune', 'anima_rune', 'aether_rune', 'passage_rune'];
-        for (let i = 0; i < 5; i++) {
-            const rune = highRunes[Math.floor(Math.random() * highRunes.length)];
-            const quantity = Math.floor(Math.random() * 21) + 10;
-            modifyItem(rune, quantity, true, { bypassAutoBank: true });
-        }
-        
-        modifyItem('coins', Math.floor(Math.random() * 10001) + 5000, true);
+        // 1. Guaranteed Sunstone
+        modifyItem('uncut_sunstone', 1, false);
 
-        if (Math.random() < 0.5) {
-            modifyItem('adamantite_bar', Math.floor(Math.random() * 3) + 1, true, { bypassAutoBank: true });
+        // 2. Roll on Master Table
+        const result = rollOnLootTable('ancient_chest_master_table');
+        if (result) {
+            const { itemId, quantity, noted } = typeof result === 'string' ? { itemId: result, quantity: 1, noted: false } : result;
+
+            switch (itemId) {
+                case 'sunstone_bonus':
+                    // Just the sunstone
+                    break;
+                case 'pkg_coins_food':
+                    modifyItem('coins', 2000, false);
+                    modifyItem('cake', 1, false);
+                    break;
+                case 'pkg_runes':
+                    modifyItem('gust_rune', 50, false);
+                    modifyItem('aqua_rune', 50, false);
+                    modifyItem('stone_rune', 50, false);
+                    modifyItem('ember_rune', 50, false);
+                    modifyItem('hex_rune', 50, false);
+                    modifyItem('binding_rune', 50, false);
+                    modifyItem('flux_rune', 10, false);
+                    modifyItem('nexus_rune', 10, false);
+                    modifyItem('astral_rune', 10, false);
+                    modifyItem('verdant_rune', 10, false);
+                    modifyItem('passage_rune', 10, false);
+                    break;
+                case 'pkg_gems':
+                    modifyItem('ruby', 2, false);
+                    modifyItem('diamond', 2, false);
+                    break;
+                case 'pkg_bars':
+                    modifyItem('runic_bar', 3, false, { noted: true });
+                    break;
+                case 'pkg_mining':
+                    // 50/50 chance for iron ore or coal
+                    if (Math.random() < 0.5) {
+                        modifyItem('iron_ore', 150, false, { noted: true });
+                    } else {
+                        modifyItem('coal', 100, false, { noted: true });
+                    }
+                    break;
+                case 'pkg_fishing':
+                    modifyItem('raw_swordfish', 5, false, { noted: true });
+                    modifyItem('coins', 1000, false);
+                    break;
+                case 'pkg_adamantite_square_shield':
+                    modifyItem('adamantite_square_shield', 1, false);
+                    break;
+                case 'pkg_key_halves':
+                    modifyItem('coins', 750, false);
+                    // 50/50 chance for loop or tooth
+                    if (Math.random() < 0.5) {
+                        modifyItem('strange_key_loop', 1, false);
+                    } else {
+                        modifyItem('strange_key_tooth', 1, false);
+                    }
+                    break;
+                case 'pkg_runic_armor':
+                    // 50/50 chance for platelegs or chainbody
+                    if (Math.random() < 0.5) {
+                        modifyItem('runic_platelegs', 1, false);
+                    } else {
+                        modifyItem('runic_chainbody', 1, false);
+                    }
+                    break;
+                default:
+                    // It's a real item from a sub-table (like Aquatite)
+                    modifyItem(itemId, quantity, false, { bypassAutoBank: false, noted });
+                    if (itemId.includes('aquatite')) {
+                        addLog("Incredibly lucky! You found a piece of Aquatite armor inside!");
+                    }
+                    break;
+            }
         }
-        if (Math.random() < 0.25) {
-            modifyItem('runic_bar', Math.floor(Math.random() * 2) + 1, true, { bypassAutoBank: true });
-        }
-        
-        if (Math.random() < 0.01) {
-            const aquatiteGear = ['aquatite_sword', 'aquatite_kiteshield', 'aquatite_platebody', 'aquatite_platelegs', 'aquatite_full_helm'];
-            // FIX: Corrected a typo where `agilityGear` was used instead of `aquatiteGear`. `agilityGear` is not defined in this scope.
-            const randomPiece = aquatiteGear[Math.floor(Math.random() * aquatiteGear.length)];
-            modifyItem(randomPiece, 1, false, { bypassAutoBank: true });
-            addLog("Incredibly lucky! You found a piece of Aquatite armor inside!");
-        }
+
         addLog(`You find a pile of loot inside the chest!`);
 
     }, [hasItems, modifyItem, addLog, inventory, setIsResting]);
@@ -370,8 +432,9 @@ export const useWorldActions = (props: UseWorldActionsProps) => {
         handleCollectWater,
         handleCollectFlour,
         handleMillWheat,
-        handleChurn, 
+        handleChurn,
         handleOpenAncientChest,
         handleCutCactus,
+        handleSandPit,
     };
 };
