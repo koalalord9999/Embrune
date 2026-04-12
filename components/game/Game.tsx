@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { CombatStance, PlayerSlayerTask, ShopStates, SkillName, POIActivity, InventorySlot, ActivePanel, Item, Region, POI, WorldState, GroundItem, Spell, GeneratedRepeatableQuest, BonfireActivity, BankTab, DialogueResponse, DialogueCheckRequirement, Monster, MonsterType, SpellElement, PlayerType, ActiveBuff, Equipment } from '../../types';
+import { CombatStance, PlayerSlayerTask, ShopStates, SkillName, POIActivity, InventorySlot, ActivePanel, Item, Region, POI, WorldState, GroundItem, Spell, GeneratedRepeatableQuest, BonfireActivity, BankTab, DialogueResponse, DialogueCheckRequirement, Monster, MonsterType, SpellElement, PlayerType, ActiveBuff, Equipment, WeaponType } from '../../types';
 import { useActivityLog } from '../../hooks/useActivityLog';
 import { useCharacter } from '../../hooks/useCharacter';
 import { useInventory } from '../../hooks/useInventory';
@@ -33,7 +33,7 @@ import { usePrayer } from '../../hooks/usePrayer';
 import { useDehydration } from '../../hooks/useDehydration';
 import { useAgility } from '../../hooks/useAgility';
 import { useMusicEngine } from '../../hooks/useMusicEngine';
-import { PRAYERS, ITEMS, SKILL_ICONS } from '../../constants';
+import { PRAYERS, ITEMS, SKILL_ICONS, ATTACK_STYLES } from '../../constants';
 import { useKeyboardManager, Direction } from '../../hooks/useKeyboardManager';
 
 
@@ -94,6 +94,8 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     const [poisonEvent, setPoisonEvent] = useState<{ damage: number, timestamp: number } | null>(null);
     const [isTraveling, setIsTraveling] = useState(false);
     const [combatStance, setCombatStance] = useState<CombatStance>(initialState.combatStance);
+    const [stylesByWeaponType, setStylesByWeaponType] = useState<Partial<Record<WeaponType, number>>>(initialState.stylesByWeaponType || {});
+    const [combatAttackType, setCombatAttackType] = useState<'stab' | 'slash' | 'crush'>('crush');
     const [rangeCooldowns, setRangeCooldowns] = useState<Record<string, number>>({});
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -229,6 +231,21 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         }
     );
     useEffect(() => { invRef.current = inv; }, [inv]);
+
+    useEffect(() => {
+        const weaponType = inv.equipment.weapon ? ITEMS[inv.equipment.weapon.itemId]?.equipment?.weaponType : WeaponType.Unarmed;
+        const normalizedWeaponType = weaponType ?? WeaponType.Unarmed;
+        
+        const attackStyles = ATTACK_STYLES[normalizedWeaponType];
+        if (attackStyles) {
+            const savedIndex = stylesByWeaponType[normalizedWeaponType] || 0;
+            const styleToApply = attackStyles[savedIndex] || attackStyles[0];
+            if (styleToApply) {
+                setCombatStance(styleToApply.stance);
+                setCombatAttackType(styleToApply.attackType);
+            }
+        }
+    }, [inv.equipment.weapon?.itemId]); // intentionally omitting stylesByWeaponType to avoid reverting manual selections
 
     const char = useCharacter(
         charInitialData,
@@ -480,6 +497,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         coins: inv.coins,
         equipment: inv.equipment,
         combatStance: combatStance,
+        stylesByWeaponType: stylesByWeaponType,
         currentHp: char.currentHp,
         currentPrayer: char.rawCurrentPrayer,
         runEnergy: char.runEnergy,
@@ -528,7 +546,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         combatLevel: char.combatLevel,
     }), [
         initialState.username, initialState.playerType,
-        char.skills, combatStance, char.currentHp, char.rawCurrentPrayer, char.autocastSpell, char.statModifiers, char.activeBuffs, char.combatLevel, prayer.activePrayers, char.runEnergy, char.isRunToggled, char.isResting, agility.agilityState,
+        char.skills, combatStance, stylesByWeaponType, char.currentHp, char.rawCurrentPrayer, char.autocastSpell, char.statModifiers, char.activeBuffs, char.combatLevel, prayer.activePrayers, char.runEnergy, char.isRunToggled, char.isResting, agility.agilityState,
         inv.inventory, inv.coins, inv.equipment, bank, session.currentPoiId, quests.playerQuests, quests.lockedPois, clearedSkillObstacles,
         skilling.resourceNodeStates, monsterRespawnTimers, allGroundItems, repeatableQuests, slayer.slayerTask, worldState,
         ui.showTooltips, ui.showXpDrops, ui.confirmValuableDrops, ui.valuableDropThreshold, ui.showMinimapHealth, ui.showCombatPlayerHealth, ui.showCombatEnemyHealth, ui.showHitsplats, ui.isOneClickMode,
@@ -777,6 +795,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         inv.equipment,
         inv.setEquipment,
         worldState,
+        setWorldState,
         repeatableQuests.activePlayerQuest
     );
 
@@ -1494,7 +1513,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                             />
                         </div>
                     )}
-                    <MainViewController onFastTravel={handleFastTravel} onCommitMapChanges={devMode.handleCommitMapChanges} {...{
+                    <MainViewController combatAttackType={combatAttackType} stylesByWeaponType={stylesByWeaponType} setStylesByWeaponType={setStylesByWeaponType} setCombatAttackType={setCombatAttackType} onFastTravel={handleFastTravel} onCommitMapChanges={devMode.handleCommitMapChanges} {...{
                         char: { ...char, setCombatStance },
                         itemActions, inv, quests, bank, bankLogic, shops, crafting, repeatableQuests, navigation, worldActions, slayer, questLogic, skilling, interactQuest, session, clearedSkillObstacles, monsterRespawnTimers, handlePlayerDeath: () => handlePlayerDeath(gameState), handleKill, onWinCombat, onFleeSuccess: onFleeFromCombat, onResponse, handleDialogueCheck, combatSpeedMultiplier: devMode.combatSpeedMultiplier, activeCombatStyleHighlight: null, isTouchSimulationEnabled: devMode.isTouchSimulationEnabled, isMapManagerEnabled: false, poiCoordinates: undefined, regionCoordinates: undefined, onUpdatePoiCoordinate: undefined, poiConnections: undefined, addLog, ui, initialState, showAllPois: devMode.showAllPois, groundItemsForCurrentPoi, onPickUpItem: handlePickUpItem, onTakeAllLoot: handleTakeAllLoot, onItemDropped, isAutoBankOn: devMode.isAutoBankOn, handleCombatXpGain: char.addXp, poiImmunityTimeLeft, killTrigger, bankPlaceholders: worldState.bankPlaceholders ?? false, handleToggleBankPlaceholders, bonfires: bonfires.filter(b => b.uniqueId.startsWith(session.currentPoiId)), onStokeBonfire: crafting.handleStokeBonfire, isStunned: char.isStunned, addBuff: char.addBuff, isDevMode: devMode.isDevMode, onToggleDevPanel: handleToggleDevPanel, onToggleTouchSimulation: devMode.onToggleTouchSimulation, onDepositEquipment: () => bankLogic.handleDepositEquipment(ui.activeBankTabId), deathMarker: worldState.deathMarker, activeRepeatableQuest: repeatableQuests.activePlayerQuest, onActivity: handleActivityClickWrapper, onResetGame, onImportGame, onExportGame, isOneClickMode: ui.isOneClickMode, poi, thievingContainerStates: thieving.containerStates, onPickpocket: thieving.handlePickpocket, onLockpick: thieving.handleLockpick, onPilfer: thievingPilfering.handlePilfer, onStealFromStall: thieving.handleStealFromStall, worldState, onStartCombat: onStartSingleCombat, onEncounterWin: handleEncounterWin, activePrayers: prayer.activePrayers, onJewelryCraft: crafting.handleJewelryCrafting, setEquipment: inv.setEquipment, poisonEvent, runEnergy: char.runEnergy, setRunEnergy: char.setRunEnergy, playerCombatLevel: char.combatLevel, addXp: char.addXp, setCurrentHp: char.setCurrentHp, agility, setActivePrayers: prayer.setActivePrayers
                     }} />
@@ -1520,6 +1539,10 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                         ui,
                         initialState,
                         char: { ...char, setCombatStance },
+                        combatAttackType,
+                        setCombatAttackType,
+                        stylesByWeaponType,
+                        setStylesByWeaponType,
                         inv,
                         quests,
                         repeatableQuests,

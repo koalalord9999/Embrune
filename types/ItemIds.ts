@@ -1,5 +1,5 @@
 // AUTO-GENERATED: Run 'node generate-item-ids.js' to update this file!
-export type ItemId = 
+export type ItemId =
   | '2_3_cake'
   | 'accuracy_potion'
   | 'adamantite_arrow'
@@ -460,6 +460,10 @@ export type ItemId =
   | 'molten_glass'
   | 'mystic_page'
   | 'necklace_mould'
+  | 'necklace_of_binding'
+  | 'necklace_of_the_angler'
+  | 'necklace_of_pyromancy'
+  | 'necklace_of_shadows'
   | 'necklace_of_fortune'
   | 'needle'
   | 'nexus_rune'

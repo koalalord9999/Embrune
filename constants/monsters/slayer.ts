@@ -219,7 +219,7 @@ export const slayer: Monster[] = [
         // requiredSlayerItem: 'nose_clamp',
         maxHp: 70,
         attack: 1, magic: 60, strength: 1, defence: 55,
-        stabDefence: 50, slashDefence: 50, crushDefence: 50, rangedDefence: 55, magicDefence: 60,
+        stabDefence: 50, slashDefence: 50, crushDefence: 50, rangedDefence: 55, magicDefence: -20,
         iconUrl: 'ghost',
         types: [MonsterType.Undead, MonsterType.Elemental],
         attackSpeed: 4, respawnTime: 38000, alwaysDrops: true, aggressive: true, attackStyle: 'magic',

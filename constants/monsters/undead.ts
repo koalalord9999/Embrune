@@ -116,8 +116,8 @@ export const undead: Monster[] = [
         types: [MonsterType.Undead], attackSpeed: 4, respawnTime: 45000, aggressive: true, alwaysAggressive: true, attackStyle: 'ranged'
     },
     {
-        id: 'spire_spellweaver', name: 'Spire Spellweaver', level: 80, maxHp: 100, attack: 1, magic: 70, customMaxHit: 16, strength: 40, defence: 75,
-        stabDefence: 65, slashDefence: 65, crushDefence: 65, rangedDefence: 28, magicDefence: 32,
+        id: 'spire_spellweaver', name: 'Spire Spellweaver', level: 80, maxHp: 100, attack: 1, magic: 70, customMaxHit: 11, strength: 40, defence: 75,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -10,
         iconUrl: 'wizard-face',
         guaranteedDrops: [{ itemId: 'bones', minQuantity: 1, maxQuantity: 1 }],
         mainDrops: [

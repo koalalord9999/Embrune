@@ -183,8 +183,8 @@ export const beasts: Monster[] = [
         types: [MonsterType.Beast, MonsterType.Armored], attackSpeed: 4, respawnTime: 50000, aggressive: true, attackStyle: 'stab',
     },
     {
-        id: 'crystal_hydra', name: 'Crystal Hydra', level: 100, maxHp: 150, attack: 1, magic: 90, customMaxHit: 20, strength: 50, defence: 100,
-        stabDefence: 100, slashDefence: 100, crushDefence: 100, rangedDefence: 45, magicDefence: 50,
+        id: 'crystal_hydra', name: 'Crystal Hydra', level: 100, maxHp: 150, attack: 1, magic: 90, customMaxHit: 14, strength: 50, defence: 100,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -80,
         iconUrl: 'hydra',
         guaranteedDrops: [
             { itemId: 'dragon_bones', minQuantity: 1, maxQuantity: 1 },
@@ -204,8 +204,8 @@ export const beasts: Monster[] = [
         specialAttacks: [{ name: 'Shattering Roar', chance: 0.3, effect: 'stat_drain_multi', skills: [{ skill: SkillName.Defence, value: -3 }, { skill: SkillName.Magic, value: -3 }] }],
     },
     {
-        id: 'crystalline_spider', name: 'Crystalline Spider', level: 62, maxHp: 70, attack: 1, magic: 52, customMaxHit: 13, strength: 30, defence: 60,
-        stabDefence: 42, slashDefence: 42, crushDefence: 42, rangedDefence: 12, magicDefence: 18,
+        id: 'crystalline_spider', name: 'Crystalline Spider', level: 62, maxHp: 70, attack: 1, magic: 52, customMaxHit: 9, strength: 30, defence: 60,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -10,
         iconUrl: 'spider-alt',
         guaranteedDrops: [{ itemId: 'spider_silk', minQuantity: 1, maxQuantity: 1 }],
         mainDrops: [

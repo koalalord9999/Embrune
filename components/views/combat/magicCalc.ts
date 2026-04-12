@@ -1,5 +1,5 @@
 import { CombatStance, ActiveBuff, Monster, SkillName, MonsterStatusEffect, InventorySlot, Spell, SpellElement } from '../../../types';
-import {  ITEMS  } from '../../../constants';
+import { ITEMS } from '../../../constants';
 import { calculateAccuracy, DamageCalculationResult } from './combatUtils';
 
 export const calculateMagicDamage = (
@@ -43,21 +43,23 @@ export const calculateMagicDamage = (
         damageMultiplier = 2.0;
         logMessage = "Your spell hits a weak point!";
     }
-    
-    const totalMonsterMagicDefence = monster.defence + monster.magicDefence;
+
+    const magicLevelBase = monster.magic ?? (monster.attackStyle === 'ranged' ? (monster.ranged ?? 0) / 2 : 0);
+    const totalMonsterMagicDefence = (magicLevelBase * 2) + (monster.magicDefence ?? 0);
+
     const accuracy = calculateAccuracy(totalMagicAttack, totalMonsterMagicDefence);
-    
+
     const baseMaxHit = spell.maxHit ?? 0;
     const magicBuff = activeBuffs.find(b => b.type === 'magic_damage_boost');
     const buffBonus = magicBuff ? (magicBuff.value / 100) : 0;
     const bonus = 1 + (playerStats.magicDamageBonus / 100) + buffBonus;
     const maxHit = Math.floor(baseMaxHit * bonus * damageMultiplier);
 
-    if (Math.random() < accuracy) { 
+    if (Math.random() < accuracy) {
         successfulHit = true;
         playerDamage = Math.floor(Math.random() * (maxHit + 1));
     }
-    
+
     if (successfulHit && playerDamage > 0 && spell.element === 'fire') {
         if (monster.fireImmunity) {
             playerDamage = -Math.ceil(playerDamage / 2);
@@ -65,13 +67,13 @@ export const calculateMagicDamage = (
         } else if (monster.fireWeakness) { // Can be positive or negative
             playerDamage = Math.ceil(playerDamage * (1 + monster.fireWeakness));
             if (monster.fireWeakness > 0) {
-                 logMessage = "The monster is weak to fire!";
+                logMessage = "The monster is weak to fire!";
             } else if (monster.fireWeakness < 0) {
-                 logMessage = "The monster resists the fire!";
+                logMessage = "The monster resists the fire!";
             }
         }
     }
-    
+
     const isMax = successfulHit && playerDamage > 0 && playerDamage === maxHit && maxHit >= 2;
 
     if (playerDamage > 0) {
@@ -85,25 +87,25 @@ export const calculateMagicDamage = (
     }
 
     if (successfulHit) {
-         const equipmentPoison = weaponSlot?.statsOverride?.poisoned;
-         const potionPoisonBuff = activeBuffs.find(b => b.type === 'poison_on_hit');
-         let poisonToApply: { chance: number, damage: number } | null = null;
-         if (equipmentPoison) {
+        const equipmentPoison = weaponSlot?.statsOverride?.poisoned;
+        const potionPoisonBuff = activeBuffs.find(b => b.type === 'poison_on_hit');
+        let poisonToApply: { chance: number, damage: number } | null = null;
+        if (equipmentPoison) {
             poisonToApply = { chance: equipmentPoison.chance, damage: equipmentPoison.damage };
-         }
-         if (potionPoisonBuff) {
+        }
+        if (potionPoisonBuff) {
             const potionPoison = { chance: potionPoisonBuff.chance ?? 0.25, damage: potionPoisonBuff.value };
-             if (!poisonToApply || potionPoison.damage > poisonToApply.damage) {
-                 poisonToApply = potionPoison;
-             }
-         }
-         if (poisonToApply && Math.random() < poisonToApply.chance) {
+            if (!poisonToApply || potionPoison.damage > poisonToApply.damage) {
+                poisonToApply = potionPoison;
+            }
+        }
+        if (poisonToApply && Math.random() < poisonToApply.chance) {
             statusEffectsToApply.push({ type: 'poison', damagePerTick: poisonToApply.damage, ticksApplied: 0 });
-         }
+        }
     }
-    
+
     const spellTier = spell.level > 80 ? 5 : spell.level > 60 ? 4 : spell.level > 40 ? 3 : spell.level > 20 ? 2 : 1;
-    
+
     return {
         damage: playerDamage,
         xpGains,

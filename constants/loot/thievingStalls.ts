@@ -99,7 +99,7 @@ export const THIEVING_STALL_TARGETS: Record<string, ThievingStall> = {
         name: 'Water Stall',
         level: 35, xp: 50, respawnTime: 6000,
         loot: [
-            { itemId: 'waterskin_full', chance: "1/1" },
+            { itemId: 'waterskin', chance: "1/1", doses: 3 },
         ]
     },
     thieving_stall_spices: {
@@ -126,6 +126,6 @@ export const THIEVING_STALL_LOOT_TABLES: Record<string, WeightedDrop[]> = {
         { itemId: 'golem_core_shard', chance: 1 },
     ],
     thieving_stall_random_potion: [
-        ...HERBLORE_RECIPES.finished.map(p => ({ itemId: p.finishedPotionId, chance: 1, minQuantity: 1, maxQuantity: 1 }))
+        ...HERBLORE_RECIPES.finished.map(p => ({ itemId: p.finishedPotionId as any, chance: 1, doses: 3 }))
     ],
 };

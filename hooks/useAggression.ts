@@ -21,6 +21,7 @@ export const useAggression = (
     equipment: Equipment,
     setEquipment: React.Dispatch<React.SetStateAction<Equipment>>,
     worldState: WorldState,
+    setWorldState: React.Dispatch<React.SetStateAction<WorldState>>,
     activeRepeatableQuest: PlayerRepeatableQuest | null
 ) => {
     useEffect(() => {
@@ -90,6 +91,14 @@ export const useAggression = (
                 const necklace = equipment.necklace;
                 if (necklace?.itemId === 'necklace_of_shadows' && (necklace.charges ?? 0) > 0) {
                     const newCharges = (necklace.charges ?? 1) - 1;
+                    addLog("Your Necklace of Shadows pulses with dark energy, cloaking you from the monsters here.");
+                    setWorldState(prev => ({
+                        ...prev,
+                        poiImmunity: {
+                            ...(prev.poiImmunity || {}),
+                            [currentPoiId]: Date.now() + 10 * 60 * 1000 // 10 minutes of immunity
+                        }
+                    }));
                     if (newCharges > 0) {
                         setEquipment(prev => ({ ...prev, necklace: { ...necklace, charges: newCharges } }));
                     } else {
@@ -110,5 +119,5 @@ export const useAggression = (
 
         return () => clearInterval(interval);
         
-    }, [currentPoi, isGameLoaded, isBusy, isInCombat, isTraveling, playerCombatLevel, startCombat, addLog, monsterRespawnTimers, isPermAggroOn, isPlayerInvisible, isPlayerImmune, equipment, setEquipment, worldState, activeRepeatableQuest]);
+    }, [currentPoi, isGameLoaded, isBusy, isInCombat, isTraveling, playerCombatLevel, startCombat, addLog, monsterRespawnTimers, isPermAggroOn, isPlayerInvisible, isPlayerImmune, equipment, setEquipment, worldState, setWorldState, activeRepeatableQuest]);
 };

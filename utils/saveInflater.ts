@@ -1,4 +1,4 @@
-import { REPEATABLE_QUEST_POOL, XP_TABLE, INVENTORY_CAPACITY, ALL_SKILLS, QUESTS, ITEMS, SPELLS } from '../constants';
+import { REPEATABLE_QUEST_POOL, XP_TABLE, INVENTORY_CAPACITY, ALL_SKILLS, QUESTS, ITEMS, SPELLS, SAVE_KEY_TO_WEAPON_TYPE } from '../constants';
 import { MUSIC_TRACKS } from '../hooks/useMusicEngine';
 
 /** Reverse mapping for numeric IDs to string IDs */
@@ -111,6 +111,21 @@ export function inflateGameState(state: any): any {
             monsterRespawnTimers: state.mr || {},
             settings: {}
         };
+
+        if (state.stwt && typeof state.stwt === 'object') {
+            const inflatedStwt: Record<string, number> = {};
+            for (const [shortKey, index] of Object.entries(state.stwt)) {
+                if (typeof index === 'number') {
+                    const wt = SAVE_KEY_TO_WEAPON_TYPE[shortKey];
+                    if (wt) {
+                        inflatedStwt[wt] = index;
+                    }
+                }
+            }
+            if (Object.keys(inflatedStwt).length > 0) {
+                full.stylesByWeaponType = inflatedStwt;
+            }
+        }
 
         // 1. Skills
         if (Array.isArray(state.s)) {

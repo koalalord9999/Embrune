@@ -29,3 +29,4 @@ export * from './pilfering';
 export * from '../data/pois/pilfering';
 export * from '../data/agility_courses';
 export * from './audioManifest';
+export * from './attackStyles';

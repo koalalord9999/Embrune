@@ -26,6 +26,10 @@ interface SidePanelProps {
     initialState: any;
     // char prop type now includes setCombatStance to match what's passed from Game.tsx
     char: ReturnType<typeof useCharacter> & { setCombatStance: React.Dispatch<React.SetStateAction<CombatStance>> };
+    combatAttackType: 'stab' | 'slash' | 'crush';
+    setCombatAttackType: React.Dispatch<React.SetStateAction<'stab' | 'slash' | 'crush'>>;
+    stylesByWeaponType: Partial<Record<WeaponType, number>>;
+    setStylesByWeaponType: React.Dispatch<React.SetStateAction<Partial<Record<WeaponType, number>>>>;
     inv: ReturnType<typeof useInventory>;
     quests: ReturnType<typeof useQuests>;
     repeatableQuests: ReturnType<typeof useRepeatableQuests>;
@@ -117,7 +121,7 @@ const PlaceholderIcon: React.FC = () => (
 
 
 const SidePanel: React.FC<SidePanelProps> = (props) => {
-    const { ui, char, inv, quests, repeatableQuests, slayer, onReturnToMenu, isDevMode, isTouchSimulationEnabled, onToggleTouchSimulation, itemActions, isBusy, handleExamine, session, addLog, activeCombatStyleHighlight, isBankOpen, isShopOpen, onDeposit, onNavigate, unlockedPois, onCastSpell, onSpellOnItem, isEquipmentStatsOpen = false, initialState, activePrayers, onTogglePrayer, isPoisoned, onCurePoison, poisonEvent, onToggleDevPanel, isPermAggroOn, onTogglePermAggro, isGodModeOn, onToggleGodMode, worldState } = props;
+    const { ui, char, inv, quests, repeatableQuests, slayer, onReturnToMenu, isDevMode, isTouchSimulationEnabled, onToggleTouchSimulation, itemActions, isBusy, handleExamine, session, addLog, activeCombatStyleHighlight, isBankOpen, isShopOpen, onDeposit, onNavigate, unlockedPois, onCastSpell, onSpellOnItem, isEquipmentStatsOpen = false, initialState, activePrayers, onTogglePrayer, isPoisoned, onCurePoison, poisonEvent, onToggleDevPanel, isPermAggroOn, onTogglePermAggro, isGodModeOn, onToggleGodMode, worldState, combatAttackType, setCombatAttackType, stylesByWeaponType, setStylesByWeaponType } = props;
     const { activePanel, setActivePanel } = ui;
     const panelContentRef = useRef<HTMLDivElement>(null);
 
@@ -152,7 +156,7 @@ const SidePanel: React.FC<SidePanelProps> = (props) => {
     const renderActivePanel = () => {
         switch(activePanel) {
             case 'combat':
-                return <CombatStylePanel combatStance={char.combatStance} setCombatStance={char.setCombatStance} equipment={inv.equipment} combatLevel={char.combatLevel} activeCombatStyleHighlight={activeCombatStyleHighlight} ui={ui} />;
+                return <CombatStylePanel combatStance={char.combatStance} setCombatStance={char.setCombatStance} equipment={inv.equipment} combatLevel={char.combatLevel} activeCombatStyleHighlight={activeCombatStyleHighlight} ui={ui} combatAttackType={combatAttackType} setCombatAttackType={setCombatAttackType} stylesByWeaponType={stylesByWeaponType} setStylesByWeaponType={setStylesByWeaponType} />;
             case 'inventory':
                  return <InventoryPanel {...inventoryPanelProps} />;
             case 'equipment':

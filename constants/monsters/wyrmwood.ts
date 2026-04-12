@@ -4,7 +4,7 @@ export const wyrmwoodMonsters: Monster[] = [
     // --- Southern Branch (Lvl 55-70, Stealthy/Enchanted, Fearful) ---
     {
         id: 'shadow_cat', name: 'Shadow Cat', level: 55, maxHp: 60, attack: 45, strength: 40, defence: 50,
-        stabDefence: 40, slashDefence: 55, crushDefence: 35, rangedDefence: 50, magicDefence: 45,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: 0,
         iconUrl: 'lynx-head',
         types: [MonsterType.Beast], attackSpeed: 3, respawnTime: 25000, aggressive: false, attackStyle: 'slash', customMaxHit: 7,
         mainDrops: [{ itemId: 'raw_beef', chance: '1/2' }, { tableId: 'herb_table', chance: '1/8' }],
@@ -12,7 +12,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'wispwood_spirit', name: 'Wispwood Spirit', level: 58, maxHp: 50, attack: 1, magic: 55, strength: 1, defence: 60,
-        stabDefence: 50, slashDefence: 50, crushDefence: 50, rangedDefence: 65, magicDefence: 70,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: 0,
         iconUrl: 'ghost-ally',
         types: [MonsterType.Elemental], attackSpeed: 4, respawnTime: 30000, aggressive: false, attackStyle: 'magic', customMaxHit: 8,
         mainDrops: [{ itemId: 'fey_dust', chance: '1/3' }, { itemId: 'verdant_rune', chance: '1/5', minQuantity: 5, maxQuantity: 15 }],
@@ -20,7 +20,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'timid_dryad', name: 'Timid Dryad', level: 62, maxHp: 70, attack: 1, ranged: 60, strength: 1, defence: 55,
-        stabDefence: 45, slashDefence: 45, crushDefence: 45, rangedDefence: 60, magicDefence: 60,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: 0,
         iconUrl: 'dryad',
         types: [MonsterType.Humanoid], attackSpeed: 4, respawnTime: 35000, aggressive: false, attackStyle: 'ranged', customMaxHit: 9,
         mainDrops: [{ itemId: 'willow_logs', chance: '1/2', noted: true }, { tableId: 'herb_table', chance: '1/4' }, { itemId: 'enchanted_bark', chance: '1/10' }],
@@ -29,7 +29,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'bramble_lurker', name: 'Bramble Lurker', level: 65, maxHp: 80, attack: 58, strength: 55, defence: 65,
-        stabDefence: 70, slashDefence: 60, crushDefence: 65, rangedDefence: 50, magicDefence: 40,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: 0,
         iconUrl: 'thorny-tentacle',
         types: [MonsterType.Beast], attackSpeed: 5, respawnTime: 40000, aggressive: false, attackStyle: 'stab', customMaxHit: 8,
         mainDrops: [{ itemId: 'yew_logs', chance: '1/8', noted: true }, { itemId: 'bloodroot_tendril', chance: '1/12' }],
@@ -38,7 +38,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'feywood_stalker', name: 'Feywood Stalker', level: 68, maxHp: 75, attack: 62, strength: 60, defence: 60,
-        stabDefence: 55, slashDefence: 65, crushDefence: 50, rangedDefence: 60, magicDefence: 55,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: 0,
         iconUrl: 'forest-beast',
         types: [MonsterType.Beast], attackSpeed: 4, respawnTime: 42000, aggressive: false, attackStyle: 'slash', customMaxHit: 9,
         mainDrops: [{ itemId: 'feywood_logs', chance: '1/4', noted: true }, { itemId: 'fey_dust', chance: '1/6' }],
@@ -46,7 +46,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'enchanted_boar', name: 'Enchanted Boar', level: 70, maxHp: 90, attack: 65, strength: 65, defence: 70,
-        stabDefence: 60, slashDefence: 60, crushDefence: 75, rangedDefence: 60, magicDefence: 50,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: 0,
         iconUrl: 'boar-tusks',
         types: [MonsterType.Beast], attackSpeed: 5, respawnTime: 45000, aggressive: false, attackStyle: 'crush', customMaxHit: 9,
         mainDrops: [{ itemId: 'raw_boar_meat', chance: '1/1' }, { itemId: 'boar_hide', chance: '1/1' }],
@@ -56,7 +56,7 @@ export const wyrmwoodMonsters: Monster[] = [
     // --- Northern Branch (Lvl 80-110, Aggressive, Hungry, Corrupted) ---
     {
         id: 'corrupted_treant', name: 'Corrupted Treant', level: 80, maxHp: 120, attack: 75, strength: 80, defence: 90,
-        stabDefence: 70, slashDefence: 95, crushDefence: 95, rangedDefence: 80, magicDefence: 50,
+        stabDefence: 35, slashDefence: 47, crushDefence: 47, rangedDefence: 40, magicDefence: 25,
         iconUrl: 'evil-tree',
         types: [MonsterType.Beast], attackSpeed: 6, respawnTime: 60000, aggressive: true, attackStyle: 'crush', customMaxHit: 15,
         mainDrops: [{ itemId: 'yew_logs', chance: '1/2', minQuantity: 3, maxQuantity: 5, noted: true }, { itemId: 'uncut_ruby', chance: '1/64' }],
@@ -65,7 +65,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'raging_bear', name: 'Raging Bear', level: 82, maxHp: 110, attack: 80, strength: 85, defence: 70,
-        stabDefence: 65, slashDefence: 65, crushDefence: 75, rangedDefence: 60, magicDefence: 50,
+        stabDefence: 32, slashDefence: 32, crushDefence: 37, rangedDefence: 30, magicDefence: 25,
         iconUrl: 'bear-head',
         types: [MonsterType.Beast], attackSpeed: 4, respawnTime: 50000, aggressive: true, attackStyle: 'crush', customMaxHit: 16,
         mainDrops: [{ itemId: 'bear_pelt', chance: '1/1' }, { itemId: 'raw_swordfish', chance: '1/4', noted: true }],
@@ -73,7 +73,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'blighted_wolf', name: 'Blighted Wolf', level: 85, maxHp: 90, attack: 82, strength: 78, defence: 75,
-        stabDefence: 70, slashDefence: 80, crushDefence: 60, rangedDefence: 70, magicDefence: 65,
+        stabDefence: 30, slashDefence: 40, crushDefence: 30, rangedDefence: 35, magicDefence: 30,
         iconUrl: 'wolf-head',
         types: [MonsterType.Beast], attackSpeed: 4, respawnTime: 40000, aggressive: true, attackStyle: 'slash', customMaxHit: 14,
         poisonsOnHit: { chance: 0.2, damage: 3 },
@@ -90,7 +90,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'elder_grove_spirit', name: 'Elder Grove Spirit', level: 90, maxHp: 80, attack: 1, magic: 90, strength: 1, defence: 85,
-        stabDefence: 80, slashDefence: 80, crushDefence: 80, rangedDefence: 90, magicDefence: 95,
+        stabDefence: 40, slashDefence: 40, crushDefence: 40, rangedDefence: 45, magicDefence: 50,
         iconUrl: 'tree-face',
         types: [MonsterType.Elemental], attackSpeed: 4, respawnTime: 65000, aggressive: true, attackStyle: 'magic', customMaxHit: 18,
         mainDrops: [{ itemId: 'verdant_rune', chance: '1/1', minQuantity: 20, maxQuantity: 40 }, { itemId: 'feywood_logs', chance: '1/5', noted: true }],
@@ -98,7 +98,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'thorned_beast', name: 'Thorned Beast', level: 92, maxHp: 130, attack: 88, strength: 90, defence: 95,
-        stabDefence: 100, slashDefence: 90, crushDefence: 95, rangedDefence: 80, magicDefence: 60,
+        stabDefence: 45, slashDefence: 50, crushDefence: 45, rangedDefence: 40, magicDefence: 35,
         iconUrl: 'horned-reptile',
         types: [MonsterType.Beast], attackSpeed: 5, respawnTime: 80000, aggressive: true, attackStyle: 'stab', customMaxHit: 18,
         specialAttacks: [{ name: 'Thorn Volley', chance: 0.2, effect: 'damage_multiplier', value: 1.3 }],
@@ -107,7 +107,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'deepwood_horror', name: 'Deepwood Horror', level: 95, maxHp: 150, attack: 90, strength: 92, defence: 85,
-        stabDefence: 80, slashDefence: 80, crushDefence: 90, rangedDefence: 80, magicDefence: 75,
+        stabDefence: 40, slashDefence: 45, crushDefence: 40, rangedDefence: 35, magicDefence: 30,
         iconUrl: 'lizardman',
         types: [MonsterType.Beast], attackSpeed: 5, respawnTime: 90000, aggressive: true, attackStyle: 'crush', customMaxHit: 19,
         mainDrops: [{ itemId: 'uncut_diamond', chance: '1/128' }, { itemId: 'runic_bar', chance: '1/64', noted: true }],
@@ -115,7 +115,7 @@ export const wyrmwoodMonsters: Monster[] = [
     },
     {
         id: 'wyrmwood_guardian', name: 'Wyrmwood Guardian', level: 98, maxHp: 160, attack: 95, strength: 95, defence: 100,
-        stabDefence: 100, slashDefence: 100, crushDefence: 100, rangedDefence: 90, magicDefence: 80,
+        stabDefence: 50, slashDefence: 50, crushDefence: 50, rangedDefence: 45, magicDefence: 40,
         iconUrl: 'rock-golem',
         types: [MonsterType.Elemental, MonsterType.Armored], attackSpeed: 6, respawnTime: 120000, aggressive: true, attackStyle: 'crush', customMaxHit: 20,
         mainDrops: [{ itemId: 'golem_core', chance: '1/20' }, { itemId: 'anima_rune', chance: '1/5', minQuantity: 5, maxQuantity: 10 }],

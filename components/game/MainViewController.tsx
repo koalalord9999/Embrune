@@ -126,6 +126,10 @@ interface MainViewControllerProps {
     onFastTravel: (destinationPoiId: string) => void;
     onCommitMapChanges: () => void;
     setActivePrayers: React.Dispatch<React.SetStateAction<string[]>>;
+    combatAttackType: 'stab' | 'slash' | 'crush';
+    setCombatAttackType: React.Dispatch<React.SetStateAction<'stab' | 'slash' | 'crush'>>;
+    stylesByWeaponType: Partial<Record<WeaponType, number>>;
+    setStylesByWeaponType: React.Dispatch<React.SetStateAction<Partial<Record<WeaponType, number>>>>;
 }
 
 const MainViewController: React.FC<MainViewControllerProps> = (props) => {
@@ -138,6 +142,7 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
         onToggleDevPanel,
         onToggleTouchSimulation,
         onDepositEquipment,
+        combatAttackType, stylesByWeaponType, setStylesByWeaponType, setCombatAttackType,
         deathMarker,
         activeRepeatableQuest,
         onEncounterWin,
@@ -240,6 +245,7 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
                 setRunEnergy={setRunEnergy}
                 playerCombatLevel={playerCombatLevel}
                 playerQuests={quests.playerQuests}
+                combatAttackType={combatAttackType}
             />;
         }
         if (ui.activeTeleportBoardId) {

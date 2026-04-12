@@ -2,8 +2,8 @@ import { Monster, MonsterType, SkillName, SpellElement } from '@/types';
 
 export const elemental: Monster[] = [
     {
-        id: 'arcane_elemental', name: 'Arcane Elemental', level: 90, maxHp: 120, attack: 1, magic: 80, customMaxHit: 18, strength: 45, defence: 85,
-        stabDefence: 80, slashDefence: 80, crushDefence: 80, rangedDefence: 38, magicDefence: 42,
+        id: 'arcane_elemental', name: 'Arcane Elemental', level: 90, maxHp: 120, attack: 1, magic: 80, customMaxHit: 11, strength: 45, defence: 85,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -60,
         iconUrl: 'swirl-ring',
         guaranteedDrops: [
             { itemId: 'anima_rune', minQuantity: 5, maxQuantity: 10 },
@@ -23,8 +23,8 @@ export const elemental: Monster[] = [
         specialAttacks: [{ name: 'Energy Surge', chance: 0.2, effect: 'damage_multiplier', value: 1.5 }],
     },
     {
-        id: 'arcane_familiar', name: 'Arcane Familiar', level: 60, maxHp: 75, attack: 1, magic: 50, customMaxHit: 12, strength: 30, defence: 55,
-        stabDefence: 40, slashDefence: 40, crushDefence: 40, rangedDefence: 10, magicDefence: 15,
+        id: 'arcane_familiar', name: 'Arcane Familiar', level: 60, maxHp: 75, attack: 1, magic: 50, customMaxHit: 9, strength: 30, defence: 55,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -10,
         iconUrl: 'cat',
         guaranteedDrops: [{ itemId: 'ashes', minQuantity: 1, maxQuantity: 2 }],
         mainDrops: [
@@ -139,8 +139,8 @@ export const elemental: Monster[] = [
         types: [MonsterType.Elemental], attackSpeed: 4, respawnTime: 40000, aggressive: false, attackStyle: 'magic',
     },
     {
-        id: 'greater_crystal_construct', name: 'Greater Crystal Construct', level: 82, maxHp: 120, attack: 1, magic: 72, customMaxHit: 16, strength: 40, defence: 80,
-        stabDefence: 70, slashDefence: 70, crushDefence: 70, rangedDefence: 30, magicDefence: 35,
+        id: 'greater_crystal_construct', name: 'Greater Crystal Construct', level: 82, maxHp: 120, attack: 1, magic: 72, customMaxHit: 11, strength: 40, defence: 80,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -10,
         iconUrl: 'ice-golem',
         guaranteedDrops: [{ itemId: 'crystal_shard', minQuantity: 2, maxQuantity: 5 }],
         mainDrops: [
@@ -156,8 +156,8 @@ export const elemental: Monster[] = [
         specialAttacks: [{ name: 'Disrupting Pulse', chance: 0.2, effect: 'stat_drain', skill: SkillName.Attack, value: -3 }],
     },
     {
-        id: 'greater_mana_wisp', name: 'Greater Mana Wisp', level: 76, maxHp: 110, attack: 1, magic: 65, customMaxHit: 16, strength: 35, defence: 70,
-        stabDefence: 60, slashDefence: 60, crushDefence: 60, rangedDefence: 25, magicDefence: 30,
+        id: 'greater_mana_wisp', name: 'Greater Mana Wisp', level: 76, maxHp: 110, attack: 1, magic: 65, customMaxHit: 11, strength: 35, defence: 70,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -10,
         iconUrl: 'glowing-artifact',
         guaranteedDrops: [{ itemId: 'ashes', minQuantity: 1, maxQuantity: 3 }],
         mainDrops: [
@@ -185,8 +185,8 @@ export const elemental: Monster[] = [
         types: [MonsterType.Elemental, MonsterType.Armored], attackSpeed: 5, respawnTime: 90000, aggressive: true, attackStyle: 'crush'
     },
     {
-        id: 'lesser_crystal_construct', name: 'Lesser Crystal Construct', level: 65, maxHp: 85, attack: 1, magic: 55, customMaxHit: 13, strength: 30, defence: 60,
-        stabDefence: 45, slashDefence: 45, crushDefence: 45, rangedDefence: 15, magicDefence: 20,
+        id: 'lesser_crystal_construct', name: 'Lesser Crystal Construct', level: 65, maxHp: 85, attack: 1, magic: 55, customMaxHit: 9, strength: 30, defence: 60,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -20,
         iconUrl: 'ice-golem',
         guaranteedDrops: [{ itemId: 'crystal_shard', minQuantity: 1, maxQuantity: 3 }],
         mainDrops: [
@@ -202,7 +202,7 @@ export const elemental: Monster[] = [
     },
     {
         id: 'mana_wisp', name: 'Mana Wisp', level: 54, maxHp: 60, attack: 1, magic: 45, customMaxHit: 10, strength: 25, defence: 50,
-        stabDefence: 30, slashDefence: 30, crushDefence: 30, rangedDefence: 5, magicDefence: 10,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: 0,
         iconUrl: 'glowing-artifact',
         guaranteedDrops: [{ itemId: 'ashes', minQuantity: 1, maxQuantity: 1 }],
         mainDrops: [
@@ -264,8 +264,8 @@ export const elemental: Monster[] = [
         types: [MonsterType.Elemental, MonsterType.Armored], attackSpeed: 6, respawnTime: 120000, aggressive: true, alwaysAggressive: true, attackStyle: 'crush',
     },
     {
-        id: 'runic_guardian', name: 'Runic Guardian', level: 72, maxHp: 95, attack: 1, magic: 62, customMaxHit: 15, strength: 35, defence: 70,
-        stabDefence: 55, slashDefence: 55, crushDefence: 55, rangedDefence: 22, magicDefence: 28,
+        id: 'runic_guardian', name: 'Runic Guardian', level: 72, maxHp: 95, attack: 1, magic: 62, customMaxHit: 11, strength: 35, defence: 70,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -10,
         iconUrl: 'robot-golem',
         guaranteedDrops: [{ itemId: 'binding_rune', minQuantity: 15, maxQuantity: 30 }],
         mainDrops: [
@@ -312,8 +312,8 @@ export const elemental: Monster[] = [
         types: [MonsterType.Elemental, MonsterType.Armored], attackSpeed: 6, respawnTime: 100000, aggressive: false, attackStyle: 'crush'
     },
     {
-        id: 'spire_justicar', name: 'Spire Justicar', level: 95, maxHp: 140, attack: 1, magic: 85, customMaxHit: 19, strength: 45, defence: 90,
-        stabDefence: 90, slashDefence: 90, crushDefence: 90, rangedDefence: 40, magicDefence: 45,
+        id: 'spire_justicar', name: 'Spire Justicar', level: 95, maxHp: 140, attack: 1, magic: 85, customMaxHit: 14, strength: 45, defence: 90,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -70,
         iconUrl: 'robot-golem',
         guaranteedDrops: [{ itemId: 'big_bones', minQuantity: 1, maxQuantity: 1 }, { itemId: 'passage_rune', minQuantity: 10, maxQuantity: 20 }],
         mainDrops: [
@@ -330,7 +330,7 @@ export const elemental: Monster[] = [
     },
     {
         id: 'spire_sentry', name: 'Spire Sentry', level: 70, maxHp: 90, attack: 1, magic: 60, customMaxHit: 14, strength: 30, defence: 65,
-        stabDefence: 50, slashDefence: 50, crushDefence: 50, rangedDefence: 20, magicDefence: 25,
+        stabDefence: 0, slashDefence: 0, crushDefence: 0, rangedDefence: 0, magicDefence: -10,
         iconUrl: 'eye-of-horus',
         mainDrops: [
             { itemId: 'astral_rune', chance: '1/3', minQuantity: 5, maxQuantity: 10 },

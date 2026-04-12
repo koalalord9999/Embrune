@@ -40,6 +40,7 @@ export enum CombatStance {
     Accurate = "Accurate",
     Aggressive = "Aggressive",
     Defensive = "Defensive",
+    Controlled = "Controlled",
     // Ranged
     RangedAccurate = "Ranged Accurate",
     RangedRapid = "Ranged Rapid",
@@ -67,6 +68,7 @@ export enum WeaponType {
     Staff = "Staff",
     Thrown = "Thrown",
     Greatsword = "Greatsword",
+    Pickaxe = "Pickaxe",
 }
 
 export enum MonsterType {

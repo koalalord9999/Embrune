@@ -57,6 +57,7 @@ interface CombatViewProps {
     runEnergy: number;
     setRunEnergy: React.Dispatch<React.SetStateAction<number>>;
     playerCombatLevel: number;
+    combatAttackType: 'stab' | 'slash' | 'crush';
 }
 
 const SmoothCombatCooldownBar: React.FC<{ label: string, nextAttackTime: number, attackSpeedTicks: number, combatSpeedMultiplier: number, color: string }> = ({ label, nextAttackTime, attackSpeedTicks, combatSpeedMultiplier, color }) => {
@@ -108,7 +109,7 @@ const parseChance = (chance: number | string): number => {
     return 0; // fallback
 };
 
-const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, playerSkills, playerHp, equipment, combatStance, setCombatStance, setPlayerHp, onCombatEnd, onFleeSuccess, addXp, addLoot, onDropLoot, isAutoBankOn, addLog, onPlayerDeath, onKill, onEncounterWin, onConsumeAmmo, activeBuffs, combatSpeedMultiplier, advanceTutorial, autocastSpell, inv, ui, killTrigger, applyStatModifier, isStunned, addBuff, showPlayerHealthNumbers, showEnemyHealthNumbers, showHitsplats, activePrayers, setActivePrayers, poisonEvent, getEffectiveLevel, playerQuests = [], runEnergy, setRunEnergy, playerCombatLevel }) => {
+const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, playerSkills, playerHp, equipment, combatStance, setCombatStance, setPlayerHp, onCombatEnd, onFleeSuccess, addXp, addLoot, onDropLoot, isAutoBankOn, addLog, onPlayerDeath, onKill, onEncounterWin, onConsumeAmmo, activeBuffs, combatSpeedMultiplier, advanceTutorial, autocastSpell, inv, ui, killTrigger, applyStatModifier, isStunned, addBuff, showPlayerHealthNumbers, showEnemyHealthNumbers, showHitsplats, activePrayers, setActivePrayers, poisonEvent, getEffectiveLevel, runEnergy, setRunEnergy, playerCombatLevel, playerQuests, combatAttackType }) => {
     const [currentMonsterIndex, setCurrentMonsterIndex] = useState(0);
     const currentInstanceId = monsterQueue[currentMonsterIndex];
     const monsterId = currentInstanceId.split(':')[1];
@@ -705,7 +706,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         result = calculateRangedDamage(playerStats, monster, combatStance, getEffectiveLevel, playerMaxHit, activeBuffs, equipment.weapon, equipment.ammo);
                     } else {
                         attackStyle = 'melee';
-                        result = calculateMeleeDamage(playerStats, monster, combatStance, getEffectiveLevel, playerMaxHit, activeBuffs, equipment.weapon, playerWeapon);
+                        result = calculateMeleeDamage(playerStats, monster, combatStance, getEffectiveLevel, playerMaxHit, activeBuffs, equipment.weapon, playerWeapon, combatAttackType);
                     }
                 }
 

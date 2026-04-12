@@ -10,7 +10,8 @@ export const calculateMeleeDamage = (
     playerMaxHit: number,
     activeBuffs: ActiveBuff[],
     weaponSlot: InventorySlot | null,
-    playerWeapon: { type: WeaponType }
+    playerWeapon: { type: WeaponType },
+    combatAttackType: 'stab' | 'slash' | 'crush'
 ): DamageCalculationResult => {
     let successfulHit = false;
     let playerDamage = 0;
@@ -20,21 +21,7 @@ export const calculateMeleeDamage = (
     let effectiveAttack = getEffectiveLevel(SkillName.Attack);
     if (combatStance === CombatStance.Accurate) effectiveAttack += 3;
 
-    let playerAttackStyle: 'stab' | 'slash' | 'crush' = 'crush';
-    switch (playerWeapon.type) {
-        case WeaponType.Dagger: playerAttackStyle = 'stab'; break;
-        case WeaponType.Sword: playerAttackStyle = 'slash'; break;
-        case WeaponType.Scimitar: playerAttackStyle = 'slash'; break;
-        case WeaponType.Axe: playerAttackStyle = 'slash'; break;
-        case WeaponType.Battleaxe: playerAttackStyle = 'slash'; break;
-        case WeaponType.Mace: playerAttackStyle = 'crush'; break;
-        case WeaponType.Warhammer: playerAttackStyle = 'crush'; break;
-        case WeaponType.Unarmed: playerAttackStyle = 'crush'; break;
-        case WeaponType.Staff: playerAttackStyle = 'crush'; break;
-        case WeaponType.Whip: playerAttackStyle = 'slash'; break;
-        case WeaponType.Greatsword: playerAttackStyle = 'slash'; break;
-        case WeaponType.Spear: playerAttackStyle = 'stab'; break;
-    }
+    let playerAttackStyle: 'stab' | 'slash' | 'crush' = combatAttackType;
 
     let attackBonus = 0;
     let monsterDefenceBonus = 0;
@@ -86,6 +73,12 @@ export const calculateMeleeDamage = (
         if (combatStance === CombatStance.Accurate) xpGains[SkillName.Attack] = (xpGains[SkillName.Attack] || 0) + playerDamage * 4;
         else if (combatStance === CombatStance.Aggressive) xpGains[SkillName.Strength] = (xpGains[SkillName.Strength] || 0) + playerDamage * 4;
         else if (combatStance === CombatStance.Defensive) xpGains[SkillName.Defence] = (xpGains[SkillName.Defence] || 0) + playerDamage * 4;
+        else if (combatStance === CombatStance.Controlled) {
+            const cxp = Math.floor(playerDamage * 4 / 3);
+            xpGains[SkillName.Attack] = (xpGains[SkillName.Attack] || 0) + cxp;
+            xpGains[SkillName.Strength] = (xpGains[SkillName.Strength] || 0) + cxp;
+            xpGains[SkillName.Defence] = (xpGains[SkillName.Defence] || 0) + cxp;
+        }
     }
 
     const weaponPoison = weaponSlot?.statsOverride?.poisoned;

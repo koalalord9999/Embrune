@@ -1,4 +1,4 @@
-import { REPEATABLE_QUEST_POOL, ALL_SKILLS, ITEMS } from '../constants';
+import { REPEATABLE_QUEST_POOL, ALL_SKILLS, ITEMS, WEAPON_TYPE_SAVE_KEY } from '../constants';
 import { MUSIC_TRACKS } from '../hooks/useMusicEngine';
 
 /** Reverse mapping for numeric IDs to string IDs */
@@ -110,6 +110,19 @@ export function minifyGameState(state: any): any {
         re: state.runEnergy,
         rt: state.isRunToggled,
     };
+
+    if (state.stylesByWeaponType) {
+        const minifiedStwt: Record<string, number> = {};
+        for (const [wt, index] of Object.entries(state.stylesByWeaponType)) {
+            const shortKey = WEAPON_TYPE_SAVE_KEY[wt as any];
+            if (shortKey && typeof index === 'number') {
+                minifiedStwt[shortKey] = index;
+            }
+        }
+        if (Object.keys(minifiedStwt).length > 0) {
+            mini.stwt = minifiedStwt;
+        }
+    }
 
     // 1. Skills (s): Array of XP values in ALL_SKILLS order
     if (Array.isArray(state.skills)) {

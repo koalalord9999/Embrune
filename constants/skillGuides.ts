@@ -435,7 +435,7 @@ export const SKILL_GUIDES: Record<SkillName, SkillGuideTab[]> = {
         { level: 41, description: 'Use a Runic Pickaxe.', itemId: 'runic_pickaxe' },
         { level: 45, description: 'Mine Brimstone.', itemId: 'brimstone' },
         { level: 50, description: 'Mine Mithril ore.', itemId: 'mithril_ore' },
-        { level: 41, description: 'Use a Crystal Tipped Runic Pickaxe.', itemId: 'crystal_tipped_runic_pickaxe' },
+        { level: 51, description: 'Use a Crystal Tipped Runic Pickaxe.', itemId: 'crystal_tipped_runic_pickaxe' },
         { level: 65, description: 'Mine Adamantite ore.', itemId: 'adamantite_ore' },
         { level: 75, description: 'Mine Titanium ore.', itemId: 'titanium_ore' },
     ].sort((a, b) => a.level - b.level)),

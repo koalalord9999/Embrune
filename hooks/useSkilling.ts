@@ -125,6 +125,17 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                     } else if (activity.requiredTool === ToolType.FlyFishingRod) {
                         modifyItem('feathers', -1, true);
                     }
+                    
+                    const necklace = depsRef.current.equipment.necklace;
+                    if (necklace?.itemId === 'necklace_of_the_angler' && (necklace.charges ?? 0) > 0) {
+                        const newCharges = (necklace.charges ?? 1) - 1;
+                        if (newCharges > 0) {
+                            depsRef.current.setEquipment(prev => ({...prev, necklace: {...necklace, charges: newCharges}}));
+                        } else {
+                            depsRef.current.addLog("Your Necklace of the Angler has run out of charges and shatters.");
+                            depsRef.current.setEquipment(prev => ({...prev, necklace: null}));
+                        }
+                    }
                 }
 
                  for (let i = activity.loot.length - 1; i >= 0; i--) {

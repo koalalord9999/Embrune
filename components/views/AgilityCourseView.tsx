@@ -23,27 +23,6 @@ const AgilityCourseView: React.FC<AgilityCourseViewProps> = ({ agility, activeAc
     const [startTime, setStartTime] = useState<number>(Date.now());
     const [lastHitResult, setLastHitResult] = useState<{ result: 'lightning' | 'fast' | 'steady' | 'fail', bonus: string } | null>(null);
     const [isCooldown, setIsCooldown] = useState(false);
-    const [localProgress, setLocalProgress] = useState(0);
-
-    // Track active action progress
-    useEffect(() => {
-        if (!activeAction) {
-            setLocalProgress(0);
-            return;
-        }
-
-        let frameId: number;
-        const updateProgress = () => {
-            const elapsed = Date.now() - activeAction.startTime;
-            const newProgress = Math.min(100, (elapsed / activeAction.duration) * 100);
-            setLocalProgress(newProgress);
-            if (newProgress < 100) {
-                frameId = requestAnimationFrame(updateProgress);
-            }
-        };
-        frameId = requestAnimationFrame(updateProgress);
-        return () => cancelAnimationFrame(frameId);
-    }, [activeAction]);
 
     // Randomize target whenever obstacle changes
     const randomizeTarget = useCallback(() => {
@@ -128,7 +107,7 @@ const AgilityCourseView: React.FC<AgilityCourseViewProps> = ({ agility, activeAc
             <div className="flex flex-col md:flex-row flex-grow min-h-0 w-full gap-2 sm:gap-4 p-1 sm:p-2">
 
                 {/* Progress Indicators: Horizontal on mobile, vertical on desktop */}
-                <div className="flex md:flex-col items-center gap-1 overflow-x-auto md:overflow-y-auto md:w-12 md:h-full scrollbar-hide py-1 md:py-2 md:border-r border-gray-800/50">
+                <div className="flex md:flex-col items-center gap-1 overflow-x-auto md:overflow-y-auto md:w-12 md:h-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-1 md:py-2 md:border-r border-gray-800/50">
                     <span className="hidden md:block text-[10px] text-gray-600 uppercase vertical-text mb-2 tracking-widest">Progress</span>
                     <div className="flex md:flex-col gap-1 min-w-full">
                         {course.obstacles.map((_, index) => (
@@ -152,71 +131,61 @@ const AgilityCourseView: React.FC<AgilityCourseViewProps> = ({ agility, activeAc
                 </div>
 
                 {/* Centered Minigame Hub */}
-                <div className="flex-grow flex flex-col items-center justify-center min-h-0 overflow-y-auto sm:overflow-visible">
-                    <div className="text-center mb-3 sm:mb-6">
-                        <p className="text-gray-500 text-xs sm:text-base uppercase tracking-[0.3em] leading-none mb-2">Next Obstacle</p>
-                        <h2 className="text-2xl sm:text-4xl font-bold text-yellow-300 leading-none">{currentObstacle?.name}</h2>
+                <div className="flex-grow flex flex-col items-center justify-between min-h-0 overflow-hidden py-1 sm:py-2">
+                    {/* Header */}
+                    <div className="text-center shrink-0 mb-1 sm:mb-2">
+                        <p className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-[0.3em] leading-none mb-1 sm:mb-2">Next Obstacle</p>
+                        <h2 className="text-xl sm:text-3xl font-bold text-yellow-300 leading-none">{currentObstacle?.name}</h2>
                     </div>
 
-                    <div
-                        className="w-full max-w-[320px] sm:max-w-[400px] aspect-square bg-gray-950 rounded-2xl border-[4px] sm:border-[6px] border-gray-900 p-2 sm:p-3 grid gap-2 sm:gap-3 relative overflow-hidden"
-                        style={{
-                            gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
-                            gridTemplateRows: `repeat(${gridSize}, 1fr)`
-                        }}
-                    >
-                        {Array.from({ length: totalHoles }).map((_, i) => (
+                    {/* Grid Wrapper */}
+                    <div className="flex-1 w-full aspect-square max-h-[440px] flex items-center justify-center shrink overflow-hidden relative pb-2 sm:pb-4 mx-auto">
+                        <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-4">
                             <div
-                                key={i}
-                                onClick={() => handleTargetClick(i)}
-                                className={`
-                                    rounded-lg sm:rounded-xl flex items-center justify-center cursor-pointer border-2
-                                    ${i === targetPos ? 'bg-yellow-600 border-yellow-400' : 'bg-black/20 border-transparent'}
-                                `}
+                                className="rounded-2xl relative overflow-hidden flex flex-col p-1 sm:p-[6px] shadow-[0_0_20px_rgba(0,0,0,0.5)] bg-gray-900"
+                                style={{
+                                    height: '100%',
+                                    maxHeight: '440px',
+                                    maxWidth: '100%',
+                                    aspectRatio: '1 / 1',
+                                }}
                             >
-                            </div>
-                        ))}
+                                {/* GPU-Accelerated Progress Background */}
+                                <div 
+                                    className="absolute bottom-0 left-0 w-full h-full bg-blue-500 origin-bottom"
+                                    style={{
+                                        transform: activeAction ? 'scaleY(1)' : 'scaleY(0)',
+                                        transition: activeAction ? `transform ${activeAction.duration}ms linear` : 'none',
+                                    }}
+                                />
 
-                        {/* Status Overlays */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-                            {lastHitResult?.result === 'lightning' && <span className="text-5xl font-black text-blue-400 italic tracking-tighter">LIGHTNING!!</span>}
-                            {lastHitResult?.result === 'fast' && <span className="text-5xl font-black text-green-400 italic tracking-tighter">FAST!</span>}
-                            {lastHitResult?.result === 'steady' && <span className="text-4xl font-black text-yellow-500 italic tracking-tighter">STEADY</span>}
-                        </div>
-                    </div>
-
-                    <div className="mt-6 flex flex-col items-center gap-1 min-h-[96px] w-full max-w-[280px]">
-                        {activeAction ? (
-                            <div className="w-full flex flex-col items-center gap-2 animate-fade-in">
-                                {lastHitResult && (
-                                    <div className="bg-black/50 px-4 py-1 rounded-full border border-gray-700 mb-1">
-                                        <span className={`text-sm font-bold ${lastHitResult.result === 'lightning' ? 'text-blue-400' : 'text-green-400'}`}>
-                                            MODIFIER: {lastHitResult.bonus} XP
-                                        </span>
+                                <div
+                                    className="bg-gray-950 w-full h-full rounded-xl grid gap-1 sm:gap-2 p-1 sm:p-2 relative overflow-hidden z-10"
+                                    style={{
+                                        gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+                                        gridTemplateRows: `repeat(${gridSize}, 1fr)`
+                                    }}
+                                >
+                                {Array.from({ length: totalHoles }).map((_, i) => (
+                                    <div
+                                        key={i}
+                                        onClick={() => handleTargetClick(i)}
+                                        className={`
+                                            rounded-lg sm:rounded-xl flex items-center justify-center cursor-pointer border-2
+                                            ${i === targetPos ? 'bg-yellow-600 border-yellow-400' : 'bg-black/20 border-transparent'}
+                                        `}
+                                    >
                                     </div>
-                                )}
-                                <span className="text-blue-300 text-[10px] uppercase tracking-widest leading-none">Sprinting...</span>
-                                <ProgressBar value={localProgress} maxValue={100} color="bg-blue-500" />
-                                <Button onClick={onCancelAction} variant="secondary" className="mt-1 px-4 py-0.5 text-[10px]">
-                                    Cancel
-                                </Button>
-                            </div>
-                        ) : lastHitResult ? (
-                            <div className="flex flex-col items-center gap-2">
-                                <span className={`text-3xl font-black italic tracking-tighter ${lastHitResult.result === 'lightning' ? 'text-blue-400' :
-                                    lastHitResult.result === 'fast' ? 'text-green-400' : 'text-yellow-500'
-                                    }`}>
-                                    {lastHitResult.result.toUpperCase()}{lastHitResult.result !== 'steady' ? '!!' : ''}
-                                </span>
-                                <div className="bg-black/50 px-4 py-1 rounded-full border border-gray-700">
-                                    <span className={`text-xl font-bold ${lastHitResult.result === 'lightning' ? 'text-blue-400' : 'text-green-400'}`}>
-                                        MODIFIER: {lastHitResult.bonus} XP
-                                    </span>
+                                ))}
+
+                                {/* Status Overlays */}
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                                    {lastHitResult?.result === 'lightning' && <span className="text-3xl sm:text-5xl font-black text-blue-400 italic tracking-tighter">LIGHTNING!!</span>}
+                                    {lastHitResult?.result === 'fast' && <span className="text-3xl sm:text-5xl font-black text-green-400 italic tracking-tighter">FAST!</span>}
+                                </div>
                                 </div>
                             </div>
-                        ) : (
-                            <p className="text-gray-600 text-sm uppercase tracking-[0.4em] leading-none mb-2">Focus & Target</p>
-                        )}
+                        </div>
                     </div>
                 </div>
             </div>
