@@ -56,8 +56,13 @@
   z-index: 10;
 }
 
-.crafting-slot-level.met   { color: #4ade80; }
-.crafting-slot-level.unmet { color: #f87171; }
+.crafting-slot-level.met {
+  color: #4ade80;
+}
+
+.crafting-slot-level.unmet {
+  color: #f87171;
+}
 
 .crafting-slot-ingredients {
   display: flex;
@@ -101,21 +106,49 @@
 }
 
 /* ---- Item icon rotations ---- */
-img[src*="game-icons:bone-knife"]:not(.item-note-icon)    { transform: rotate(-90deg); }
-img[src*="game-icons:curvy-knife"]:not(.item-note-icon)   { transform: rotate(-75deg); }
+img[src*="game-icons:bone-knife"]:not(.item-note-icon) {
+  transform: rotate(-90deg);
+}
+
+img[src*="game-icons:curvy-knife"]:not(.item-note-icon) {
+  transform: rotate(-75deg);
+}
+
 img[src*="game-icons:arrow-flights"]:not(.item-note-icon),
 img[src*="game-icons:arrowhead"]:not(.item-note-icon),
-img[src*="game-icons:broadhead-arrow"]:not(.item-note-icon) { transform: rotate(-90deg); }
-img[src*="game-icons:key-skeleton"]:not(.item-note-icon)  { transform: rotate(180deg); }
-img[src*="game-icons:key.svg#loop"]:not(.item-note-icon)  { transform: rotate(180deg); }
+img[src*="game-icons:broadhead-arrow"]:not(.item-note-icon) {
+  transform: rotate(-90deg);
+}
 
-.item-note-icon[src*="game-icons:bone-knife"]    { transform: translate(-50%, -50%) rotate(-90deg); }
-.item-note-icon[src*="game-icons:curvy-knife"]   { transform: translate(-50%, -50%) rotate(-75deg); }
+img[src*="game-icons:key-skeleton"]:not(.item-note-icon) {
+  transform: rotate(180deg);
+}
+
+img[src*="game-icons:key.svg#loop"]:not(.item-note-icon) {
+  transform: rotate(180deg);
+}
+
+.item-note-icon[src*="game-icons:bone-knife"] {
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.item-note-icon[src*="game-icons:curvy-knife"] {
+  transform: translate(-50%, -50%) rotate(-75deg);
+}
+
 .item-note-icon[src*="game-icons:arrow-flights"],
 .item-note-icon[src*="game-icons:arrowhead"],
-.item-note-icon[src*="game-icons:broadhead-arrow"] { transform: translate(-50%, -50%) rotate(-90deg); }
-.item-note-icon[src*="game-icons:key-skeleton"]  { transform: translate(-50%, -50%) rotate(180deg); }
-.item-note-icon[src*="game-icons:key.svg#loop"]  { transform: translate(-50%, -50%) rotate(180deg); }
+.item-note-icon[src*="game-icons:broadhead-arrow"] {
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.item-note-icon[src*="game-icons:key-skeleton"] {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+
+.item-note-icon[src*="game-icons:key.svg#loop"] {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
 
 /* ---- Noted Items ---- */
 .item-note-wrapper {
@@ -182,10 +215,26 @@ img[src*="game-icons:key.svg#loop"]:not(.item-note-icon)  { transform: rotate(18
   border-bottom: none;
 }
 
-.bank-tab:hover        { background-color: #4a5568; }
-.bank-tab.active       { background-color: #1a202c; border-color: #f59e0b; border-bottom: 2px solid #f59e0b; transform: translateY(2px); }
-.bank-tab-icon         { width: 3rem; height: 3rem; }
-.bank-tab-drag-over    { border-color: #4ade80; background-color: #166534; }
+.bank-tab:hover {
+  background-color: #4a5568;
+}
+
+.bank-tab.active {
+  background-color: #1a202c;
+  border-color: #f59e0b;
+  border-bottom: 2px solid #f59e0b;
+  transform: translateY(2px);
+}
+
+.bank-tab-icon {
+  width: 3rem;
+  height: 3rem;
+}
+
+.bank-tab-drag-over {
+  border-color: #4ade80;
+  background-color: #166534;
+}
 
 .bank-grid {
   display: grid;
@@ -201,7 +250,20 @@ img[src*="game-icons:key.svg#loop"]:not(.item-note-icon)  { transform: rotate(18
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  .bank-tabs-container::-webkit-scrollbar { display: none; }
-  .bank-tab  { flex-shrink: 0; padding: 0.5rem; }
-  .bank-grid { grid-template-columns: repeat(auto-fill, 48px); justify-content: center; overflow-y: auto; padding-right: 4px; }
+
+  .bank-tabs-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bank-tab {
+    flex-shrink: 0;
+    padding: 0.5rem;
+  }
+
+  .bank-grid {
+    grid-template-columns: repeat(auto-fill, 48px);
+    justify-content: center;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
 }

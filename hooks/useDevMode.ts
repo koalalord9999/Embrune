@@ -229,13 +229,17 @@ export const useDevMode = (deps: DevModeDependencies) => {
     const onToggleTouchSimulation = useCallback(() => setIsTouchSimulationEnabled(prev => !prev), []);
 
     const onToggleMapManager = useCallback((enable: boolean) => {
+        if (enable && isInCombat) {
+            addLog("You can't open the map manager while in combat.");
+            return;
+        }
         setIsMapManagerEnabled(enable);
         ui.setIsExpandedMapViewOpen(enable);
         if(!enable) {
              setModifiedPois(new Set());
              setModifiedRegions(new Set());
         }
-    }, [ui]);
+    }, [ui, isInCombat, addLog]);
 
     const handleUpdatePoiCoordinate = (id: string, x: number, y: number, isRegion: boolean) => {
         if (isRegion) {

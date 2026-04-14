@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Button from '../common/Button';
 import { useUIState } from '../../hooks/useUIState';
 import { useSoundEngine } from '../../hooks/useSoundEngine';
+import { FONT_OPTIONS, GameFont } from '../../hooks/useUIState';
 
 interface SettingsViewProps {
     onResetGame: () => void;
@@ -49,6 +50,41 @@ const QualitySelector: React.FC<{ value: string, onChange: (value: 'Low' | 'Medi
         ))}
     </div>
 );
+
+const FontSelector: React.FC<{ value: GameFont; onChange: (v: GameFont) => void }> = ({ value, onChange }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const selected = FONT_OPTIONS.find(o => o.value === value) ?? FONT_OPTIONS[0];
+
+    return (
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(o => !o)}
+                className="flex items-center justify-between gap-3 bg-gray-900/50 border border-gray-600 hover:border-yellow-600 px-3 py-1.5 rounded-md transition-colors min-w-[210px]"
+            >
+                <span className="text-xl text-white" style={{ fontFamily: selected.family }}>
+                    {selected.label}
+                </span>
+                <span className="text-gray-400 text-sm font-pixel-rpg">{isOpen ? '▲' : '▼'}</span>
+            </button>
+            {isOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-gray-900 border border-gray-600 rounded-md shadow-xl z-50 min-w-[210px] overflow-hidden">
+                    {FONT_OPTIONS.map(opt => (
+                        <button
+                            key={opt.value}
+                            onClick={() => { onChange(opt.value); setIsOpen(false); }}
+                            className={`w-full text-left px-4 py-2.5 text-xl transition-colors hover:bg-gray-700 ${
+                                opt.value === value ? 'bg-yellow-700/60 text-white' : 'text-gray-200'
+                            }`}
+                            style={{ fontFamily: opt.family }}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
 
 const KeybindRow: React.FC<{ label: string, value: string, isRemapping: boolean, onRemap: () => void }> = ({ label, value, isRemapping, onRemap }) => (
     <div className="flex justify-between items-center py-2 border-b border-gray-700/50">
@@ -113,6 +149,21 @@ const SettingsView: React.FC<SettingsViewProps> = ({ onResetGame, onExportGame, 
                 <div>
                     <SettingRow label="Graphics Quality" description="Adjusts animation quality to improve performance.">
                         <QualitySelector value={quality} onChange={setQuality} />
+                    </SettingRow>
+                    <SettingRow label="Font Style" description="Change the typeface used across the entire game UI.">
+                        <FontSelector value={ui.gameFont} onChange={ui.setGameFont} />
+                    </SettingRow>
+                    <SettingRow label="Font Size" description="Adjust the scale of the text throughout the game.">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="range"
+                                min="0.8" max="1.5" step="0.05"
+                                value={ui.gameFontScale}
+                                onChange={(e) => ui.setGameFontScale(parseFloat(e.target.value))}
+                                className="w-40 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-600"
+                            />
+                            <span className="text-xs font-mono w-8">{Math.round(ui.gameFontScale * 100)}%</span>
+                        </div>
                     </SettingRow>
                     <SettingRow label="Show Tooltips" description="Display helpful popups when hovering over items and UI elements.">
                         <ToggleButton enabled={ui.showTooltips} onClick={() => ui.setShowTooltips(!ui.showTooltips)} />

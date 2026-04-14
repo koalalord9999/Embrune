@@ -122,7 +122,7 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
 
         // Check if enhancement buff is already active
         if (spell.type === 'enhancement') {
-            if (char.activeBuffs.some(b => b.source === spell.id)) {
+            if (char.activeBuffs.some(b => b.type === 'spell_buff' && b.source === spell.id)) {
                 addLog("That spell is already active.");
                 return;
             }
@@ -158,15 +158,13 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
             }
         }
 
-        if (['combat', 'curse', 'enhancement'].includes(spell.type)) {
+        if (['combat', 'curse'].includes(spell.type)) {
             if (ui.combatQueue.length > 0) {
                 ui.setManualCastTrigger(spell);
                 return;
             }
-            if (spell.type === 'combat' || spell.type === 'curse') {
-                addLog("You can only cast this spell in combat.");
-                return;
-            }
+            addLog("You can only cast this spell in combat.");
+            return;
         }
         
         if (['utility-enchant', 'utility-alchemy', 'utility-processing'].includes(spell.type)) {
@@ -208,47 +206,98 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
         } else if (spell.type === 'enhancement') {
             const duration = 300000; // 5 minutes
             
-            // Use applySpellStatBuff instead of applyStatModifier for invisible buffs, passing spell.id as source
             if (spell.id === 'warriors_grace') {
                 const attLevel = char.skills.find(s => s.name === SkillName.Attack)?.level ?? 1;
                 const strLevel = char.skills.find(s => s.name === SkillName.Strength)?.level ?? 1;
                 const defLevel = char.skills.find(s => s.name === SkillName.Defence)?.level ?? 1;
+                const boost = Math.floor(attLevel * 0.10) + 2;
                 
-                char.applySpellStatBuff(SkillName.Attack, Math.floor(attLevel * 0.10) + 2, duration, spell.id);
-                char.applySpellStatBuff(SkillName.Strength, Math.floor(strLevel * 0.10) + 2, duration, spell.id);
-                char.applySpellStatBuff(SkillName.Defence, Math.floor(defLevel * 0.10) + 2, duration, spell.id);
+                char.applyEnhancementSpell(
+                    spell.name, 
+                    `Boosts Attack, Strength, and Defence by ${boost}.`,
+                    [
+                        { skill: SkillName.Attack, value: boost },
+                        { skill: SkillName.Strength, value: boost },
+                        { skill: SkillName.Defence, value: boost }
+                    ],
+                    duration,
+                    spell.id
+                );
                 addLog("You feel a surge of martial prowess.");
             } else if (spell.id === 'archers_focus') {
                 const rngLevel = char.skills.find(s => s.name === SkillName.Ranged)?.level ?? 1;
                 const defLevel = char.skills.find(s => s.name === SkillName.Defence)?.level ?? 1;
+                const boost = Math.floor(rngLevel * 0.10) + 2;
 
-                char.applySpellStatBuff(SkillName.Ranged, Math.floor(rngLevel * 0.10) + 2, duration, spell.id);
-                char.applySpellStatBuff(SkillName.Defence, Math.floor(defLevel * 0.10) + 2, duration, spell.id);
+                char.applyEnhancementSpell(
+                    spell.name,
+                    `Boosts Ranged and Defence by ${boost}.`,
+                    [
+                        { skill: SkillName.Ranged, value: boost },
+                        { skill: SkillName.Defence, value: boost }
+                    ],
+                    duration,
+                    spell.id
+                );
                 addLog("Your senses sharpen.");
             } else if (spell.id === 'mystic_insight') {
                 const magLevel = char.skills.find(s => s.name === SkillName.Magic)?.level ?? 1;
-                char.applySpellStatBuff(SkillName.Magic, Math.floor(magLevel * 0.10) + 2, duration, spell.id);
+                const boost = Math.floor(magLevel * 0.10) + 2;
+
+                char.applyEnhancementSpell(
+                    spell.name,
+                    `Boosts Magic by ${boost} and Magic damage by 3%.`,
+                    [{ skill: SkillName.Magic, value: boost }],
+                    duration,
+                    spell.id
+                );
                 char.addBuff({ type: 'magic_damage_boost', value: 3, duration: duration, source: spell.id });
                 addLog("Your mind expands, boosting your magical abilities.");
             } else if (spell.id === 'warriors_vigour') {
                 const attLevel = char.skills.find(s => s.name === SkillName.Attack)?.level ?? 1;
                 const strLevel = char.skills.find(s => s.name === SkillName.Strength)?.level ?? 1;
                 const defLevel = char.skills.find(s => s.name === SkillName.Defence)?.level ?? 1;
+                const boost = Math.floor(attLevel * 0.20) + 4;
                 
-                char.applySpellStatBuff(SkillName.Attack, Math.floor(attLevel * 0.20) + 4, duration, spell.id);
-                char.applySpellStatBuff(SkillName.Strength, Math.floor(strLevel * 0.20) + 4, duration, spell.id);
-                char.applySpellStatBuff(SkillName.Defence, Math.floor(defLevel * 0.20) + 4, duration, spell.id);
+                char.applyEnhancementSpell(
+                    spell.name,
+                    `Greatly boosts Attack, Strength, and Defence by ${boost}.`,
+                    [
+                        { skill: SkillName.Attack, value: boost },
+                        { skill: SkillName.Strength, value: boost },
+                        { skill: SkillName.Defence, value: boost }
+                    ],
+                    duration,
+                    spell.id
+                );
                 addLog("You are filled with immense strength and resilience.");
             } else if (spell.id === 'archers_precision') {
                 const rngLevel = char.skills.find(s => s.name === SkillName.Ranged)?.level ?? 1;
                 const defLevel = char.skills.find(s => s.name === SkillName.Defence)?.level ?? 1;
+                const boost = Math.floor(rngLevel * 0.20) + 4;
 
-                char.applySpellStatBuff(SkillName.Ranged, Math.floor(rngLevel * 0.20) + 4, duration, spell.id);
-                char.applySpellStatBuff(SkillName.Defence, Math.floor(defLevel * 0.20) + 4, duration, spell.id);
+                char.applyEnhancementSpell(
+                    spell.name,
+                    `Greatly boosts Ranged and Defence by ${boost}.`,
+                    [
+                        { skill: SkillName.Ranged, value: boost },
+                        { skill: SkillName.Defence, value: boost }
+                    ],
+                    duration,
+                    spell.id
+                );
                 addLog("Your aim becomes unerring.");
             } else if (spell.id === 'mystic_power') {
                 const magLevel = char.skills.find(s => s.name === SkillName.Magic)?.level ?? 1;
-                char.applySpellStatBuff(SkillName.Magic, Math.floor(magLevel * 0.20) + 4, duration, spell.id);
+                const boost = Math.floor(magLevel * 0.20) + 4;
+
+                char.applyEnhancementSpell(
+                    spell.name,
+                    `Greatly boosts Magic by ${boost} and Magic damage by 5%.`,
+                    [{ skill: SkillName.Magic, value: boost }],
+                    duration,
+                    spell.id
+                );
                 char.addBuff({ type: 'magic_damage_boost', value: 5, duration: duration, source: spell.id });
                 addLog("You channel overwhelming arcane power.");
             } else {

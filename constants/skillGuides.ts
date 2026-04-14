@@ -1,6 +1,7 @@
 import { SkillName, SkillGuideTab, SkillGuideEntry } from '../types';
 import { SMITHING_RECIPES, SMELTING_RECIPES } from './recipes';
 import { slayer as SLAYER_MONSTERS } from './monsters/slayer';
+//skillguide skill guide
 
 const toTitleCase = (str: string) => str.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()).replace(' Unf', ' (unf)');
 
@@ -154,7 +155,7 @@ export const SKILL_GUIDES: Record<SkillName, SkillGuideTab[]> = {
         { level: 49, description: 'Unlock Blade Master.' },
         { level: 52, description: 'Unlock Deadeye.' },
         { level: 55, description: 'Unlock Archon\'s Insight.' },
-        { level: 58, description: "Unlock Protect from Magic." },
+        { level: 58, description: "Unlock Protect from Magic. Requires: A Sorcerer's Trial" },
         { level: 61, description: "Unlock Protect from Ranged." },
         { level: 65, description: "Unlock Protect from Melee." },
         { level: 70, description: 'Unlock Adamant Skin.' },
@@ -209,7 +210,9 @@ export const SKILL_GUIDES: Record<SkillName, SkillGuideTab[]> = {
                 { level: 1, description: 'Bronze Arrow', subDescription: 'Headless Arrow + Bronze Arrowtip', itemId: 'bronze_arrow' },
                 { level: 1, description: 'Bronze Bolts', subDescription: 'Bronze Bolts (unf) + Feather', itemId: 'bronze_bolts' },
                 { level: 15, description: 'Iron Arrow', subDescription: 'Headless Arrow + Iron Arrowtip', itemId: 'iron_arrow' },
+                { level: 15, description: 'Iron Bolts', subDescription: 'Iron Bolts (unf) + Feather', itemId: 'iron_bolts' },
                 { level: 30, description: 'Steel Arrow', subDescription: 'Headless Arrow + Steel Arrowtip', itemId: 'steel_arrow' },
+                { level: 30, description: 'Steel Bolts', subDescription: 'Steel Bolts (unf) + Feather', itemId: 'steel_bolts' },
                 { level: 45, description: 'Mithril Arrow', subDescription: 'Headless Arrow + Mithril Arrowtip', itemId: 'mithril_arrow' },
                 { level: 50, description: 'Mithril Bolts', subDescription: 'Mithril Bolts (unf) + Feather', itemId: 'mithril_bolts' },
                 { level: 60, description: 'Adamantite Arrow', subDescription: 'Headless Arrow + Adamantite Arrowtip', itemId: 'adamantite_arrow' },

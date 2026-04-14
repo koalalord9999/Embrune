@@ -543,6 +543,11 @@ export const useItemActions = (props: UseItemActionsProps) => {
     const handleReadMap = useCallback((item: Item) => {
         if (!item.mappable) return;
 
+        if (ui.combatQueue.length > 0) {
+            addLog("You can't study a map while in combat!");
+            return;
+        }
+
         const currentRegionId = POIS[currentPoiId]?.regionId;
         if (currentRegionId === item.mappable.regionId) {
             setActiveDungeonMap({
@@ -552,7 +557,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
         } else {
             addLog("You can only read this map while inside the dungeon it depicts.");
         }
-    }, [currentPoiId, setActiveDungeonMap, addLog]);
+    }, [currentPoiId, setActiveDungeonMap, addLog, ui.combatQueue.length]);
 
     const handleUseItemOnActivity = useCallback((used: { item: InventorySlot; index: number }, activity: POIActivity) => {
         const { item: usedItem } = used;

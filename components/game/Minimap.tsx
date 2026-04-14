@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import {  POIS, REGIONS, getIconUrl  } from '../../constants';
+import { POIS, REGIONS, getIconUrl } from '../../constants';
 import { ContextMenuState, useUIState } from '../../hooks/useUIState';
 import { ContextMenuOption } from '../common/ContextMenu';
 import { useLongPress } from '../../hooks/useLongPress';
@@ -45,7 +45,7 @@ const HpOrb: React.FC<{
     isTouchDevice: boolean;
 }> = ({ currentHp, maxHp, showHealthNumbers, isPoisoned, onCurePoison, setContextMenu, isTouchDevice }) => {
     const percentage = maxHp > 0 ? (currentHp / maxHp) * 100 : 0;
-    
+
     const liquidClass = isPoisoned ? 'bg-green-700' : 'bg-red-600';
     const heartIconClass = isPoisoned ? 'poisoned-heart-icon' : 'filter invert opacity-25';
 
@@ -58,7 +58,7 @@ const HpOrb: React.FC<{
     const handleLongPress = (e: React.MouseEvent | React.TouchEvent) => {
         if (!isPoisoned) return;
         e.preventDefault();
-        
+
         let eventForMenu: React.MouseEvent | React.Touch;
         if ('touches' in e && e.touches.length > 0) {
             eventForMenu = e.touches[0];
@@ -73,61 +73,61 @@ const HpOrb: React.FC<{
         ];
         setContextMenu({ options, triggerEvent: eventForMenu, isTouchInteraction: isTouchDevice, title: "Health" });
     };
-    
+
     const longPressHandlers = useLongPress({
         onLongPress: handleLongPress,
         onClick: handleSingleTap,
     });
-  
+
     return (
-      <div 
-        {...longPressHandlers}
-        data-tutorial-id="hp-orb"
-        className="relative w-11 h-11 rounded-full border-2 border-gray-500 bg-gray-800 overflow-hidden shadow-lg"
-      >
-        {/* Liquid fill */}
-        <div 
-          className={`absolute bottom-0 left-0 w-full ${liquidClass} transition-all duration-300 ease-in-out`} 
-          style={{ height: `${percentage}%` }}
-        />
-        {/* Heart Icon */}
-        <div className="absolute inset-0 flex items-center justify-center">
-            <img 
-                src={getIconUrl("hearts")} 
-                alt="" 
-                className={`w-8 h-8 transition-all ${heartIconClass}`} 
+        <div
+            {...longPressHandlers}
+            data-tutorial-id="hp-orb"
+            className="relative w-11 h-11 rounded-full border-2 border-gray-500 bg-gray-800 overflow-hidden shadow-lg"
+        >
+            {/* Liquid fill */}
+            <div
+                className={`absolute bottom-0 left-0 w-full ${liquidClass} transition-all duration-300 ease-in-out`}
+                style={{ height: `${percentage}%` }}
             />
-        </div>
-        {/* Shine effect */}
-        <div className="absolute top-1 left-1 w-8 h-8 rounded-full bg-white/20 blur-sm" />
-        {/* HP Text */}
-        {showHealthNumbers && (
-            <div className="absolute inset-0 flex items-center justify-center z-10 font-pixel-rpg">
-                <span className="font-bold text-xl text-white" style={{ textShadow: '1px 1px 2px black' }}>
-                    {currentHp}
-                </span>
+            {/* Heart Icon */}
+            <div className="absolute inset-0 flex items-center justify-center">
+                <img
+                    src={getIconUrl("hearts")}
+                    alt=""
+                    className={`w-8 h-8 transition-all ${heartIconClass}`}
+                />
             </div>
-        )}
-      </div>
+            {/* Shine effect */}
+            <div className="absolute top-1 left-1 w-8 h-8 rounded-full bg-white/20 blur-sm" />
+            {/* HP Text */}
+            {showHealthNumbers && (
+                <div className="absolute inset-0 flex items-center justify-center z-10 font-pixel-rpg">
+                    <span className="font-bold text-xl text-white" style={{ textShadow: '1px 1px 2px black' }}>
+                        {currentHp}
+                    </span>
+                </div>
+            )}
+        </div>
     );
 };
 
 const PrayerOrb: React.FC<{ currentPrayer: number, maxPrayer: number }> = ({ currentPrayer, maxPrayer }) => {
     const percentage = maxPrayer > 0 ? (currentPrayer / maxPrayer) * 100 : 0;
-  
+
     return (
-      <div className="relative w-11 h-11 rounded-full border-2 border-gray-500 bg-gray-800 overflow-hidden shadow-lg">
-        <div className="absolute bottom-0 left-0 w-full bg-blue-500 transition-all duration-300 ease-in-out" style={{ height: `${percentage}%` }} />
-        <div className="absolute inset-0 flex items-center justify-center">
-            <img src={getIconUrl("polar-star")} alt="" className="w-8 h-8 filter invert opacity-25" />
+        <div className="relative w-11 h-11 rounded-full border-2 border-gray-500 bg-gray-800 overflow-hidden shadow-lg">
+            <div className="absolute bottom-0 left-0 w-full bg-blue-500 transition-all duration-300 ease-in-out" style={{ height: `${percentage}%` }} />
+            <div className="absolute inset-0 flex items-center justify-center">
+                <img src={getIconUrl("polar-star")} alt="" className="w-8 h-8 filter invert opacity-25" />
+            </div>
+            <div className="absolute top-1 left-1 w-8 h-8 rounded-full bg-white/20 blur-sm" />
+            <div className="absolute inset-0 flex items-center justify-center z-10 font-pixel-rpg">
+                <span className="font-bold text-xl text-white" style={{ textShadow: '1px 1px 2px black' }}>
+                    {Math.floor(currentPrayer)}
+                </span>
+            </div>
         </div>
-        <div className="absolute top-1 left-1 w-8 h-8 rounded-full bg-white/20 blur-sm" />
-        <div className="absolute inset-0 flex items-center justify-center z-10 font-pixel-rpg">
-            <span className="font-bold text-xl text-white" style={{ textShadow: '1px 1px 2px black' }}>
-                {Math.floor(currentPrayer)}
-            </span>
-        </div>
-      </div>
     );
 };
 
@@ -164,10 +164,10 @@ const RunEnergyOrb: React.FC<{
             iconUrl: 'wingfoot'
         };
     }, [isResting, isToggled]);
-    
+
     const handleLongPress = (e: React.MouseEvent | React.TouchEvent) => {
         e.preventDefault();
-        
+
         let eventForMenu: React.MouseEvent | React.Touch;
         if ('touches' in e) {
             eventForMenu = e.touches[0] || e.changedTouches[0];
@@ -196,9 +196,9 @@ const RunEnergyOrb: React.FC<{
             aria-label={isToggled ? 'Toggle Run Off' : 'Toggle Run On'}
             title="Run Energy (Click to toggle run, Right-click/Long-press for more options)"
         >
-            <div 
-              className={`absolute bottom-0 left-0 w-full ${orbColor} transition-colors duration-300 ease-in-out`} 
-              style={{ height: `${percentage}%` }}
+            <div
+                className={`absolute bottom-0 left-0 w-full ${orbColor} transition-colors duration-300 ease-in-out`}
+                style={{ height: `${percentage}%` }}
             />
             <div className="absolute inset-0 flex items-center justify-center">
                 <div
@@ -244,6 +244,10 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
     }, [poisonEvent, isInCombat]);
 
     const handleMapOpen = () => {
+        if (isInCombat) {
+            addLog("You can't open your map while in combat!");
+            return;
+        }
         if (currentRegion && (currentRegion.type === 'city' || currentRegion.type === 'underground')) {
             ui.setActiveMapRegionId(currentRegion.id);
         } else {
@@ -254,6 +258,10 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
 
     const mapOrbLongPress = useLongPress({
         onLongPress: (e: React.MouseEvent | React.TouchEvent) => {
+            if (isInCombat) {
+                addLog("You can't open your map while in combat!");
+                return;
+            }
             let eventForMenu: React.MouseEvent | React.Touch;
             if ('touches' in e && e.touches.length > 0) {
                 eventForMenu = e.touches[0];
@@ -264,10 +272,12 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
             }
             ui.setContextMenu({
                 options: [
-                    { label: 'Open World Map', onClick: () => {
-                        ui.setActiveMapRegionId('world');
-                        ui.setIsExpandedMapViewOpen(true);
-                    } },
+                    {
+                        label: 'Open World Map', onClick: () => {
+                            ui.setActiveMapRegionId('world');
+                            ui.setIsExpandedMapViewOpen(true);
+                        }
+                    },
                     { label: 'Open Atlas', onClick: () => ui.setIsAtlasViewOpen(true) },
                 ],
                 triggerEvent: eventForMenu,
@@ -277,7 +287,7 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
         },
         onClick: handleMapOpen,
     });
-    
+
     const devButtonLongPress = useLongPress({
         onLongPress: (e: React.MouseEvent | React.TouchEvent) => {
             let eventForMenu: React.MouseEvent | React.Touch;
@@ -296,13 +306,13 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
 
             const options: ContextMenuOption[] = [
                 { label: 'Open Panel', onClick: () => performAction(onToggleDevPanel) },
-                { 
-                    label: <span className={isPermAggroOn ? "text-green-500" : "text-red-500"}>Toggle Aggression</span>, 
+                {
+                    label: <span className={isPermAggroOn ? "text-green-500" : "text-red-500"}>Toggle Aggression</span>,
                     onClick: () => performAction(() => onTogglePermAggro?.())
                 },
                 { label: 'Open Bank', onClick: () => performAction(() => ui.setActivePanel('bank')) },
-                { 
-                    label: <span className={isGodModeOn ? "text-green-500" : "text-red-500"}>Toggle God Mode</span>, 
+                {
+                    label: <span className={isGodModeOn ? "text-green-500" : "text-red-500"}>Toggle God Mode</span>,
                     onClick: () => performAction(() => onToggleGodMode?.())
                 },
             ];
@@ -323,22 +333,22 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
         <div className="bg-black/70 border-b-2 border-gray-600 flex flex-col gap-2 flex-shrink-0">
             {/* Main positioning container for the minimap and its overlays. Now full-width. */}
             <div className="w-full aspect-square relative my-1">
-                
+
                 {/* Radar background, POI dots, and player icon. Now explicitly sized and centered. */}
-                <div 
+                <div
                     className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] bg-cover bg-center border-2 border-yellow-600 rounded-full overflow-hidden"
                     style={{ backgroundImage: `url('https://images.unsplash.com/photo-1505236755279-228d5d36c34b?q=80&w=256&auto=format=fit=crop')` }}
                 >
                     <div className="absolute inset-0 bg-black/50" />
-                    
+
                     {/* Center dot for player */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-yellow-400 rounded-full border-2 border-black" />
-                    
+
                     {/* Connection POI dots */}
                     {currentPoi.connections.map(connId => {
                         const connPoi = POIS[connId];
                         if (!connPoi) return null;
-                        
+
                         const isUnlocked = unlockedPois.includes(connId);
                         const dotColorClass = isUnlocked ? "bg-gray-300 hover:bg-yellow-300" : "bg-gray-700";
                         const cursorClass = isUnlocked ? "cursor-pointer" : "cursor-not-allowed";
@@ -346,16 +356,16 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
                         const dx = connPoi.x - currentPoi.x;
                         const dy = connPoi.y - currentPoi.y;
                         const angle = Math.atan2(dy, dx);
-                        const distance = 40; 
+                        const distance = 40;
 
                         const left = `calc(50% + ${Math.cos(angle) * distance}px - 8px)`;
                         const top = `calc(50% + ${Math.sin(angle) * distance}px - 8px)`;
 
                         return (
-                            <div 
-                                key={connId} 
+                            <div
+                                key={connId}
                                 className={`absolute w-4 h-4 rounded-full border-2 border-black transition-colors ${dotColorClass} ${cursorClass}`}
-                                style={{ left, top }} 
+                                style={{ left, top }}
                                 onClick={() => {
                                     if (isUnlocked) {
                                         onNavigate(connId);
@@ -408,13 +418,13 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
                     </div>
                 </div>
 
-                 {/* Prayer Orb Overlay */}
+                {/* Prayer Orb Overlay */}
                 <div className="absolute z-10 top-px right-px">
                     <PrayerOrb currentPrayer={currentPrayer} maxPrayer={maxPrayer} />
                 </div>
-                
+
                 {isDevMode && (
-                    <button 
+                    <button
                         {...devButtonLongPress}
                         className="absolute z-10 w-8 h-8 bg-gray-800 hover:bg-gray-700 border-2 border-gray-500 rounded-full flex items-center justify-center bottom-px left-px"
                         aria-label="Open Dev Panel"
@@ -422,9 +432,9 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
                         <img src={getIconUrl("wrench")} alt="Dev Panel" className="w-5 h-5 filter invert" />
                     </button>
                 )}
-                
+
                 {/* Map Orb Overlay - Placed in the bottom-right corner of the panel */}
-                <button 
+                <button
                     data-tutorial-id="map-orb"
                     {...mapOrbLongPress}
                     className="absolute z-10 w-11 h-11 rounded-full bg-blue-800 hover:bg-blue-700 border-2 border-blue-500 flex items-center justify-center bottom-px right-px"

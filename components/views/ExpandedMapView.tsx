@@ -86,8 +86,19 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
         
         if (isWorldView) {
             const region = REGIONS[poi.regionId];
-            const isCity = region?.type === 'city' || region?.type === 'dungeon' || region?.type === 'underground';
-            const effectivePoi = isMapManagerEnabled ? (isCity ? regionCoordinates?.[region.id] : poiCoordinates?.[poi.id]) : { x: isCity ? region.x : (poi.eX ?? poi.x), y: isCity ? region.y : (poi.eY ?? poi.y) };
+            const isDungeon = region?.type === 'dungeon' || region?.type === 'underground';
+            const isCity = region?.type === 'city';
+            
+            let effectivePoi;
+            if (isDungeon && region.entryPoiId) {
+                const entryPoi = allPois[region.entryPoiId];
+                effectivePoi = { x: entryPoi?.eX ?? entryPoi?.x ?? 0, y: entryPoi?.eY ?? entryPoi?.y ?? 0 };
+            } else if (isMapManagerEnabled) {
+                effectivePoi = (isCity ? regionCoordinates?.[region.id] : poiCoordinates?.[poi.id]);
+            } else {
+                effectivePoi = { x: isCity ? region.x : (poi.eX ?? poi.x), y: isCity ? region.y : (poi.eY ?? poi.y) };
+            }
+
             if (!effectivePoi) return;
             targetX = effectivePoi.x;
             targetY = effectivePoi.y;
@@ -122,8 +133,19 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
         
         if (isWorldView) {
             const region = REGIONS[poi.regionId];
-            const isCity = region?.type === 'city' || region?.type === 'dungeon' || region?.type === 'underground';
-            const effectivePoi = isMapManagerEnabled ? (isCity ? regionCoordinates?.[region.id] : poiCoordinates?.[poi.id]) : { x: isCity ? region.x : (poi.eX ?? poi.x), y: isCity ? region.y : (poi.eY ?? poi.y) };
+            const isDungeon = region?.type === 'dungeon' || region?.type === 'underground';
+            const isCity = region?.type === 'city';
+
+            let effectivePoi;
+            if (isDungeon && region.entryPoiId) {
+                const entryPoi = allPois[region.entryPoiId];
+                effectivePoi = { x: entryPoi?.eX ?? entryPoi?.x ?? 0, y: entryPoi?.eY ?? entryPoi?.y ?? 0 };
+            } else if (isMapManagerEnabled) {
+                effectivePoi = (isCity ? regionCoordinates?.[region.id] : poiCoordinates?.[poi.id]);
+            } else {
+                effectivePoi = { x: isCity ? region.x : (poi.eX ?? poi.x), y: isCity ? region.y : (poi.eY ?? poi.y) };
+            }
+
             if (!effectivePoi) return;
             targetX = effectivePoi.x;
             targetY = effectivePoi.y;
@@ -523,7 +545,8 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
                                             const dy = Math.abs(e.clientY - nodeDragStart.current.y);
                                             if (dx > 5 || dy > 5) return;
                                         }
-                                        if (canClick) setActiveMapRegionId(dungeon.id);
+                                        // Disable clicking dungeons on world map as per request
+                                        // if (canClick) setActiveMapRegionId(dungeon.id);
                                     }}
                                     onMouseEnter={(e) => handleMouseEnter(e, { ...entryPoi, name: dungeon.name })}
                                     onMouseLeave={() => setTooltip(null)}
@@ -562,9 +585,23 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
                              <div
                                 key="current-player-location"
                                 className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                                style={{
-                                    top: `${(isWorldView ? (isMapManagerEnabled && poiCoordinates ? poiCoordinates[currentPlayerPoi.id]?.y : currentPlayerPoi.eY ?? currentPlayerPoi.y) : (isMapManagerEnabled && poiCoordinates ? poiCoordinates[currentPlayerPoi.id]?.y : currentPlayerPoi.y)) ?? 0}px`,
-                                    left: `${(isWorldView ? (isMapManagerEnabled && poiCoordinates ? poiCoordinates[currentPlayerPoi.id]?.x : currentPlayerPoi.eX ?? currentPlayerPoi.x) : (isMapManagerEnabled && poiCoordinates ? poiCoordinates[currentPlayerPoi.id]?.x : currentPlayerPoi.x)) ?? 0}px`,
+                                 style={{
+                                    top: `${(isWorldView ? (() => {
+                                        const region = REGIONS[currentPlayerPoi.regionId];
+                                        if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
+                                            const entryPoi = allPois[region.entryPoiId];
+                                            return entryPoi?.eY ?? entryPoi?.y ?? 0;
+                                        }
+                                        return (isMapManagerEnabled && poiCoordinates ? poiCoordinates[currentPlayerPoi.id]?.y : currentPlayerPoi.eY ?? currentPlayerPoi.y);
+                                    })() : (isMapManagerEnabled && poiCoordinates ? poiCoordinates[currentPlayerPoi.id]?.y : currentPlayerPoi.y)) ?? 0}px`,
+                                    left: `${(isWorldView ? (() => {
+                                        const region = REGIONS[currentPlayerPoi.regionId];
+                                        if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
+                                            const entryPoi = allPois[region.entryPoiId];
+                                            return entryPoi?.eX ?? entryPoi?.x ?? 0;
+                                        }
+                                        return (isMapManagerEnabled && poiCoordinates ? poiCoordinates[currentPlayerPoi.id]?.x : currentPlayerPoi.eX ?? currentPlayerPoi.x);
+                                    })() : (isMapManagerEnabled && poiCoordinates ? poiCoordinates[currentPlayerPoi.id]?.x : currentPlayerPoi.x)) ?? 0}px`,
                                     zIndex: 20
                                 }}
                             >
@@ -579,9 +616,25 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
                             <div
                                 key="death-marker"
                                 className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
-                                style={{
-                                    top: `${(isWorldView ? (isMapManagerEnabled && poiCoordinates ? poiCoordinates[deathMarker.poiId]?.y : allPois[deathMarker.poiId].eY ?? allPois[deathMarker.poiId].y) : (isMapManagerEnabled && poiCoordinates ? poiCoordinates[deathMarker.poiId]?.y : allPois[deathMarker.poiId].y)) ?? 0}px`,
-                                    left: `${(isWorldView ? (isMapManagerEnabled && poiCoordinates ? poiCoordinates[deathMarker.poiId]?.x : allPois[deathMarker.poiId].eX ?? allPois[deathMarker.poiId].x) : (isMapManagerEnabled && poiCoordinates ? poiCoordinates[deathMarker.poiId]?.x : allPois[deathMarker.poiId].x)) ?? 0}px`,
+                                 style={{
+                                    top: `${(isWorldView ? (() => {
+                                        const poi = allPois[deathMarker.poiId];
+                                        const region = REGIONS[poi?.regionId];
+                                        if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
+                                            const entryPoi = allPois[region.entryPoiId];
+                                            return entryPoi?.eY ?? entryPoi?.y ?? 0;
+                                        }
+                                        return (isMapManagerEnabled && poiCoordinates ? poiCoordinates[deathMarker.poiId]?.y : allPois[deathMarker.poiId].eY ?? allPois[deathMarker.poiId].y);
+                                    })() : (isMapManagerEnabled && poiCoordinates ? poiCoordinates[deathMarker.poiId]?.y : allPois[deathMarker.poiId].y)) ?? 0}px`,
+                                    left: `${(isWorldView ? (() => {
+                                        const poi = allPois[deathMarker.poiId];
+                                        const region = REGIONS[poi?.regionId];
+                                        if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
+                                            const entryPoi = allPois[region.entryPoiId];
+                                            return entryPoi?.eX ?? entryPoi?.x ?? 0;
+                                        }
+                                        return (isMapManagerEnabled && poiCoordinates ? poiCoordinates[deathMarker.poiId]?.x : allPois[deathMarker.poiId].eX ?? allPois[deathMarker.poiId].x);
+                                    })() : (isMapManagerEnabled && poiCoordinates ? poiCoordinates[deathMarker.poiId]?.x : allPois[deathMarker.poiId].x)) ?? 0}px`,
                                     zIndex: 20
                                 }}
                             >

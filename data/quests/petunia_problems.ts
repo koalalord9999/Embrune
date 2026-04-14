@@ -22,30 +22,12 @@ export const petuniaProblems: Quest = {
     ],
     completionSummary: "I solved the mystery of Fitzwilliam's dying petunias. Anise the Herbalist helped me create a potion which revealed a magical Blight Imp was the culprit. After defeating the creature, the flowers are safe and Fitzwilliam is finally quiet.",
     stages: [
-        {
-            description: "Speak to Herbalist Anise in Oakhaven.",
-            requirement: { type: 'talk', poiId: 'oakhaven_herblore_shop', npcName: 'Herbalist Anise' }
-        },
-        {
-            description: "Gather 1 Grimy Spore Spud.",
-            requirement: { type: 'gather', items: [{ itemId: 'grimy_spore_spud', quantity: 1 }] }
-        },
-        {
-            description: "Return to Herbalist Anise.",
-            requirement: { type: 'talk', poiId: 'oakhaven_herblore_shop', npcName: 'Herbalist Anise' }
-        },
-        {
-            description: "Use the Blight Ward Potion on the blighted soil in Meadowdale Square.",
-            requirement: { type: 'talk', poiId: 'meadowdale_square', npcName: 'Use Blight Ward Potion' }
-        },
-        {
-            description: "Defeat the Blight Imp.",
-            requirement: { type: 'kill', monsterId: 'blight_imp', quantity: 1 }
-        },
-        {
-            description: "Report your success to Old Man Fitzwilliam.",
-            requirement: { type: 'talk', poiId: 'meadowdale_square', npcName: 'Old Man Fitzwilliam' }
-        }
+        { description: "Speak to Herbalist Anise in Oakhaven.", requirement: { type: 'talk', poiId: 'oakhaven_herblore_shop', npcName: 'Herbalist Anise' } },
+        { description: "Gather 1 Grimy Spore Spud.", requirement: { type: 'gather', items: [{ itemId: 'grimy_spore_spud', quantity: 1 }] } },
+        { description: "Return to Herbalist Anise.", requirement: { type: 'talk', poiId: 'oakhaven_herblore_shop', npcName: 'Herbalist Anise' } },
+        { description: "Use the Blight Ward Potion on the blighted soil in Meadowdale Square.", requirement: { type: 'talk', poiId: 'meadowdale_square', npcName: 'Use Blight Ward Potion' } },
+        { description: "Defeat the Blight Imp.", requirement: { type: 'kill', monsterId: 'blight_imp', quantity: 1 } },
+        { description: "Report your success to Old Man Fitzwilliam.", requirement: { type: 'talk', poiId: 'meadowdale_square', npcName: 'Old Man Fitzwilliam' } }
     ],
     rewards: {
         xp: [{ skill: SkillName.Herblore, amount: 500 }],
@@ -53,10 +35,12 @@ export const petuniaProblems: Quest = {
         items: [{ itemId: 'ring_of_preservation', quantity: 1 }]
     },
     dialogueEntryPoints: [
-        { npcName: 'Old Man Fitzwilliam', response: { text: "That's why I stopped by. What's wrong?", check: { requirements: [{ type: 'quest', questId: 'petunia_problems', status: 'not_started' }, { type: 'quest', questId: 'goblin_menace', status: 'completed'}], successNode: 'quest_intro_petunia_problems', failureNode: '' } } },
+        { npcName: 'Old Man Fitzwilliam', response: { text: "That's why I stopped by. What's wrong?", check: { requirements: [{ type: 'quest', questId: 'petunia_problems', status: 'not_started' }, { type: 'quest', questId: 'goblin_menace', status: 'completed' }], successNode: 'quest_intro_petunia_problems', failureNode: '' } } },
+        { npcName: 'Old Man Fitzwilliam', response: { text: "I have lost the soil sample you gave me.", check: { requirements: [{ type: 'quest', questId: 'petunia_problems', status: 'in_progress', stage: 0, operator: 'gte' }, { type: 'items', items: [{ itemId: 'blighted_soil', quantity: 1, operator: 'lt' }] }], successNode: 'pp_fitz_lost_soil', failureNode: '' } } },
         { npcName: 'Old Man Fitzwilliam', response: { text: "I've dealt with the blight.", check: { requirements: [{ type: 'quest', questId: 'petunia_problems', status: 'in_progress', stage: 5 }], successNode: 'pp_fitz_complete', failureNode: '' } } },
         { npcName: 'Herbalist Anise', response: { text: "Fitzwilliam sent me to inquire about a blight?", check: { requirements: [{ type: 'quest', questId: 'petunia_problems', status: 'in_progress', stage: 0 }], successNode: 'pp_anise_intro', failureNode: '' } } },
         { npcName: 'Herbalist Anise', response: { text: "I have the ingredient you asked for.", check: { requirements: [{ type: 'quest', questId: 'petunia_problems', status: 'in_progress', stage: 2 }], successNode: 'pp_anise_has_spud', failureNode: '' } } },
+        { npcName: 'Herbalist Anise', response: { text: "I seem to have lost the soil sample.", check: { requirements: [{ type: 'quest', questId: 'petunia_problems', status: 'in_progress', stage: 1, operator: 'gte' }, { type: 'items', items: [{ itemId: 'blighted_soil', quantity: 1, operator: 'lt' }] }], successNode: 'pp_anise_lost_soil', failureNode: '' } } },
     ],
     dialogue: {
         petunia_use_potion: {
@@ -106,7 +90,15 @@ export const petuniaProblems: Quest = {
             npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
             text: "It's a magical problem, I'm sure of it. I'm too old to go chasing mages. But you... you look capable. Go to Oakhaven. There's an herbalist there, Anise. She knows about this sort of thing. Here, take a sample of the soil. Show it to her. But be careful... it feels wrong.",
             responses: [
-                { text: "I'll take this to Anise right away.", actions: [{ type: 'start_quest', questId: 'petunia_problems' }, { type: 'give_item', itemId: 'blighted_soil', quantity: 1 }] }
+                { text: "I'll take this to Anise right away.", actions: [{ type: 'give_item', itemId: 'blighted_soil', quantity: 1 }, { type: 'start_quest', questId: 'petunia_problems' }] }
+            ]
+        },
+        pp_fitz_lost_soil: {
+            npcName: 'Old Man Fitzwilliam',
+            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            text: "You lost the soil sample? How could you be so careless? Here... let me dig some more up... Don't lose it this time, okay? *Fitz scoops up another sample of the soil*",
+            responses: [
+                { text: "I'll be careful next time.", actions: [{ type: 'give_item', itemId: 'blighted_soil', quantity: 1 }] }
             ]
         },
         pp_anise_intro: {
@@ -145,6 +137,14 @@ export const petuniaProblems: Quest = {
             npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
             text: "Oh, dear. You brought me the grimy spore spud. I can't use it like this. You'll need to clean it first. Don't you know the first thing about Herblore? Clean your herbs before you try to brew with them!",
             responses: []
+        },
+        pp_anise_lost_soil: {
+            npcName: 'Herbalist Anise',
+            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            text: "Oh, dear. You lost the soil sample? I can't help you without it. You'll need to go back to Fitzwilliam and get another one.",
+            responses: [
+                { text: "I'll go back to Fitzwilliam." }
+            ]
         },
         pp_anise_make_potion: {
             npcName: 'Herbalist Anise',

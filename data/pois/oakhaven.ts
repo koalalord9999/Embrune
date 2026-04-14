@@ -320,6 +320,8 @@ export const oakhavenPois: Record<string, POI> = {
                 startNode: 'default_dialogue',
                 questTopics: ['an_echo_of_battle', 'art_of_the_warhammer'],
                 conditionalGreetings: [
+                    //Goblin Crusher Dialogue
+                    { text: "Have you come to turn in a bounty?", check: { requirements: [{ type: 'items', items: [{ itemId: 'goblin_champion_scroll', quantity: 1 }] }] } },
                     // AN ECHO OF BATTLE (HIGHEST PRIORITY)
                     { text: "Thank you again, my friend. It's... quieter now. In my head.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'completed' }] } },
                     { text: "Have you uncovered any information about the barrow?", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 1 }] } },
@@ -339,11 +341,26 @@ export const oakhavenPois: Record<string, POI> = {
                 ],
 
                 dialogue: {
+                    bronn_take_scroll: {
+                        npcName: 'Bronn the Retired Adventurer',
+                        npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+                        text: "A scroll? Let me see that... Whoa, what an extraordinary find! I found this mace back in my heyday—it's yours if you'll let me take that scroll off your hands.",
+                        responses: [
+                            { text: "It's a deal.", actions: [{ type: 'take_item', itemId: 'goblin_champion_scroll', quantity: 1 }, { type: 'give_item', itemId: 'goblin_crusher', quantity: 1 }] },
+                            { text: "Maybe another time." }
+                        ],
+                    },
                     default_dialogue: {
                         npcName: 'Bronn the Retired Adventurer',
                         npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
                         text: "Another pint, barkeep! What's an old soldier to do but drink and remember?",
-                        responses: [],
+                        responses: [
+                            {
+                                text: "About that bounty... I found this scroll held by a goblin champion.",
+                                next: 'bronn_take_scroll',
+                                check: { requirements: [{ type: 'items', items: [{ itemId: 'goblin_champion_scroll', quantity: 1 }] }] }
+                            }
+                        ],
                     }
                 },
             }

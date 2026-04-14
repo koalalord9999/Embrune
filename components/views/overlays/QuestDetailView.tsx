@@ -175,13 +175,13 @@ const QuestDetailView: React.FC<QuestDetailViewProps> = ({ questId, playerQuests
     const statusColor = !playerQuest ? 'text-red-400' : playerQuest.isComplete ? 'text-green-400' : 'text-yellow-400';
 
     return (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in font-sans" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in font-pixel-rpg" onClick={onClose}>
             <div
                 className="bg-gray-800 border-4 border-gray-600 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center p-4 border-b-2 border-gray-600 flex-shrink-0 bg-gray-900/50">
-                    <h2 className={`text-3xl font-bold ${statusColor} font-medieval tracking-wide`}>{questData.name}</h2>
+                    <h2 className={`text-3xl font-bold ${statusColor} font-pixel-rpg tracking-wide`}>{questData.name}</h2>
                     <Button onClick={onClose}>Close</Button>
                 </div>
                 <div className="flex-grow overflow-y-auto p-4 text-gray-200">

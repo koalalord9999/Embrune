@@ -2,6 +2,15 @@
    BASE — layout, body, root, global resets
    ============================================================ */
 
+:root {
+  --game-font-family: 'VT323', monospace;
+  --game-font-scale: 1;
+}
+
+html {
+  font-size: calc(16px * var(--game-font-scale));
+}
+
 html,
 body,
 #root {
@@ -14,7 +23,7 @@ body,
 
 body {
   background-color: #282c34;
-  font-family: 'VT323', monospace;
+  font-family: var(--game-font-family);
   user-select: none; /* Disable text selection */
   letter-spacing: 0.02em;
   -webkit-user-select: none; /* Safari */
@@ -24,7 +33,7 @@ body {
 }
 
 .font-pixel-rpg {
-  font-family: 'VT323', monospace;
+  font-family: var(--game-font-family);
   letter-spacing: 0.02em;
 }
 

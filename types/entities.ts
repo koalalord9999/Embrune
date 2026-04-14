@@ -198,8 +198,10 @@ export type MonsterStatusEffect =
 
 export interface ActiveBuff {
     id: number;
-    type: 'recoil' | 'flat_damage' | 'poison_on_hit' | 'accuracy_boost' | 'evasion_boost' | 'damage_on_hit' | 'attack_speed_boost' | 'poison_immunity' | 'damage_reduction' | 'antifire' | 'stun' | 'poison' | 'stat_boost' | 'magic_damage_boost' | 'stamina';
+    type: 'recoil' | 'flat_damage' | 'poison_on_hit' | 'accuracy_boost' | 'evasion_boost' | 'damage_on_hit' | 'attack_speed_boost' | 'poison_immunity' | 'damage_reduction' | 'antifire' | 'stun' | 'poison' | 'stat_boost' | 'magic_damage_boost' | 'stamina' | 'spell_buff';
     value: number;
+    name?: string;
+    description?: string;
     duration: number; // initial duration in ms
     durationRemaining: number; // ms remaining
     chance?: number;
@@ -208,6 +210,10 @@ export interface ActiveBuff {
         skill: SkillName;
         value: number;
     };
+    statBoosts?: {
+        skill: SkillName;
+        value: number;
+    }[];
     ticksApplied?: number;
     nextTickTimestamp?: number;
     source?: string; // ID of the spell or item that caused this buff

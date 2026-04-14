@@ -1,5 +1,5 @@
 // AUTO-GENERATED: Run 'node generate-item-ids.js' to update this file!
-export type ItemId =
+export type ItemId = 
   | '2_3_cake'
   | 'accuracy_potion'
   | 'adamantite_arrow'
@@ -318,6 +318,7 @@ export type ItemId =
   | 'gloom_moss_potion_unf'
   | 'gnawed_bone'
   | 'goblin_champion_scroll'
+  | 'goblin_crusher'
   | 'goblin_dungeon_map'
   | 'goblin_hide'
   | 'goblin_mail'
@@ -461,10 +462,10 @@ export type ItemId =
   | 'mystic_page'
   | 'necklace_mould'
   | 'necklace_of_binding'
-  | 'necklace_of_the_angler'
+  | 'necklace_of_fortune'
   | 'necklace_of_pyromancy'
   | 'necklace_of_shadows'
-  | 'necklace_of_fortune'
+  | 'necklace_of_the_angler'
   | 'needle'
   | 'nexus_rune'
   | 'nexus_talisman'

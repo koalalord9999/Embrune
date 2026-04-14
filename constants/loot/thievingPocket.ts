@@ -15,13 +15,13 @@ export const THIEVING_POCKET_TARGETS: Record<string, PickpocketTarget> = {
     pickpocket_man_woman_table: {
         name: 'Man / Woman',
         level: 1, xp: 8, stunDuration: 4200, damageOnFailure: 1,
-        loot: [{ itemId: 'coins', chance: 1, minQuantity: 3, maxQuantity: 3 }]
+        loot: [{ itemId: 'coins', chance: 9, minQuantity: 3, maxQuantity: 3 }, { itemId: 'bobby_pin', chance: 1 }]
     },
     // Level 5 Thieving
     pickpocket_tavern_regular: {
         name: 'Tavern Regular',
         level: 5, xp: 12, stunDuration: 4200, damageOnFailure: 1,
-        loot: [{ itemId: 'coins', chance: "9/10", minQuantity: 4, maxQuantity: 4 }, { itemId: 'beer', chance: "1/10", minQuantity: 1, maxQuantity: 1 }]
+        loot: [{ itemId: 'coins', chance: "9/10", minQuantity: 4, maxQuantity: 4 }, { itemId: 'beer', chance: "1/10" }]
     },
     // Level 10 Thieving
     pickpocket_farmer_table: {
@@ -47,7 +47,7 @@ export const THIEVING_POCKET_TARGETS: Record<string, PickpocketTarget> = {
         level: 30, xp: 48, stunDuration: 4200, damageOnFailure: 2,
         loot: [{ itemId: 'coins', chance: 1, minQuantity: 25, maxQuantity: 25 }]
     },
-     // Level 35 Thieving
+    // Level 35 Thieving
     pickpocket_silverhaven_citizen: {
         name: 'Silverhaven Citizen',
         level: 35, xp: 55, stunDuration: 4200, damageOnFailure: 2,
@@ -62,12 +62,12 @@ export const THIEVING_POCKET_TARGETS: Record<string, PickpocketTarget> = {
     pickpocket_guard_table: {
         name: 'Guard',
         level: 40, xp: 80, stunDuration: 4200, damageOnFailure: 2,
-        loot: [{ itemId: 'coins', chance: "9/10", minQuantity: 40, maxQuantity: 40 }, { itemId: 'bread', chance: "1/10", minQuantity: 1, maxQuantity: 1 }]
+        loot: [{ itemId: 'coins', chance: "9/10", minQuantity: 40, maxQuantity: 40 }, { itemId: 'bread', chance: "1/10" }]
     },
     pickpocket_dwarf_table: {
         name: 'Dwarf',
         level: 40, xp: 80, stunDuration: 4200, damageOnFailure: 3,
-        loot: [{ itemId: 'coins', chance: "19/20", minQuantity: 40, maxQuantity: 40 }, { itemId: 'iron_ore', chance: "1/20", minQuantity: 1, maxQuantity: 1, noted: true }]
+        loot: [{ itemId: 'coins', chance: "19/20", minQuantity: 40, maxQuantity: 40 }, { itemId: 'iron_ore', chance: "1/20", noted: true }]
     },
     // Level 45 Thieving
     pickpocket_yeoman_table: {
@@ -78,7 +78,7 @@ export const THIEVING_POCKET_TARGETS: Record<string, PickpocketTarget> = {
     pickpocket_merchant_table: {
         name: 'Merchant',
         level: 45, xp: 90, stunDuration: 4200, damageOnFailure: 3,
-        loot: [{ itemId: 'coins', chance: "19/20", minQuantity: 50, maxQuantity: 150 }, { tableId: 'gem_table', chance: "1/20", minQuantity: 1, maxQuantity: 1 }]
+        loot: [{ itemId: 'coins', chance: "19/20", minQuantity: 50, maxQuantity: 150 }, { tableId: 'gem_table', chance: "1/20" }]
     },
     // Level 55 Thieving
     pickpocket_knight_table: {
@@ -86,10 +86,10 @@ export const THIEVING_POCKET_TARGETS: Record<string, PickpocketTarget> = {
         level: 55, xp: 110, stunDuration: 4200, damageOnFailure: 3,
         loot: [
             { itemId: 'coins', chance: "17/20", minQuantity: 70, maxQuantity: 70 },
-            { itemId: 'steel_bar', chance: "1/10", minQuantity: 1, maxQuantity: 1, noted: true },
-            { itemId: 'mithril_bar', chance: "1/25", minQuantity: 1, maxQuantity: 1, noted: true },
-            { itemId: 'uncut_ruby', chance: "9/1000", minQuantity: 1, maxQuantity: 1 },
-            { itemId: 'skeleton_key', chance: "1/50000", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'steel_bar', chance: "1/10", noted: true },
+            { itemId: 'mithril_bar', chance: "1/25", noted: true },
+            { itemId: 'uncut_ruby', chance: "9/1000" },
+            { itemId: 'skeleton_key', chance: "1/50000" },
         ]
     },
     // Level 70 Thieving
@@ -101,9 +101,9 @@ export const THIEVING_POCKET_TARGETS: Record<string, PickpocketTarget> = {
             { itemId: 'verdant_rune', chance: "1/10", minQuantity: 2, maxQuantity: 5 },
             { itemId: 'passage_rune', chance: "1/10", minQuantity: 1, maxQuantity: 2 },
             { itemId: 'yew_logs', chance: "1/20", minQuantity: 1, maxQuantity: 2, noted: true },
-            { itemId: 'yew_shortbow', chance: "1/128", minQuantity: 1, maxQuantity: 1, noted: true },
-            { itemId: 'yew_longbow', chance: "1/128", minQuantity: 1, maxQuantity: 1, noted: true },
-            { itemId: 'skeleton_key', chance: "1/40000", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'yew_shortbow', chance: "1/128" },
+            { itemId: 'yew_longbow', chance: "1/128" },
+            { itemId: 'skeleton_key', chance: "1/40000" },
         ]
     },
     // Level 80 Thieving
@@ -112,11 +112,11 @@ export const THIEVING_POCKET_TARGETS: Record<string, PickpocketTarget> = {
         level: 80, xp: 320, stunDuration: 4200, damageOnFailure: 5,
         loot: [
             { itemId: 'coins', chance: "4/5", minQuantity: 100, maxQuantity: 400 },
-            { itemId: 'super_attack_potion', chance: "1/20", minQuantity: 1, maxQuantity: 1 },
-            { itemId: 'super_strength_potion', chance: "1/20", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'super_attack_potion', chance: "1/20", doses: 3 },
+            { itemId: 'super_strength_potion', chance: "1/20", doses: 3 },
             { itemId: 'cooked_shark', chance: "2/25", minQuantity: 1, maxQuantity: 2, noted: true },
             { itemId: 'adamantite_bar', chance: "1/25", minQuantity: 1, maxQuantity: 2, noted: true },
-            { itemId: 'skeleton_key', chance: "1/25000", minQuantity: 1, maxQuantity: 1 },
+            { itemId: 'skeleton_key', chance: "1/25000" },
         ]
     },
 };

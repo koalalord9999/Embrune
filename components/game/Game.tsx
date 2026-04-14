@@ -58,6 +58,29 @@ import MonsterDBView from '../views/dev/MonsterDBView';
 import SingleActionProgressView from '../game/SingleActionProgressView';
 import AgilityCourseView from '../views/AgilityCourseView.tsx'
 
+const AttackLabel: React.FC<{ monsterName: string; respawnTimestamp: number | undefined }> = ({ monsterName, respawnTimestamp }) => {
+    const [timeLeft, setTimeLeft] = useState(respawnTimestamp ? Math.ceil((respawnTimestamp - Date.now()) / 1000) : 0);
+
+    useEffect(() => {
+        if (!respawnTimestamp || timeLeft <= 0) return;
+        const interval = setInterval(() => {
+            const newTime = Math.ceil((respawnTimestamp - Date.now()) / 1000);
+            if (newTime <= 0) {
+                setTimeLeft(0);
+                clearInterval(interval);
+            } else {
+                setTimeLeft(newTime);
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [respawnTimestamp]);
+
+    if (timeLeft > 0) {
+        return <>{`Attack ${monsterName} (${timeLeft}s)`}</>;
+    }
+    return <>{`Attack ${monsterName}`}</>;
+};
+
 import { beasts } from '../../constants/monsters/beasts';
 import { humanoids } from '../../constants/monsters/humanoids';
 import { magicalAndUndead } from '../../constants/monsters/magicalAndUndead';
@@ -1103,15 +1126,20 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     }, [gridItems, navigation]);
 
     const handleActionKey = useCallback((index: number, isShiftPressed: boolean) => {
-        if (!poi) return;
+        if (!poi || ui.combatQueue.length > 0) return;
 
         let activity: POIActivity | BonfireActivity | null = null;
         let isCombat = false;
         let uniqueId = "";
 
-        // Filter activities like SceneView does to ensure matching indices
+        // Filter activities using the EXACT SAME logic as SceneView.tsx
         const visibleActivities = poi.activities.filter(act => {
             const pAct = act as any;
+            
+            // 1. quest_start check
+            if (pAct.type === 'quest_start' && quests.playerQuests.some(q => q.questId === pAct.questId)) return false;
+
+            // 2. questCondition check
             if (pAct.questCondition) {
                 const questCond = pAct.questCondition;
                 const activeRepeatableQuest = repeatableQuests.activePlayerQuest;
@@ -1128,6 +1156,14 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                 }
                 if (!isRepeatableQuestActive && !isMainQuestVisible) return false;
             }
+
+            // 3. visibilityCheck check
+            if (pAct.type === 'npc' && pAct.visibilityCheck) {
+                if (!handleDialogueCheck(pAct.visibilityCheck)) {
+                    return false;
+                }
+            }
+
             return true;
         });
 
@@ -1135,7 +1171,8 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
             activity = visibleActivities[index];
             if (activity.type === 'combat') {
                 isCombat = true;
-                uniqueId = `${poi.id}:${activity.monsterId}:${index}`;
+                const originalIndex = poi.activities.indexOf(activity);
+                uniqueId = `${poi.id}:${activity.monsterId}:${originalIndex}`;
             }
         } else {
             let offset = visibleActivities.length;
@@ -1176,20 +1213,26 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                         options.push({
                             label: 'Pickpocket',
                             onClick: () => {
-                                const pickpocketId = `${poi.id}:${act.name}:${index}`;
+                                const originalIndex = poi.activities.indexOf(act);
+                                const pickpocketId = `${poi.id}:${act.name}:${originalIndex}`;
                                 thieving.handlePickpocket({ name: act.name, pickpocket: act.pickpocket }, pickpocketId);
                                 return false;
                             }
                         });
                     }
                     if (act.attackableMonsterId) {
+                        const originalIndex = poi.activities.indexOf(act);
+                        const combatId = `${poi.id}:${act.attackableMonsterId}:${originalIndex}`;
+                        const respawnTimestamp = monsterRespawnTimers[combatId];
+                        const isRespawning = respawnTimestamp && respawnTimestamp > Date.now();
+
                         options.push({
-                            label: 'Attack',
+                            label: <AttackLabel monsterName={MONSTERS[act.attackableMonsterId]?.name || act.name} respawnTimestamp={respawnTimestamp} />,
                             onClick: () => {
-                                const combatId = `${poi.id}:${act.attackableMonsterId}:${index}`;
                                 startCombat([combatId]);
                                 return false;
-                            }
+                            },
+                            disabled: !!isRespawning
                         });
                     }
                     if (act.actions) {

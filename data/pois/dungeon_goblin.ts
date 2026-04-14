@@ -69,7 +69,7 @@ export const goblinDungeonPois: Record<string, POI> = {
                 type: 'agility_shortcut',
                 id: 'warrens_rope_swing',
                 name: 'Swing Across on Rope (Lvl 15)',
-                toPoiId: 'warrens_tunnel_C',
+                toPoiId: 'warrens_back_tunnel',
                 level: 15,
                 xp: 20,
                 baseFailChance: 40,
@@ -86,7 +86,7 @@ export const goblinDungeonPois: Record<string, POI> = {
         name: "Whispering Passage",
         description: "Every sound you make seems to amplify, returning as faint whispers from multiple directions.",
         connections: ['warrens_pitfall_chamber', 'warrens_crossroads'],
-        activities: [ { type: 'combat', monsterId: 'goblin_thrower' } ],
+        activities: [{ type: 'combat', monsterId: 'goblin_thrower' }],
         regionId: 'goblin_dungeon',
         x: 1740, y: 1000
     },
@@ -129,12 +129,12 @@ export const goblinDungeonPois: Record<string, POI> = {
         regionId: 'goblin_dungeon',
         x: 1760, y: 1120
     },
-     warrens_back_tunnel: {
+    warrens_back_tunnel: {
         id: 'warrens_back_tunnel',
         name: "Fungus-Lined Passage",
         description: "Patches of eerie, glowing fungi cast a dim light on the damp walls.",
         connections: ['warrens_storage_cave', 'warrens_dead_end'],
-        activities: [ { type: 'combat', monsterId: 'goblin' } ],
+        activities: [{ type: 'combat', monsterId: 'goblin' }],
         regionId: 'goblin_dungeon',
         x: 1820, y: 1120
     },
@@ -156,7 +156,7 @@ export const goblinDungeonPois: Record<string, POI> = {
         regionId: 'goblin_dungeon',
         x: 1880, y: 1120
     },
-     warrens_throne_approach: {
+    warrens_throne_approach: {
         id: 'warrens_throne_approach',
         name: "Guarded Hallway",
         description: "This hallway is wider and surprisingly cleaner than the others. The faint sound of clanging metal can be heard from the far end. Two imposing guards stand watch.",

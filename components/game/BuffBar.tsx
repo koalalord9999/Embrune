@@ -167,6 +167,8 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs, activePra
                     if (buff.statBoost) {
                         buffs.push({
                             id: buff.id,
+                            name: buff.name || `${buff.statBoost.skill} Boost`,
+                            description: buff.description || `Increases your ${buff.statBoost.skill} level.`,
                             iconUrl: SKILL_ICONS[buff.statBoost.skill],
                             value: `${buff.statBoost.value > 0 ? '+' : ''}${buff.statBoost.value}`,
                             valueColor: buff.statBoost.value > 0 ? 'text-green-400' : 'text-red-400',
@@ -174,6 +176,17 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs, activePra
                             colorClass: getSkillColorClass(buff.statBoost.skill),
                         });
                     }
+                    break;
+                case 'spell_buff':
+                    buffs.push({
+                        id: buff.id,
+                        name: buff.name,
+                        description: buff.description,
+                        iconUrl: 'aura', // Generic enhancement icon
+                        value: '',
+                        expiresAt,
+                        colorClass: 'bg-yellow-900/40 text-yellow-200'
+                    });
                     break;
                 case 'accuracy_boost':
                     buffs.push({
@@ -301,6 +314,8 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs, activePra
                         iconClassName: 'opacity-80'
                     });
                     break;
+                /* Combined into spell_buff for the singular spell display */
+                /*
                 case 'magic_damage_boost' as any:
                     buffs.push({
                         id: buff.id,
@@ -313,6 +328,7 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs, activePra
                         colorClass: 'bg-purple-900/50'
                     });
                     break;
+                */
                 case 'item_expiry': {
                     const item = ITEMS[buff.itemId];
                     if (item) {

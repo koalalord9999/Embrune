@@ -138,6 +138,8 @@ const App: React.FC = () => {
             await saveSlotState(activeSlotId, minifyGameState(currentState));
             await refreshSlots();
         }
+        ui.setCombatQueue([]);
+        ui.setIsMandatoryCombat(false);
         ui.closeAllModals();
         setActiveGameState(null);
         setActiveSlotId(null);

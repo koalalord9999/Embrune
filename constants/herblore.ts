@@ -34,13 +34,13 @@ export const HERBLORE_RECIPES = {
         { unfinishedPotionId: 'guromoot_potion_unf', secondaryId: 'spider_eggs', finishedPotionId: 'weak_attack_potion', level: 1, xp: 25, finishedNum: 660 },
         { unfinishedPotionId: 'guromoot_potion_unf', secondaryId: 'cave_slime_globule', finishedPotionId: 'weak_mining_potion', level: 3, xp: 28, finishedNum: 661 },
         { unfinishedPotionId: 'guromoot_potion_unf', secondaryId: 'spider_silk', finishedPotionId: 'weapon_poison_weak', level: 10, xp: 45, finishedNum: 662 },
-        
+
         // --- Marleaf Potions (Lvl 5 Herb) ---
         { unfinishedPotionId: 'marleaf_potion_unf', secondaryId: 'cave_slime_globule', finishedPotionId: 'stat_restore_potion', level: 5, xp: 30, finishedNum: 663 },
         { unfinishedPotionId: 'marleaf_potion_unf', secondaryId: 'enchanted_bark', finishedPotionId: 'weak_woodcutting_potion', level: 7, xp: 35, finishedNum: 664 },
         { unfinishedPotionId: 'marleaf_potion_unf', secondaryId: 'fey_dust', finishedPotionId: 'weak_crafting_potion', level: 10, xp: 40, finishedNum: 665 },
-        { unfinishedPotionId: 'marleaf_potion_unf', secondaryId: 'fey_dust', finishedPotionId: 'accuracy_potion', level: 15, xp: 55, finishedNum: 666 },
-        
+        { unfinishedPotionId: 'marleaf_potion_unf', secondaryId: 'red_berries', finishedPotionId: 'accuracy_potion', level: 15, xp: 55, finishedNum: 666 },
+
         // --- Swiftthistle Potions (Lvl 11 Herb) ---
         { unfinishedPotionId: 'swiftthistle_potion_unf', secondaryId: 'boar_tusk', finishedPotionId: 'weak_strength_potion', level: 11, xp: 50, finishedNum: 667 },
         { unfinishedPotionId: 'swiftthistle_potion_unf', secondaryId: 'raw_sardine', finishedPotionId: 'weak_fishing_potion', level: 13, xp: 52, finishedNum: 668 },
@@ -74,7 +74,7 @@ export const HERBLORE_RECIPES = {
         { unfinishedPotionId: 'gloom_moss_potion_unf', secondaryId: 'frost_berries', finishedPotionId: 'super_energy_potion', level: 45, xp: 120, finishedNum: 688 },
         { unfinishedPotionId: 'gloom_moss_potion_unf', secondaryId: 'cowhide', finishedPotionId: 'crafting_potion', level: 43, xp: 102, finishedNum: 689 },
         { unfinishedPotionId: 'gloom_moss_potion_unf', secondaryId: 'iron_ore', finishedPotionId: 'smithing_potion', level: 45, xp: 105, finishedNum: 690 },
-        
+
         // --- Windwhisper Bud Potions (Lvl 48 Herb) ---
         { unfinishedPotionId: 'windwhisper_bud_potion_unf', secondaryId: 'harpy_feather', finishedPotionId: 'ranged_potion', level: 48, xp: 110, finishedNum: 691 },
         { unfinishedPotionId: 'windwhisper_bud_potion_unf', secondaryId: 'spider_silk', finishedPotionId: 'super_ranged_potion', level: 52, xp: 118, finishedNum: 692 },

@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useCallback, createContext, useContext } from 'react';
+import React, { useState, useMemo, useCallback, createContext, useContext, useEffect } from 'react';
 import { ActivePanel, SkillName, InventorySlot, ActiveCraftingAction, DialogueNode, CraftingContext, Equipment, PlayerQuestState, Spell, Item, DialogueResponse, DialogueCheckRequirement, ActiveTutorialState } from '../types';
 import { ContextMenuOption } from '../components/common/ContextMenu';
 
@@ -125,6 +125,17 @@ export const DEFAULT_KEYBINDINGS: Keybindings = {
 
 export type WithdrawMode = 1 | 5 | 10 | 'x' | 'all';
 
+export type GameFont = 'VT323' | 'MedievalSharp' | 'Inter' | 'Monospace' | 'Press Start 2P' | 'Almendra';
+
+export const FONT_OPTIONS: { label: string; value: GameFont; family: string; baseScale?: number }[] = [
+    { label: 'VT323 (Default)',  value: 'VT323',         family: "'VT323', monospace"        },
+    { label: 'MedievalSharp',    family: "'MedievalSharp', cursive", value: 'MedievalSharp' },
+    { label: 'Almendra',         value: 'Almendra',       family: "'Almendra', serif"         },
+    { label: 'Press Start 2P',   value: 'Press Start 2P', family: "'Press Start 2P', cursive", baseScale: 0.65 },
+    { label: 'Inter',            value: 'Inter',          family: "'Inter', sans-serif"       },
+    { label: 'Monospace',        value: 'Monospace',      family: 'monospace'                },
+];
+
 // Helper for localStorage
 const createPersistentState = <T,>(key: string, defaultValue: T): [T, (value: React.SetStateAction<T>) => void] => {
     const [value, setValue] = useState<T>(() => {
@@ -212,7 +223,18 @@ const useUIStateInternal = () => {
     const [ambientVolume, setAmbientVolume] = createPersistentState<number>('settings_ambientVolume', 1);
     const [isMuted, setIsMuted] = createPersistentState<boolean>('settings_isMuted', false);
     const [keybindings, setKeybindings] = createPersistentState<Keybindings>('settings_keybindings', DEFAULT_KEYBINDINGS);
-    
+    const [gameFont, setGameFont] = createPersistentState<GameFont>('settings_gameFont', 'VT323');
+    const [gameFontScale, setGameFontScale] = createPersistentState<number>('settings_gameFontScale', 1);
+
+    // Sync chosen font and scale to CSS custom properties whenever they change
+    useEffect(() => {
+        const option = FONT_OPTIONS.find(o => o.value === gameFont);
+        const baseWeight = option?.baseScale ?? 1;
+        
+        document.documentElement.style.setProperty('--game-font-family', option?.family ?? "'VT323', monospace");
+        document.documentElement.style.setProperty('--game-font-scale', (gameFontScale * baseWeight).toString());
+    }, [gameFont, gameFontScale]);
+
     // Non-persistent dev settings
     const [xpMultiplier, setXpMultiplier] = useState<number>(1);
     const [combatSpeedMultiplier, setCombatSpeedMultiplier] = useState<number>(1);
@@ -284,8 +306,6 @@ const useUIStateInternal = () => {
     }, [setKeybindings]);
 
     const closeAllModals = useCallback(() => {
-        setCombatQueue([]);
-        setIsMandatoryCombat(false);
         setActiveShopId(null);
         setActiveCraftingContext(null);
         setItemToUse(null);
@@ -374,6 +394,8 @@ const useUIStateInternal = () => {
         ambientVolume, setAmbientVolume,
         isMuted, setIsMuted,
         keybindings, setKeybindings,
+        gameFont, setGameFont,
+        gameFontScale, setGameFontScale,
         activeWithdrawMode, setActiveWithdrawMode,
         customWithdrawAmount, setCustomWithdrawAmount,
         xpMultiplier, setXpMultiplier,

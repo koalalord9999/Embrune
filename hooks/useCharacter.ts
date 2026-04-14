@@ -367,7 +367,9 @@ export const useCharacter = (
             // Log expired buffs
             currentBuffs.forEach(buff => {
                 if (expiredBuffIds.includes(buff.id)) {
-                    if (buff.type === 'stat_boost' && buff.statBoost) {
+                    if (buff.type === 'spell_buff' && buff.name) {
+                        addLog(`Your ${buff.name} boost has worn off.`);
+                    } else if (buff.type === 'stat_boost' && buff.statBoost) {
                         addLog(`Your magical ${buff.statBoost.skill} boost has worn off.`);
                     } else if (buff.type === 'stamina') {
                         addLog("You feel your legs grow heavy again.");
@@ -515,22 +517,22 @@ export const useCharacter = (
         setStatModifiers(prev => [...prev.filter(m => m.skill !== skill), newModifier]);
     }, [statModifiers, addLog]);
 
-    const applySpellStatBuff = useCallback((skill: SkillName, value: number, duration: number, source?: string) => {
+    const applyEnhancementSpell = useCallback((spellName: string, description: string, statBoosts: { skill: SkillName, value: number }[], duration: number, source: string) => {
         const newBuff: ActiveBuff = {
             id: Date.now() + Math.random(),
-            type: 'stat_boost',
-            value: value,
+            type: 'spell_buff',
+            name: spellName,
+            description: description,
+            value: 0,
             duration: duration,
             durationRemaining: duration,
             source: source,
-            statBoost: {
-                skill,
-                value
-            }
+            statBoosts: statBoosts
         };
-        setActiveBuffs(prev => [...prev.filter(b => b.statBoost?.skill !== skill), newBuff]);
-        addLog(`You feel a surge of magical power, boosting your ${skill}.`);
-    }, [addLog]);
+        // Ensure only one spell_buff active at a time (casting new overwrites old as requested)
+        // Also clear magic_damage_boost which is part of the Mystic spells
+        setActiveBuffs(prev => [...prev.filter(b => b.type !== 'spell_buff' && b.type !== 'magic_damage_boost'), newBuff]);
+    }, []);
 
     const addBuff = useCallback((buff: Omit<ActiveBuff, 'id' | 'durationRemaining'>) => {
         if (buff.type === 'poison') {
@@ -609,11 +611,11 @@ export const useCharacter = (
 
     const clearStatModifiers = useCallback(() => {
         setStatModifiers([]);
-        setActiveBuffs(prev => prev.filter(b => b.type !== 'stat_boost'));
+        setActiveBuffs(prev => prev.filter(b => b.type !== 'stat_boost' && b.type !== 'spell_buff'));
     }, []);
 
     const clearBuffs = useCallback(() => {
-        setActiveBuffs(prev => prev.filter(b => b.type === 'stat_boost'));
+        setActiveBuffs(prev => prev.filter(b => b.type === 'stat_boost' || b.type === 'spell_buff'));
     }, []);
 
     // VISIBLE LEVEL Calculation (Base + Potions)
@@ -643,10 +645,15 @@ export const useCharacter = (
         let level = skill.currentLevel; // Start with Visible Level
 
         // Add Spell Buffs (Invisible flat boost)
-        const spellBuff = activeBuffs.find(b => b.type === 'stat_boost' && b.statBoost?.skill === skillName);
-        if (spellBuff && spellBuff.statBoost) {
-            level += spellBuff.statBoost.value;
-        }
+        const spellBuffs = activeBuffs.filter(b => b.type === 'spell_buff' || (b.type === 'stat_boost' && b.statBoost?.skill === skillName));
+        spellBuffs.forEach(buff => {
+            if (buff.type === 'spell_buff' && buff.statBoosts) {
+                const boost = buff.statBoosts.find(s => s.skill === skillName);
+                if (boost) level += boost.value;
+            } else if (buff.type === 'stat_boost' && buff.statBoost?.skill === skillName) {
+                level += buff.statBoost.value;
+            }
+        });
 
         // Multiply by Prayer (Invisible percentage boost)
         const prayerBoosts = activePrayers
@@ -714,7 +721,7 @@ export const useCharacter = (
         combatLevel,
         addXp,
         applyStatModifier,
-        applySpellStatBuff,
+        applyEnhancementSpell,
         activeBuffs,
         statModifiers,
         addBuff,
