@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { POIActivity, ResourceNodeState, SkillName, PlayerSkill, InventorySlot, ToolType, Equipment, Item } from '../types';
-import {  INVENTORY_CAPACITY, ITEMS, rollOnLootTable, LootRollResult, LOG_HARDNESS, ORE_HARDNESS  } from '../constants';
+import { POIActivity, ResourceNodeState, SkillName, PlayerSkill, InventorySlot, ToolType, Equipment, Item, ItemId } from '../types';
+import { INVENTORY_CAPACITY, ITEMS, rollOnLootTable, LootRollResult, LOG_HARDNESS, ORE_HARDNESS } from '../constants';
 import { POIS } from '../data/pois';
 import { useSoundEngine } from './useSoundEngine';
 import { useUIState } from './useUIState';
@@ -14,11 +14,11 @@ interface SkillingDependencies {
     skills: (PlayerSkill & { currentLevel: number })[];
     addXp: (skill: SkillName, amount: number) => void;
     inventory: (InventorySlot | null)[];
-    modifyItem: (itemId: string, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void;
+    modifyItem: (itemId: ItemId, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void;
     equipment: Equipment;
     setEquipment: React.Dispatch<React.SetStateAction<Equipment>>;
     checkQuestProgressOnShear: () => void;
-    hasItems: (items: { itemId: string, quantity: number }[]) => boolean;
+    hasItems: (items: { itemId: ItemId, quantity: number }[]) => boolean;
 }
 
 export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>, deps: SkillingDependencies) => {
@@ -26,7 +26,7 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
     const ui = useUIState();
     // FIX: useSoundEngine hook expects 0 arguments.
     const { play } = useSoundEngine();
-    
+
     const [resourceNodeStates, setResourceNodeStates] = useState<Record<string, ResourceNodeState>>(initialNodeStates);
     const [activeSkilling, setActiveSkilling] = useState<{ nodeId: string; activity: SkillingActivity } | null>(null);
     const [skillingTick, setSkillingTick] = useState(0);
@@ -44,7 +44,7 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
     }, [activeSkilling]);
 
     const skillingCallbackRef = useRef<(() => void) | null>(null);
-    
+
     const playRandomSound = useCallback((baseId: string, count: number) => {
         const randomIndex = Math.floor(Math.random() * count) + 1;
         play(`${baseId}_${randomIndex}` as SoundID);
@@ -70,25 +70,25 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                     case SkillName.Mining: actionVerb = 'mining'; break;
                     case SkillName.Crafting: actionVerb = 'crafting'; break;
                 }
-                
+
                 const primaryLootItemName = activity.loot[0] ? ITEMS[activity.loot[0].itemId]?.name.replace('Raw ', '').toLowerCase() : 'resources';
-                
+
                 addLog(`Your ${activity.skill} level is too low to continue ${actionVerb} ${primaryLootItemName}.`);
                 setActiveSkilling(null);
                 return;
             }
-            
+
             // Check for Bait Requirements for Fishing
             if (activity.skill === SkillName.Fishing) {
                 if (activity.requiredTool === ToolType.FishingRod) {
-                    if (!hasItems([{ itemId: 'fishing_bait', quantity: 1 }])) {
+                    if (!hasItems([{ itemId: 'fishing_bait' as ItemId, quantity: 1 }])) {
                         addLog("You have run out of fishing bait.");
                         setActiveSkilling(null);
                         return;
                     }
                 } else if (activity.requiredTool === ToolType.FlyFishingRod) {
-                    if (!hasItems([{ itemId: 'feathers', quantity: 1 }])) {
-                        addLog("You have run out of feathers.");
+                    if (!hasItems([{ itemId: 'feathers' as ItemId, quantity: 1 }])) {
+                        addLog("You have run out of fishing bait.");
                         setActiveSkilling(null);
                         return;
                     }
@@ -100,14 +100,14 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                 setActiveSkilling(null);
                 return;
             }
-            
+
             setSkillingTick(t => t + 1);
 
             // Play background skilling sound (swinging/attempt)
             if (activity.skill === SkillName.Woodcutting) playRandomSound('WOODCUTTING_CHOP', 3);
             if (activity.skill === SkillName.Mining) playRandomSound('MINING_TINK', 3);
             if (activity.skill === SkillName.Fishing) playRandomSound('FISHING_SPLASH', 3);
-            
+
             const successChance = getSuccessChance(activity);
             const roll = Math.random() * 100;
 
@@ -121,24 +121,24 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                 // Consume Bait
                 if (activity.skill === SkillName.Fishing) {
                     if (activity.requiredTool === ToolType.FishingRod) {
-                        modifyItem('fishing_bait', -1, true);
+                        modifyItem('fishing_bait' as ItemId, -1, true);
                     } else if (activity.requiredTool === ToolType.FlyFishingRod) {
-                        modifyItem('feathers', -1, true);
+                        modifyItem('vial' as ItemId, 1, false, { bypassAutoBank: true });
                     }
-                    
+
                     const necklace = depsRef.current.equipment.necklace;
                     if (necklace?.itemId === 'necklace_of_the_angler' && (necklace.charges ?? 0) > 0) {
                         const newCharges = (necklace.charges ?? 1) - 1;
                         if (newCharges > 0) {
-                            depsRef.current.setEquipment(prev => ({...prev, necklace: {...necklace, charges: newCharges}}));
+                            depsRef.current.setEquipment(prev => ({ ...prev, necklace: { ...necklace, charges: newCharges } }));
                         } else {
                             depsRef.current.addLog("Your Necklace of the Angler has run out of charges and shatters.");
-                            depsRef.current.setEquipment(prev => ({...prev, necklace: null}));
+                            depsRef.current.setEquipment(prev => ({ ...prev, necklace: null }));
                         }
                     }
                 }
 
-                 for (let i = activity.loot.length - 1; i >= 0; i--) {
+                for (let i = activity.loot.length - 1; i >= 0; i--) {
                     const potentialLoot = activity.loot[i];
                     const lootLevelReq = potentialLoot.requiredLevel ?? activity.requiredLevel;
 
@@ -146,13 +146,13 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                         if (potentialLoot.xp > 0) {
                             addXp(activity.skill, potentialLoot.xp);
                         }
-                        
+
                         const { equipment, addLog, modifyItem, setEquipment, checkQuestProgressOnShear } = depsRef.current;
-                        
+
                         // --- APPLE LOGIC & WOODSMAN RING ---
                         let itemToGive = potentialLoot.itemId;
                         let shouldDecrementResource = potentialLoot.itemId !== 'rune_essence';
-                        
+
                         if (activity.skill === SkillName.Woodcutting) {
                             const ring = equipment.ring;
                             // Check item string directly against the literal itemId
@@ -160,18 +160,18 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                             const hasWoodsman = ringId === 'ring_of_the_woodsman' && (ring!.charges ?? 0) > 0;
                             let rolledApple = false;
 
-                            if (itemToGive === 'logs' && Math.random() < 0.10) {
-                                itemToGive = 'apple';
+                            if (itemToGive === 'logs' as ItemId && Math.random() < 0.10) {
+                                itemToGive = 'apple' as ItemId;
                                 rolledApple = true;
                                 addLog("You found an apple in the tree!");
                             }
-                            
+
                             if (hasWoodsman && !rolledApple) {
                                 if (Math.random() < 0.25) {
                                     modifyItem(itemToGive, 1); // Extra log
                                     shouldDecrementResource = false;
                                     addLog("Your Ring of the Woodsman perfectly harvests the tree, saving its vitality!");
-                                    
+
                                     const newCharges = (ring!.charges ?? 1) - 1;
                                     if (newCharges > 0) {
                                         setEquipment(prev => ({ ...prev, ring: { ...ring!, charges: newCharges } }));
@@ -184,7 +184,7 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                                 shouldDecrementResource = false;
                             }
                         }
-                        
+
                         // --- PROSPECTING RING (+1 ORE) ---
                         if (activity.skill === SkillName.Mining) {
                             const ring = equipment.ring;
@@ -205,18 +205,18 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                         // -----------------------------------
 
                         modifyItem(itemToGive, 1);
-                        
-                        if (itemToGive === 'wool') checkQuestProgressOnShear();
+
+                        if (itemToGive === 'wool' as ItemId) checkQuestProgressOnShear();
 
                         if (shouldDecrementResource) {
                             setResourceNodeStates(prev => {
                                 const node = prev[nodeId];
                                 if (!node) return prev;
-                                
+
                                 // FIX: Safety check for NaN or undefined resources from old saves
                                 const currentResources = (typeof node.resources !== 'number' || isNaN(node.resources)) ? 1 : node.resources;
                                 const newResources = currentResources - 1;
-                                
+
                                 if (newResources <= 0) {
                                     setActiveSkilling(null);
                                     return { ...prev, [nodeId]: { resources: 0, respawnTimer: activity.respawnTime } };
@@ -224,16 +224,16 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                                 return { ...prev, [nodeId]: { ...node, resources: newResources } };
                             });
                         }
-                        break; 
+                        break;
                     }
                 }
-                
+
                 // Gem finding logic for mining
                 if (activity.skill === SkillName.Mining) {
                     const { equipment, addLog, modifyItem } = depsRef.current;
                     const ring = equipment.ring;
                     const hasProspecting = ring?.itemId === 'ring_of_prospecting' && (ring.charges ?? 0) > 0;
-                    
+
                     let gemChance = equipment.necklace?.itemId === 'amulet_of_fate' ? 1 / 625 : 1 / 1000;
                     if (hasProspecting) gemChance *= 1.25;
 
@@ -242,21 +242,21 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                             addLog("Your ring tugs at your finger");
                         }
 
-                        const gemRank: Record<string, number> = { 
-                            'uncut_sapphire': 1, 
-                            'uncut_emerald': 2, 
-                            'uncut_ruby': 3, 
+                        const gemRank: Record<string, number> = {
+                            'uncut_sapphire': 1,
+                            'uncut_emerald': 2,
+                            'uncut_ruby': 3,
                             'uncut_diamond': 4,
                             'uncut_sunstone': 5,
                             'uncut_tenebrite': 6
                         };
                         let gemToAward: string | null = null;
-                        
+
                         if (equipment.necklace?.itemId === 'amulet_of_fate') {
                             addLog("Your Amulet of Fate glows, improving your luck.");
                             const roll1 = rollOnLootTable('gem_table');
                             const roll2 = rollOnLootTable('gem_table');
-                            
+
                             if (typeof roll1 === 'string' && typeof roll2 === 'string') {
                                 // FIX: Compare rank values instead of comparing string vs number directly.
                                 gemToAward = gemRank[roll2 as keyof typeof gemRank] > gemRank[roll1 as keyof typeof gemRank] ? roll2 : roll1;
@@ -269,9 +269,9 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                                 gemToAward = result;
                             }
                         }
-                        
+
                         if (gemToAward) {
-                            modifyItem(gemToAward, 1);
+                            modifyItem(gemToAward as ItemId, 1);
                             addLog(`You find a gem in the rock!`);
                         }
                     }
@@ -286,9 +286,9 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
         }
         const skill = skills.find(s => s.name === activity.skill);
         if (!skill) return 0;
-    
+
         let toolPower = 0;
-        
+
         let requiredToolType: ToolType | undefined = activity.requiredTool;
         if (!requiredToolType) {
             if (activity.skill === SkillName.Woodcutting) requiredToolType = ToolType.Axe;
@@ -300,8 +300,8 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                 ...inventory.map(slot => slot ? ITEMS[slot.itemId] : null),
                 equipment.weapon ? ITEMS[equipment.weapon.itemId] : null
             ].filter((item): item is Item => !!item && item.tool?.type === requiredToolType);
-    
-            const usableTools = allAvailableTools.filter(tool => 
+
+            const usableTools = allAvailableTools.filter(tool =>
                 !tool.tool?.requiredLevels || tool.tool.requiredLevels.every(req => {
                     const playerSkill = skills.find(s => s.name === req.skill);
                     return playerSkill && playerSkill.level >= req.level;
@@ -309,13 +309,13 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
             );
 
             if (usableTools.length > 0) {
-                const bestTool = usableTools.reduce((best, current) => 
+                const bestTool = usableTools.reduce((best, current) =>
                     (current.tool!.power > best.tool!.power ? current : best)
                 );
                 toolPower = bestTool.tool!.power;
             }
         }
-    
+
         if (activity.skill === SkillName.Woodcutting) {
             let hardness = activity.treeHardness;
             if (hardness === undefined) {
@@ -362,7 +362,7 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
     const initializeNodeState = useCallback((nodeId: string, activity: SkillingActivity | GroundItemActivity) => {
         setResourceNodeStates(prev => {
             if (prev[nodeId] && typeof (prev[nodeId] as any).resources === 'number') return prev;
-            
+
             if (activity.type === 'ground_item') {
                 return {
                     ...prev,
@@ -390,41 +390,41 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
             stopSkilling();
             return;
         }
-    
+
         const skill = skills.find(s => s.name === SkillName.Agility); // Intentional mismatch? No, should be current skill
         const playerSkill = skills.find(s => s.name === activity.skill);
         if (!playerSkill || playerSkill.currentLevel < activity.requiredLevel) {
             addLog(`You need a ${activity.skill} level of ${activity.requiredLevel} to do that.`);
             return;
         }
-    
+
         let requiredToolType: ToolType | undefined = activity.requiredTool;
         if (!requiredToolType) {
             if (activity.skill === SkillName.Woodcutting) requiredToolType = ToolType.Axe;
             else if (activity.skill === SkillName.Mining) requiredToolType = ToolType.Pickaxe;
         }
-    
+
         if (requiredToolType) {
             const allAvailableTools = [
                 ...inventory.map(slot => slot ? ITEMS[slot.itemId] : null),
                 equipment.weapon ? ITEMS[equipment.weapon.itemId] : null
             ].filter((item): item is Item => !!item && item.tool?.type === requiredToolType);
-    
+
             if (allAvailableTools.length === 0) {
                 const toolName = requiredToolType.replace(/([A-Z])/g, ' $1').trim().toLowerCase();
                 addLog(`You need a ${toolName} to do this.`);
                 return;
             }
-    
-            const usableTools = allAvailableTools.filter(tool => 
+
+            const usableTools = allAvailableTools.filter(tool =>
                 !tool.tool?.requiredLevels || tool.tool.requiredLevels.every(req => {
                     const playerSkill = skills.find(s => s.name === req.skill);
                     return playerSkill && playerSkill.level >= req.level;
                 })
             );
-    
+
             if (usableTools.length === 0) {
-                const bestUnusableTool = allAvailableTools.reduce((best, current) => 
+                const bestUnusableTool = allAvailableTools.reduce((best, current) =>
                     (current.tool!.power > best.tool!.power ? current : best)
                 );
                 const requirement = bestUnusableTool.tool!.requiredLevels![0];
@@ -432,7 +432,7 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                 return;
             }
         } else if (activity.skill === SkillName.Crafting && activity.name === "Shear Sheep") {
-            if (!inventory.some(slot => slot?.itemId === 'shears')) {
+            if (!inventory.some(slot => slot?.itemId === 'shears' as ItemId)) {
                 addLog("You need a pair of shears to do this.");
                 return;
             }
@@ -440,23 +440,23 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
 
         if (activity.skill === SkillName.Fishing) {
             if (activity.requiredTool === ToolType.FishingRod) {
-                if (!inventory.some(slot => slot?.itemId === 'fishing_bait')) {
+                if (!inventory.some(slot => slot?.itemId === 'fishing_bait' as ItemId)) {
                     addLog("You need some fishing bait to do this.");
                     return;
                 }
             } else if (activity.requiredTool === ToolType.FlyFishingRod) {
-                if (!inventory.some(slot => slot?.itemId === 'feathers')) {
+                if (!inventory.some(slot => slot?.itemId === 'feathers' as ItemId)) {
                     addLog("You need some feathers to do this.");
                     return;
                 }
             }
         }
-    
+
         if (inventory.filter(Boolean).length >= INVENTORY_CAPACITY) {
             addLog("Your inventory is full. You cannot gather resources.");
             return;
         }
-        
+
         setActiveSkilling({ nodeId: activity.id, activity });
     }, [activeSkilling, skills, addLog, inventory, equipment, stopSkilling]);
 
@@ -467,7 +467,7 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
 
         const freeSlots = inventory.filter(s => s === null).length;
         const stackExists = itemData.stackable && inventory.some(i => i?.itemId === activity.itemId);
-        
+
         if (!stackExists && freeSlots < 1) {
             addLog("Your inventory is full.");
             return;
@@ -511,7 +511,7 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                 const bestTool = usableTools.reduce((best, current) => (current.tool!.power > best.tool!.power ? current : best));
                 bestToolMaterial = bestTool.material as string;
             }
-            
+
             switch (bestToolMaterial) {
                 case 'runic': return 3 * GAME_TICK_MS;
                 case 'adamantite': return 4 * GAME_TICK_MS;
@@ -547,9 +547,9 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
             if (!activeSkillingRef.current) {
                 return;
             }
-            
+
             skillingCallbackRef.current?.();
-            
+
             const nextTickRate = getTickRate(activity, depsRef.current);
             timerRef.current = window.setTimeout(tick, nextTickRate);
         };
@@ -573,16 +573,16 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                 for (const nodeId in newStates) {
                     const node = newStates[nodeId];
                     const isDepleted = node.resources <= 0 || typeof node.resources !== 'number' || isNaN(node.resources);
-                    
+
                     if (node.respawnTimer > 0) {
                         changed = true;
                         const newTimer = node.respawnTimer - 1000;
                         newStates[nodeId].respawnTimer = Math.max(0, newTimer);
 
                         if (newTimer <= 0) {
-                            const poi = Object.values(POIS).find(p => p.activities.some(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId));
-                            const activity = poi?.activities.find(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId);
-                            
+                            const poi = Object.values(POIS).find(p => (p.activities ?? []).some(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId));
+                            const activity = poi?.activities?.find(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId);
+
                             if (activity) {
                                 if (activity.type === 'ground_item') {
                                     newStates[nodeId].resources = 1;
@@ -595,12 +595,12 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
                     } else if (isDepleted) {
                         // KICKSTARTER: If a node is depleted but the timer is at 0, 
                         // it might be stuck from a corrupted save Load. Check if it should respawn.
-                        const poi = Object.values(POIS).find(p => p.activities.some(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId));
-                        const activity = poi?.activities.find(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId);
-                        
+                        const poi = Object.values(POIS).find(p => (p.activities ?? []).some(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId));
+                        const activity = poi?.activities?.find(a => (a.type === 'skilling' || a.type === 'ground_item') && a.id === nodeId);
+
                         if (activity && (activity as any).respawnTime > 0) {
-                             changed = true;
-                             if (activity.type === 'ground_item') {
+                            changed = true;
+                            if (activity.type === 'ground_item') {
                                 newStates[nodeId].resources = 1;
                             } else if (activity.type === 'skilling') {
                                 const { min, max } = activity.resourceCount;
@@ -621,7 +621,7 @@ export const useSkilling = (initialNodeStates: Record<string, ResourceNodeState>
         activeSkillingNodeId: activeSkilling?.nodeId ?? null,
         skillingTick,
         handleToggleSkilling,
-        handlePickupGroundItem, 
+        handlePickupGroundItem,
         initializeNodeState,
         stopSkilling,
         getSuccessChance,

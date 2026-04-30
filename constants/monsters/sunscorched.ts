@@ -1,4 +1,4 @@
-import { Monster, MonsterType, SkillName } from '@/types';
+import { Monster, MonsterType, SkillName, MonsterId } from '@/types';
 
 export const sunscorchedMonsters: Monster[] = [
     // --- 55-90 Tier (Max Hit ~12) ---

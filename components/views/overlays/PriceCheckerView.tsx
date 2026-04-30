@@ -59,12 +59,22 @@ const PriceCheckerView: React.FC<PriceCheckerViewProps> = ({ inventory, onClose,
                 if (currentSlot.quantity <= 0) newLocalInv[index] = null;
             }
         } else { // Unstackable
-            const allIndices = newLocalInv.map((s, i) => s?.itemId === fromSlot.itemId ? i : -1).filter(i => i !== -1);
-            qtyToMove = quantity === 'all' ? allIndices.length : Math.min(quantity, allIndices.length);
+            const matchingIndices = newLocalInv.map((s, i) => (s?.itemId === fromSlot.itemId && !s.noted) ? i : -1).filter(i => i !== -1);
+            qtyToMove = quantity === 'all' ? matchingIndices.length : Math.min(quantity, matchingIndices.length);
             if (qtyToMove <= 0) return;
 
-            for (let i = 0; i < qtyToMove; i++) {
-                newLocalInv[allIndices[i]] = null;
+            let moved = 0;
+            // Always move the clicked one first
+            newLocalInv[index] = null;
+            moved++;
+
+            // Move others from the matching list if more than 1 requested
+            for (let i = 0; i < matchingIndices.length && moved < qtyToMove; i++) {
+                const targetIdx = matchingIndices[i];
+                if (targetIdx !== index) {
+                    newLocalInv[targetIdx] = null;
+                    moved++;
+                }
             }
         }
 
@@ -72,11 +82,18 @@ const PriceCheckerView: React.FC<PriceCheckerViewProps> = ({ inventory, onClose,
 
         setCheckedItems(prev => {
             const newChecked = [...prev];
-            const existingIndex = newChecked.findIndex(i => i.itemId === fromSlot.itemId && !!i.noted === !!fromSlot.noted);
-            if (existingIndex > -1) {
-                newChecked[existingIndex].quantity += qtyToMove;
+            if (itemData.stackable || fromSlot.noted) {
+                const existingIndex = newChecked.findIndex(i => i.itemId === fromSlot.itemId && !!i.noted === !!fromSlot.noted);
+                if (existingIndex > -1) {
+                    newChecked[existingIndex].quantity += qtyToMove;
+                } else {
+                    newChecked.push({ ...fromSlot, quantity: qtyToMove });
+                }
             } else {
-                newChecked.push({ ...fromSlot, quantity: qtyToMove });
+                // For unstackable items, add them as separate individual entries
+                for (let i = 0; i < qtyToMove; i++) {
+                    newChecked.push({ ...fromSlot, quantity: 1 });
+                }
             }
             return newChecked;
         });
@@ -149,7 +166,12 @@ const PriceCheckerView: React.FC<PriceCheckerViewProps> = ({ inventory, onClose,
 
     const totalValue = checkedItems.reduce((acc, slot) => {
         const item = ITEMS[slot.itemId];
-        return acc + ((item?.value ?? 0) * slot.quantity);
+        if (!item) return acc;
+        let val = item.value;
+        if (item.doseable && slot.doses && item.initialDoses) {
+            val = Math.floor((item.value / item.initialDoses) * slot.doses);
+        }
+        return acc + (val * slot.quantity);
     }, 0);
 
     const inventoryGrid: (InventorySlot | null)[] = new Array(35).fill(null);
@@ -236,7 +258,7 @@ const PriceCheckerView: React.FC<PriceCheckerViewProps> = ({ inventory, onClose,
                                 const item = slot ? ITEMS[slot.itemId] : null;
                                 const longPressHandlers = useLongPress({
                                     onLongPress: (e) => slot && createContextMenu(e, slot, index),
-                                    onClick: () => slot && addToChecker(index, 'all'),
+                                    onClick: () => slot && addToChecker(index, 1),
                                 });
                                 return (
                                 <div 

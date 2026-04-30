@@ -14,7 +14,7 @@ export const useChat = (username: string) => {
   }, [blockedUsers]);
 
   const getBackendUrl = () => {
-    let url = import.meta.env.VITE_BACKEND_URL || window.location.origin;
+    let url = (import.meta as any).env.VITE_BACKEND_URL || window.location.origin;
     if (url && !url.startsWith('http') && !url.startsWith('https') && !url.startsWith('/')) {
       return `https://${url}`;
     }
@@ -22,8 +22,8 @@ export const useChat = (username: string) => {
   };
 
   useEffect(() => {
-    pusherRef.current = new Pusher(import.meta.env.VITE_PUSHER_KEY || '', {
-      cluster: import.meta.env.VITE_PUSHER_CLUSTER || '',
+    pusherRef.current = new Pusher((import.meta as any).env.VITE_PUSHER_KEY || '', {
+      cluster: (import.meta as any).env.VITE_PUSHER_CLUSTER || '',
       authEndpoint: `${getBackendUrl()}/.netlify/functions/pusher-auth`,
       auth: {
         params: { username }

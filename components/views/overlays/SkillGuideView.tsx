@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { PlayerSkill, SkillName, SkillGuideTab, SkillGuideEntry } from '../../../types';
+import { PlayerSkill, SkillName, SkillGuideTab, SkillGuideEntry, ItemId } from '../../../types';
 import {  SKILL_GUIDES, ITEMS, getIconClassName, HERBS, HERBLORE_RECIPES, THIEVING_POCKET_TARGETS, THIEVING_CONTAINER_TARGETS, HOUSE_TIERS, THIEVING_STALL_TARGETS, getIconUrl  } from '../../../constants';
 import Button from '../../common/Button';
 
@@ -23,7 +23,7 @@ const SkillGuideView: React.FC<SkillGuideViewProps> = ({ activeSkill, setActiveS
                 entries: HERBS.map(h => ({
                     level: h.level,
                     description: `Clean ${ITEMS[h.grimy].name}`,
-                    itemId: h.grimy
+                    itemId: h.grimy as ItemId
                 })).sort((a, b) => a.level - b.level)
             };
 
@@ -38,7 +38,7 @@ const SkillGuideView: React.FC<SkillGuideViewProps> = ({ activeSkill, setActiveS
                     level: r.level,
                     description: ITEMS[r.finishedPotionId].name,
                     subDescription: `${baseName} + ${secondaryName}`,
-                    itemId: r.finishedPotionId,
+                    itemId: r.finishedPotionId as ItemId,
                     herbLevel: herb ? herb.level : 0
                 };
             }).sort((a, b) => {
@@ -63,7 +63,7 @@ const SkillGuideView: React.FC<SkillGuideViewProps> = ({ activeSkill, setActiveS
                 entries: Object.values(THIEVING_POCKET_TARGETS).map(t => ({
                     level: t.level,
                     description: t.name,
-                    itemId: 'coins'
+                    itemId: 'coins' as ItemId
                 })).sort((a, b) => a.level - b.level)
             };
 
@@ -84,7 +84,7 @@ const SkillGuideView: React.FC<SkillGuideViewProps> = ({ activeSkill, setActiveS
                 entries: lockpickingTargets.map(t => ({
                     level: t.level,
                     description: t.name,
-                    itemId: 'lockpick'
+                    itemId: 'lockpick' as ItemId
                 }))
             };
 
@@ -121,7 +121,7 @@ const SkillGuideView: React.FC<SkillGuideViewProps> = ({ activeSkill, setActiveS
 
     const renderEntry = (entry: SkillGuideEntry, index: number) => {
         const hasLevel = playerLevel >= entry.level;
-        const item = entry.itemId ? ITEMS[entry.itemId] : null;
+        const item = entry.itemId ? ITEMS[entry.itemId as ItemId] : null;
         const showSub = entry.subDescription && (!entry.revealSubAtLevel || hasLevel);
         return (
             <div key={index} className={`flex items-center gap-4 p-2 rounded-md font-pixel-rpg transition-all hover:brightness-110 ${hasLevel ? 'bg-green-900/30 border border-green-900/50' : 'bg-gray-900/50 border border-gray-800'}`}>
@@ -134,11 +134,17 @@ const SkillGuideView: React.FC<SkillGuideViewProps> = ({ activeSkill, setActiveS
                     </div>
                 )}
                 <div className={`flex-grow leading-tight ${hasLevel ? 'text-white' : 'text-gray-400'}`}>
-                    <p className="text-xl">{entry.description}</p>
+                    <p className="text-xl">
+                        {entry.description}
+                        {entry.titleSuffix && (!entry.revealTitleSuffixAtLevel || hasLevel) && (
+                            <span className="text-gray-500 italic"> - {entry.titleSuffix}</span>
+                        )}
+                    </p>
                     {showSub && (
                         <p className="text-sm text-gray-500 mt-1">{entry.subDescription}</p>
                     )}
                 </div>
+
             </div>
         );
     };

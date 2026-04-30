@@ -39,6 +39,7 @@ interface InventoryPanelProps {
     valuableDropThreshold: number;
     isOneClickMode: boolean;
     onTeleport: (itemSlot: InventorySlot, slotIdentifier: number | keyof Equipment, from: 'inventory' | keyof Equipment, poiId: string) => void;
+    onCombine: (itemId: string, index: number) => void;
     ui: ReturnType<typeof useUIState>;
 }
 

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Monster, PlayerSkill, SkillName, Equipment, CombatStance, WeaponType, MonsterType, InventorySlot, WeightedDrop, Spell, MonsterSpecialAttack, SpellElement, Item, MonsterStatusEffect } from '../../types';
+import { Monster, PlayerSkill, SkillName, Equipment, EquipmentSlot, CombatStance, WeaponType, MonsterType, InventorySlot, WeightedDrop, Spell, MonsterSpecialAttack, SpellElement, Item, MonsterStatusEffect, ItemId } from '../../types';
 import { MONSTERS, ITEMS, rollOnLootTable, LootRollResult, REGIONS, getIconClassName, QUESTS, POIS, getIconUrl } from '../../constants';
 import Button from '../common/Button';
 import ProgressBar from '../common/ProgressBar';
@@ -43,7 +43,7 @@ interface CombatViewProps {
     inv: ReturnType<typeof useInventory>;
     ui: ReturnType<typeof useUIState>;
     killTrigger: number;
-    applyStatModifier: (skill: SkillName, value: number, baseLevelOnConsumption: number) => void;
+    applyStatModifier: (skill: SkillName, value: number, baseLevelOnConsumption: number, stackable?: boolean) => void;
     isStunned: boolean;
     addBuff: (buff: Omit<ActiveBuff, 'id' | 'durationRemaining'>) => void;
     showPlayerHealthNumbers: boolean;
@@ -247,7 +247,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         const processLootResult = (lootResult: LootRollResult | string | null) => {
             if (lootResult) {
                 const drop: LootRollResult = typeof lootResult === 'string'
-                    ? { itemId: lootResult, quantity: 1, noted: false }
+                    ? { itemId: lootResult as ItemId, quantity: 1, noted: false }
                     : lootResult;
 
                 if (drop.itemId === 'coins' && equipment.ring?.itemId === 'ring_of_greed') {
@@ -258,7 +258,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 if (isAutoBankOn) {
                     addLoot(drop.itemId, drop.quantity, false, { noted: drop.noted });
                 } else {
-                    onDropLoot({ itemId: drop.itemId, quantity: drop.quantity, noted: drop.noted });
+                    onDropLoot({ itemId: drop.itemId as ItemId, quantity: drop.quantity, noted: drop.noted });
                 }
             }
         };
@@ -384,10 +384,10 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 }
 
                 let itemToDrop: LootRollResult = typeof rareDropResult === 'string'
-                    ? { itemId: rareDropResult, quantity: 1, noted: false }
+                    ? { itemId: rareDropResult as ItemId, quantity: 1, noted: false }
                     : rareDropResult;
 
-                if (itemToDrop.itemId === 'talisman_drop') {
+                if ((itemToDrop.itemId as string) === 'talisman_drop') {
                     const poiId = currentInstanceId.split(':')[0];
                     const poi = POIS[poiId];
                     const region = poi ? REGIONS[poi.regionId] : null;
@@ -566,8 +566,15 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
             }
         }
 
-        const damageToDeal = Math.min(result.damage, monsterHp);
-        const newMonsterHp = Math.max(0, monsterHp - damageToDeal);
+        let damageToDeal = Math.min(result.damage, monsterHp);
+        let newMonsterHp = Math.max(0, monsterHp - damageToDeal);
+
+        const isFinisherItemRequired = monster.requiredSlayerItem === 'bag_of_salt' || monster.requiredSlayerItem === 'stonecracker_hammer';
+        if (isFinisherItemRequired && newMonsterHp <= 0) {
+            newMonsterHp = 1;
+            damageToDeal = Math.max(0, monsterHp - 1);
+        }
+
         setMonsterHp(newMonsterHp);
 
         addHitSplat(damageToDeal > 0 ? damageToDeal : 'miss', 'monster', { isMaxHit: result.isMaxHit, isMagic: true });
@@ -689,7 +696,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                         const equippedStaff = equipment.weapon ? ITEMS[equipment.weapon.itemId] : null;
                         const providedRune = equippedStaff?.equipment?.providesRune ? equippedStaff.equipment.providesRune : null;
                         const runesNeeded = autocastSpell!.runes.filter((r: { itemId: string; quantity: number }) => r.itemId !== providedRune);
-                        runesNeeded.forEach((r: { itemId: string, quantity: number }) => inv.modifyItem(r.itemId, -r.quantity, true));
+                        runesNeeded.forEach((r: { itemId: string, quantity: number }) => inv.modifyItem(r.itemId as ItemId, -r.quantity, true));
                     }
                 }
 
@@ -715,11 +722,28 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                     if (result.error) {
                         addLog(result.error);
                     } else {
+                        // Check Slayer Weapon Requirement
+                        if (monster.requiredSlayerItem && ITEMS[monster.requiredSlayerItem]?.equipment?.slot === EquipmentSlot.Weapon) {
+                            if (equipment.weapon?.itemId !== monster.requiredSlayerItem) {
+                                result.damage = 0;
+                                result.isMaxHit = false;
+                                result.successfulHit = false;
+                                result.logMessage = `Your attacks have no effect without a ${ITEMS[monster.requiredSlayerItem].name}!`;
+                            }
+                        }
+
                         if (result.logMessage) addLog(result.logMessage);
                         if (result.ammoConsumed) onConsumeAmmo();
 
-                        const damageToDeal = Math.min(result.damage, monsterHp);
-                        const newMonsterHp = Math.max(0, monsterHp - damageToDeal);
+                        let damageToDeal = Math.min(result.damage, monsterHp);
+                        let newMonsterHp = Math.max(0, monsterHp - damageToDeal);
+
+                        const isFinisherItemRequired = monster.requiredSlayerItem === 'bag_of_salt' || monster.requiredSlayerItem === 'stonecracker_hammer';
+                        if (isFinisherItemRequired && newMonsterHp <= 0) {
+                            newMonsterHp = 1;
+                            damageToDeal = Math.max(0, monsterHp - 1);
+                        }
+
                         setMonsterHp(newMonsterHp);
 
                         if (showHitsplats) addHitSplat(result.successfulHit ? damageToDeal : 'miss', 'monster', { isMaxHit: result.isMaxHit, isMagic: attackStyle === 'magic' });
@@ -791,11 +815,41 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 let triggeredSpecial: MonsterSpecialAttack | null = null;
                 let performNormalAttack = true;
 
-                if (monster.specialAttacks) {
-                    for (const special of monster.specialAttacks) {
-                        if (Math.random() < special.chance) {
-                            triggeredSpecial = special;
-                            break;
+                // Check Slayer Armor Requirement
+                let missingSlayerArmor = false;
+                if (monster.requiredSlayerItem && ITEMS[monster.requiredSlayerItem]?.equipment?.slot && ITEMS[monster.requiredSlayerItem]?.equipment?.slot !== EquipmentSlot.Weapon) {
+                    const reqItem = ITEMS[monster.requiredSlayerItem];
+                    const slotKey = reqItem.equipment!.slot.toLowerCase() as keyof Equipment;
+                    if (equipment[slotKey]?.itemId !== monster.requiredSlayerItem) {
+                        missingSlayerArmor = true;
+                    }
+                }
+
+                if (missingSlayerArmor) {
+                    performNormalAttack = false;
+                    monsterHit = true;
+                    monsterDamage = 15; // static amount
+                    addLog(`The ${monster.name} bypasses your defences because you lack a ${ITEMS[monster.requiredSlayerItem!].name}!`);
+                    
+                    // Reduce all combat stats by 10%
+                    const statsToDrain = [SkillName.Attack, SkillName.Strength, SkillName.Defence, SkillName.Ranged, SkillName.Magic];
+                    statsToDrain.forEach(skillName => {
+                        const skillData = playerSkills.find(s => s.name === skillName);
+                        if (skillData) {
+                            const currentLvl = getEffectiveLevel(skillName);
+                            if (currentLvl > 1) {
+                                const drainAmt = -Math.max(1, Math.floor(currentLvl * 0.10));
+                                applyStatModifier(skillName, drainAmt, skillData.level, true);
+                            }
+                        }
+                    });
+                } else {
+                    if (monster.specialAttacks) {
+                        for (const special of monster.specialAttacks) {
+                            if (Math.random() < special.chance) {
+                                triggeredSpecial = special;
+                                break;
+                            }
                         }
                     }
                 }
@@ -971,7 +1025,7 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 if (showHitsplats) {
                     if (prayerProtected) {
                         addHitSplat('miss', 'player', {});
-                    } else if (performNormalAttack || triggeredSpecial?.effect === 'magic_bypass_defence') {
+                    } else if (performNormalAttack || triggeredSpecial?.effect === 'magic_bypass_defence' || missingSlayerArmor) {
                         const isMax = monsterHit && monsterDamage > 0 && monsterDamage === monsterMaxHit;
                         if (monsterHit) {
                             addHitSplat(monsterDamage, 'player', { isMaxHit: isMax, isMagic: !isDragonfireAttack && isMagicAttack, isDragonfire: isDragonfireAttack });
@@ -1008,8 +1062,15 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                     }
 
                     if (recoilDamage > 0 && monsterHp > 0) {
-                        const recoilDamageToDeal = Math.min(recoilDamage, monsterHp);
-                        const monsterHpAfterRecoil = Math.max(0, monsterHp - recoilDamageToDeal);
+                        let recoilDamageToDeal = Math.min(recoilDamage, monsterHp);
+                        let monsterHpAfterRecoil = Math.max(0, monsterHp - recoilDamageToDeal);
+
+                        const isFinisherItemRequired = monster.requiredSlayerItem === 'bag_of_salt' || monster.requiredSlayerItem === 'stonecracker_hammer';
+                        if (isFinisherItemRequired && monsterHpAfterRecoil <= 0) {
+                            monsterHpAfterRecoil = 1;
+                            recoilDamageToDeal = Math.max(0, monsterHp - 1);
+                        }
+
                         setMonsterHp(monsterHpAfterRecoil);
                         if (showHitsplats) addHitSplat(recoilDamageToDeal, 'monster', {});
                         addLog(`${recoilSource} recoils, dealing ${recoilDamageToDeal} damage to the ${monster.name}!`);
@@ -1104,8 +1165,14 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
             }
 
             if (totalDamageDealt > 0) {
-                const actualDamage = Math.min(totalDamageDealt, monsterHp);
-                const newHp = Math.max(0, monsterHp - actualDamage);
+                let actualDamage = Math.min(totalDamageDealt, monsterHp);
+                let newHp = Math.max(0, monsterHp - actualDamage);
+
+                const isFinisherItemRequired = monster.requiredSlayerItem === 'bag_of_salt' || monster.requiredSlayerItem === 'stonecracker_hammer';
+                if (isFinisherItemRequired && newHp <= 0) {
+                    newHp = 1;
+                    actualDamage = Math.max(0, monsterHp - 1);
+                }
 
                 // Apply HP update using direct value to avoid side-effect issues with functional updates in Strict Mode
                 setMonsterHp(newHp);
@@ -1148,6 +1215,27 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         }
         prevKillTrigger.current = killTrigger;
     }, [killTrigger, monsterHp, monster, addLog, handleMonsterDefeated]);
+
+    const isFinisherItemRequired = monster?.requiredSlayerItem === 'bag_of_salt' || monster?.requiredSlayerItem === 'stonecracker_hammer';
+    const canFinish = isFinisherItemRequired && monsterHp > 0 && monsterHp <= (monster!.maxHp * 0.10);
+    const hasFinisherItem = monster && monster.requiredSlayerItem ? inv.hasItems([{ itemId: monster.requiredSlayerItem as ItemId, quantity: 1 }]) : false;
+
+    const handleFinishMonster = useCallback(() => {
+        if (!monster || !isFinisherItemRequired || !canFinish) return;
+        
+        if (!hasFinisherItem) {
+            addLog(`You need a ${ITEMS[monster.requiredSlayerItem!].name} to finish the ${monster.name}!`);
+            return;
+        }
+
+        if (monster.requiredSlayerItem === 'bag_of_salt') {
+            inv.modifyItem('bag_of_salt', -1, true);
+        }
+
+        addLog(`You use your ${ITEMS[monster.requiredSlayerItem!].name} to finish off the ${monster.name}!`);
+        setMonsterHp(0);
+        handleMonsterDefeated('melee');
+    }, [monster, isFinisherItemRequired, canFinish, hasFinisherItem, inv, addLog, handleMonsterDefeated]);
 
     const handleFlee = useCallback(() => {
         if (isStunned) { addLog("You are stunned and cannot flee."); return; }
@@ -1230,8 +1318,14 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 <span className="text-2xl md:text-4xl font-extrabold text-gray-500 animate-pulse">VS</span>
 
                 <div className="flex flex-col items-center w-32 md:w-48">
-                    <div ref={monsterRef} className="relative">
-                        <div className={`w-24 h-24 md:w-32 md:h-32 p-2 bg-gray-900 border-4 border-gray-600 rounded-lg transition-transform duration-150 ${monsterAttacking ? 'scale-110' : 'scale-100'}`}>
+                    <div ref={monsterRef} className="relative cursor-pointer group" onClick={() => {
+                        if (isFinisherItemRequired && canFinish) {
+                            handleFinishMonster();
+                        } else if (isFinisherItemRequired && monsterHp > (monster.maxHp * 0.10)) {
+                            addLog(`The ${monster.name} is still too strong to be finished!`);
+                        }
+                    }}>
+                        <div className={`w-24 h-24 md:w-32 md:h-32 p-2 bg-gray-900 border-4 ${canFinish ? 'border-purple-500 animate-pulse' : 'border-gray-600'} rounded-lg transition-transform duration-150 ${monsterAttacking ? 'scale-110' : 'scale-100'} group-hover:brightness-125`}>
                             <img src={getIconUrl(monster.iconUrl)} alt={monster.name} className={`w-full h-full pixelated-image ${monsterIconClass}`} />
                         </div>
                         {showHitsplats && hitSplats.filter(s => s.target === 'monster').map(splat => <HitSplat key={splat.id} {...splat} />)}

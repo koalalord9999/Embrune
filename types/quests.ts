@@ -1,4 +1,4 @@
-import { SkillName } from './enums';
+import { SkillName, ItemId, MonsterId } from './index';
 import { InventorySlot } from './entities';
 import { QUESTS } from '../constants/quests';
 
@@ -14,7 +14,7 @@ export interface PlayerQuestState {
 }
 
 export interface PlayerSlayerTask {
-  monsterId: string;
+  monsterId: MonsterId;
   requiredCount: number;
   progress: number;
   isComplete: boolean;
@@ -24,20 +24,20 @@ export interface PlayerSlayerTask {
 // FIX: Added 'operator' to gather type QuestRequirement to support 'eq', 'lt', etc.
 export type QuestRequirement =
   | ({ type: 'gather' } & (
-    | { itemId: string; quantity: number; operator?: 'gte' | 'lt' | 'eq' }
-    | { items: { itemId: string; quantity: number; operator?: 'gte' | 'lt' | 'eq' }[] }
+    | { itemId: ItemId; quantity: number; operator?: 'gte' | 'lt' | 'eq' }
+    | { items: { itemId: ItemId; quantity: number; operator?: 'gte' | 'lt' | 'eq' }[] }
   ))
-  | { type: 'kill'; monsterId: string; quantity: number; style?: 'melee' | 'ranged' | 'magic' }
+  | { type: 'kill'; monsterId: MonsterId; quantity: number; style?: 'melee' | 'ranged' | 'magic' }
   | { type: 'talk'; poiId: string; npcName: string }
   | { type: 'shear'; quantity: number }
-  | { type: 'smith'; itemId: string; quantity: number }
+  | { type: 'smith'; itemId: ItemId; quantity: number }
   | { type: 'spin'; quantity: number }
   | { type: 'accept_repeatable_quest'; questId: string }
-  | { type: 'offer'; itemId: string; quantity: number; poiId: string; npcName: string };
+  | { type: 'offer'; itemId: ItemId; quantity: number; poiId: string; npcName: string };
 
 export type DialogueAction =
-  | { type: 'give_item'; itemId: string; quantity: number; noted?: boolean }
-  | { type: 'take_item'; itemId: string; quantity: number | 'all'; nameOverride?: string }
+  | { type: 'give_item'; itemId: ItemId; quantity: number; noted?: boolean }
+  | { type: 'take_item'; itemId: ItemId; quantity: number | 'all'; nameOverride?: string }
   | { type: 'give_coins'; amount: number }
   | { type: 'take_coins'; amount: number }
   | { type: 'give_xp'; skill: SkillName; amount: number }
@@ -48,10 +48,13 @@ export type DialogueAction =
   | { type: 'heal'; amount: 'full' | number }
   | { type: 'restore_stats' }
   | { type: 'open_bank' }
+  | { type: 'deposit_backpack' }
+  | { type: 'deposit_equipment' }
+  | { type: 'shop'; shopId: string }
   | { type: 'start_bank_tutorial' }
   | { type: 'complete_tutorial' }
-  | { type: 'set_quest_combat_reward'; itemId: string; quantity: number }
-  | { type: 'start_mandatory_combat'; monsterId: string }
+  | { type: 'set_quest_combat_reward'; itemId: ItemId; quantity: number }
+  | { type: 'start_mandatory_combat'; monsterId: MonsterId }
   | { type: 'tan_all_hides' }
   | { type: 'add_log'; message: string }
   | { type: 'restore_prayer' }
@@ -67,15 +70,17 @@ export type DialogueAction =
   | { type: 'light_monolith_fire'; pitId: string; logType: string }
   | { type: 'show_quest_info'; questId: QuestId }
   | { type: 'slayer_get_task'; masterId: string }
+  | { type: 'slayer_complete_task'; masterId: string }
   | { type: 'slayer_reset_task'; masterId: string }
   | { type: 'slayer_open_shop' }
+  | { type: 'blimp_travel'; destinationPoiId: string; cost?: number }
   | { type: 'cleanup_quest_state'; questId: QuestId };
 
 export type DialogueCheckRequirement =
-  | { type: 'items'; items: { itemId: string, quantity: number, operator?: 'gte' | 'lt' | 'eq', nameOverride?: string }[] }
+  | { type: 'items'; items: { itemId: ItemId, quantity: number, operator?: 'gte' | 'lt' | 'eq', nameOverride?: string }[] }
   | { type: 'coins'; amount: number }
   | { type: 'skill'; skill: SkillName; level: number }
-  | { type: 'world_state'; property: 'windmillFlour' | 'monolithFire' | 'monolithFires' | 'monolithLogType' | 'monolith_pit_1' | 'monolith_pit_2' | 'monolith_pit_3' | 'monolith_pit_4'; value: any; operator?: 'gte' | 'eq' }
+  | { type: 'world_state'; property: 'windmillFlour' | 'monolithFire' | 'monolithFires' | 'monolithLogType' | 'monolith_pit_1' | 'monolith_pit_2' | 'monolith_pit_3' | 'monolith_pit_4' | 'destructionTrialProgress'; value: any; operator?: 'gte' | 'eq' }
   // FIX: Added 'operator' to quest check requirement to support flexible stage comparisons ---
   | { type: 'quest'; questId: QuestId; status: 'not_started' | 'in_progress' | 'completed'; stage?: number; operator?: 'gte' | 'lt' | 'eq' }
   // FIX: Added new check type for quest-specific variables.
@@ -147,7 +152,7 @@ export interface Quest {
     notes?: string[];
   };
   triggerItem?: {
-    itemId: string;
+    itemId: ItemId;
     npcName: string;
     startNode: string;
   };
@@ -161,12 +166,12 @@ export interface RepeatableQuest {
   type: 'gather' | 'interact' | 'kill';
   title: string;
   description: string;
-  location: 'meadowdale' | 'oakhaven' | 'general' | 'isle_of_whispers' | 'silverhaven' | 'fouthia' | 'sanctity';
+  location: 'meadowdale' | 'oakhaven' | 'general' | 'isle_of_whispers' | 'silverhaven' | 'fouthia' | 'sanctity' | 'duskwatch' | 'ironmaw' | 'bleakpost';
   locationPoiId?: string; // For 'interact' type
   target: {
-    itemId?: string; // For 'gather' type
+    itemId?: ItemId; // For 'gather' type
     name?: string; // For 'interact' type
-    monsterId?: string; // For 'kill' type
+    monsterId?: MonsterId; // For 'kill' type
   };
   baseCoinReward: number; // Per item for 'gather', or flat for 'interact'
   xpReward: {
@@ -179,7 +184,7 @@ export interface RepeatableQuest {
   instancePoiId?: string;
   aggressionToggle?: {
     poiId: string;
-    monsterId: string;
+    monsterId: MonsterId;
   };
 }
 

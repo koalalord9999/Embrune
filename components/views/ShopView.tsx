@@ -6,7 +6,7 @@ import { ContextMenuOption } from '../common/ContextMenu';
 import { MakeXPrompt, ContextMenuState, TooltipState } from '../../hooks/useUIState';
 import { useLongPress } from '../../hooks/useLongPress';
 import { useIsTouchDevice } from '../../hooks/useIsTouchDevice';
-import { getDisplayName } from '../panels/InventorySlot';
+import { getDisplayName, ItemIcon } from '../panels/InventorySlot';
 
 const getQuantityColor = (quantity: number): string => {
     if (quantity >= 10000000) return 'text-green-400'; // Green for 10M+
@@ -131,7 +131,7 @@ const ShopSlot: React.FC<ShopSlotProps> = ({ slot, price, stock, shopId, playerC
             onMouseEnter={handleMouseEnter}
             onMouseLeave={() => setTooltip(null)}
         >
-            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+            <ItemIcon item={item} slot={slot} className="w-full h-full" />
             {stock !== undefined && stock > 0 && (
                 <span className={`absolute bottom-0 right-1 text-xs font-bold ${getQuantityColor(stock)}`} style={{ textShadow: '1px 1px 1px black' }}>
                     {formatItemQuantity(stock)}

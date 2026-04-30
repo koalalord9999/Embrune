@@ -52,6 +52,7 @@ export const theArcaneAwakening: Quest = {
         { npcName: 'Skyship Captain', response: { text: "I need to return to the Crystalline Isles.", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'in_progress', stage: 7 }], successNode: 'taa_captain_free_travel_to_isles', failureNode: '' } } },
         { npcName: 'Skyship Captain', response: { text: "I need to return to the Crystalline Isles.", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'in_progress', stage: 8 }], successNode: 'taa_captain_free_travel_to_isles', failureNode: '' } } },
         { npcName: 'Skyship Captain', response: { text: "I need to return to the Crystalline Isles.", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'in_progress', stage: 9 }], successNode: 'taa_captain_free_travel_to_isles', failureNode: '' } } },
+        { npcName: 'Skyship Captain', response: { text: "I need to return to the Crystalline Isles.", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'completed' }], successNode: 'taa_captain_travel_to_isles', failureNode: '' } } },
         // Durin
         { npcName: 'Durin', response: { text: "The Skyship Captain sent me. He said you could build a 'Resonance Dampener'.", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'in_progress', stage: 3 }], successNode: 'quest_intro_resonance_dampener', failureNode: '' } } },
         { npcName: 'Durin', response: { text: "What do you need for the Resonance Dampener again?", check: { requirements: [{ type: 'quest', questId: 'the_arcane_awakening', status: 'in_progress', stage: 4 }], successNode: 'taa_durin_stage_4_no_items', failureNode: '' } } },
@@ -166,6 +167,14 @@ export const theArcaneAwakening: Quest = {
             text: "Aye, the Archmage's business is important. Hop aboard, I'll take you up.",
             responses: [
                 { text: "(Board the Skyship)", actions: [{ type: 'teleport', poiId: 'crystalline_isles_landing' }] }
+            ]
+        },
+        taa_captain_travel_to_isles: {
+            npcName: 'Skyship Captain',
+            npcIcon: '/assets/npcChatHeads/ferryman_silas.png',
+            text: "The Resonance Dampener is working perfectly now. Hop aboard, I'll take you up. But it will cost a little coin, a captains got bills to pay!",
+            responses: [
+                { text: "(Board the Skyship - 500g)", actions: [{ type: 'take_coins', amount: 500 }, { type: 'teleport', poiId: 'crystalline_isles_landing' }] }
             ]
         },
         taa_air_not_ready: {

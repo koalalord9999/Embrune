@@ -68,6 +68,7 @@ export interface ActiveSingleAction {
     startTime: number;
     duration: number; // in ms
     onComplete: () => void;
+    interruptOnDamage?: boolean;
 }
 
 export interface Keybindings {
@@ -196,8 +197,8 @@ const useUIStateInternal = () => {
     const [isEquipmentStatsViewOpen, setIsEquipmentStatsViewOpen] = useState<boolean>(false);
     const [itemsOnDeathData, setItemsOnDeathData] = useState<ItemsOnDeathData | null>(null);
     const [priceCheckerInventory, setPriceCheckerInventory] = useState<(InventorySlot | null)[] | null>(null);
-    const [isAtlasViewOpen, setIsAtlasViewOpen] = useState<boolean>(false);
     const [isExpandedMapViewOpen, setIsExpandedMapViewOpen] = useState<boolean>(false);
+    const [isMapManagerOpen, setIsMapManagerOpen] = useState<boolean>(false);
     const [isLootViewOpen, setIsLootViewOpen] = useState<boolean>(false);
     const [isDevPanelOpen, setIsDevPanelOpen] = useState<boolean>(false);
     const [isMonsterDBOpen, setIsMonsterDBOpen] = useState<boolean>(false);
@@ -264,7 +265,6 @@ const useUIStateInternal = () => {
         isEquipmentStatsViewOpen ||
         itemsOnDeathData ||
         priceCheckerInventory ||
-        isAtlasViewOpen ||
         isLootViewOpen ||
         activeDungeonMap ||
         isMonsterDBOpen ||
@@ -284,7 +284,6 @@ const useUIStateInternal = () => {
         activeQuestDetail,
         itemsOnDeathData,
         priceCheckerInventory,
-        isAtlasViewOpen,
         isLootViewOpen,
         activeDungeonMap,
         isMonsterDBOpen,
@@ -324,8 +323,8 @@ const useUIStateInternal = () => {
         setIsEquipmentStatsViewOpen(false);
         setItemsOnDeathData(null);
         setPriceCheckerInventory(null);
-        setIsAtlasViewOpen(false);
         setIsExpandedMapViewOpen(false);
+        setIsMapManagerOpen(false);
         setActiveMapRegionId('world');
         setIsLootViewOpen(false);
         setIsSelectingAutocastSpell(false);
@@ -365,8 +364,8 @@ const useUIStateInternal = () => {
         isEquipmentStatsViewOpen, setIsEquipmentStatsViewOpen,
         itemsOnDeathData, setItemsOnDeathData,
         priceCheckerInventory, setPriceCheckerInventory,
-        isAtlasViewOpen, setIsAtlasViewOpen,
         isExpandedMapViewOpen, setIsExpandedMapViewOpen,
+        isMapManagerOpen, setIsMapManagerOpen,
         isLootViewOpen, setIsLootViewOpen,
         activeMapRegionId, setActiveMapRegionId,
         isSelectingAutocastSpell, setIsSelectingAutocastSpell,

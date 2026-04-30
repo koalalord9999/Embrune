@@ -34,6 +34,21 @@ import { sunscorchedWastesPois } from './sunscorched_wastes';
 import { barrowOfTheRevenantPois } from './dungeon_barrow';
 import { sunbrightUndergroundCavePois } from './sunbright_underground_cave';
 import { agilityCoursePois } from './agility_courses';
+import { newPois } from './new_pois';
+
+import { DUSKWATCH_POIS } from './slayers_respite/duskwatch';
+import { IRONMAW_POIS } from './slayers_respite/ironmaw';
+import { BLEAKPOST_POIS } from './slayers_respite/bleakpost';
+import { RESPITE_ROADS_POIS } from './slayers_respite/respite_roads';
+import { HOLLOWED_BARROW_POIS } from './slayers_respite/dungeon_hollowed_barrow';
+import { CINDERFORGE_DEPTHS_POIS } from './slayers_respite/dungeon_cinderforge_depths';
+import { ABYSSAL_RIFT_POIS } from './slayers_respite/dungeon_abyssal_rift';
+import { BONEMARSH_POIS } from './slayers_respite/the_bonemarsh';
+import { SCORCHED_HOLLOW_POIS } from './slayers_respite/the_scorched_hollow';
+import { SHATTERED_COAST_POIS } from './slayers_respite/the_shattered_coast';
+import { FROSTSPINE_RIDGE_POIS } from './slayers_respite/frostspine_ridge';
+import { THORNVEIL_POIS } from './slayers_respite/the_thornveil';
+import { ABYSSAL_EXPANSE_POIS } from './slayers_respite/the_abyssal_expanse';
 
 export const POIS: Record<string, POI> = {
     ...tutorialZonePois,
@@ -70,4 +85,18 @@ export const POIS: Record<string, POI> = {
     ...sunscorchedWastesPois,
     ...barrowOfTheRevenantPois,
     ...agilityCoursePois,
+    ...newPois,
+    ...DUSKWATCH_POIS,
+    ...IRONMAW_POIS,
+    ...BLEAKPOST_POIS,
+    ...RESPITE_ROADS_POIS,
+    ...HOLLOWED_BARROW_POIS,
+    ...CINDERFORGE_DEPTHS_POIS,
+    ...ABYSSAL_RIFT_POIS,
+    ...BONEMARSH_POIS,
+    ...SCORCHED_HOLLOW_POIS,
+    ...SHATTERED_COAST_POIS,
+    ...FROSTSPINE_RIDGE_POIS,
+    ...THORNVEIL_POIS,
+    ...ABYSSAL_EXPANSE_POIS,
 };

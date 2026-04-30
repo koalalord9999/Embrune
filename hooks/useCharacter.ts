@@ -16,7 +16,7 @@ interface CharacterCallbacks {
 }
 
 export const useCharacter = (
-    initialData: { skills: PlayerSkill[], combatStance: CombatStance, currentHp: number, currentPrayer: number, autocastSpell: Spell | null, statModifiers: ActiveStatModifier[], activeBuffs: ActiveBuff[], runEnergy: number, isRunToggled: boolean, isResting: boolean },
+    initialData: { skills: PlayerSkill[], combatStance: CombatStance, currentHp: number, currentPrayer: number, autocastSpell: Spell | null, statModifiers: ActiveStatModifier[], activeBuffs: ActiveBuff[], runEnergy: number, isRunToggled: boolean, isResting: boolean, lastHomeTeleport: number },
     callbacks: CharacterCallbacks,
     worldState: WorldState,
     setWorldState: React.Dispatch<React.SetStateAction<WorldState>>,
@@ -42,6 +42,7 @@ export const useCharacter = (
     const [runEnergy, setRunEnergyInternal] = useState<number>(initialData.runEnergy ?? 100);
     const [isRunToggled, setIsRunToggled] = useState<boolean>(initialData.isRunToggled ?? false);
     const [isResting, setIsResting] = useState<boolean>(initialData.isResting ?? false);
+    const [lastHomeTeleport, setLastHomeTeleport] = useState<number>(initialData.lastHomeTeleport ?? 0);
 
     const setRunEnergy = useCallback((updater: React.SetStateAction<number>) => {
         setRunEnergyInternal(prev => {
@@ -490,25 +491,30 @@ export const useCharacter = (
         }
     }, [skills, statModifiers, addLog, onXpGain, onLevelUp, xpMultiplier, setCurrentHp, setCurrentPrayer]);
 
-    const applyStatModifier = useCallback((skill: SkillName, value: number, baseLevelOnConsumption: number) => {
+    const applyStatModifier = useCallback((skill: SkillName, value: number, baseLevelOnConsumption: number, stackable?: boolean) => {
         const existingModifier = statModifiers.find(m => m.skill === skill);
 
+        let finalValue = value;
         if (existingModifier) {
-            if (value > 0 && value < existingModifier.initialValue) {
-                addLog(`You already have a stronger ${skill} boost active.`);
-                return;
-            }
-            if (value < 0 && value > existingModifier.initialValue) {
-                addLog(`You already have a stronger ${skill} drain active.`);
-                return;
+            if (stackable) {
+                finalValue = existingModifier.currentValue + value;
+            } else {
+                if (value > 0 && value < existingModifier.initialValue) {
+                    addLog(`You already have a stronger ${skill} boost active.`);
+                    return;
+                }
+                if (value < 0 && value > existingModifier.initialValue) {
+                    addLog(`You already have a stronger ${skill} drain active.`);
+                    return;
+                }
             }
         }
 
         const newModifier: ActiveStatModifier = {
             id: existingModifier?.id ?? (Date.now() + Math.random()),
             skill,
-            initialValue: value,
-            currentValue: value,
+            initialValue: stackable ? finalValue : value,
+            currentValue: finalValue,
             baseLevelOnConsumption,
             nextDecayTimestamp: Date.now() + 60000,
         };
@@ -516,6 +522,22 @@ export const useCharacter = (
         addLog(value > 0 ? `You feel your ${skill} level increase.` : `You feel your ${skill} level decrease.`);
         setStatModifiers(prev => [...prev.filter(m => m.skill !== skill), newModifier]);
     }, [statModifiers, addLog]);
+
+    const restoreNegativeStatModifiers = useCallback((percent: number, base: number) => {
+        setStatModifiers(prev => {
+            return prev.map(m => {
+                if (m.currentValue < 0) {
+                    const skillData = skills.find(s => s.name === m.skill);
+                    const baseLvl = skillData ? skillData.level : 1;
+                    const restoreAmount = Math.floor(baseLvl * percent) + base;
+                    const newValue = Math.min(0, m.currentValue + restoreAmount);
+                    return { ...m, currentValue: newValue };
+                }
+                return m;
+            }).filter(m => m.currentValue !== 0); // remove if exactly 0
+        });
+        addLog("Your lowered stats have been partially restored.");
+    }, [skills, addLog]);
 
     const applyEnhancementSpell = useCallback((spellName: string, description: string, statBoosts: { skill: SkillName, value: number }[], duration: number, source: string) => {
         const newBuff: ActiveBuff = {
@@ -726,6 +748,7 @@ export const useCharacter = (
         statModifiers,
         addBuff,
         curePoison,
+        restoreNegativeStatModifiers,
         clearStatModifiers,
         clearBuffs,
         autocastSpell,
@@ -736,5 +759,7 @@ export const useCharacter = (
         isPoisoned,
         globalActionCooldown,
         setGlobalActionCooldown,
+        lastHomeTeleport,
+        setLastHomeTeleport,
     };
 };

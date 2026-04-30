@@ -42,6 +42,7 @@ const defaultState = {
     runEnergy: 100,
     isRunToggled: false,
     isResting: false,
+    lastHomeTeleport: 0,
     agilityState: { activeCourseId: null, currentObstacleIndex: 0, lapsCompleted: {} } as AgilityState,
     activePrayers: [] as string[],
     currentPoiId: 'tutorial_entrance',
@@ -202,6 +203,8 @@ const hydrateGameState = (loadedState: any): GameState => {
         hydrated.playerType = PlayerType.Cheats;
         console.log("Legacy save detected without playerType. Migrating to Cheats mode.");
     }
+    
+    hydrated.lastHomeTeleport = loadedState.lastHomeTeleport || 0;
 
     // Safety check for now-deleted TechDemo mode
     if ((loadedState.playerType as any) === 'TechDemo') {

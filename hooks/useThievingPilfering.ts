@@ -134,7 +134,7 @@ export const useThievingPilfering = (deps: PilferingDependencies) => {
         const poi = POIS[poiId];
         if (!poi) return;
         
-        const pilferDoors = poi.activities.filter(a => a.type === 'thieving_pilfer');
+        const pilferDoors = (poi.activities ?? []).filter(a => a.type === 'thieving_pilfer');
         if (pilferDoors.length === 0) return;
         
         let targetTier = HOUSE_TIERS.slice().reverse().find(tier => thievingLevel >= tier.level);
@@ -303,10 +303,10 @@ export const useThievingPilfering = (deps: PilferingDependencies) => {
 
     useEffect(() => {
         const poi = POIS[session.currentPoiId];
-        if (poi && poi.activities.some(a => a.type === 'thieving_pilfer')) {
+        if (poi && (poi.activities ?? []).some(a => a.type === 'thieving_pilfer')) {
             const thievingSkill = char.skills.find(s => s.name === SkillName.Thieving);
             if (thievingSkill) {
-                const firstDoorId = (poi.activities.find(a => a.type === 'thieving_pilfer') as Extract<POIActivity, {type: 'thieving_pilfer'}>)?.id;
+                const firstDoorId = ((poi.activities ?? []).find(a => a.type === 'thieving_pilfer') as Extract<POIActivity, {type: 'thieving_pilfer'}>)?.id;
                 if (firstDoorId && !worldState.generatedHouses?.[firstDoorId]) {
                     generateHousesForPoi(session.currentPoiId, thievingSkill.level);
                 }

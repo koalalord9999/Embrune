@@ -6,8 +6,8 @@ import Button from '../common/Button';
 import { useUIState, TooltipState, ContextMenuState } from '../../hooks/useUIState';
 import { ContextMenuOption } from '../common/ContextMenu';
 import { useLongPress } from '../../hooks/useLongPress';
-import { useIsTouchDevice } from '../../hooks/useIsTouchDevice';
-import { getDisplayName } from './InventorySlot';
+import { getIsTouchDevice, useIsTouchDevice } from '../../hooks/useIsTouchDevice';
+import { getDisplayName, ItemIcon } from './InventorySlot';
 
 interface EquipmentPanelProps {
     equipment: Equipment;
@@ -142,9 +142,9 @@ const EquipmentSlotDisplay: React.FC<EquipmentSlotDisplayProps> = ({ slotKey, it
             onMouseEnter={handleMouseEnter}
             onMouseLeave={() => setTooltip(null)}
         >
-            {item ? (
+            {item && itemSlot ? (
                 <>
-                    <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+                    <ItemIcon item={item} slot={itemSlot} className="w-full h-full" />
                     {itemSlot?.statsOverride?.poisoned && (
                         <img 
                             src={getIconUrl("boiling-bubbles")} 

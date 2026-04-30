@@ -1,6 +1,6 @@
 
 import React, { useMemo, useCallback } from 'react';
-import { InventorySlot, PlayerSlayerTask } from '../../types';
+import { InventorySlot, PlayerSlayerTask, ItemId } from '../../types';
 import { SHOPS, ITEMS, getIconClassName, getIconUrl } from '../../constants';
 import Button from '../common/Button';
 import { ContextMenuState, MakeXPrompt, TooltipState } from '../../hooks/useUIState';
@@ -152,8 +152,8 @@ const SlayerShopView: React.FC<SlayerShopViewProps> = (props) => {
         
         // Special case: Rune Pack needs at least 1 or 2 slots depending on what you already have
         if (itemId === 'slayer_rune_pack') {
-            const hasNexus = inventory.some(s => s?.itemId === 'rune_nexus');
-            const hasGust = inventory.some(s => s?.itemId === 'rune_gust');
+            const hasNexus = inventory.some(s => s?.itemId === 'nexus_rune' as ItemId);
+            const hasGust = inventory.some(s => s?.itemId === 'gust_rune' as ItemId);
             let slotsNeeded = 0;
             if (!hasNexus) slotsNeeded++;
             if (!hasGust) slotsNeeded++;

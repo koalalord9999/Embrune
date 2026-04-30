@@ -64,6 +64,10 @@ export const anEchoOfBattle: Quest = {
         { npcName: 'Bronn the Retired Adventurer', response: { text: "You seem troubled, Bronn.", check: { requirements: [{ type: 'quest', questId: 'art_of_the_warhammer', status: 'completed' }, { type: 'quest', questId: 'capitals_call', status: 'completed' }, { type: 'quest', questId: 'an_echo_of_battle', status: 'not_started' }], successNode: 'aeb_intro', failureNode: '' } } },
         //FOUND SEAL
         { npcName: 'Bronn the Retired Adventurer', response: { text: "I have found the seal, and it does appear to be weakening.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 1 }], successNode: 'aeb_bronn_return_from_barrow', failureNode: '' } } },
+        //I LOST THE BROKEN KEY
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "I lost the key you gave me.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 2, operator: 'gte' }, { type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 5, operator: 'lt' }, { type: 'items', items: [{ itemId: 'broken_barrow_key', quantity: 1, operator: 'lt' }] }], successNode: 'aeb_bronn_lost_key', failureNode: '' } } },
+        //I LOST THE REFORGED KEY
+        { npcName: 'Bronn the Retired Adventurer', response: { text: "I lost the reforged key Valerius made.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 5, operator: 'eq' }, { type: 'items', items: [{ itemId: 'reforged_barrow_key', quantity: 1, operator: 'lt' }] }], successNode: 'aeb_bronn_lost_reforged_key', failureNode: '' } } },
         //BEFORE SEARCHING SEAL
         { npcName: 'Bronn the Retired Adventurer', response: { text: "I have not found anything yet.", check: { requirements: [{ type: 'quest', questId: 'an_echo_of_battle', status: 'in_progress', stage: 0 }], successNode: 'aeb_bronn_nothing_yet', failureNode: '' } } },
         //AFTER TAKING THE BROKEN KEY
@@ -101,6 +105,18 @@ export const anEchoOfBattle: Quest = {
                 { text: "A Revenant Lord? What is that?", next: 'aeb_lore_revenant' },
                 { text: "I'm ready to help. What needs to be done?", next: 'aeb_story_2' }
             ]
+        },
+        aeb_bronn_lost_key: {
+            npcName: 'Bronn the Retired Adventurer',
+            npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+            text: "Lost it already? Bah. Good thing I kept some spare fragments from the original seal. Here, take these back to Valerius and try to keep a tighter grip on them this time.",
+            responses: [{ text: "Thank you, Bronn. I'll be more careful.", actions: [{ type: 'give_item', itemId: 'broken_barrow_key', quantity: 1 }] }]
+        },
+        aeb_bronn_lost_reforged_key: {
+            npcName: 'Bronn the Retired Adventurer',
+            npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+            text: "You lost the reforged key? That's... problematic. Luckily, Valerius sent me a prototype he made while working on the original. It should still work. Don't lose this one, it's the last one we have.",
+            responses: [{ text: "I understand, Bronn. Thank you.", actions: [{ type: 'give_item', itemId: 'reforged_barrow_key', quantity: 1 }] }]
         },
         aeb_company_intro: {
             npcName: 'Bronn the Retired Adventurer',

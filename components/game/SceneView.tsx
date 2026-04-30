@@ -283,6 +283,7 @@ const ActionableButton: React.FC<{
         case 'ladder': text = activity.name; break;
         case 'cut_cactus': text = activity.name; break;
         case 'sand_pit': text = 'Fill Bucket with Sand'; break;
+        case 'blimp_travel': text = activity.name; break;
     }
     
     // Prepend index + 1
@@ -316,8 +317,13 @@ const ActionableButton: React.FC<{
 
         let options: ContextMenuOption[] = [];
 
-        if (activity.type === 'npc') {
-            const isBanker = activity.actions && activity.actions.some(a => a.action === 'open_bank');
+        if (activity.type === 'npc' || activity.type === 'slayer_master') {
+            const actActions = (activity as any).actions as (
+                | { label: string; action: 'open_bank' | 'deposit_backpack' | 'deposit_equipment' }
+                | { type: 'shop'; label: string; shopId: string }
+            )[] | undefined;
+
+            const isBanker = actActions?.some(a => 'action' in a && a.action === 'open_bank');
             const isAltar = activity.name === 'Altar';
 
             if (!isBanker && !isAltar) {
@@ -328,7 +334,7 @@ const ActionableButton: React.FC<{
                  options.push({ label: 'Pray', onClick: () => { handleActivityClick(activity); setContextMenu(null); } });
             }
 
-            if (activity.pickpocket) {
+            if (activity.type === 'npc' && activity.pickpocket) {
                 options.push({
                     label: 'Pickpocket',
                     onClick: () => {
@@ -339,7 +345,7 @@ const ActionableButton: React.FC<{
                 });
             }
 
-            if (activity.attackableMonsterId) {
+            if (activity.type === 'npc' && activity.attackableMonsterId) {
                 const uniqueInstanceId = `${poi.id}:${activity.attackableMonsterId}:${originalIndex}`;
                 const respawnTimestamp = monsterRespawnTimers[uniqueInstanceId];
                 const isRespawning = respawnTimestamp && respawnTimestamp > Date.now();
@@ -354,12 +360,21 @@ const ActionableButton: React.FC<{
                 });
             }
 
-            if (activity.actions) {
-                activity.actions.forEach(action => {
+            if (activity.type === 'slayer_master') {
+                options.push({ label: `Reset Task (20 Credits)`, onClick: () => { slayer.resetTask(activity.masterId || 'kaelen'); setContextMenu(null); }, disabled: !slayer.slayerTask });
+                options.push({ label: 'Rewards Shop', onClick: () => { slayer.openSlayerShop(); setContextMenu(null); } });
+            }
+
+            if (actActions) {
+                actActions.forEach(action => {
                     let onClick = () => {};
-                    if (action.action === 'open_bank') onClick = () => ui.setActivePanel('bank');
-                    else if (action.action === 'deposit_backpack') onClick = onDepositBackpack;
-                    else if (action.action === 'deposit_equipment') onClick = onDepositEquipment;
+                    if ('action' in action) {
+                        if (action.action === 'open_bank') onClick = () => ui.setActivePanel('bank');
+                        else if (action.action === 'deposit_backpack') onClick = onDepositBackpack;
+                        else if (action.action === 'deposit_equipment') onClick = onDepositEquipment;
+                    } else if ('type' in action && action.type === 'shop') {
+                        onClick = () => ui.setActiveShopId(action.shopId);
+                    }
                     options.push({ label: action.label, onClick: () => { onClick(); setContextMenu(null); } });
                 });
             }
@@ -375,15 +390,7 @@ const ActionableButton: React.FC<{
                 { label: 'Cook', onClick: () => { handleActualClick(); setContextMenu(null); } },
                 { label: 'Rendering', onClick: () => { ui.openCraftingView({ type: 'rendering' }); setContextMenu(null); } }
             ];
-        } else if (activity.type === 'slayer_master') {
-            options = [
-                { label: 'Talk', onClick: () => { handleActivityClick(activity); setContextMenu(null); } },
-                { label: `Reset Task (20 Credits)`, onClick: () => { slayer.resetTask(activity.masterId || 'kaelen'); setContextMenu(null); }, disabled: !slayer.slayerTask },
-                { label: 'Rewards Shop', onClick: () => { slayer.openSlayerShop(); setContextMenu(null); } }
-            ];
-        }
-
-        if (options.length > 0) {
+        }  if (options.length > 0) {
             setContextMenu({ options, triggerEvent: eventForMenu, isTouchInteraction: isTouchDevice, title: text });
         }
     };
@@ -590,7 +597,7 @@ const WindmillButton: React.FC<{
 
 const SceneView: React.FC<SceneViewProps> = (props) => {
     const { poi, unlockedPois, onNavigate, onForcedNavigate, onActivity, onStartCombat, playerQuests, inventory, setContextMenu, setMakeXPrompt, setTooltip, addLog, startQuest, hasItems, resourceNodeStates, activeSkillingNodeId, onToggleSkilling, onPickupGroundItem, initializeNodeState, skillingTick, getSuccessChance, activeRepeatableQuest, activeCleanup, onStartInteractQuest, onCancelInteractQuest, clearedSkillObstacles, onClearObstacle, skills, monsterRespawnTimers, setActiveDialogue, handleDialogueCheck, onResponse, onDepositBackpack, onDepositEquipment, ui, isTouchSimulationEnabled, worldActions, bonfires, onStokeBonfire, isOneClickMode, onPickpocket, onLockpick, onPilfer, thievingContainerStates, onStealFromStall, worldState, groundItemsForCurrentPoi, handleCutCactus, equipment, addXp, setCurrentHp, agility, slayer } = props;
-    const { depletedNodesAnimating } = useSkillingAnimations(resourceNodeStates, poi.activities);
+    const { depletedNodesAnimating } = useSkillingAnimations(resourceNodeStates, poi.activities ?? []);
     const [countdown, setCountdown] = useState<Record<string, number>>({});
     const [shakingNodeId, setShakingNodeId] = useState<string | null>(null);
     const isTouchDevice = useIsTouchDevice(isTouchSimulationEnabled);
@@ -612,7 +619,7 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
     }, [skillingTick, activeSkillingNodeId]);
     
     useEffect(() => {
-        poi.activities.forEach(activity => {
+        (poi.activities ?? []).forEach(activity => {
             if (activity.type === 'skilling' || activity.type === 'ground_item') {
                 initializeNodeState(activity.id, activity);
             }
@@ -623,7 +630,7 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
         const interval = setInterval(() => {
             const now = Date.now();
             const newCountdown: Record<string, number> = {};
-            poi.activities.forEach((activity, index) => {
+            (poi.activities ?? []).forEach((activity, index) => {
                 if (activity.type === 'combat') {
                     const uniqueInstanceId = `${poi.id}:${activity.monsterId}:${index}`;
                     const respawnTime = monsterRespawnTimers[uniqueInstanceId];
@@ -692,13 +699,21 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
     
             const obstacleId = `${poi.id}-${connId}`;
             const requirement = poi.connectionRequirements?.[connId];
-            if (requirement && !clearedSkillObstacles.includes(obstacleId)) {
-                grid[gridIndex].push({
-                    type: 'obstacle',
-                    fromPoiId: poi.id,
-                    toPoiId: connId,
-                    requirement,
-                });
+            if (requirement) {
+                const isPermanentlyCleared = clearedSkillObstacles.includes(obstacleId);
+                const tempExpiry = worldState.temporaryObstacles?.[obstacleId];
+                const isTemporarilyCleared = tempExpiry && tempExpiry > Date.now();
+
+                if (!isPermanentlyCleared && !isTemporarilyCleared) {
+                    grid[gridIndex].push({
+                        type: 'obstacle',
+                        fromPoiId: poi.id,
+                        toPoiId: connId,
+                        requirement,
+                    });
+                } else {
+                    grid[gridIndex].push(destinationPoi);
+                }
             } else {
                 grid[gridIndex].push(destinationPoi);
             }
@@ -708,7 +723,7 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
     }, [poi, clearedSkillObstacles]);
 
     const visibleActivities = useMemo(() => {
-        return poi.activities.filter((activity) => {
+        return (poi.activities ?? []).filter((activity) => {
             // 1. quest_start check
             if (activity.type === 'quest_start' && playerQuests.some(q => q.questId === activity.questId)) return false;
 
@@ -1270,7 +1285,7 @@ const SceneView: React.FC<SceneViewProps> = (props) => {
                          <div data-tutorial-id="activity-buttons" className="overflow-y-auto pr-1 animate-fade-in">
                             <div className="grid grid-cols-3 gap-x-2 gap-y-1">
                                 {visibleActivities.map((activity, visibleIndex) => (
-                                    getActivityButton(activity, visibleIndex, poi.activities.indexOf(activity))
+                                    getActivityButton(activity, visibleIndex, (poi.activities ?? []).indexOf(activity))
                                 ))}
                                 {bonfires.length > 0 && bonfires.map((bonfire, bonfireIdx) => (
                                     <BonfireButton

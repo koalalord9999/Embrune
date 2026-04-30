@@ -6,7 +6,7 @@ import { DialogueState } from '../../../hooks/useUIState';
 interface DialogueOverlayProps {
     dialogue: DialogueState;
     setActivePanel: (panel: ActivePanel) => void;
-    onResponse: (response: DialogueResponse) => void;
+    onResponse: (response: DialogueResponse) => { success: boolean, error?: string };
     handleDialogueCheck: (requirements: DialogueCheckRequirement[]) => boolean;
     onNavigate: (nextNodeKey: string) => void;
 }
@@ -16,6 +16,7 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
 
     const [textPage, setTextPage] = useState(0);
     const [optionPage, setOptionPage] = useState(0);
+    const [tooltip, setTooltip] = useState<{ message: string, x: number, y: number, visible: boolean } | null>(null);
 
     const currentNode = nodes[currentNodeKey];
 
@@ -83,7 +84,25 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
     useEffect(() => {
         setTextPage(0);
         setOptionPage(0);
+        setTooltip(null);
     }, [currentNodeKey]);
+
+    useEffect(() => {
+        if (tooltip && tooltip.visible) {
+            const hideTimer = setTimeout(() => {
+                setTooltip(prev => prev ? { ...prev, visible: false } : null);
+            }, 1200);
+            
+            const removeTimer = setTimeout(() => {
+                setTooltip(null);
+            }, 1500);
+            
+            return () => {
+                clearTimeout(hideTimer);
+                clearTimeout(removeTimer);
+            };
+        }
+    }, [tooltip]);
 
     const handleNextPage = useCallback(() => {
         if (textPage < paginatedText.length - 1) {
@@ -93,8 +112,21 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
         }
     }, [textPage, paginatedText, onEnd]);
 
-    const handleResponseClick = useCallback((response: DialogueResponse) => {
-        onResponse(response);
+    const handleResponseClick = useCallback((e: React.MouseEvent | React.KeyboardEvent, response: DialogueResponse) => {
+        const result = onResponse(response);
+        if (result && !result.success && result.error) {
+            let x = 0;
+            let y = 0;
+            if ('clientX' in e) {
+                x = (e as React.MouseEvent).clientX;
+                y = (e as React.MouseEvent).clientY;
+            } else {
+                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                x = rect.left + rect.width / 2;
+                y = rect.top;
+            }
+            setTooltip({ message: result.error, x, y, visible: true });
+        }
     }, [onResponse]);
 
     useEffect(() => {
@@ -121,7 +153,7 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
                     if (keyNum === 4 && hasMore) {
                         setOptionPage(p => (p + 1) % Math.ceil(visibleResponses.length / (optionsPerPage - 1)));
                     } else if (keyNum <= displayedOptions.length) {
-                        handleResponseClick(displayedOptions[keyNum - 1]);
+                        handleResponseClick(e as any, displayedOptions[keyNum - 1]);
                     }
                 }
             }
@@ -193,7 +225,7 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
                     {isLastTextPage && hasResponses ? (
                         <div className="w-full space-y-2">
                             {displayedResponses.map((res, i) => (
-                                <Button key={i} size="sm" className="w-full text-left justify-start font-pixel-rpg text-xl py-1 leading-none" onClick={() => handleResponseClick(res)}>
+                                <Button key={i} size="sm" className="w-full text-left justify-start font-pixel-rpg text-xl py-1 leading-none" onClick={(e) => handleResponseClick(e, res)}>
                                     <span className="text-yellow-400 mr-2">{i + 1}.</span>{res.text}
                                 </Button>
                             ))}
@@ -210,6 +242,20 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
                     )}
                 </div>
             </div>
+
+            {tooltip && (
+                <div 
+                    className={`fixed z-[9999] pointer-events-none bg-red-900/95 text-white border border-red-500 rounded px-3 py-1.5 font-pixel-rpg text-lg shadow-xl transition-all duration-300 ease-out whitespace-nowrap ${tooltip.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
+                    style={{ 
+                        left: tooltip.x, 
+                        top: tooltip.y - 40,
+                        transform: 'translateX(-50%)'
+                    }}
+                >
+                    <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-red-500" />
+                    {tooltip.message}
+                </div>
+            )}
         </>
     );
 };

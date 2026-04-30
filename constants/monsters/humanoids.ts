@@ -1,4 +1,4 @@
-import { Monster, MonsterType, SkillName, SpellElement } from '@/types';
+import { Monster, MonsterType, SkillName, SpellElement, MonsterId } from '@/types';
 
 export const humanoids: Monster[] = [
     {
@@ -177,9 +177,9 @@ export const humanoids: Monster[] = [
             { itemId: 'coins', chance: "1/2", minQuantity: 1, maxQuantity: 10 },
             { tableId: 'herb_table', chance: "1/20" },
             { itemId: 'seeds', chance: "1/10", minQuantity: 1, maxQuantity: 5 },
-            { itemId: 'stone_rune', chance: "2/128", minQuantity: 4, maxQuantity: 4 },
-            { itemId: 'ember_rune', chance: "2/128", minQuantity: 6, maxQuantity: 6 },
-            { itemId: 'binding_rune', chance: "2/128", minQuantity: 9, maxQuantity: 9 },
+            { itemId: 'stone_rune', chance: "1/64", minQuantity: 4, maxQuantity: 4 },
+            { itemId: 'ember_rune', chance: "1/64", minQuantity: 6, maxQuantity: 6 },
+            { itemId: 'binding_rune', chance: "1/64", minQuantity: 9, maxQuantity: 9 },
             { itemId: 'flux_rune', chance: "1/128", minQuantity: 2, maxQuantity: 2 },
 
         ],

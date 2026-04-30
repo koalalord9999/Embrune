@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useState, useCallback } from 'react';
-import { InventorySlot, Equipment, CombatStance, WeaponType, PlayerSkill, Item, BankTab, EquipmentStats, PlayerQuestState } from '../types';
+import { InventorySlot, Equipment, CombatStance, WeaponType, PlayerSkill, Item, BankTab, EquipmentStats, PlayerQuestState, ItemId, MonsterId } from '../types';
 import {  ITEMS, INVENTORY_CAPACITY, BANK_CAPACITY, AMMO_TIER_LEVELS  } from '../constants';
 
 // Helper to ensure inventory is always a fixed-size sparse array
@@ -16,7 +16,7 @@ const padInventory = (inv: (InventorySlot | null)[]): (InventorySlot | null)[] =
 };
 
 const addToBank = (
-    itemId: string,
+    itemId: ItemId,
     quantity: number,
     setBank: React.Dispatch<React.SetStateAction<BankTab[]>>,
     addLog: (message: string) => void,
@@ -102,7 +102,7 @@ export const useInventory = (
     const { isAutoBankOn = false, setBank, onItemDropped = () => {}, setCombatStance = () => {}, playerQuests, startQuest, closeDialogue = () => {} } = options ?? {};
 
     const modifyItem = useCallback((
-        itemId: string, 
+        itemId: ItemId, 
         quantity: number, 
         quiet: boolean = false, 
         slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean },
@@ -244,7 +244,7 @@ export const useInventory = (
         }
     }, [addLog, isAutoBankOn, setBank, playerQuests, startQuest]);
 
-    const hasItems = useCallback((requirements: { itemId: string, quantity: number, operator?: 'gte' | 'lt' | 'eq', nameOverride?: string }[]): boolean => {
+    const hasItems = useCallback((requirements: { itemId: ItemId, quantity: number, operator?: 'gte' | 'lt' | 'eq', nameOverride?: string }[]): boolean => {
       return requirements.every(req => {
         const totalQuantity = inventory.reduce((acc, slot) => (slot && slot.itemId === req.itemId && !slot.noted) ? acc + slot.quantity : acc, 0);
         
@@ -266,6 +266,42 @@ export const useInventory = (
                 return totalQuantity >= req.quantity;
         }
       });
+    }, [inventory]);
+
+    const canHoldItems = useCallback((itemsToGive: { itemId: ItemId, quantity: number, noted?: boolean, nameOverride?: string }[]): boolean => {
+        let tempInv = [...inventory];
+        
+        for (const item of itemsToGive) {
+            const itemData = ITEMS[item.itemId];
+            if (!itemData) continue;
+
+            const isNoted = !!item.noted;
+            const nameOverride = item.nameOverride;
+            
+            if (isNoted || itemData.stackable) {
+                const stackIndex = tempInv.findIndex(i => 
+                    i?.itemId === item.itemId && 
+                    !!i.noted === isNoted &&
+                    i.nameOverride === nameOverride
+                );
+                
+                if (stackIndex === -1) {
+                    const emptySlotIndex = tempInv.findIndex(slot => slot === null);
+                    if (emptySlotIndex === -1) return false;
+                    tempInv[emptySlotIndex] = { itemId: item.itemId, quantity: item.quantity, noted: isNoted || undefined, nameOverride };
+                } else {
+                    const existing = tempInv[stackIndex]!;
+                    tempInv[stackIndex] = { ...existing, quantity: existing.quantity + item.quantity };
+                }
+            } else {
+                for (let i = 0; i < item.quantity; i++) {
+                    const emptySlotIndex = tempInv.findIndex(slot => slot === null);
+                    if (emptySlotIndex === -1) return false;
+                    tempInv[emptySlotIndex] = { itemId: item.itemId, quantity: 1, noted: false, nameOverride };
+                }
+            }
+        }
+        return true;
     }, [inventory]);
 
     const handleEquip = useCallback((itemToEquip: InventorySlot, inventoryIndex: number, skills: PlayerSkill[], combatStance: CombatStance) => {
@@ -525,7 +561,7 @@ export const useInventory = (
         addLog(`You drop ${qtyToDrop > 1 ? `${qtyToDrop}x ` : ''}${itemData.name}.`);
     }, [inventory, modifyItem, onItemDropped, addLog, closeDialogue]);
     
-    const handleSell = useCallback((itemId: string, quantity: number | 'all', inventoryIndex?: number) => {
+    const handleSell = useCallback((itemId: ItemId, quantity: number | 'all', inventoryIndex?: number) => {
         const itemData = ITEMS[itemId];
         if (!itemData) return;
 
@@ -622,6 +658,6 @@ export const useInventory = (
 
     return {
         inventory, setInventory, coins, setCoins, equipment, setEquipment,
-        modifyItem, hasItems, handleEquip, handleUnequip, handleDropItem, handleSell, handleConsumeAmmo, moveItem
+        modifyItem, hasItems, canHoldItems, handleEquip, handleUnequip, handleDropItem, handleSell, handleConsumeAmmo, moveItem
     };
 };

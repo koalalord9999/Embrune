@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ActiveStatModifier, ActiveBuff, SkillName, Item, Prayer } from '../../types';
-import {  SKILL_ICONS, getSkillColorClass, ITEMS, getIconClassName, PRAYERS, getPrayerIconColor, getPrayerShadowColor, getIconUrl  } from '../../constants';
+import { SKILL_ICONS, getSkillColorClass, ITEMS, getIconClassName, PRAYERS, getPrayerIconColor, getPrayerShadowColor, getIconUrl } from '../../constants';
 import { TooltipState } from '../../hooks/useUIState';
 
 interface BuffBarProps {
@@ -143,8 +143,8 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs, activePra
         statModifiers.forEach(mod => {
             buffs.push({
                 id: mod.id,
-                name: `${mod.skill} Boost`,
-                description: `Increases your ${mod.skill} level.`,
+                name: `${mod.skill} ${mod.currentValue > 0 ? 'Boost' : 'Drain'}`,
+                description: `${mod.currentValue > 0 ? 'Increases' : 'Decreases'} your ${mod.skill} level.`,
                 iconUrl: SKILL_ICONS[mod.skill],
                 value: `${mod.currentValue > 0 ? '+' : ''}${mod.currentValue}`,
                 valueColor: mod.currentValue > 0 ? 'text-green-400' : 'text-red-400',
@@ -167,8 +167,8 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs, activePra
                     if (buff.statBoost) {
                         buffs.push({
                             id: buff.id,
-                            name: buff.name || `${buff.statBoost.skill} Boost`,
-                            description: buff.description || `Increases your ${buff.statBoost.skill} level.`,
+                            name: buff.name || `${buff.statBoost.skill} ${buff.statBoost.value > 0 ? 'Boost' : 'Drain'}`,
+                            description: buff.description || `${buff.statBoost.value > 0 ? 'Increases' : 'Decreases'} your ${buff.statBoost.skill} level.`,
                             iconUrl: SKILL_ICONS[buff.statBoost.skill],
                             value: `${buff.statBoost.value > 0 ? '+' : ''}${buff.statBoost.value}`,
                             valueColor: buff.statBoost.value > 0 ? 'text-green-400' : 'text-red-400',

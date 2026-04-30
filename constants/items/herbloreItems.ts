@@ -1,21 +1,25 @@
-import { Item, SkillName } from '../../types';
+import { Item, SkillName, ItemId } from '../../types';
 import { HERBS, HERBLORE_RECIPES } from '../herblore';
 
 const getPotionMaterial = (potionId: string): Item['material'] => {
-    // Weak potions
-    if (potionId.startsWith('weak_')) {
-        return `potion-${potionId.replace('_potion', '')}` as Item['material'];
-    }
-    // Super potions
-    if (potionId.startsWith('super_')) {
-        const base = potionId.replace('super_', '');
-        return `potion-super-${base.replace('_potion', '')}` as Item['material'];
-    }
     // Handle specific complex names first
     if (potionId.startsWith('weapon_poison')) return 'potion-poison';
     if (potionId.includes('antifire')) return 'potion-antifire';
     if (potionId.includes('stamina')) return 'potion-stamina';
     if (potionId.includes('combo')) return 'potion-combo';
+    if (potionId.includes('overload')) return 'potion-overload';
+    if (potionId.includes('battlemasters')) return 'potion-battlemasters';
+
+    // Weak potions
+    if (potionId.startsWith('weak_')) {
+        const base = potionId.replace('weak_', '').replace('_potion', '');
+        return `potion-weak-${base}` as Item['material'];
+    }
+    // Super potions
+    if (potionId.startsWith('super_')) {
+        const base = potionId.replace('super_', '').replace('_potion', '');
+        return `potion-super-${base}` as Item['material'];
+    }
 
     // Generic pattern for simple potions
     const match = potionId.match(/(\w+)_potion/);
@@ -23,8 +27,13 @@ const getPotionMaterial = (potionId: string): Item['material'] => {
         return `potion-${match[1]}` as Item['material'];
     }
 
-    return 'potion'; // Default red
+    if (potionId === 'prayer_potion') return 'potion-prayer';
+    if (potionId === 'stat_restore_potion') return 'potion-restore';
+    if (potionId === 'antipoison_potion') return 'potion-antipoison';
+
+    return 'potion'; // Default
 };
+
 
 // This helper function creates consumable properties for potions
 const getPotionEffect = (potionId: string): Item['consumable'] | undefined => {
@@ -98,7 +107,7 @@ const getPotionEffect = (potionId: string): Item['consumable'] | undefined => {
         case 'prayer_potion':
             return { potionEffect: { description: 'Restores some Prayer points.' } };
         case 'stat_restore_potion':
-            return { potionEffect: { description: 'Restores lowered combat stats.' } };
+            return { restoresStats: { percent: 0.10, base: 4 }, potionEffect: { description: 'Restores lowered combat stats.' } };
         case 'antipoison_potion':
             return { buffs: [{ type: 'poison_immunity', value: 1, duration: 180000 }], curesPoison: true };
         case 'super_antipoison':
@@ -141,7 +150,7 @@ const getPotionEffect = (potionId: string): Item['consumable'] | undefined => {
 const grimyHerbs: Item[] = HERBS.map(herb => {
     const herbName = herb.clean.replace('clean_', '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     return {
-        id: herb.grimy,
+        id: herb.grimy as ItemId,
         itemNum: (herb as any).grimyNum,
         name: `Grimy ${herbName}`,
         description: 'An unidentified herb covered in grime. Needs cleaning.',
@@ -150,7 +159,7 @@ const grimyHerbs: Item[] = HERBS.map(herb => {
         iconUrl: 'herbs-bundle',
         material: 'grimy-herb',
         cleanable: {
-            cleanItemId: herb.clean,
+            cleanItemId: herb.clean as ItemId,
             xp: herb.xp
         }
     };
@@ -159,7 +168,7 @@ const grimyHerbs: Item[] = HERBS.map(herb => {
 const cleanHerbs: Item[] = HERBS.map(herb => {
     const name = herb.clean.replace('clean_', '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     return {
-        id: herb.clean,
+        id: herb.clean as ItemId,
         itemNum: (herb as any).cleanNum,
         name: name,
         description: `A clean ${name.toLowerCase()}. Used in Herblore.`,
@@ -174,7 +183,7 @@ const unfinishedPotions: Item[] = HERBLORE_RECIPES.unfinished.map(recipe => {
     const cleanHerb = cleanHerbs.find(h => h.id === recipe.cleanHerbId);
     const herbName = cleanHerb ? cleanHerb.name : 'Herb';
     return {
-        id: recipe.unfinishedPotionId,
+        id: recipe.unfinishedPotionId as ItemId,
         itemNum: (recipe as any).unfinishedNum,
         name: `${herbName} potion (unf)`,
         description: `A vial of water with a ${herbName.toLowerCase()} added.`,
@@ -182,28 +191,29 @@ const unfinishedPotions: Item[] = HERBLORE_RECIPES.unfinished.map(recipe => {
         value: (cleanHerb?.value ?? 5) + 2,
         iconUrl: 'round-potion',
         material: 'unfinished-potion',
-        emptyable: { emptyItemId: 'vial' },
+        emptyable: { emptyItemId: 'vial' as ItemId },
     }
 });
 
-const finishedPotions: Item[] = HERBLORE_RECIPES.finished
+const expandedFinishedPotions: Item[] = [];
+HERBLORE_RECIPES.finished
     .filter(r => r.finishedPotionId !== 'anointing_oil')
-    .map(recipe => {
+    .forEach(recipe => {
         const name = recipe.finishedPotionId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         const effect = getPotionEffect(recipe.finishedPotionId);
         let description = `A magical potion.`;
         if (effect?.potionEffect?.description) description = effect.potionEffect.description;
         else if (effect?.statModifiers) description = `Temporarily boosts ${effect.statModifiers[0].skill}.`;
         else if (effect?.buffs) description = `Grants a temporary buff.`;
-        else if (recipe.finishedPotionId.includes('poison')) description = `A vial of deadly poison.`
-        else if (recipe.finishedPotionId.includes('antipoison')) description = `Cures and prevents poison.`
+        else if (recipe.finishedPotionId.includes('poison')) description = `A vial of deadly poison.`;
+        else if (recipe.finishedPotionId.includes('antipoison')) description = `Cures and prevents poison.`;
 
         const isWeaponPoison = recipe.finishedPotionId.startsWith('weapon_poison');
 
         // Special handling for Pouch Cleanser
         if (recipe.finishedPotionId === 'pouch_cleanser') {
-            return {
-                id: recipe.finishedPotionId,
+            expandedFinishedPotions.push({
+                id: recipe.finishedPotionId as any,
                 itemNum: (recipe as any).finishedNum,
                 name: name,
                 stackable: false,
@@ -212,32 +222,67 @@ const finishedPotions: Item[] = HERBLORE_RECIPES.finished
                 iconUrl: 'potion-ball',
                 material: getPotionMaterial(recipe.finishedPotionId),
                 charges: 25,
-            };
+            });
+            return;
         }
 
-        return {
-            id: recipe.finishedPotionId,
-            itemNum: (recipe as any).finishedNum,
-            name: name,
-            description: description,
-            stackable: false,
-            value: recipe.level * 8,
-            iconUrl: 'potion-ball',
-            material: getPotionMaterial(recipe.finishedPotionId),
-            consumable: effect,
-            doseable: !isWeaponPoison,
-            maxDoses: isWeaponPoison ? 1 : 4,
-            initialDoses: isWeaponPoison ? 1 : 3,
-            emptyable: { emptyItemId: 'vial' },
+        if (isWeaponPoison) {
+            expandedFinishedPotions.push({
+                id: recipe.finishedPotionId as any,
+                itemNum: (recipe as any).finishedNum,
+                name: name,
+                description: description,
+                stackable: false,
+                value: recipe.level * 8,
+                iconUrl: 'potion-ball',
+                material: getPotionMaterial(recipe.finishedPotionId),
+                consumable: effect,
+                doseable: false,
+                maxDoses: 1,
+                initialDoses: 1,
+                emptyable: { emptyItemId: 'vial' },
+            });
+        } else {
+            // Generate (1), (2), (3), (4) dose versions
+            for (let d = 1; d <= 4; d++) {
+                expandedFinishedPotions.push({
+                    id: `${recipe.finishedPotionId}_${d}` as any,
+                    itemNum: ((recipe as any).finishedNum * 10) + d,
+                    name: name,
+                    description: description,
+                    stackable: false,
+                    value: Math.floor(recipe.level * 2 * d),
+                    iconUrl: 'potion-ball',
+                    material: getPotionMaterial(recipe.finishedPotionId),
+                    consumable: effect,
+                    doseable: true,
+                    maxDoses: 4,
+                    initialDoses: d,
+                    emptyable: { emptyItemId: 'vial' },
+                });
+            }
+            // Also keep the base one as an alias for (3) doses (standard crafted amount)
+            expandedFinishedPotions.push({
+                id: recipe.finishedPotionId as any,
+                itemNum: (recipe as any).finishedNum,
+                name: name,
+                description: description,
+                stackable: false,
+                value: Math.floor(recipe.level * 2 * 3),
+                iconUrl: 'potion-ball',
+                material: getPotionMaterial(recipe.finishedPotionId),
+                consumable: effect,
+                doseable: true,
+                maxDoses: 4,
+                initialDoses: 3,
+                emptyable: { emptyItemId: 'vial' as ItemId },
+            });
         }
     });
-
-
-
 
 export const herbloreItems: Item[] = [
     ...grimyHerbs,
     ...cleanHerbs,
     ...unfinishedPotions,
-    ...finishedPotions
-];
+    ...expandedFinishedPotions
+];

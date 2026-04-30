@@ -1,16 +1,16 @@
-import { Item } from './entities';
+import { Item, ItemId } from './index';
 import { SkillName } from './enums';
 
 export interface Shop {
     id: string;
     name: string;
-    inventory: { itemId: string; quantity: number; priceModifier: number; doses?: number; }[]; // modifier for buying/selling
+    inventory: { itemId: ItemId; quantity: number; priceModifier: number; doses?: number; }[]; // modifier for buying/selling
     currency?: 'coins' | 'agility_voucher' | 'slayer_credits';
     sellingDisabled?: boolean;
 }
 
 export interface ShopItemState {
-    itemId: string;
+    itemId: ItemId;
     currentStock: number;
     restockProgress: number; // in milliseconds
 }
@@ -18,40 +18,44 @@ export interface ShopItemState {
 export type ShopStates = Record<string, Record<string, ShopItemState>>; // { [shopId]: { [itemId]: ShopItemState } }
 
 export interface CookingRecipe {
-    itemId: string; // The item you get from cooking
+    itemId: ItemId; // The item you get from cooking
     level: number;
     xp: number;
-    ingredients: { itemId: string; quantity: number }[];
-    burntItemId: string;
+    ingredients: { itemId: ItemId; quantity: number }[];
+    burntItemId: ItemId;
     alwaysSucceeds?: boolean;
 }
 
 export interface CraftingRecipe {
-    itemId: string;
+    itemId: ItemId;
     level?: number;
     xp?: number;
     requiredSkills?: { skill: SkillName; level: number }[];
     xpRewards?: { skill: SkillName; amount: number }[];
-    ingredients: { itemId: string; quantity: number }[];
+    ingredients: { itemId: ItemId; quantity: number }[];
 }
 
 export interface JewelryRecipe {
-    itemId: string;
+    itemId: ItemId;
     level: number;
     xp: number;
     barType: 'silver_bar' | 'gold_bar';
     barsRequired: number;
-    mouldId: string;
-    gemId?: string;
+    mouldId: ItemId;
+    gemId?: ItemId;
 }
 
 export interface SkillGuideEntry {
     level: number;
     description: string;
     subDescription?: string;
-    itemId?: string;
+    titleSuffix?: string;
+    itemId?: ItemId;
     /** If true, subDescription is only shown when the player meets the level requirement */
     revealSubAtLevel?: boolean;
+    /** If true, titleSuffix is only shown when the player meets the level requirement */
+    revealTitleSuffixAtLevel?: boolean;
+
 }
 
 export interface SkillGuideTab {

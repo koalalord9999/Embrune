@@ -1,6 +1,6 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { PlayerSkill, SkillName, InventorySlot, ActiveCraftingAction, Equipment, WorldState, BankTab } from '../types';
+import { PlayerSkill, SkillName, InventorySlot, ActiveCraftingAction, Equipment, WorldState, BankTab, ItemId } from '../types';
 import { ITEMS, SMITHING_RECIPES, COOKING_RECIPES, INVENTORY_CAPACITY, CRAFTING_RECIPES, FLETCHING_RECIPES, GEM_CUTTING_RECIPES, SPINNING_RECIPES, HERBLORE_RECIPES, JEWELRY_CRAFTING_RECIPES, DOUGH_RECIPES, RUNECRAFTING_RECIPES, FIREMAKING_RECIPES, SPECIAL_SMITHING_RECIPES, RENDERING_RECIPES, GLASSBLOWING_RECIPES, MISC_FURNACE_RECIPES } from '../constants';
 import { POIS } from '../data/pois';
 import { useSoundEngine } from './useSoundEngine';
@@ -9,16 +9,16 @@ import { SoundID } from '../constants/audioManifest';
 
 interface UseCraftingProps {
     skills: (PlayerSkill & { currentLevel: number; })[];
-    hasItems: (items: { itemId: string, quantity: number }[]) => boolean;
+    hasItems: (items: { itemId: ItemId, quantity: number }[]) => boolean;
     addLog: (message: string) => void;
     activeCraftingAction: ActiveCraftingAction | null;
     setActiveCraftingAction: (action: ActiveCraftingAction | null) => void;
     inventory: (InventorySlot | null)[];
-    modifyItem: (itemId: string, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void;
+    modifyItem: (itemId: ItemId, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void;
     addXp: (skill: SkillName, amount: number) => void;
-    checkQuestProgressOnSpin: (itemId: string, quantity: number) => void;
-    checkQuestProgressOnSmith: (itemId: string, quantity: number) => void;
-    checkQuestProgressOnOffer: (itemId: string, quantity: number) => void;
+    checkQuestProgressOnSpin: (itemId: ItemId, quantity: number) => void;
+    checkQuestProgressOnSmith: (itemId: ItemId, quantity: number) => void;
+    checkQuestProgressOnOffer: (itemId: ItemId, quantity: number) => void;
     advanceTutorial: (condition: string) => void;
     closeCraftingView: () => void;
     setWindmillFlour: React.Dispatch<React.SetStateAction<number>>;
@@ -44,7 +44,7 @@ export const useCrafting = (props: UseCraftingProps) => {
     const ui = useUIState();
 
     const addToBank = (
-        itemId: string,
+        itemId: ItemId,
         quantity: number,
         quiet: boolean = false
     ) => {
@@ -55,7 +55,7 @@ export const useCrafting = (props: UseCraftingProps) => {
         setBank(prevBank => {
             const newBank = JSON.parse(JSON.stringify(prevBank)) as BankTab[];
             let targetTab = newBank.find(tab => tab.items.some((i: InventorySlot | null) => i?.itemId === itemId)) || newBank.find(t => t.id === 0);
-            
+
             if (!targetTab) {
                 targetTab = { id: 0, name: 'Main', icon: null, items: [] };
                 newBank.push(targetTab);
@@ -75,13 +75,13 @@ export const useCrafting = (props: UseCraftingProps) => {
 
     const completeCraftingItem = useCallback((action: ActiveCraftingAction): { success: boolean; wasItemMade: boolean; logMessage?: string } => {
         let recipe: any;
-        let ingredients: { itemId: string, quantity: number }[] = [];
-        let product: { itemId: string, quantity: number } = { itemId: action.recipeId, quantity: 1 };
+        let ingredients: { itemId: ItemId, quantity: number }[] = [];
+        let product: { itemId: ItemId, quantity: number } = { itemId: action.recipeId as ItemId, quantity: 1 };
         let xp = { skill: SkillName.Crafting, amount: 0 };
         let levelReq = { skill: SkillName.Crafting, level: 1 };
         const ring = equipment.ring;
 
-        const getItemCount = (itemId: string): number => {
+        const getItemCount = (itemId: ItemId): number => {
             return inventory.reduce((total, slot) => {
                 return slot && slot.itemId === itemId && !slot.noted ? total + slot.quantity : total;
             }, 0);
@@ -97,10 +97,10 @@ export const useCrafting = (props: UseCraftingProps) => {
             const hasForgeRing = ring?.itemId === 'ring_of_the_forge' && (ring.charges ?? 0) > 0;
 
             // Consume ore regardless of success
-            modifyItem('iron_ore', -1, true);
+            modifyItem('iron_ore' as ItemId, -1, true);
 
             if (hasForgeRing || Math.random() < 0.5) { // 100% with ring, 50% without
-                modifyItem('iron_bar', 1, true, { bypassAutoBank: true });
+                modifyItem('iron_bar' as ItemId, 1, true, { bypassAutoBank: true });
                 addXp(SkillName.Smithing, 12.5); // Full XP on success
                 checkQuestProgressOnSmith('iron_bar', 1);
 
@@ -156,11 +156,11 @@ export const useCrafting = (props: UseCraftingProps) => {
                 if (kitIndex === -1) {
                     return { success: false, wasItemMade: false, logMessage: "You need an empty rendering kit." };
                 }
-                if (!hasItems([{ itemId: recipe.fatId, quantity: 1 }])) {
+                if (!hasItems([{ itemId: recipe.fatId as ItemId, quantity: 1 }])) {
                     return { success: false, wasItemMade: false, logMessage: "You ran out of fat." };
                 }
 
-                modifyItem(recipe.fatId, -1, true);
+                modifyItem(recipe.fatId as ItemId, -1, true);
                 addXp(SkillName.Cooking, recipe.xp);
 
                 setInventory(prev => {
@@ -192,17 +192,17 @@ export const useCrafting = (props: UseCraftingProps) => {
                 const dustCount = getItemCount('sacred_dust');
                 const dustToUse = Math.min(25, dustCount);
 
-                modifyItem('anointing_oil', -1, true);
-                modifyItem('sacred_dust', -dustToUse, true);
-                modifyItem('holy_paste', dustToUse, false, { bypassAutoBank: true });
+                modifyItem('anointing_oil' as ItemId, -1, true);
+                modifyItem('sacred_dust' as ItemId, -dustToUse, true);
+                modifyItem('holy_paste' as ItemId, dustToUse, false, { bypassAutoBank: true });
 
                 return { success: true, wasItemMade: true };
             }
             case 'offering': {
-                if (!hasItems([{ itemId: 'holy_paste', quantity: 1 }])) {
+                if (!hasItems([{ itemId: 'holy_paste' as ItemId, quantity: 1 }])) {
                     return { success: false, wasItemMade: false, logMessage: "You ran out of holy paste." };
                 }
-                if (!hasItems([{ itemId: 'tinderbox', quantity: 1 }])) {
+                if (!hasItems([{ itemId: 'tinderbox' as ItemId, quantity: 1 }])) {
                     return { success: false, wasItemMade: false, logMessage: "You need a tinderbox to light the offering." };
                 }
 
@@ -217,7 +217,7 @@ export const useCrafting = (props: UseCraftingProps) => {
                     return { success: false, wasItemMade: false, logMessage: "You ran out of holy paste." };
                 }
 
-                modifyItem('holy_paste', -pasteToUse, true);
+                modifyItem('holy_paste' as ItemId, -pasteToUse, true);
                 addXp(SkillName.Prayer, pasteToUse * 3);
                 checkQuestProgressOnOffer('holy_paste', pasteToUse);
 
@@ -239,8 +239,8 @@ export const useCrafting = (props: UseCraftingProps) => {
                 if (!boneItem?.buryable || !ITEMS[consecratedId]) {
                     return { success: false, wasItemMade: false, logMessage: "Cannot consecrate this item." };
                 }
-                modifyItem(action.recipeId, -1, true);
-                modifyItem(consecratedId, 1, false, { bypassAutoBank: true });
+                modifyItem(action.recipeId as ItemId, -1, true);
+                modifyItem(consecratedId as ItemId, 1, false, { bypassAutoBank: true });
                 addXp(SkillName.Prayer, boneItem.buryable.prayerXp / 2);
                 return { success: true, wasItemMade: true };
             }
@@ -257,23 +257,23 @@ export const useCrafting = (props: UseCraftingProps) => {
                     return { success: false, wasItemMade: false, logMessage: "Cannot grind this item." };
                 }
 
-                modifyItem(consecratedBoneId, -1, true);
-                modifyItem('sacred_dust', dustAmount, false, { bypassAutoBank: true });
+                modifyItem(consecratedBoneId as ItemId, -1, true);
+                modifyItem('sacred_dust' as ItemId, dustAmount, false, { bypassAutoBank: true });
                 addXp(SkillName.Prayer, xpAmount);
                 return { success: true, wasItemMade: true };
             }
             case 'flask-mixing': {
                 const flaskId = action.recipeId;
                 const flaskItemData = ITEMS[flaskId];
-                if (!hasItems([{ itemId: 'x_mix', quantity: 1 }, { itemId: flaskId, quantity: 1 }])) {
+                if (!hasItems([{ itemId: 'x_mix' as ItemId, quantity: 1 }, { itemId: flaskId as ItemId, quantity: 1 }])) {
                     return { success: false, wasItemMade: false, logMessage: "You ran out of ingredients." };
                 }
 
-                modifyItem('x_mix', -1, true);
-                modifyItem(flaskId, -1, true);
+                modifyItem('x_mix' as ItemId, -1, true);
+                modifyItem(flaskId as ItemId, -1, true);
 
                 const newName = `${flaskItemData.name} (LX)`;
-                modifyItem(flaskId, 1, false, {
+                modifyItem(flaskId as ItemId, 1, false, {
                     nameOverride: newName,
                     statsOverride: { isXFlask: true },
                     bypassAutoBank: true,
@@ -286,7 +286,7 @@ export const useCrafting = (props: UseCraftingProps) => {
                 if (!hasItems([{ itemId: 'wheat', quantity: 1 }])) {
                     return { success: false, wasItemMade: false, logMessage: "You ran out of wheat." };
                 }
-                modifyItem('wheat', -1, true);
+                modifyItem('wheat' as ItemId, -1, true);
                 setWindmillFlour(f => f + 1);
                 return { success: true, wasItemMade: true };
             }
@@ -300,7 +300,7 @@ export const useCrafting = (props: UseCraftingProps) => {
                 break;
             }
             case 'firemaking-light': {
-                const logId = action.recipeId;
+                const logId = action.recipeId as ItemId;
                 const recipe = FIREMAKING_RECIPES.find(r => r.logId === logId);
                 if (!recipe) return { success: false, wasItemMade: false, logMessage: "Invalid log type." };
                 if (!hasItems([{ itemId: logId, quantity: 1 }])) {
@@ -326,10 +326,10 @@ export const useCrafting = (props: UseCraftingProps) => {
                 }
             }
             case 'firemaking-stoke': {
-                const logId = action.recipeId;
+                const logId = action.recipeId as ItemId;
                 const recipe = FIREMAKING_RECIPES.find(r => r.logId === logId);
                 const necklace = equipment.necklace;
-                const hasPyromancy = necklace?.itemId === 'necklace_of_pyromancy';
+                const hasPyromancy = necklace?.itemId === 'necklace_of_pyromancy' as ItemId;
 
                 if (!recipe) return { success: false, wasItemMade: false, logMessage: "Invalid log type." };
                 if (!hasItems([{ itemId: logId, quantity: 1 }])) {
@@ -341,7 +341,7 @@ export const useCrafting = (props: UseCraftingProps) => {
                 // Pyromancy Necklace Effect: 100% chance for Soda Ash, sent directly to bank, consumes charge.
                 // Standard: 25% chance for an ash, goes to inventory.
                 if (hasPyromancy && (necklace!.charges ?? 0) > 0) {
-                    addToBank('soda_ash', 1, true);
+                    addToBank('soda_ash' as ItemId, 1, true);
                     addLog("Your Necklace of Pyromancy converted the ash into Soda Ash, and sent it to your bank.");
                     const newCharges = (necklace!.charges ?? 1) - 1;
                     if (newCharges > 0) {
@@ -351,7 +351,7 @@ export const useCrafting = (props: UseCraftingProps) => {
                         setEquipment(prev => ({ ...prev, necklace: null }));
                     }
                 } else if (Math.random() < 0.25) { // 25% chance for ashes (standard)
-                    modifyItem('ashes', 1, false, { bypassAutoBank: true });
+                    modifyItem('ashes' as ItemId, 1, false, { bypassAutoBank: true });
                 }
 
                 if (Math.random() < 0.25) { // 25% chance for HP boost
@@ -410,7 +410,7 @@ export const useCrafting = (props: UseCraftingProps) => {
             case 'fletching-carve':
                 recipe = FLETCHING_RECIPES.carving[action.payload!.logId!]?.find(r => r.itemId === action.recipeId);
                 if (recipe) {
-                    ingredients = [{ itemId: action.payload!.logId!, quantity: 1 }];
+                    ingredients = [{ itemId: action.payload!.logId! as ItemId, quantity: 1 }];
                     product.quantity = recipe.quantity ?? 1;
                     xp = { skill: SkillName.Fletching, amount: recipe.xp };
                     levelReq = { skill: SkillName.Fletching, level: recipe.level };
@@ -551,9 +551,9 @@ export const useCrafting = (props: UseCraftingProps) => {
                     addXp(SkillName.Cooking, recipe.xp);
 
                     if (recipe.itemId === 'cake') {
-                        modifyItem('cake_tin', 1, false, { bypassAutoBank: true });
-                    } else if (['berry_pie', 'apple_pie', 'meat_pie', 'fish_pie'].includes(recipe.itemId)) {
-                        modifyItem('pie_dish', 1, false, { bypassAutoBank: true });
+                        modifyItem('cake_tin' as ItemId, 1, false, { bypassAutoBank: true });
+                    } else if (ITEMS[action.recipeId as ItemId]?.material === 'cooked-meat') {
+                        modifyItem('pie_dish' as ItemId, 1, false, { bypassAutoBank: true });
                     }
 
                 } else {
@@ -937,7 +937,7 @@ export const useCrafting = (props: UseCraftingProps) => {
 
         const tiara = Object.values(ITEMS).find(i => i.equipment?.slot === 'Head' && i.equipment.runeType === runeId);
         const hasTiara = tiara && equipment.head?.itemId === tiara.id;
-        const hasTalisman = hasItems([{ itemId: recipe.talismanId, quantity: 1 }]) || equipment.necklace?.itemId === recipe.talismanId;
+        const hasTalisman = hasItems([{ itemId: recipe.talismanId as ItemId, quantity: 1 }]) || equipment.necklace?.itemId === recipe.talismanId;
 
         if (!hasTalisman && !hasTiara) {
             addLog(`You need a ${ITEMS[recipe.talismanId].name} or a corresponding tiara to craft these runes.`);
@@ -950,25 +950,25 @@ export const useCrafting = (props: UseCraftingProps) => {
             return;
         }
 
-        modifyItem('rune_essence', -essenceCount, true);
+        modifyItem('rune_essence' as ItemId, -essenceCount, true);
 
         // Necklace of Binding logic
         const necklace = equipment.necklace;
         const hasBindingNecklace = necklace?.itemId === 'necklace_of_binding' && (necklace.charges ?? 0) > 0;
-        
+
         let baseBonus = Math.floor((rcLevel - recipe.level) / 8);
         if (baseBonus < 0) baseBonus = 0;
         if (baseBonus > 6) baseBonus = 6;
         let multiplier = 1 + baseBonus;
-        
+
         if (hasBindingNecklace) multiplier += 1;
 
         const runesCrafted = essenceCount * multiplier;
         const totalXp = essenceCount * recipe.xp;
 
-        modifyItem(recipe.runeId, runesCrafted, false, { bypassAutoBank: true });
+        modifyItem(recipe.runeId as ItemId, runesCrafted, false, { bypassAutoBank: true });
         addXp(SkillName.Runecrafting, totalXp);
-        
+
         if (hasBindingNecklace) {
             const newCharges = (necklace!.charges ?? 1) - 1;
             if (newCharges > 0) {

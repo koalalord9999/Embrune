@@ -50,7 +50,7 @@ export const capitalsCall: Quest = {
             responses: [],
             conditionalResponses: [
                 {
-                    text: "You mentioned trouble with the bridge?",
+                    text: "I heard there was trouble with the bridge?",
                     check: { requirements: [{ type: 'quest', questId: 'capitals_call', status: 'not_started' }], successNode: 'quest_intro_capitals_call', failureNode: '' }
                 },
                 {
@@ -128,7 +128,27 @@ export const capitalsCall: Quest = {
             npcName: 'Guard Captain Elara',
             npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
             text: "Thanks to your help, the bridge is secure and the road to Silverhaven is open once more. We're all in your debt. Be wary of those Serpent Bandits, though.",
+            conditionalResponses: [
+                { text: "I still have your signet.", check: { requirements: [{ type: 'items', items: [{ itemId: 'elaras_signet', quantity: 1 }] }], successNode: 'return_elaras_signet', failureNode: '' } },
+                { text: "I still have the bandit insignia.", check: { requirements: [{ type: 'items', items: [{ itemId: 'torn_bandit_insignia', quantity: 1 }] }], successNode: 'return_bandit_insignia', failureNode: '' } }
+            ],
             responses: []
+        },
+        return_elaras_signet: {
+            npcName: 'Guard Captain Elara',
+            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            text: "Ah, yes. I had almost forgotten about that. Thank you for returning it; those aren't cheap to forge. Here's a little extra for your honesty.",
+            responses: [
+                { text: "Thank you.", actions: [{ type: 'take_item', itemId: 'elaras_signet', quantity: 1 }, { type: 'give_coins', amount: 500 }] }
+            ]
+        },
+        return_bandit_insignia: {
+            npcName: 'Guard Captain Elara',
+            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            text: "The Serpent Bandits... so they're back. Thank you for bringing this to my attention. This confirms they're operating in this region. We'll need to increase patrols.",
+            responses: [
+                { text: "Thank you.", actions: [{ type: 'take_item', itemId: 'torn_bandit_insignia', quantity: 1 }, { type: 'give_coins', amount: 500 }] }
+            ]
         },
         investigate_debris_start: {
             npcName: 'Investigate Debris',
@@ -145,7 +165,7 @@ export const capitalsCall: Quest = {
             responses: [],
             conditionalResponses: [
                 {
-                    text: "Captain Elara sent me about the bridge.",
+                    text: "Captain Elara sent me about this insignia.",
                     check: { requirements: [{ type: 'quest', questId: 'capitals_call', status: 'in_progress', stage: 2 }], successNode: 'finn_recognizes_insignia', failureNode: '' }
                 },
                 {
@@ -167,6 +187,24 @@ export const capitalsCall: Quest = {
             npcName: 'Finn the Rope-maker',
             npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
             text: "An insignia? Let me see... By my grandfather's beard, it's the mark of the Serpent Bandits! A nasty clan known for economic sabotage. They must be behind the bridge collapse!",
+            responses: [
+                { text: "Who exactly are these Serpent Bandits?", next: 'cc_finn_serpent_lore_1' },
+                { text: "What needs to be done to fix the bridge?", next: 'cc_finn_explain_materials' }
+            ]
+        },
+        cc_finn_serpent_lore_1: {
+            npcName: 'Finn the Rope-maker',
+            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            text: "They're a ruthless syndicate operating out of the eastern marshes. They don't just rob carts; they strangle trade routes, forcing merchants to pay exorbitant tolls to use 'safe' passages they control.",
+            responses: [
+                { text: "So they destroyed the bridge to create a monopoly?", next: 'cc_finn_serpent_lore_2' },
+                { text: "I see. What needs to be done to fix the bridge?", next: 'cc_finn_explain_materials' }
+            ]
+        },
+        cc_finn_serpent_lore_2: {
+            npcName: 'Finn the Rope-maker',
+            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            text: "Exactly. By crippling the King's Road, they force all Silverhaven traffic to use their hidden smuggler routes through the eastern marshes. It's a labyrinth of poison fog and sinkholes—impossible to navigate unless you're one of them, making it a perfect extortion racket.",
             responses: [
                 { text: "What needs to be done to fix the bridge?", next: 'cc_finn_explain_materials' }
             ]
@@ -250,7 +288,7 @@ export const capitalsCall: Quest = {
             npcIcon: '/assets/npcChatHeads/artisan.png',
             text: "Do you take me for a fool? I can tell Yew from Pine just by the smell of it, and you certainly don't have ten Yew logs on you. Don't try to pull a fast one on a master woodworker. Now go get what I need!",
             responses: [
-                 { text: "Right. Of course. I'll be back." },
+                { text: "Right. Of course. I'll be back." },
             ]
         },
         alaric_exit_gale: {

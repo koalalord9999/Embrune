@@ -59,7 +59,7 @@ const DungeonMapView: React.FC<DungeonMapViewProps> = ({ regionId, mapTitle, cur
     }, [regionId]);
 
     const handleMouseEnter = (e: React.MouseEvent, poi: typeof poisInRegion[0]) => {
-        const combatActivities = poi.activities.filter(a => a.type === 'combat') as Extract<POIActivity, { type: 'combat' }>[];
+        const combatActivities = (poi.activities ?? []).filter(a => a.type === 'combat') as Extract<POIActivity, { type: 'combat' }>[];
         
         const tooltipContent = (
             <div className="text-sm">

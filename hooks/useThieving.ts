@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Monster, SkillName, PlayerSkill, InventorySlot, Equipment, Item, POIActivity, ActiveBuff, ThievingContainerState, WorldState } from '../types';
+import { Monster, SkillName, PlayerSkill, InventorySlot, Equipment, Item, POIActivity, ActiveBuff, ThievingContainerState, WorldState, ItemId } from '../types';
 import { ITEMS, rollOnLootTable, LootRollResult, THIEVING_POCKET_TARGETS, THIEVING_CONTAINER_TARGETS, THIEVING_STALL_TARGETS } from '../constants';
 import { useNavigation } from './useNavigation';
 
@@ -12,7 +12,7 @@ interface ThievingDependencies {
     skills: (PlayerSkill & { currentLevel: number })[];
     addXp: (skill: SkillName, amount: number) => void;
     inventory: (InventorySlot | null)[];
-    modifyItem: (itemId: string, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean; }) => void;
+    modifyItem: (itemId: ItemId, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean; }) => void;
     equipment: Equipment;
     addBuff: (buff: Omit<ActiveBuff, 'id' | 'durationRemaining'>) => void;
     setPlayerHp: React.Dispatch<React.SetStateAction<number>>;
@@ -101,7 +101,7 @@ export const useThieving = (
                 const lootResult = rollOnLootTable(target.pickpocket.lootTableId);
                 if (lootResult) {
                     let loot = typeof lootResult === 'string' ? { itemId: lootResult, quantity: 1, noted: false } : lootResult;
-                    modifyItem(loot.itemId, loot.quantity, false, { bypassAutoBank: true, noted: loot.noted });
+                    modifyItem(loot.itemId as ItemId, loot.quantity, false, { bypassAutoBank: true, noted: loot.noted });
                 }
             } else {
                 log(`You have been caught!`);
@@ -192,7 +192,7 @@ export const useThieving = (
                     for (let i = 0; i < numRolls; i++) {
                         const lootResult = rollOnLootTable(activity.lootTableId);
                         if (lootResult) {
-                            let loot = typeof lootResult === 'string' ? { itemId: lootResult, quantity: 1, noted: false } : lootResult;
+                            let loot = typeof lootResult === 'string' ? { itemId: lootResult as ItemId, quantity: 1, noted: false } : lootResult;
                             loots.push(loot);
                         }
                     }
@@ -212,9 +212,9 @@ export const useThieving = (
                             }
 
                             if (canAdd) {
-                                modifyItem(loot.itemId, loot.quantity, false, { bypassAutoBank: true, noted: loot.noted });
+                                modifyItem(loot.itemId as ItemId, loot.quantity, false, { bypassAutoBank: true, noted: loot.noted });
                             } else {
-                                onItemDropped({ itemId: loot.itemId, quantity: loot.quantity, noted: loot.noted }, currentPoiId);
+                                onItemDropped({ itemId: loot.itemId as ItemId, quantity: loot.quantity, noted: loot.noted }, currentPoiId);
                                 log(`Your inventory is full. The ${itemData.name} falls to the floor.`);
                             }
                         });
@@ -290,7 +290,7 @@ export const useThieving = (
                 }
 
                 if (containerData.level > 12 && bestLockpick && !bestLockpick.lockpick!.unbreakable && Math.random() < bestLockpick.lockpick!.breakChance) {
-                    modifyItem(bestLockpick.id, -1, false);
+                    modifyItem(bestLockpick!.id as ItemId, -1, false);
                     log(`Your ${bestLockpick.name} breaks.`);
                 }
             }
@@ -336,7 +336,7 @@ export const useThieving = (
                 const lootResult = rollOnLootTable(activity.lootTableId);
                 if (lootResult) {
                     let loot = typeof lootResult === 'string' ? { itemId: lootResult, quantity: 1, noted: false } : lootResult;
-                    modifyItem(loot.itemId, loot.quantity, false, { bypassAutoBank: true, noted: loot.noted });
+                    modifyItem(loot.itemId as ItemId, loot.quantity, false, { bypassAutoBank: true, noted: loot.noted });
                 }
                 setContainerStates(prev => ({ ...prev, [activity.id]: { depleted: true, respawnTimer: stallData.respawnTime } }));
 

@@ -6,7 +6,7 @@ export const SHOPS: Record<string, Shop> = {
         name: "Meadowdale General Store",
         inventory: [
             { itemId: 'knife', quantity: 10, priceModifier: 1.0 },
-            { itemId: 'tinderbox', quantity: 10, priceModifier: 1.0},
+            { itemId: 'tinderbox', quantity: 10, priceModifier: 1.0 },
             { itemId: 'hammer', quantity: 10, priceModifier: 1.0 },
             { itemId: 'shears', quantity: 5, priceModifier: 1.0 },
             { itemId: 'bucket', quantity: 100, priceModifier: 1.0 },
@@ -17,9 +17,9 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'bronze_pickaxe', quantity: 10, priceModifier: 1.1 },
             { itemId: 'shortbow', quantity: 5, priceModifier: 1.1 },
             { itemId: 'bronze_arrow', quantity: 1000, priceModifier: 1.1 },
-            { itemId: 'bronze_sword', quantity: 10, priceModifier: 1.1},
-            { itemId: 'wooden_shield', quantity: 10, priceModifier: 1.1},
-            { itemId: 'leather_body', quantity: 5, priceModifier: 1.1},
+            { itemId: 'bronze_sword', quantity: 10, priceModifier: 1.1 },
+            { itemId: 'wooden_shield', quantity: 10, priceModifier: 1.1 },
+            { itemId: 'leather_body', quantity: 5, priceModifier: 1.1 },
             { itemId: 'vial', quantity: 1000, priceModifier: 1.0 },
             // New Ingredients
             { itemId: 'flour', quantity: 100, priceModifier: 1.0 },
@@ -69,8 +69,8 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'cake_tin', quantity: 50, priceModifier: 1.0 },
             { itemId: 'bronze_axe', quantity: 10, priceModifier: 1.1 },
             { itemId: 'bronze_pickaxe', quantity: 10, priceModifier: 1.1 },
-            { itemId: 'bronze_sword', quantity: 10, priceModifier: 1.1},
-            { itemId: 'wooden_shield', quantity: 10, priceModifier: 1.1},
+            { itemId: 'bronze_sword', quantity: 10, priceModifier: 1.1 },
+            { itemId: 'wooden_shield', quantity: 10, priceModifier: 1.1 },
             { itemId: 'throwing_flask', quantity: 150, priceModifier: 1.0 },
             { itemId: 'rendering_kit', quantity: 1, priceModifier: 1.0 },
         ]
@@ -237,7 +237,7 @@ export const SHOPS: Record<string, Shop> = {
         inventory: [
             { itemId: 'small_fishing_net', quantity: 5, priceModifier: 1.2 },
             { itemId: 'fishing_rod', quantity: 5, priceModifier: 1.2 },
-            { itemId: 'fishing_bait', quantity: 500, priceModifier: 1.0},
+            { itemId: 'fishing_bait', quantity: 500, priceModifier: 1.0 },
             { itemId: 'harpoon', quantity: 2, priceModifier: 1.5 },
             { itemId: 'fishing_bait', quantity: 100, priceModifier: 1.1 },
             { itemId: 'vial_of_water', quantity: 50, priceModifier: 1.1 },
@@ -290,4 +290,65 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'glimmerhorn_dust', quantity: 10, priceModifier: 1.2 },
         ]
     },
+    respite_general: {
+        id: 'respite_general',
+        name: "Slayer's Respite General Store",
+        inventory: [
+            { itemId: 'rope', quantity: 20, priceModifier: 1.2 },
+            { itemId: 'tinderbox', quantity: 10, priceModifier: 1.0 },
+            { itemId: 'bucket', quantity: 50, priceModifier: 1.1 },
+            { itemId: 'vial', quantity: 500, priceModifier: 1.1 },
+            { itemId: 'cake_tin', quantity: 20, priceModifier: 1.2 },
+            { itemId: 'iron_pickaxe', quantity: 10, priceModifier: 1.5 },
+            { itemId: 'iron_axe', quantity: 10, priceModifier: 1.5 },
+            { itemId: 'cooked_trout', quantity: 50, priceModifier: 2.0 },
+            { itemId: 'cooked_tuna', quantity: 25, priceModifier: 2.0 },
+            { itemId: 'rendering_kit', quantity: 5, priceModifier: 1.5 },
+        ]
+    },
+    respite_tavern: {
+        id: 'respite_tavern',
+        name: "Island Tavern",
+        inventory: [
+            { itemId: 'cooked_beef', quantity: 100, priceModifier: 2.0 },
+            { itemId: 'apple_pie', quantity: 20, priceModifier: 3.0 },
+        ]
+    },
+    respite_slayer_gear: {
+        id: 'respite_slayer_gear',
+        name: "Slayer Supplies",
+        inventory: [
+            { itemId: 'bag_of_salt', quantity: 1000, priceModifier: 1.0 },
+            { itemId: 'reflective_shield', quantity: 10, priceModifier: 1.0 },
+            { itemId: 'broad_bladed_sword', quantity: 10, priceModifier: 1.0 },
+            { itemId: 'earthen_charm', quantity: 50, priceModifier: 1.0 },
+            { itemId: 'filtered_mask', quantity: 10, priceModifier: 1.0 },
+            { itemId: 'nose_clamp', quantity: 10, priceModifier: 1.0 },
+            { itemId: 'stonecracker_hammer', quantity: 5, priceModifier: 1.0 },
+            { itemId: 'slayers_lantern', quantity: 10, priceModifier: 1.0 }
+        ]
+    },
+    respite_potions: {
+        id: 'respite_potions',
+        name: "Wynn's Concoctions",
+        inventory: [
+            { itemId: 'vial', quantity: 1000, priceModifier: 1.2 },
+            { itemId: 'vial_of_water', quantity: 1000, priceModifier: 1.2 },
+            { itemId: 'pestle_and_mortar', quantity: 10, priceModifier: 1.5 },
+            { itemId: 'antipoison_potion', quantity: 50, priceModifier: 15 },
+        ]
+    },
+    respite_smithy: {
+        id: 'respite_smithy',
+        name: "Duskwatch Armory",
+        inventory: [
+            { itemId: 'hammer', quantity: 5, priceModifier: 1.5 },
+            { itemId: 'steel_pickaxe', quantity: 5, priceModifier: 2.0 },
+            { itemId: 'mithril_pickaxe', quantity: 2, priceModifier: 3.0 },
+            { itemId: 'steel_axe', quantity: 5, priceModifier: 2.0 },
+            { itemId: 'mithril_axe', quantity: 2, priceModifier: 3.0 },
+            { itemId: 'mithril_sword', quantity: 2, priceModifier: 2.0 },
+            { itemId: 'mithril_kiteshield', quantity: 2, priceModifier: 2.0 }
+        ]
+    }
 };

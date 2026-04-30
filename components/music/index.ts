@@ -13,4 +13,5 @@ export * from './OakhavenSuite';
 export * from './SilverhavenSuite';
 export * from './SanctitySuite';
 export * from './FouthiaSuite';
+export * from './SlayersRespiteSuite';
 export * from './GeneratedTrack';

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { InventorySlot, PlayerSkill, Item, Spell, Equipment } from '../../types';
-import {  ITEMS, INVENTORY_CAPACITY, getIconClassName, getIconUrl  } from '../../constants';
+import { ITEMS, INVENTORY_CAPACITY, getIconClassName, getIconUrl } from '../../constants';
 import { ContextMenuOption } from '../common/ContextMenu';
 import { ConfirmationPrompt, ContextMenuState, MakeXPrompt, useUIState } from '../../hooks/useUIState';
 import { useLongPress } from '../../hooks/useLongPress';
@@ -56,6 +56,41 @@ const formatItemQuantity = (quantity: number): string => {
     return quantity.toLocaleString();
 };
 
+export const ItemIcon: React.FC<{ item: Item, slot: InventorySlot, className?: string, style?: React.CSSProperties }> = ({ item, slot, className, style }) => {
+    const iconUrl = getIconUrl(item.iconUrl);
+    const itemClass = getIconClassName(item);
+
+    if (item.doseable && typeof slot.doses === 'number') {
+        const doses = slot.doses;
+        const maxDoses = item.maxDoses ?? 4;
+        const fillPercent = Math.min(100, Math.max(0, (doses / maxDoses) * 100));
+        const clipPercent = 100 - fillPercent;
+
+        return (
+            <div className={`${className || 'w-full h-full'} relative`} style={{ ...style, pointerEvents: 'none' }}>
+                {/* Vial Background (faint) */}
+                <img 
+                    src={iconUrl} 
+                    className="absolute inset-0 w-full h-full item-icon-vial" 
+                    style={{ opacity: 0.4 }} 
+                    alt=""
+                />
+                {/* Potion Liquid (clipped) */}
+                <img 
+                    src={iconUrl} 
+                    className={`absolute inset-0 w-full h-full ${itemClass}`} 
+                    style={{ clipPath: `inset(${clipPercent}% 0 0 0)` }} 
+                    alt={item.name}
+                />
+            </div>
+        );
+    }
+
+    return <img src={iconUrl} alt={item.name} className={`${className || 'w-full h-full'} ${itemClass}`} style={style} />;
+};
+
+
+
 
 interface InventorySlotProps {
     index: number;
@@ -98,11 +133,12 @@ interface InventorySlotProps {
     isOneClickMode: boolean;
     onReadMap: (item: Item) => void;
     onTeleport: (itemSlot: InventorySlot, slotIdentifier: number | keyof Equipment, from: 'inventory' | keyof Equipment, poiId: string) => void;
+    onCombine: (itemId: string, index: number) => void;
     ui: ReturnType<typeof useUIState>;
 }
 
 const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
-    const { index, slot, inventory, skills, onEquip, onConsume, onDropItem, onBury, onEmpty, setTooltip, setContextMenu, addLog, isBankOpen = false, onDeposit = () => { }, itemToUse, setItemToUse, onUseItemOn, isBusy = false, setConfirmationPrompt, onExamine, draggingIndex, setDraggingIndex, dragOverIndex, setDragOverIndex, onDrop, isTouchSimulationEnabled, onDivine, onReadMap, isShopOpen = false, onSell = () => { }, spellToCast, onSpellOnItem, confirmValuableDrops, valuableDropThreshold, isOneClickMode, onTeleport, ui } = props;
+    const { index, slot, inventory, skills, onEquip, onConsume, onDropItem, onBury, onEmpty, setTooltip, setContextMenu, addLog, isBankOpen = false, onDeposit = () => { }, itemToUse, setItemToUse, onUseItemOn, isBusy = false, setConfirmationPrompt, onExamine, draggingIndex, setDraggingIndex, dragOverIndex, setDragOverIndex, onDrop, isTouchSimulationEnabled, onDivine, onReadMap, isShopOpen = false, onSell = () => { }, spellToCast, onSpellOnItem, confirmValuableDrops, valuableDropThreshold, isOneClickMode, onTeleport, onCombine, ui } = props;
 
     const isTouchDevice = useIsTouchDevice(isTouchSimulationEnabled);
 
@@ -209,6 +245,10 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
             if (item.equipment) options.push({ label: 'Equip', onClick: () => performActionAndClose(() => onEquip(slot, index)), disabled: isBusy });
             if (item.buryable) options.push({ label: 'Bury', onClick: () => performActionAndClose(() => onBury(item.id, index)), disabled: isBusy });
             if (item.cleanable) options.push({ label: 'Clean', onClick: () => performActionAndClose(() => onConsume(item.id, index)), disabled: isBusy });
+            if (item.combinable) options.push({ label: 'Combine', onClick: () => performActionAndClose(() => {
+                console.log(`[InventorySlot] Context Menu Combine clicked: ${item.id} at index ${index}`);
+                onCombine(item.id, index);
+            }), disabled: isBusy });
 
             if (item.consumable?.teleportOptions) {
                 const charges = slot.charges ?? item.charges ?? 0;
@@ -350,8 +390,13 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
         const isConsumable = !!item.consumable;
         const isDivining = !!item.divining;
         const isMappable = !!item.mappable;
+        const isCombinable = !!item.combinable;
 
         if (isMappable) performAction(() => onReadMap(item));
+        else if (isCombinable) performAction(() => {
+            console.log(`[InventorySlot] Left click Combine triggered: ${item.id} at index ${index}`);
+            onCombine(item.id, index);
+        });
         else if (isDivining) performAction(() => onDivine(item.id, index));
         else if (isEquippable) performAction(() => onEquip(slot, index));
         else if (isBuryable) performAction(() => onBury(item.id, index));
@@ -409,10 +454,10 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
                     {slot.noted ? (
                         <div className="item-note-wrapper">
                             <img src={getIconUrl("folded-paper")} alt="Note" className="item-note-paper" />
-                            <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`item-note-icon ${getIconClassName(item)}`} />
+                            <ItemIcon item={item} slot={slot} className="item-note-icon" />
                         </div>
                     ) : (
-                        <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)}`} />
+                        <ItemIcon item={item} slot={slot} className="w-full h-full" />
                     )}
                     {slot.quantity > 1 && !item.doseable && (
                         <span className={`absolute bottom-0 right-1 text-lg font-pixel-rpg font-bold ${getQuantityColor(slot.quantity)}`} style={{ textShadow: '1px 1px 1px black', zIndex: 2 }}>

@@ -7,7 +7,7 @@ import { POIS } from '../data/pois';
 import { useCharacter } from './useCharacter';
 
 const BANK_POI_IDS = Object.values(POIS)
-    .filter(poi => poi.activities.some(act => act.type === 'bank' || (act.type === 'npc' && act.actions?.some(a => a.action === 'open_bank'))))
+    .filter(poi => poi.activities?.some(act => act.type === 'bank' || (act.type === 'npc' && act.actions?.some(a => a.action === 'open_bank'))))
     .map(poi => poi.id);
 
 interface SpellActionDependencies {

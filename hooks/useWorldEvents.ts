@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { WorldState, PlayerQuestState } from '../types';
+import { WorldState, PlayerQuestState, ItemId } from '../types';
 import { POIS, REGIONS } from '../constants';
 import { useGameSession } from './useGameSession';
 import { useCharacter } from './useCharacter';
@@ -33,7 +33,7 @@ export const useWorldEvents = (deps: WorldEventDependencies) => {
             const playerQuest = depsRef.current.playerQuests.find(q => q.questId === 'the_sorcerers_trial');
             // Ensure we don't grant the item multiple times
             if (playerQuest && playerQuest.currentStage === 11) {
-                inv.modifyItem('tempered_core', 1, false, { bypassAutoBank: true });
+                inv.modifyItem('tempered_core' as ItemId, 1, false, { bypassAutoBank: true });
                 addLog("The unstable core has been fully tempered against heat, pressure, and silence. It is now a stable, powerful artifact.");
             }
         }
@@ -67,8 +67,8 @@ export const useWorldEvents = (deps: WorldEventDependencies) => {
 
                     // 2. Clear all existing cores to prevent duplication
                     inv.inventory.forEach(slot => {
-                        if (slot && slot.itemId === 'unstable_core') {
-                            inv.modifyItem('unstable_core', -slot.quantity, true, { nameOverride: slot.nameOverride });
+                        if (slot && slot.itemId === 'unstable_core' as ItemId) {
+                            inv.modifyItem('unstable_core' as ItemId, -slot.quantity, true, { nameOverride: slot.nameOverride });
                         }
                     });
 
@@ -152,7 +152,7 @@ export const useWorldEvents = (deps: WorldEventDependencies) => {
         const playerQuest = playerQuests.find(q => q.questId === 'the_sorcerers_trial');
         if (!playerQuest || playerQuest.isComplete || playerQuest.currentStage !== 11) return;
 
-        const hasCore = inv.hasItems([{ itemId: 'unstable_core', quantity: 1 }]);
+        const hasCore = inv.hasItems([{ itemId: 'unstable_core' as ItemId, quantity: 1 }]);
         const progress = worldState.destructionTrialProgress || {};
         const currentPoiId = session.currentPoiId;
         const currentPoi = POIS[currentPoiId];
@@ -230,9 +230,9 @@ export const useWorldEvents = (deps: WorldEventDependencies) => {
                         const damage = Math.floor(Math.random() * 6) + 5; // 5-10
                         char.setCurrentHp(hp => Math.max(0, hp - damage));
                         addLog(`A bolt of lightning strikes nearby, shocking you for ${damage} damage!`);
-                        if (isChargingStage && inv.hasItems([{ itemId: 'inert_rune_of_attunement', quantity: 1 }])) {
-                            inv.modifyItem('inert_rune_of_attunement', -1, true);
-                            inv.modifyItem('imprinted_rune_of_attunement', 1, false, { bypassAutoBank: true, nameOverride: 'Imprinted Rune of Attunement (Lightning)' });
+                        if (isChargingStage && inv.hasItems([{ itemId: 'inert_rune_of_attunement' as ItemId, quantity: 1 }])) {
+                            inv.modifyItem('inert_rune_of_attunement' as ItemId, -1, true);
+                            inv.modifyItem('imprinted_rune_of_attunement' as ItemId, 1, false, { bypassAutoBank: true, nameOverride: 'Imprinted Rune of Attunement (Lightning)' });
                             addLog("The lightning strike channels its raw power into your rune, imprinting it with elemental fury!");
                         }
                     } else if (strikePoiIds.includes(session.currentPoiId)) {
@@ -252,9 +252,9 @@ export const useWorldEvents = (deps: WorldEventDependencies) => {
                         const damage = Math.floor(Math.random() * 5) + 3; // 3-7
                         char.setCurrentHp(hp => Math.max(0, hp - damage));
                         addLog(`A massive wave crashes over the area, soaking you for ${damage} damage!`);
-                        if (isChargingStage && inv.hasItems([{ itemId: 'inert_rune_of_attunement', quantity: 1 }])) {
-                            inv.modifyItem('inert_rune_of_attunement', -1, true);
-                            inv.modifyItem('imprinted_rune_of_attunement', 1, false, { bypassAutoBank: true, nameOverride: 'Imprinted Rune of Attunement (Water)' });
+                        if (isChargingStage && inv.hasItems([{ itemId: 'inert_rune_of_attunement' as ItemId, quantity: 1 }])) {
+                            inv.modifyItem('inert_rune_of_attunement' as ItemId, -1, true);
+                            inv.modifyItem('imprinted_rune_of_attunement' as ItemId, 1, false, { bypassAutoBank: true, nameOverride: 'Imprinted Rune of Attunement (Water)' });
                             addLog("The raw power of the ocean surges into your rune, imprinting it with the might of the tides!");
                         }
                     }
@@ -277,9 +277,9 @@ export const useWorldEvents = (deps: WorldEventDependencies) => {
                         const damage = Math.floor(Math.random() * 5) + 8; // 8-12
                         char.setCurrentHp(hp => Math.max(0, hp - damage));
                         addLog(`A geyser of superheated steam erupts from the ground, scalding you for ${damage} damage!`);
-                        if (isChargingStage && inv.hasItems([{ itemId: 'inert_rune_of_attunement', quantity: 1 }])) {
-                            inv.modifyItem('inert_rune_of_attunement', -1, true);
-                            inv.modifyItem('imprinted_rune_of_attunement', 1, false, { bypassAutoBank: true, nameOverride: 'Imprinted Rune of Attunement (Fire)' });
+                        if (isChargingStage && inv.hasItems([{ itemId: 'inert_rune_of_attunement' as ItemId, quantity: 1 }])) {
+                            inv.modifyItem('inert_rune_of_attunement' as ItemId, -1, true);
+                            inv.modifyItem('imprinted_rune_of_attunement' as ItemId, 1, false, { bypassAutoBank: true, nameOverride: 'Imprinted Rune of Attunement (Fire)' });
                             addLog("The raw geothermal energy of the earth erupts into your rune, imprinting it with volcanic power!");
                         }
                     } else if (regionPois.some(p => p.id === session.currentPoiId)) {

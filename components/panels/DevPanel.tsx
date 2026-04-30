@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef, Suspense } from 'react';
 import Button from '../common/Button';
 import { useInventory } from '../../hooks/useInventory';
 import { Item, SkillName, ToolType } from '../../types';
@@ -8,15 +8,18 @@ import { POIS } from '../../data/pois';
 import { TooltipState, useUIState } from '../../hooks/useUIState';
 import { useAgility } from '../../hooks/useAgility';
 
+// Conditionally load the map manager. 
+// Vite evaluates import.meta.glob at build time. If the folder is missing, this is just an empty object and doesn't crash the build.
+const mapManagerModules = import.meta.env.DEV ? import.meta.glob('../../ai_utility/map_manager/index.tsx') : {};
+const hasMapManager = Object.keys(mapManagerModules).length > 0;
+const loadMapManager = hasMapManager ? (mapManagerModules['../../ai_utility/map_manager/index.tsx'] as () => Promise<{ default: React.ComponentType<any> }>) : null;
+const MapManagerComponent = loadMapManager ? React.lazy(loadMapManager) : null;
+
 interface GameManagerProps {
     onResetQuest: (questId: string) => void;
     onAdjustQuestStage: (questId: string, amount: number) => void;
     showAllPois: boolean;
     onToggleShowAllPois: () => void;
-    isMapManagerEnabled: boolean;
-    onToggleMapManager: (enable: boolean) => void;
-    onCommitMapChanges: () => void;
-    hasMapChanges: boolean;
     isTouchSimulationEnabled: boolean;
     onToggleTouchSimulation: () => void;
     onResetQuestBoards: () => void;
@@ -24,13 +27,13 @@ interface GameManagerProps {
     onTrialTestBoost: () => void;
     isShowMusicStatusOverlay: boolean;
     onToggleMusicStatusOverlay: () => void;
+    onUnlockAllMusic: () => void;
 }
 
 const GameManagerComponent: React.FC<GameManagerProps> = ({
-    onResetQuest, onAdjustQuestStage, showAllPois, onToggleShowAllPois, isMapManagerEnabled,
-    onToggleMapManager, onCommitMapChanges, hasMapChanges, isTouchSimulationEnabled, onToggleTouchSimulation,
+    onResetQuest, onAdjustQuestStage, showAllPois, onToggleShowAllPois, isTouchSimulationEnabled, onToggleTouchSimulation,
     onResetQuestBoards, onResetPilferingHouses, onTrialTestBoost,
-    isShowMusicStatusOverlay, onToggleMusicStatusOverlay
+    isShowMusicStatusOverlay, onToggleMusicStatusOverlay, onUnlockAllMusic
 }) => {
     const [selectedQuestId, setSelectedQuestId] = useState<string>('');
 
@@ -67,14 +70,7 @@ const GameManagerComponent: React.FC<GameManagerProps> = ({
                 <button onClick={onToggleShowAllPois} className={`w-full py-1 text-base rounded font-bold transition-colors ${showAllPois ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}>{showAllPois ? 'ON' : 'OFF'}</button>
             </div>
 
-            {/* Map Manager */}
-            <div>
-                <label className="block text-lg font-semibold mb-1">Map Manager</label>
-                <div className="flex gap-2">
-                    <button onClick={() => onToggleMapManager(!isMapManagerEnabled)} className={`flex-1 py-1 text-base rounded font-bold transition-colors ${isMapManagerEnabled ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}>{isMapManagerEnabled ? 'ON' : 'OFF'}</button>
-                    <Button size="sm" onClick={onCommitMapChanges} disabled={!isMapManagerEnabled || !hasMapChanges}>Commit</Button>
-                </div>
-            </div>
+
 
             {/* Simulate Touch */}
             <div>
@@ -88,14 +84,24 @@ const GameManagerComponent: React.FC<GameManagerProps> = ({
             </div>
 
             {/* Music Diagnostic */}
-            <div className="pt-2 border-t border-gray-700">
-                <label className="block text-lg font-semibold mb-1 text-yellow-500/80">Synth Diagnostic Overlay</label>
-                <button
-                    onClick={onToggleMusicStatusOverlay}
-                    className={`w-full py-1 text-base rounded font-bold transition-colors ${isShowMusicStatusOverlay ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'}`}
-                >
-                    {isShowMusicStatusOverlay ? 'VISIBLE' : 'HIDDEN'}
-                </button>
+            <div className="pt-2 border-t border-gray-700 space-y-2">
+                <label className="block text-lg font-semibold mb-1 text-yellow-500/80">Music Systems</label>
+                <div className="grid grid-cols-2 gap-2">
+                    <Button
+                        size="sm"
+                        onClick={onToggleMusicStatusOverlay}
+                        variant={isShowMusicStatusOverlay ? 'primary' : 'secondary'}
+                    >
+                        {isShowMusicStatusOverlay ? 'Diag: ON' : 'Diag: OFF'}
+                    </Button>
+                    <Button
+                        size="sm"
+                        onClick={onUnlockAllMusic}
+                        className="bg-purple-700 hover:bg-purple-600"
+                    >
+                        Unlock All
+                    </Button>
+                </div>
             </div>
         </div>
     );
@@ -314,10 +320,10 @@ const ItemSpawnerComponent: React.FC<ItemSpawnerProps> = ({ inv, setTooltip, sea
         const cols = 7; // Hardcoded cols to match grid-cols-7
         const totalRows = Math.ceil(filteredItems.length / cols);
         const rowHeight = ITEM_SIZE;
-        
+
         const startRow = Math.max(0, Math.floor(scrollTop / rowHeight) - VISIBLE_BUFFER);
         const endRow = Math.min(totalRows, Math.ceil((scrollTop + containerHeight) / rowHeight) + VISIBLE_BUFFER);
-        
+
         return {
             cols,
             totalRows,
@@ -374,13 +380,13 @@ const ItemSpawnerComponent: React.FC<ItemSpawnerProps> = ({ inv, setTooltip, sea
     return (
         <div className="p-2 flex flex-col h-full">
             <input type="text" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="Search for items..." className="w-full p-1 mb-2 bg-gray-800 border border-gray-600 rounded text-center text-base" />
-            <div 
+            <div
                 ref={containerRef}
                 onScroll={handleScroll}
                 className="flex-grow overflow-y-auto border-2 border-gray-700 rounded-md bg-black/20 p-1"
             >
-                <div 
-                    className="relative w-full" 
+                <div
+                    className="relative w-full"
                     style={{ height: virtualization.totalHeight }}
                 >
                     {filteredItems.slice(virtualization.startIndex, virtualization.endIndex).map((item: Item, sliceIdx) => {
@@ -493,6 +499,8 @@ const SlayerManagerComponent: React.FC<{ slayer: any }> = ({ slayer }) => {
                 </div>
             </div>
             <div className="flex flex-col gap-2">
+                <Button size="sm" onClick={() => slayer.forceCompleteTask()} disabled={!slayer.slayerTask || slayer.slayerTask.isComplete}>Slayer Task [Complete]</Button>
+                <Button size="sm" onClick={() => slayer.completeTask(slayer.slayerTask?.masterId)} disabled={!slayer.slayerTask || !slayer.slayerTask.isComplete}>Slayer Task [Turn In]</Button>
                 <Button size="sm" onClick={() => slayer.setSlayerTaskStreak(0)}>Task Streak [Reset]</Button>
                 <Button size="sm" onClick={() => slayer.setSlayerTask(null)}>Slayer Task [Reset]</Button>
                 <Button size="sm" onClick={() => slayer.setSlayerCredits(slayer.slayerCredits + 100)}>Slayer Credits [+100]</Button>
@@ -505,7 +513,7 @@ const SlayerManagerComponent: React.FC<{ slayer: any }> = ({ slayer }) => {
 interface DevPanelProps {
     inv: ReturnType<typeof useInventory>;
     devPanelState: {
-        activeTab: 'cheats' | 'items' | 'teleport' | 'game-manager' | 'monsters' | 'slayer';
+        activeTab: 'cheats' | 'items' | 'teleport' | 'game-manager' | 'monsters' | 'slayer' | 'map-manager';
         itemSearchTerm: string;
         selectedItemId: string | null;
         spawnQuantity: number;
@@ -548,10 +556,6 @@ interface DevPanelProps {
     onAdjustQuestStage: (questId: string, amount: number) => void;
     showAllPois: boolean;
     onToggleShowAllPois: () => void;
-    isMapManagerEnabled: boolean;
-    onToggleMapManager: (enable: boolean) => void;
-    onCommitMapChanges: () => void;
-    hasMapChanges: boolean;
     isTouchSimulationEnabled: boolean;
     onToggleTouchSimulation: () => void;
     setTooltip: (tooltip: TooltipState | null) => void;
@@ -559,6 +563,7 @@ interface DevPanelProps {
     onResetQuestBoards: () => void;
     onResetPilferingHouses: () => void;
     onTrialTestBoost: () => void;
+    onUnlockAllMusic: () => void;
 }
 
 const DevPanel: React.FC<DevPanelProps> = (props) => {
@@ -586,6 +591,17 @@ const DevPanel: React.FC<DevPanelProps> = (props) => {
                 <button onClick={() => setActiveTab('game-manager')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'game-manager' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Game</button>
                 <button onClick={() => setActiveTab('teleport')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'teleport' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Teleport</button>
                 <button onClick={() => setActiveTab('slayer')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'slayer' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Slayer</button>
+                {hasMapManager && (
+                    <button 
+                        onClick={() => {
+                            ui.setIsDevPanelOpen(false);
+                            ui.setIsMapManagerOpen(true);
+                        }} 
+                        className="flex-1 py-1 text-base font-semibold rounded-t-md transition-colors bg-blue-900 text-yellow-300 hover:bg-blue-800"
+                    >
+                        Map Editor
+                    </button>
+                )}
             </div>
             <div className="flex-grow min-h-0 overflow-y-auto">
                 {activeTab === 'cheats' && <CheatsComponent {...otherProps} />}
@@ -603,6 +619,7 @@ const DevPanel: React.FC<DevPanelProps> = (props) => {
                     {...otherProps}
                     isShowMusicStatusOverlay={ui.isShowMusicStatusOverlay}
                     onToggleMusicStatusOverlay={() => ui.setIsShowMusicStatusOverlay(!ui.isShowMusicStatusOverlay)}
+                    onUnlockAllMusic={props.onUnlockAllMusic}
                 />}
                 {activeTab === 'teleport' && <TeleportComponent
                     onForcedNavigate={props.onForcedNavigate}
@@ -612,6 +629,11 @@ const DevPanel: React.FC<DevPanelProps> = (props) => {
                     setSelectedPoiId={(id) => updateDevPanelState({ teleportPoiId: id })}
                 />}
                 {activeTab === 'slayer' && <SlayerManagerComponent slayer={slayer} />}
+                {activeTab === 'map-manager' && hasMapManager && MapManagerComponent && (
+                    <Suspense fallback={<div className="p-4 text-center text-gray-400">Loading Map Editor...</div>}>
+                        <MapManagerComponent />
+                    </Suspense>
+                )}
             </div>
         </div>
     );

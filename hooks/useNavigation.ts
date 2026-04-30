@@ -5,7 +5,7 @@ import { useUIState } from './useUIState';
 import { useSkilling } from './useSkilling';
 import { useInteractQuest } from './useInteractQuest';
 import { useGameSession } from './useGameSession';
-import { ActiveBuff, Equipment, Item } from '../types';
+import { ActiveBuff, Equipment, Item, WorldState } from '../types';
 import {  SKILL_ICONS  } from '../constants';
 
 interface NavigationDependencies {
@@ -26,10 +26,11 @@ interface NavigationDependencies {
     setIsResting: React.Dispatch<React.SetStateAction<boolean>>;
     activeBuffs: ActiveBuff[];
     equipment: Equipment;
+    worldState: WorldState;
 }
 
 export const useNavigation = (deps: NavigationDependencies) => {
-    const { session, lockedPois, clearedSkillObstacles, addLog, isBusy, isInCombat, ui, skilling, interactQuest, isStunned, isRunToggled, runEnergy, setRunEnergy, setIsTraveling, setIsResting, activeBuffs, equipment } = deps;
+    const { session, lockedPois, clearedSkillObstacles, addLog, isBusy, isInCombat, ui, skilling, interactQuest, isStunned, isRunToggled, runEnergy, setRunEnergy, setIsTraveling, setIsResting, activeBuffs, equipment, worldState } = deps;
 
     const isAgilitySetEffectActive = useMemo(() => {
         const requiredItems = ['weightless_hood', 'weightless_tunic', 'weightless_trousers', 'weightless_gloves', 'weightless_boots'];
@@ -69,8 +70,14 @@ export const useNavigation = (deps: NavigationDependencies) => {
     
                 const obstacleId = `${currentId}-${connId}`;
                 const requirement = currentPoi.connectionRequirements?.[connId];
-                if (requirement && !clearedSkillObstacles.includes(obstacleId)) {
-                    return;
+                if (requirement) {
+                    const isPermanentlyCleared = clearedSkillObstacles.includes(obstacleId);
+                    const tempExpiry = worldState.temporaryObstacles?.[obstacleId];
+                    const isTemporarilyCleared = tempExpiry && tempExpiry > Date.now();
+                    
+                    if (!isPermanentlyCleared && !isTemporarilyCleared) {
+                        return;
+                    }
                 }
     
                 visited.add(connId);
@@ -78,7 +85,7 @@ export const useNavigation = (deps: NavigationDependencies) => {
             });
         }
         return Array.from(visited);
-    }, [session.currentPoiId, lockedPois, clearedSkillObstacles]);
+    }, [session.currentPoiId, lockedPois, clearedSkillObstacles, worldState.temporaryObstacles]);
 
     const navigateToPoi = useCallback((poiId: string) => {
         ui.closeAllModals();

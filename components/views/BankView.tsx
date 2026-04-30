@@ -7,7 +7,7 @@ import { ContextMenuOption } from '../common/ContextMenu';
 import { MakeXPrompt, TooltipState, ContextMenuState, useUIState, WithdrawMode } from '../../hooks/useUIState';
 import { useLongPress } from '../../hooks/useLongPress';
 import { useIsTouchDevice } from '../../hooks/useIsTouchDevice';
-import { getDisplayName } from '../panels/InventorySlot';
+import { getDisplayName, ItemIcon } from '../panels/InventorySlot';
 
 const formatQuantity = (quantity: number): string => {
     if (quantity >= 1000000000) return `${Math.floor(quantity / 1000000000)}B`;
@@ -165,7 +165,12 @@ const BankSlot: React.FC<BankSlotProps> = React.memo((props) => {
         >
             {slot && item && (
                 <>
-                    <img src={getIconUrl(item.iconUrl)} alt={item.name} className={`w-full h-full ${getIconClassName(item)} ${isPlaceholder ? 'opacity-10' : ''}`} />
+                    <ItemIcon 
+                        item={item} 
+                        slot={slot} 
+                        className="w-full h-full" 
+                        style={isPlaceholder ? { opacity: 0.1 } : undefined} 
+                    />
                     {slot.statsOverride?.poisoned && (
                         <img 
                             src={getIconUrl("boiling-bubbles")} 
@@ -517,7 +522,7 @@ const BankView: React.FC<BankViewProps> = (props) => {
                         const firstItem = tab.items.find(item => item !== null && item.quantity > 0);
                         if (firstItem) {
                             const itemData = ITEMS[firstItem.itemId];
-                            if (itemData) iconContent = <img src={getIconUrl(itemData.iconUrl)} alt={tab.name} className={`bank-tab-icon ${getIconClassName(itemData)} w-8 h-8`} />;
+                            if (itemData) iconContent = <ItemIcon item={itemData} slot={firstItem} className="bank-tab-icon w-8 h-8" />;
                         } else iconContent = <img src={getIconUrl("bank")} alt="Empty Tab" className="bank-tab-icon filter invert opacity-50 w-8 h-8 " />;
                     }
 

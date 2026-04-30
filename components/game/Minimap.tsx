@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { POIS, REGIONS, getIconUrl } from '../../constants';
+import { POIS, REGIONS, getIconUrl, MAP_CONFIGS } from '../../constants';
 import { ContextMenuState, useUIState } from '../../hooks/useUIState';
 import { ContextMenuOption } from '../common/ContextMenu';
 import { useLongPress } from '../../hooks/useLongPress';
@@ -233,6 +233,8 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
     const [hitSplats, setHitSplats] = useState<{ id: number; damage: number }[]>([]);
 
     const currentRegion = currentPoi ? REGIONS[currentPoi.regionId] : null;
+    const currentMapId = currentRegion?.worldMapId || 'mainland';
+    const activeMapConfig = MAP_CONFIGS[currentMapId] || MAP_CONFIGS.mainland;
 
     // Handle poison damage hitsplats when out of combat
     useEffect(() => {
@@ -278,7 +280,6 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
                             ui.setIsExpandedMapViewOpen(true);
                         }
                     },
-                    { label: 'Open Atlas', onClick: () => ui.setIsAtlasViewOpen(true) },
                 ],
                 triggerEvent: eventForMenu,
                 isTouchInteraction: 'touches' in e || 'changedTouches' in e,
@@ -336,8 +337,7 @@ const Minimap: React.FC<MinimapProps> = ({ currentPoiId, currentHp, maxHp, curre
 
                 {/* Radar background, POI dots, and player icon. Now explicitly sized and centered. */}
                 <div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] bg-cover bg-center border-2 border-yellow-600 rounded-full overflow-hidden"
-                    style={{ backgroundImage: `url('https://images.unsplash.com/photo-1505236755279-228d5d36c34b?q=80&w=256&auto=format=fit=crop')` }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] bg-slate-900 border-2 border-yellow-600 rounded-full overflow-hidden"
                 >
                     <div className="absolute inset-0 bg-black/50" />
 

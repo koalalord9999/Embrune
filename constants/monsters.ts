@@ -15,6 +15,7 @@ import { frostfang } from './monsters/frostfang';
 import { wyrmwoodMonsters } from './monsters/wyrmwood';
 import { sunscorchedMonsters } from './monsters/sunscorched';
 import { slayer } from './monsters/slayer';
+import { respiteMonsters } from './monsters/respite';
 
 // Assemble all monsters into a single array
 const allMonstersUnsorted: Monster[] = [
@@ -31,6 +32,7 @@ const allMonstersUnsorted: Monster[] = [
     ...wyrmwoodMonsters,
     ...sunscorchedMonsters,
     ...slayer,
+    ...respiteMonsters,
 ];
 
 // Sort the array alphabetically by monster name

@@ -1,4 +1,4 @@
-import { Monster, MonsterType, SkillName } from '@/types';
+import { Monster, MonsterType, SkillName, MonsterId } from '@/types';
 
 export const wyrmwoodMonsters: Monster[] = [
     // --- Southern Branch (Lvl 55-70, Stealthy/Enchanted, Fearful) ---

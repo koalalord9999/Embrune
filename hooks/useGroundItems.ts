@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { InventorySlot, GroundItem, WorldState } from '../types';
+import { InventorySlot, GroundItem, WorldState, ItemId } from '../types';
 import {  ITEMS  } from '../constants';
 import { useGameSession } from './useGameSession';
 import { useInventory } from './useInventory';
@@ -190,7 +190,7 @@ export const useGroundItems = (initialGroundItems: Record<string, GroundItem[]>,
                      for (let i = 0; i < slotsNeeded; i++) {
                         const emptySlotIndex = tempInventory.findIndex(s => s === null);
                         if (emptySlotIndex !== -1) {
-                            tempInventory[emptySlotIndex] = { itemId: 'placeholder', quantity: 1 };
+                            tempInventory[emptySlotIndex] = { itemId: 'coins' as ItemId, quantity: 1 };
                         }
                     }
                 }

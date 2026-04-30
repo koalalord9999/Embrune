@@ -109,6 +109,9 @@ export function minifyGameState(state: any): any {
         ab: state.activeBuffs,
         re: state.runEnergy,
         rt: state.isRunToggled,
+        sc: state.slayerCredits,
+        sk: state.slayerTaskStreak,
+        ht: state.lastHomeTeleport,
     };
 
     if (state.stylesByWeaponType) {

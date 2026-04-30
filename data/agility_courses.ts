@@ -223,6 +223,24 @@ const VOLCANIC_BRIMSTONE_RUN: AgilityCourse = {
     ]
 };
 
+const BLEAKPOST_GAUNTLET: AgilityCourse = {
+    id: 'bleakpost_gauntlet',
+    name: "Bleakpost Gauntlet",
+    level: 70,
+    lapBonusXp: 850,
+    energyRestore: 55,
+    obstacles: [
+        { id: 'bpg_1', name: 'Spiked Barricade Vault', level: 70, xp: 80, failDamage: { min: 4, max: 8 }, duration: 4, failMessage: "You clip the spikes and tumble over the barricade." },
+        { id: 'bpg_2', name: 'Mud Trenches Scramble', level: 70, xp: 75, duration: 6 },
+        { id: 'bpg_3', name: 'Swinging Log Dodge', level: 70, xp: 95, failDamage: { min: 6, max: 12 }, duration: 5, failPoiId: 'respite_bleakpost_square', failMessage: "A heavy log slams into you, knocking you back to the square." },
+        { id: 'bpg_4', name: 'Watchtower Rope Climb', level: 70, xp: 90, duration: 7 },
+        { id: 'bpg_5', name: 'Wall Top Dash', level: 70, xp: 85, duration: 5 },
+        { id: 'bpg_6', name: 'Tar Pit Rope Swing', level: 70, xp: 110, failDamage: { min: 5, max: 10 }, duration: 6, failMessage: "You lose your grip and splash into the sticky tar." },
+        { id: 'bpg_7', name: 'Target Dummy Weave', level: 70, xp: 82, duration: 4, canFail: false },
+        { id: 'bpg_8', name: 'Mud Slide Landing', level: 70, xp: 0, duration: 3, canFail: false, successPoiId: 'respite_bleakpost_square' },
+    ]
+};
+
 export const AGILITY_COURSES: Record<string, AgilityCourse> = {
     [MEADOWDALE_ROOFTOP_COURSE.id]: MEADOWDALE_ROOFTOP_COURSE,
     [VERDANT_FIELDS_TRAVERSE.id]: VERDANT_FIELDS_TRAVERSE,
@@ -236,4 +254,5 @@ export const AGILITY_COURSES: Record<string, AgilityCourse> = {
     [WYRMWOOD_TREETOP_RUN.id]: WYRMWOOD_TREETOP_RUN,
     [GALE_SWEPT_PEAKS_RIDGE_WALK.id]: GALE_SWEPT_PEAKS_RIDGE_WALK,
     [VOLCANIC_BRIMSTONE_RUN.id]: VOLCANIC_BRIMSTONE_RUN,
+    [BLEAKPOST_GAUNTLET.id]: BLEAKPOST_GAUNTLET,
 };

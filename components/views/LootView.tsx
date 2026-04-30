@@ -3,7 +3,7 @@ import { GroundItem, InventorySlot, Item, WorldState } from '../../types';
 import {  ITEMS, getIconClassName, getIconUrl  } from '../../constants';
 import Button from '../common/Button';
 import { TooltipState } from '../../hooks/useUIState';
-import { getDisplayName } from '../panels/InventorySlot';
+import { getDisplayName, ItemIcon } from '../panels/InventorySlot';
 
 const getQuantityColor = (quantity: number): string => {
     if (quantity >= 10000000) return 'text-green-400';
@@ -94,10 +94,10 @@ const LootSlot: React.FC<{
             {item.noted ? (
                 <div className="item-note-wrapper">
                     <img src={getIconUrl("folded-paper")} alt="Note" className="item-note-paper" />
-                    <img src={getIconUrl(itemData.iconUrl)} alt={itemData.name} className={`item-note-icon ${getIconClassName(itemData)}`} />
+                    <ItemIcon item={itemData} slot={item} className="item-note-icon" />
                 </div>
             ) : (
-                <img src={getIconUrl(itemData.iconUrl)} alt={itemData.name} className={`w-full h-full ${getIconClassName(itemData)}`} />
+                <ItemIcon item={itemData} slot={item} className="w-full h-full" />
             )}
              {item.statsOverride?.poisoned && (
                 <img 

@@ -109,6 +109,9 @@ export function inflateGameState(state: any): any {
             runEnergy: state.re !== undefined ? state.re : 100,
             isRunToggled: !!state.rt,
             monsterRespawnTimers: state.mr || {},
+            slayerCredits: state.sc !== undefined ? state.sc : (state.slayerCredits || 0),
+            slayerTaskStreak: state.sk !== undefined ? state.sk : (state.slayerTaskStreak || 0),
+            lastHomeTeleport: state.ht || 0,
             settings: {}
         };
 
@@ -236,6 +239,17 @@ export function inflateGameState(state: any): any {
                 destructionTrialProgress: state.w.dtp || null,
                 activePilferingSession: aps
             };
+
+            // Strip any recentlyKilled entries whose respawn timer was already expired and
+            // pruned from the save. Without an active timer these monsters would be stuck
+            // dead forever. Removing them here lets the game treat them as alive on the next visit.
+            const now = Date.now();
+            full.worldState.recentlyKilled = (full.worldState.recentlyKilled as string[]).filter(
+                id => {
+                    const timer = (full.monsterRespawnTimers as Record<string, number>)[id];
+                    return typeof timer === 'number' && timer > now;
+                }
+            );
         }
 
         // 6b. Progression

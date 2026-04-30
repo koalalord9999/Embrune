@@ -16,7 +16,7 @@ import { useInteractQuest } from '../../hooks/useInteractQuest';
 import { useGameSession } from '../../hooks/useGameSession';
 import { useItemActions } from '../../hooks/useItemActions';
 import { useAgility } from '../../hooks/useAgility';
-import { SkillName, InventorySlot, CombatStance, POIActivity, GroundItem, Spell, BonfireActivity, DialogueCheckRequirement, DialogueAction, BankTab, WorldState, PlayerRepeatableQuest, ActiveBuff, DialogueResponse, Monster, MonsterType, SpellElement, PlayerType, POI, Equipment } from '../../types';
+import { SkillName, InventorySlot, CombatStance, POIActivity, GroundItem, Spell, BonfireActivity, DialogueCheckRequirement, DialogueAction, BankTab, WorldState, PlayerRepeatableQuest, ActiveBuff, DialogueResponse, Monster, MonsterType, SpellElement, PlayerType, POI, Equipment, WeaponType } from '../../types';
 import {  POIS, SHOPS  } from '../../constants';
 import CraftingProgressView from '../views/crafting/CraftingProgressView';
 import CombatView from '../views/CombatView';
@@ -74,11 +74,6 @@ interface MainViewControllerProps {
     combatSpeedMultiplier: number;
     activeCombatStyleHighlight?: CombatStance | null;
     isTouchSimulationEnabled: boolean;
-    isMapManagerEnabled?: boolean;
-    poiCoordinates?: Record<string, { x: number; y: number }>;
-    regionCoordinates?: Record<string, { x: number; y: number }>;
-    onUpdatePoiCoordinate?: (id: string, x: number, y: number, isRegion: boolean) => void;
-    poiConnections?: Record<string, string[]>;
     initialState: any;
     onActivity: (activity: POIActivity) => void;
     onExportGame: () => void;
@@ -124,7 +119,6 @@ interface MainViewControllerProps {
     playerCombatLevel: number;
     agility: ReturnType<typeof useAgility>;
     onFastTravel: (destinationPoiId: string) => void;
-    onCommitMapChanges: () => void;
     setActivePrayers: React.Dispatch<React.SetStateAction<string[]>>;
     combatAttackType: 'stab' | 'slash' | 'crush';
     setCombatAttackType: React.Dispatch<React.SetStateAction<'stab' | 'slash' | 'crush'>>;
@@ -163,7 +157,6 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
         playerCombatLevel,
         agility,
         onFastTravel,
-        onCommitMapChanges,
         setActivePrayers,
     } = props;
 
@@ -188,7 +181,6 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
                 activeMapRegionId={ui.activeMapRegionId}
                 setActiveMapRegionId={ui.setActiveMapRegionId}
                 deathMarker={deathMarker}
-                onCommitMapChanges={onCommitMapChanges}
             />
         }
         if (agility.agilityState.activeCourseId) {

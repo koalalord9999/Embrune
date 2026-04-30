@@ -1,6 +1,6 @@
 
 
-import { InventorySlot, WeightedDrop } from '../types';
+import { InventorySlot, WeightedDrop, ItemId } from '../types';
 import { THIEVING_POCKET_TARGETS } from './loot/thievingPocket';
 import { THIEVING_CONTAINER_TARGETS } from './loot/thievingTables';
 import { THIEVING_STALL_TARGETS, THIEVING_STALL_LOOT_TABLES } from './loot/thievingStalls';
@@ -16,7 +16,7 @@ interface LootTableItem {
 }
 
 export interface LootRollResult {
-    itemId: string;
+    itemId: ItemId;
     quantity: number;
     noted: boolean;
 }
@@ -249,12 +249,12 @@ export const rollOnLootTable = (tableId: string): LootRollResult | string | null
                 const max = item.maxQuantity ?? min;
                 const quantity = Math.floor(Math.random() * (max - min + 1)) + min;
                 return {
-                    itemId: item.itemId,
+                    itemId: item.itemId as ItemId,
                     quantity: quantity,
                     noted: item.noted ?? false,
                 };
             } else {
-                return item.itemId;
+                return item.itemId as ItemId;
             }
         }
     }

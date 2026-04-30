@@ -1,6 +1,6 @@
 
 import React, { useCallback, useMemo } from 'react';
-import { InventorySlot, Equipment, CombatStance, BankTab, EquipmentStats } from '../types';
+import { InventorySlot, Equipment, CombatStance, BankTab, EquipmentStats, ItemId } from '../types';
 import {  ITEMS, BANK_CAPACITY, INVENTORY_CAPACITY, MAX_BANK_TABS  } from '../constants';
 
 interface BankDependencies {
@@ -9,7 +9,7 @@ interface BankDependencies {
     setInventory: React.Dispatch<React.SetStateAction<(InventorySlot | null)[]>>;
     equipment: Equipment;
     setEquipment: React.Dispatch<React.SetStateAction<Equipment>>;
-    modifyItem: (itemId: string, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void;
+    modifyItem: (itemId: ItemId, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void;
     setCombatStance: (stance: CombatStance) => void;
     bankPlaceholders: boolean;
 }
@@ -23,8 +23,8 @@ interface BankState {
  * Helper to 'snuff out' a lit fire pot if it's being deposited.
  */
 const getSnuffedSlot = (slot: InventorySlot): InventorySlot => {
-    if (slot.itemId === 'fire_pot_lit') {
-        return { ...slot, itemId: 'fire_pot', expiresAt: undefined };
+    if (slot.itemId === 'fire_pot_lit' as ItemId) {
+        return { ...slot, itemId: 'fire_pot' as ItemId, expiresAt: undefined };
     }
     return slot;
 };

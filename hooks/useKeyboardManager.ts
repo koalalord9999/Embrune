@@ -146,5 +146,5 @@ export const useKeyboardManager = ({ keybindings, isBusy, onTravel, onAction, on
             window.removeEventListener('keyup', handleKeyUp);
             window.removeEventListener('blur', handleBlur);
         };
-    }, [isBusy, onTravel, onAction, resolveTravel, resolveAction]);
+    }, [isBusy, onTravel, onAction, resolveTravel, resolveAction, onEsc, onSlash, onR, onPanelSwitch, resolvePanel]);
 };

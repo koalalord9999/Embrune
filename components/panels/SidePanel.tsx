@@ -19,7 +19,7 @@ import SpellbookPanel from '../panels/SpellbookPanel';
 import SoundPanel from '../panels/SoundPanel';
 import SettingsPanel from '../panels/SettingsPanel';
 import DevPanel from '../panels/DevPanel';
-import { ActivePanel, CombatStance, Spell, InventorySlot, SkillName, Item, Equipment } from '../../types';
+import { ActivePanel, CombatStance, Spell, InventorySlot, SkillName, Item, Equipment, WeaponType } from '../../types';
 
 interface SidePanelProps {
     ui: ReturnType<typeof useUIState>;
@@ -150,6 +150,7 @@ const SidePanel: React.FC<SidePanelProps> = (props) => {
         valuableDropThreshold: ui.valuableDropThreshold,
         isOneClickMode: ui.isOneClickMode,
         onTeleport: itemActions.handleTeleport,
+        onCombine: itemActions.handleCombine,
         ui: ui,
     };
 

@@ -1,360 +1,989 @@
 import { POI, SkillName, ToolType } from '../../types';
+import { CIVILLIAN_DIALOGUE } from '../../constants/dialogue';
 
 export const tutorialZonePois: Record<string, POI> = {
     tutorial_entrance: {
-        id: 'tutorial_entrance',
-        name: 'Tutorial Entrance',
-        description: 'A simple path leading into a secluded training area. A knowledgeable guide awaits to show you the ropes.',
-        connections: ['tutorial_survival_grounds'],
+        id: "tutorial_entrance",
+        name: "Tutorial Entrance",
+        description: "A simple path leading into a secluded training area. A knowledgeable guide awaits to show you the ropes.",
+        connections: ["tutorial_survival_grounds"],
         activities: [
             {
-                type: 'npc',
-                name: 'Leo the Guide',
-                icon: '/assets/npcChatHeads/leo_the_guide.png',
-                startNode: 'leo_default',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Leo the Guide",
+                icon: "/assets/npcChatHeads/leo_the_guide.png",
+                startNode: "leo_default",
+                questTopics: ["embrune_101"],
                 conditionalGreetings: [
-                    { text: "The Survival Guide is just down the path. He's waiting for you.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 1 }] } },
-                    { text: "Good to see you're making progress. Follow the Survival Guide's instructions.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 2 }] } },
-                    { text: "The Baker is next. He's in the clearing past the Survival Guide.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 4 }] } },
-                    { text: "Head to the learning hut to speak with the Information Guide.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 7 }] } },
-                    { text: "Head down to the mines when you're ready.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 8 }] } },
+                    {
+                        text: "The Survival Guide is just down the path. He's waiting for you.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 1,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Good to see you're making progress. Follow the Survival Guide's instructions.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 2,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "The Baker is next. He's in the clearing past the Survival Guide.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 4,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Head to the learning hut to speak with the Information Guide.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 7,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Head down to the mines when you're ready.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 8,
+                                },
+                            ],
+                        },
+                    },
                 ],
                 dialogue: {
                     leo_default: {
-                        npcName: 'Leo the Guide',
-                        npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+                        npcName: "Leo the Guide",
+                        npcIcon: "/assets/npcChatHeads/leo_the_guide.png",
                         text: "Welcome to Embrune! Ready to start your adventure?",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
         ],
-        regionId: 'path_of_beginnings', x: 89, y: -50,
+        regionId: "path_of_beginnings",
+        x: 100,
+        y: -50,
     },
     tutorial_survival_grounds: {
-        id: 'tutorial_survival_grounds',
-        name: 'Survival Training Grounds',
-        description: 'A small clearing with basic resources for survival training. A survival expert is here to help.',
-        connections: ['tutorial_entrance', 'tutorial_baking_area'],
-        unlockRequirement: { type: 'quest', questId: 'embrune_101', stage: 1 },
+        id: "tutorial_survival_grounds",
+        name: "Survival Training Grounds",
+        description: "A small clearing with basic resources for survival training. A survival expert is here to help.",
+        connections: ["tutorial_entrance", "tutorial_baking_area"],
+        unlockRequirement: {
+            type: "quest",
+            questId: "embrune_101",
+            stage: 1,
+        },
         activities: [
             {
-                type: 'npc',
-                name: 'Survival Guide',
-                icon: '/assets/npcChatHeads/survival_guide.png',
-                startNode: 'survival_default',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Survival Guide",
+                icon: "/assets/npcChatHeads/survival_guide.png",
+                startNode: "survival_default",
+                questTopics: ["embrune_101"],
                 conditionalGreetings: [
-                    { text: "Gather some logs and a raw shrimp, then cook them!", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 2 }] } },
-                    { text: "Show me your cooked shrimp when you're done.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 3 }] } },
+                    {
+                        text: "Gather some logs and a raw shrimp, then cook them!",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 2,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Show me your cooked shrimp when you're done.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 3,
+                                },
+                            ],
+                        },
+                    },
                 ],
                 dialogue: {
                     survival_default: {
-                        npcName: 'Survival Guide',
-                        npcIcon: '/assets/npcChatHeads/survival_guide.png',
+                        npcName: "Survival Guide",
+                        npcIcon: "/assets/npcChatHeads/survival_guide.png",
                         text: "Learning to live off the land is the first step to becoming a true adventurer.",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
-            { type: 'skilling', id: 'tut_survival_tree1', name: 'Chop Tree', skill: SkillName.Woodcutting, requiredLevel: 1, loot: [{ itemId: 'logs', chance: 1, xp: 25 }], resourceCount: { min: 999, max: 999 }, respawnTime: 3000, gatherTime: 1500 },
-            { type: 'skilling', id: 'tut_survival_fish1', name: 'Net Fish', skill: SkillName.Fishing, requiredLevel: 1, loot: [{ itemId: 'raw_shrimp', chance: 1, xp: 10 }], resourceCount: { min: 999, max: 999 }, respawnTime: 4000, gatherTime: 1800, requiredTool: ToolType.FishingNet },
+            {
+                type: "skilling",
+                id: "tut_survival_tree1",
+                name: "Chop Tree",
+                skill: SkillName.Woodcutting,
+                requiredLevel: 1,
+                loot: [
+                    {
+                        itemId: "logs",
+                        chance: 1,
+                        xp: 25,
+                    },
+                ],
+                resourceCount: {
+                    min: 999,
+                    max: 999,
+                },
+                respawnTime: 3000,
+                gatherTime: 1500,
+            },
+            {
+                type: "skilling",
+                id: "tut_survival_fish1",
+                name: "Net Fish",
+                skill: SkillName.Fishing,
+                requiredLevel: 1,
+                loot: [
+                    {
+                        itemId: "raw_shrimp",
+                        chance: 1,
+                        xp: 10,
+                    },
+                ],
+                resourceCount: {
+                    min: 999,
+                    max: 999,
+                },
+                respawnTime: 4000,
+                gatherTime: 1800,
+                requiredTool: ToolType.FishingNet,
+            },
         ],
-        regionId: 'path_of_beginnings', x: 91, y: 4,
+        regionId: "path_of_beginnings",
+        x: 100,
+        y: 0,
     },
     tutorial_baking_area: {
-        id: 'tutorial_baking_area',
-        name: 'Baking Area',
-        description: 'The smell of fresh bread hangs in the air. A baker stands near a cooking range, next to a field of wheat.',
-        connections: ['tutorial_survival_grounds', 'tutorial_learning_hut'],
-        unlockRequirement: { type: 'quest', questId: 'embrune_101', stage: 4 },
+        id: "tutorial_baking_area",
+        name: "Baking Area",
+        description: "The smell of fresh bread hangs in the air. A baker stands near a cooking range, next to a field of wheat.",
+        connections: ["tutorial_survival_grounds", "tutorial_learning_hut"],
+        unlockRequirement: {
+            type: "quest",
+            questId: "embrune_101",
+            stage: 4,
+        },
         activities: [
             {
-                type: 'npc',
-                name: 'Baker',
-                icon: '/assets/npcChatHeads/baker.png',
-                startNode: 'baker_default',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Baker",
+                icon: "/assets/npcChatHeads/baker.png",
+                startNode: "baker_default",
+                questTopics: ["embrune_101"],
                 conditionalGreetings: [
-                    { text: "Harvest wheat and make dough!", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 5 }] } },
-                    { text: "Show me that fresh bread!", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 6 }] } },
+                    {
+                        text: "Harvest wheat and make dough!",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 5,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Show me that fresh bread!",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 6,
+                                },
+                            ],
+                        },
+                    },
                 ],
                 dialogue: {
                     baker_default: {
-                        npcName: 'Baker',
-                        npcIcon: '/assets/npcChatHeads/baker.png',
+                        npcName: "Baker",
+                        npcIcon: "/assets/npcChatHeads/baker.png",
                         text: "Nothing warms the soul like a fresh loaf of bread!",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
-            { type: 'skilling', id: 'tut_baking_wheat', name: 'Harvest Wheat', skill: SkillName.Cooking, requiredLevel: 1, loot: [{ itemId: 'wheat', chance: 1, xp: 0 }], resourceCount: { min: 999, max: 999 }, respawnTime: 2000, gatherTime: 600 },
-            { type: 'windmill' },
-            { type: 'cooking_range' },
-            { type: 'water_source', name: 'Fill Container' },
+            {
+                type: "skilling",
+                id: "tut_baking_wheat",
+                name: "Harvest Wheat",
+                skill: SkillName.Cooking,
+                requiredLevel: 1,
+                loot: [
+                    {
+                        itemId: "wheat",
+                        chance: 1,
+                        xp: 0,
+                    },
+                ],
+                resourceCount: {
+                    min: 999,
+                    max: 999,
+                },
+                respawnTime: 2000,
+                gatherTime: 600,
+            },
+            {
+                type: "windmill",
+            },
+            {
+                type: "cooking_range",
+            },
+            {
+                type: "water_source",
+                name: "Fill Container",
+            },
         ],
-        regionId: 'path_of_beginnings', x: -19, y: -5,
+        regionId: "path_of_beginnings",
+        x: -25,
+        y: 0,
     },
     tutorial_learning_hut: {
-        id: 'tutorial_learning_hut',
-        name: 'Learning Hut',
-        description: 'A small hut filled with books and scrolls. An information guide offers to share knowledge. A ladder leads down into the darkness.',
-        connections: ['tutorial_baking_area'],
-        unlockRequirement: { type: 'quest', questId: 'embrune_101', stage: 7 },
+        id: "tutorial_learning_hut",
+        name: "Learning Hut",
+        description: "A small hut filled with books and scrolls. An information guide offers to share knowledge. A ladder leads down into the darkness.",
+        connections: ["tutorial_baking_area"],
+        unlockRequirement: {
+            type: "quest",
+            questId: "embrune_101",
+            stage: 7,
+        },
         activities: [
             {
-                type: 'npc',
-                name: 'Information Guide',
-                icon: '/assets/npcChatHeads/information_guide.png',
-                startNode: 'info_default',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Information Guide",
+                icon: "/assets/npcChatHeads/information_guide.png",
+                startNode: "info_default",
+                questTopics: ["embrune_101"],
                 dialogue: {
                     info_default: {
-                        npcName: 'Information Guide',
-                        npcIcon: '/assets/npcChatHeads/information_guide.png',
+                        npcName: "Information Guide",
+                        npcIcon: "/assets/npcChatHeads/information_guide.png",
                         text: "Pay attention to your interface. Knowing where your skills and quests are is half the battle.",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
             {
-                type: 'ladder',
-                name: 'Climb Down Ladder',
-                direction: 'down',
-                toPoiId: 'tutorial_mine',
-                questCondition: { questId: 'embrune_101', stages: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], visibleAfterCompletion: true }
-            }
+                type: "ladder",
+                name: "Climb Down Ladder",
+                direction: "down",
+                toPoiId: "tutorial_mine",
+                questCondition: {
+                    questId: "embrune_101",
+                    stages: [
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22,
+                        23,
+                        24,
+                        25,
+                        26,
+                        27,
+                        28,
+                        29,
+                    ],
+                    visibleAfterCompletion: true,
+                },
+            },
         ],
-        regionId: 'path_of_beginnings', x: -42, y: -109,
+        regionId: "path_of_beginnings",
+        x: -50,
+        y: -100,
     },
     tutorial_mine: {
-        id: 'tutorial_mine',
-        name: 'Tutorial Mine',
-        description: 'A small cavern with deposits of copper and tin. A furnace and anvil stand ready for use.',
-        connections: ['tutorial_combat_area'],
-        unlockRequirement: { type: 'quest', questId: 'embrune_101', stage: 8 },
+        id: "tutorial_mine",
+        name: "Tutorial Mine",
+        description: "A small cavern with deposits of copper and tin. A furnace and anvil stand ready for use.",
+        connections: ["tutorial_combat_area"],
+        unlockRequirement: {
+            type: "quest",
+            questId: "embrune_101",
+            stage: 8,
+        },
         activities: [
             {
-                type: 'npc',
-                name: 'Mining Guide',
-                icon: '/assets/npcChatHeads/mining_guide.png',
-                startNode: 'mining_default',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Mining Guide",
+                icon: "/assets/npcChatHeads/mining_guide.png",
+                startNode: "mining_default",
+                questTopics: ["embrune_101"],
                 conditionalGreetings: [
-                    { text: "Mine one copper ore and one tin ore.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 9 }] } },
-                    { text: "Smelt your ores in the furnace.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 10 }] } },
-                    { text: "Smith that bar into a dagger.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 11 }] } },
-                    { text: "Let me see that dagger you made.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 12 }] } },
+                    {
+                        text: "Mine one copper ore and one tin ore.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 9,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Smelt your ores in the furnace.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 10,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Smith that bar into a dagger.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 11,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Let me see that dagger you made.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 12,
+                                },
+                            ],
+                        },
+                    },
                 ],
                 dialogue: {
                     mining_default: {
-                        npcName: 'Mining Guide',
-                        npcIcon: '/assets/npcChatHeads/mining_guide.png',
+                        npcName: "Mining Guide",
+                        npcIcon: "/assets/npcChatHeads/mining_guide.png",
                         text: "The ring of a hammer, the heat of the forge... that's the life for me.",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
-            { type: 'skilling', id: 'tut_mine_copper1', name: 'Mine Copper', skill: SkillName.Mining, requiredLevel: 1, loot: [{ itemId: 'copper_ore', chance: 1, xp: 18 }], resourceCount: { min: 999, max: 999 }, respawnTime: 3000, gatherTime: 1500 },
-            { type: 'skilling', id: 'tut_mine_tin1', name: 'Mine Tin', skill: SkillName.Mining, requiredLevel: 1, loot: [{ itemId: 'tin_ore', chance: 1, xp: 18 }], resourceCount: { min: 999, max: 999 }, respawnTime: 3000, gatherTime: 1500 },
-            { type: 'furnace' },
-            { type: 'anvil' },
             {
-                type: 'ladder',
-                name: 'Climb Up Ladder',
-                direction: 'up',
-                toPoiId: 'tutorial_learning_hut',
-                questCondition: { questId: 'embrune_101', stages: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], visibleAfterCompletion: true }
-            }
+                type: "skilling",
+                id: "tut_mine_copper1",
+                name: "Mine Copper",
+                skill: SkillName.Mining,
+                requiredLevel: 1,
+                loot: [
+                    {
+                        itemId: "copper_ore",
+                        chance: 1,
+                        xp: 18,
+                    },
+                ],
+                resourceCount: {
+                    min: 999,
+                    max: 999,
+                },
+                respawnTime: 3000,
+                gatherTime: 1500,
+            },
+            {
+                type: "skilling",
+                id: "tut_mine_tin1",
+                name: "Mine Tin",
+                skill: SkillName.Mining,
+                requiredLevel: 1,
+                loot: [
+                    {
+                        itemId: "tin_ore",
+                        chance: 1,
+                        xp: 18,
+                    },
+                ],
+                resourceCount: {
+                    min: 999,
+                    max: 999,
+                },
+                respawnTime: 3000,
+                gatherTime: 1500,
+            },
+            {
+                type: "furnace",
+            },
+            {
+                type: "anvil",
+            },
+            {
+                type: "ladder",
+                name: "Climb Up Ladder",
+                direction: "up",
+                toPoiId: "tutorial_learning_hut",
+                questCondition: {
+                    questId: "embrune_101",
+                    stages: [
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22,
+                        23,
+                        24,
+                        25,
+                        26,
+                        27,
+                        28,
+                        29,
+                    ],
+                    visibleAfterCompletion: true,
+                },
+            },
         ],
-        regionId: 'path_of_beginnings', x: 48, y: -180,
+        regionId: "path_of_beginnings",
+        x: 50,
+        y: -200,
     },
     tutorial_combat_area: {
-        id: 'tutorial_combat_area',
-        name: 'Combat Area',
-        description: 'An area set up for combat practice. Some rats skitter in a cage.',
-        connections: ['tutorial_mine', 'tutorial_bank_area'],
-        unlockRequirement: { type: 'quest', questId: 'embrune_101', stage: 13 },
+        id: "tutorial_combat_area",
+        name: "Combat Area",
+        description: "An area set up for combat practice. Some rats skitter in a cage.",
+        connections: ["tutorial_mine", "tutorial_bank_area"],
+        unlockRequirement: {
+            type: "quest",
+            questId: "embrune_101",
+            stage: 13,
+        },
         activities: [
             {
-                type: 'npc',
-                name: 'Weapon Guide',
-                icon: '/assets/npcChatHeads/weapon_guide.png',
-                startNode: 'weapon_default',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Weapon Guide",
+                icon: "/assets/npcChatHeads/weapon_guide.png",
+                startNode: "weapon_default",
+                questTopics: ["embrune_101"],
                 conditionalGreetings: [
-                    { text: "Equip your dagger and defeat a rat!", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 14 }] } },
-                    { text: "Tell me about your melee victory.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 15 }] } },
-                    { text: "Use the bow to defeat the other rat.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 16 }] } },
-                    { text: "Report your ranged victory to me.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 17 }] } },
+                    {
+                        text: "Equip your dagger and defeat a rat!",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 14,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Tell me about your melee victory.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 15,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Use the bow to defeat the other rat.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 16,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Report your ranged victory to me.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 17,
+                                },
+                            ],
+                        },
+                    },
                 ],
                 dialogue: {
                     weapon_default: {
-                        npcName: 'Weapon Guide',
-                        npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+                        npcName: "Weapon Guide",
+                        npcIcon: "/assets/npcChatHeads/weapon_guide.png",
                         text: "A sharp blade and a steady hand are an adventurer's best friends.",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
-            { type: 'combat', monsterId: 'tutorial_rat' },
-            { type: 'combat', monsterId: 'tutorial_rat' },
+            {
+                type: "combat",
+                monsterId: "tutorial_rat",
+            },
+            {
+                type: "combat",
+                monsterId: "tutorial_rat",
+            },
         ],
-        regionId: 'path_of_beginnings', x: 175, y: -193,
+        regionId: "path_of_beginnings",
+        x: 200,
+        y: -200,
     },
     tutorial_bank_area: {
-        id: 'tutorial_bank_area',
-        name: 'Bank & Finance Area',
-        description: 'A small, secure building. Inside, a Banker and a Money Guide offer their services.',
-        connections: ['tutorial_combat_area', 'tutorial_chapel_area'],
-        unlockRequirement: { type: 'quest', questId: 'embrune_101', stage: 18 },
+        id: "tutorial_bank_area",
+        name: "Bank & Finance Area",
+        description: "A small, secure building. Inside, a Banker and a Money Guide offer their services.",
+        connections: ["tutorial_combat_area", "tutorial_chapel_area"],
+        unlockRequirement: {
+            type: "quest",
+            questId: "embrune_101",
+            stage: 18,
+        },
         activities: [
             {
-                type: 'npc',
-                name: 'Banker',
-                icon: '/assets/npcChatHeads/banker.png',
-                startNode: 'default_dialogue',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Banker",
+                icon: "/assets/npcChatHeads/banker.png",
+                startNode: "default_dialogue",
+                questTopics: ["embrune_101"],
                 conditionalGreetings: [
-                    { text: "Welcome to the Bank of Embrune, trainee. Please, ask me about the lesson so we can begin.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 18 }] } }
+                    {
+                        text: "Welcome to the Bank of Embrune, trainee. Please, ask me about the lesson so we can begin.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 18,
+                                },
+                            ],
+                        },
+                    },
                 ],
                 dialogue: {
                     default_dialogue: {
-                        npcName: 'Banker',
-                        npcIcon: '/assets/npcChatHeads/banker.png',
+                        npcName: "Banker",
+                        npcIcon: "/assets/npcChatHeads/banker.png",
                         text: "Your items are safe with us. Would you like to access your bank?",
                         responses: [],
                         conditionalResponses: [
-                            { text: "Yes.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 19, operator: 'gte' }] }, actions: [{ type: 'open_bank' }] },
-                            { text: "Yes.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'completed' }] }, actions: [{ type: 'open_bank' }] },
-                            { text: "No, thank you.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 19, operator: 'gte' }] } },
-                            { text: "No, thank you.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'completed' }] } }
-                        ]
-                    }
-                }
+                            {
+                                text: "Yes.",
+                                check: {
+                                    requirements: [
+                                        {
+                                            type: "quest",
+                                            questId: "embrune_101",
+                                            status: "in_progress",
+                                            stage: 19,
+                                            operator: "gte",
+                                        },
+                                    ],
+                                },
+                                actions: [
+                                    {
+                                        type: "open_bank",
+                                    },
+                                ],
+                            },
+                            {
+                                text: "Yes.",
+                                check: {
+                                    requirements: [
+                                        {
+                                            type: "quest",
+                                            questId: "embrune_101",
+                                            status: "completed",
+                                        },
+                                    ],
+                                },
+                                actions: [
+                                    {
+                                        type: "open_bank",
+                                    },
+                                ],
+                            },
+                            {
+                                text: "No, thank you.",
+                                check: {
+                                    requirements: [
+                                        {
+                                            type: "quest",
+                                            questId: "embrune_101",
+                                            status: "in_progress",
+                                            stage: 19,
+                                            operator: "gte",
+                                        },
+                                    ],
+                                },
+                            },
+                            {
+                                text: "No, thank you.",
+                                check: {
+                                    requirements: [
+                                        {
+                                            type: "quest",
+                                            questId: "embrune_101",
+                                            status: "completed",
+                                        },
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                },
             },
             {
-                type: 'npc',
-                name: 'Money Guide',
-                icon: '/assets/npcChatHeads/money_guide.png',
-                startNode: 'money_default',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Money Guide",
+                icon: "/assets/npcChatHeads/money_guide.png",
+                startNode: "money_default",
+                questTopics: ["embrune_101"],
                 dialogue: {
                     money_default: {
-                        npcName: 'Money Guide',
-                        npcIcon: '/assets/npcChatHeads/money_guide.png',
+                        npcName: "Money Guide",
+                        npcIcon: "/assets/npcChatHeads/money_guide.png",
                         text: "A full coin purse is a happy coin purse.",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
         ],
-        regionId: 'path_of_beginnings', x: 267, y: -96,
+        regionId: "path_of_beginnings",
+        x: 275,
+        y: -75,
     },
     tutorial_chapel_area: {
-        id: 'tutorial_chapel_area',
-        name: 'Chapel Area',
-        description: 'A small, peaceful chapel stands in this clearing.',
-        connections: ['tutorial_bank_area', 'tutorial_tavern'],
-        unlockRequirement: { type: 'quest', questId: 'embrune_101', stage: 20 },
+        id: "tutorial_chapel_area",
+        name: "Chapel Area",
+        description: "A small, peaceful chapel stands in this clearing.",
+        connections: ["tutorial_bank_area", "tutorial_tavern"],
+        unlockRequirement: {
+            type: "quest",
+            questId: "embrune_101",
+            stage: 20,
+        },
         activities: [
             {
-                type: 'npc',
-                name: 'Prayer Guide',
-                icon: '/assets/npcChatHeads/prayer_guide.png',
-                startNode: 'prayer_default',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Prayer Guide",
+                icon: "/assets/npcChatHeads/prayer_guide.png",
+                startNode: "prayer_default",
+                questTopics: ["embrune_101"],
                 conditionalGreetings: [
-                    { text: "Bury some bones and speak with me again.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 21 }] } },
-                    { text: "Ready to hear more about Prayer?", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 22 }] } },
+                    {
+                        text: "Bury some bones and speak with me again.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 21,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Ready to hear more about Prayer?",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 22,
+                                },
+                            ],
+                        },
+                    },
                 ],
                 dialogue: {
                     prayer_default: {
-                        npcName: 'Prayer Guide',
-                        npcIcon: '/assets/npcChatHeads/prayer_guide.png',
+                        npcName: "Prayer Guide",
+                        npcIcon: "/assets/npcChatHeads/prayer_guide.png",
                         text: "May you walk in the light.",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
             {
-                type: 'npc',
-                name: 'Altar',
-                icon: 'altar',
-                startNode: 'altar_default',
+                type: "npc",
+                name: "Altar",
+                icon: "altar",
+                startNode: "altar_default",
                 dialogue: {
                     altar_default: {
-                        npcName: 'Altar',
-                        npcIcon: 'altar',
+                        npcName: "Altar",
+                        npcIcon: "altar",
                         text: "An ancient, holy altar. Praying here restores your Prayer points.",
                         responses: [
-                            { text: "Pray", actions: [{ type: 'restore_prayer' }] },
-                            { text: "Leave" }
-                        ]
-                    }
-                }
-            }
+                            {
+                                text: "Pray",
+                                actions: [
+                                    {
+                                        type: "restore_prayer",
+                                    },
+                                ],
+                            },
+                            {
+                                text: "Leave",
+                            },
+                        ],
+                    },
+                },
+            },
         ],
-        regionId: 'path_of_beginnings', x: 257, y: 54,
+        regionId: "path_of_beginnings",
+        x: 250,
+        y: 50,
     },
     tutorial_tavern: {
-        id: 'tutorial_tavern',
-        name: 'Tutorial Tavern',
-        description: 'A cozy tavern. A manager, a magic guide, and a quest board offer opportunities.',
-        connections: ['tutorial_chapel_area'],
-        unlockRequirement: { type: 'quest', questId: 'embrune_101', stage: 23 },
+        id: "tutorial_tavern",
+        name: "Tutorial Tavern",
+        description: "A cozy tavern. A manager, a magic guide, and a quest board offer opportunities.",
+        connections: ["tutorial_chapel_area"],
+        unlockRequirement: {
+            type: "quest",
+            questId: "embrune_101",
+            stage: 23,
+        },
         activities: [
             {
-                type: 'npc',
-                name: 'Tavern Manager',
-                icon: '/assets/npcChatHeads/barkeep_grimley.png',
-                startNode: 'tavern_default',
-                questTopics: ['embrune_101'],
+                type: "npc",
+                name: "Tavern Manager",
+                icon: "/assets/npcChatHeads/barkeep_grimley.png",
+                startNode: "tavern_default",
+                questTopics: ["embrune_101"],
                 conditionalGreetings: [
-                    { text: "Check the board for a special task.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 24 }] } },
-                    { text: "Oh, look! Master Elmsworth has finally deigned to manifest. Speak with him to begin your studies.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 25 }] } },
-                    { text: "Don't let that rat escape! Zap it with magic.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 26 }] } },
-                    { text: "Did you deal with that rat yet?", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 27 }] } },
+                    {
+                        text: "Check the board for a special task.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 24,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Oh, look! Master Elmsworth has finally deigned to manifest. Speak with him to begin your studies.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 25,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Don't let that rat escape! Zap it with magic.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 26,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Did you deal with that rat yet?",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 27,
+                                },
+                            ],
+                        },
+                    },
                 ],
                 dialogue: {
                     tavern_default: {
-                        npcName: 'Tavern Manager',
-                        npcIcon: '/assets/npcChatHeads/barkeep_grimley.png',
+                        npcName: "Tavern Manager",
+                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
                         text: "Welcome! Looking for work or a drink?",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
             {
-                type: 'npc',
-                name: 'Magic Guide',
-                icon: '/assets/npcChatHeads/wizard_elmsworth.png',
-                startNode: 'magic_default',
-                questTopics: ['embrune_101'],
-                // Strictly gated visibility for teleport effect
-                questCondition: { questId: 'embrune_101', stages: [25, 26, 27, 28, 29] },
+                type: "npc",
+                name: "Magic Guide",
+                icon: "/assets/npcChatHeads/wizard_elmsworth.png",
+                startNode: "magic_default",
+                questTopics: ["embrune_101"],
+                questCondition: {
+                    questId: "embrune_101",
+                    stages: [25, 26, 27, 28, 29],
+                },
                 conditionalGreetings: [
-                    { text: "*The wizard suddenly appears in a swirl of shimmering air.* Salutations, traveler!", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 25 }] } },
-                    { text: "Focus your mind and unleash the elements!", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 26 }] } },
-                    { text: "Magnificent work. Return to me for your final lesson.", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 28 }] } },
-                    { text: "Ready to depart for the mainland, traveler?", check: { requirements: [{ type: 'quest', questId: 'embrune_101', status: 'in_progress', stage: 29 }] } },
+                    {
+                        text: "*The wizard suddenly appears in a swirl of shimmering air.* Salutations, traveler!",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 25,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Focus your mind and unleash the elements!",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 26,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Magnificent work. Return to me for your final lesson.",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 28,
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        text: "Ready to depart for the mainland, traveler?",
+                        check: {
+                            requirements: [
+                                {
+                                    type: "quest",
+                                    questId: "embrune_101",
+                                    status: "in_progress",
+                                    stage: 29,
+                                },
+                            ],
+                        },
+                    },
                 ],
                 dialogue: {
                     magic_default: {
-                        npcName: 'Magic Guide',
-                        npcIcon: '/assets/npcChatHeads/wizard_elmsworth.png',
+                        npcName: "Magic Guide",
+                        npcIcon: "/assets/npcChatHeads/wizard_elmsworth.png",
                         text: "Magic is a powerful tool, if you have the will to master it.",
-                        responses: []
-                    }
-                }
+                        responses: [],
+                    },
+                },
             },
-            { 
-                type: 'quest_board',
-                questCondition: { questId: 'embrune_101', stages: [24, 25, 26, 27, 28, 29] },
+            {
+                type: "quest_board",
+                questCondition: {
+                    questId: "embrune_101",
+                    stages: [24, 25, 26, 27, 28, 29],
+                },
             },
-            { type: 'combat', monsterId: 'tutorial_rat' },
+            {
+                type: "combat",
+                monsterId: "tutorial_rat",
+            },
         ],
-        regionId: 'path_of_beginnings', x: 98, y: 106,
+        regionId: "path_of_beginnings",
+        x: 100,
+        y: 75,
     },
 };

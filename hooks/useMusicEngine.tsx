@@ -83,11 +83,48 @@ export const MUSIC_TRACKS: MusicTrackMetadata[] = [
     { id: 'scorpions_den', name: "Scorpion's Den", style: 'desolate' as MusicStyle, poiId: 'the_sand_serpent_inn', trackNum: 19 },
     { id: 'silk_and_cinder', name: 'Silk & Cinder', style: 'desolate' as MusicStyle, poiId: 'fouthia_bazaar', trackNum: 20 },
     { id: 'whispers_in_the_sand', name: 'Whispers in the Sand', style: 'mystic' as MusicStyle, poiId: 'fouthia_shrine', trackNum: 21 },
+    // --- Slayers Respite Suite ---
+    // Duskwatch
+    { id: 'duskwatch_plaza', name: "The Guildmaster's Pride", style: 'grand' as MusicStyle, poiId: 'duskwatch_plaza', trackNum: 23 },
+    { id: 'duskwatch_inn', name: 'The Salty Spirit', style: 'pastoral' as MusicStyle, poiId: 'duskwatch_tavern', trackNum: 24 },
+    { id: 'duskwatch_market', name: 'Coin & Scoria', style: 'industrial' as MusicStyle, poiId: 'duskwatch_market', trackNum: 25 },
+    { id: 'duskwatch_gates', name: 'Iron Vigil', style: 'heroic' as MusicStyle, poiId: 'duskwatch_north_gate', trackNum: 26 },
+    // Thornveil
+    { id: 'thornveil_gen', name: 'Emerald Canopy', style: 'pastoral' as MusicStyle, regionId: 'the_thornveil', trackNum: 27 },
+    { id: 'thornveil_mystic', name: 'Dancers of the Leaf', style: 'mystic' as MusicStyle, poiId: 'thornveil_ne_canopy_walk', trackNum: 28 },
+    { id: 'thornveil_deep', name: 'Strangle-Root', style: 'mystic' as MusicStyle, poiId: 'thornveil_nw_inner_thicket', trackNum: 29 },
+    // Scorched Hollow
+    { id: 'scorched_gen', name: 'Ash and Ember', style: 'volcanic' as MusicStyle, regionId: 'the_scorched_hollow', trackNum: 30 },
+    { id: 'scorched_secondary', name: 'Obsidian Heart', style: 'volcanic' as MusicStyle, poiId: 'scorched_obsidian_peak', trackNum: 31 },
+    { id: 'scorched_deep', name: 'Forge of the Sun', style: 'volcanic' as MusicStyle, poiId: 'scorched_magma_cathedral', trackNum: 32 },
+    // Bonemarsh
+    { id: 'bonemarsh_gen', name: 'Mist of the Fallen', style: 'desolate' as MusicStyle, regionId: 'the_bonemarsh', trackNum: 33 },
+    { id: 'bonemarsh_mystic', name: "Kaelen's Vigil", style: 'mystic' as MusicStyle, poiId: 'bonemarsh_mire_watcher_hut', trackNum: 34 },
+    { id: 'bonemarsh_deep', name: 'The Sinking Heart', style: 'desolate' as MusicStyle, poiId: 'bonemarsh_mire_core', trackNum: 35 },
+    // Shattered Coast
+    { id: 'coast_gen', name: 'Brine & Bone', style: 'pastoral' as MusicStyle, regionId: 'the_shattered_coast', trackNum: 36 },
+    { id: 'coast_grand', name: "Eyrie's Call", style: 'grand' as MusicStyle, poiId: 'shattered_cliff_eyrie', trackNum: 37 },
+    { id: 'coast_mystic', name: 'Lustre of the Deep', style: 'mystic' as MusicStyle, poiId: 'shattered_drowned_lake', trackNum: 38 },
+    // Frostspine
+    { id: 'frostspine_gen', name: 'Glacial Breath', style: 'desolate' as MusicStyle, regionId: 'respite_frostspine_ridge', trackNum: 39 },
+    { id: 'frostspine_pastoral', name: 'Echoes of the Peak', style: 'pastoral' as MusicStyle, poiId: 'frostspine_ridge_base_camp', trackNum: 40 },
+    { id: 'frostspine_grand', name: "Dragon's Skeleton", style: 'grand' as MusicStyle, poiId: 'frostspine_ancient_peak', trackNum: 41 },
+    // Abyssal Expanse
+    { id: 'abyssal_gen', name: 'Violet Haze', style: 'eerie' as MusicStyle, regionId: 'the_abyssal_expanse', trackNum: 42 },
+    { id: 'abyssal_mystic', name: 'Lost Research', style: 'mystic' as MusicStyle, poiId: 'abyssal_n2', trackNum: 43 },
+    { id: 'abyssal_eerie', name: 'Event Horizon', style: 'eerie' as MusicStyle, poiId: 'abyssal_n5', trackNum: 44 },
+    // Dungeons
+    { id: 'barrow_entry', name: 'Crypt Whispers', style: 'eerie' as MusicStyle, poiId: 'hollowed_barrow_entrance', trackNum: 45 },
+    { id: 'barrow_inner', name: 'Ancient Sarcophagus', style: 'eerie' as MusicStyle, poiId: 'hollowed_barrow_heart', trackNum: 46 },
+    { id: 'forge_entry', name: 'Hiss of the Deeps', style: 'industrial' as MusicStyle, poiId: 'cinderforge_entrance', trackNum: 47 },
+    { id: 'forge_inner', name: "Master's Hammer", style: 'industrial' as MusicStyle, poiId: 'cinderforge_heart', trackNum: 48 },
+    { id: 'rift_entry', name: 'Shattered Reality', style: 'eerie' as MusicStyle, poiId: 'abyssal_rift_entrance', trackNum: 49 },
+    { id: 'rift_inner', name: 'The Unmaking', style: 'mystic' as MusicStyle, poiId: 'abyssal_rift_heart_of_unmaking', trackNum: 50 },
     // --- Other ---
     { id: 'generated_track_1', name: 'Whispers from the Void', style: 'eerie' as MusicStyle, trackNum: 22 },
     // Generic Region Defaults LAST
     ...(Object.values(REGIONS).map((r): MusicTrackMetadata => {
-        if (['meadowdale', 'oakhaven', 'silverhaven', 'sanctity', 'fouthia'].includes(r.id)) return null as any; // Skip regions with dedicated suites
+        if (['meadowdale', 'oakhaven', 'silverhaven', 'sanctity', 'fouthia', 'the_thornveil', 'the_scorched_hollow', 'the_bonemarsh', 'the_shattered_coast', 'respite_frostspine_ridge', 'the_abyssal_expanse', 'hollowed_barrow', 'cinderforge_depths', 'abyssal_rift'].includes(r.id)) return null as any; // Skip regions with dedicated suites
         let style: MusicStyle = 'desolate';
         if (['meadowdale', 'the_verdant_fields', 'sunbright_plains'].includes(r.id)) style = 'pastoral';
         else if (['oakhaven', 'dwarven_outpost', 'sanctity'].includes(r.id)) style = 'industrial';
@@ -131,6 +168,35 @@ const generateScore = (track: MusicTrackMetadata): string => {
     if (track.id === 'scorpions_den') return (TRACKS as any).SCORPIONS_DEN_SCORE;
     if (track.id === 'silk_and_cinder') return (TRACKS as any).SILK_AND_CINDER_SCORE;
     if (track.id === 'whispers_in_the_sand') return (TRACKS as any).WHISPERS_IN_THE_SAND_SCORE;
+    // --- Slayers Respite Suite ---
+    if (track.id === 'duskwatch_plaza') return (TRACKS as any).DUSKWATCH_PLAZA_SCORE;
+    if (track.id === 'duskwatch_inn') return (TRACKS as any).DUSKWATCH_INN_SCORE;
+    if (track.id === 'duskwatch_market') return (TRACKS as any).DUSKWATCH_MARKET_SCORE;
+    if (track.id === 'duskwatch_gates') return (TRACKS as any).DUSKWATCH_GATES_SCORE;
+    if (track.id === 'thornveil_gen') return (TRACKS as any).THORNVEIL_GEN_SCORE;
+    if (track.id === 'thornveil_mystic') return (TRACKS as any).THORNVEIL_MYSTIC_SCORE;
+    if (track.id === 'thornveil_deep') return (TRACKS as any).THORNVEIL_DEEP_SCORE;
+    if (track.id === 'scorched_gen') return (TRACKS as any).SCORCHED_GEN_SCORE;
+    if (track.id === 'scorched_secondary') return (TRACKS as any).SCORCHED_SECONDARY_SCORE;
+    if (track.id === 'scorched_deep') return (TRACKS as any).SCORCHED_DEEP_SCORE;
+    if (track.id === 'bonemarsh_gen') return (TRACKS as any).BONEMARSH_GEN_SCORE;
+    if (track.id === 'bonemarsh_mystic') return (TRACKS as any).BONEMARSH_MYSTIC_SCORE;
+    if (track.id === 'bonemarsh_deep') return (TRACKS as any).BONEMARSH_DEEP_SCORE;
+    if (track.id === 'coast_gen') return (TRACKS as any).COAST_GEN_SCORE;
+    if (track.id === 'coast_grand') return (TRACKS as any).COAST_GRAND_SCORE;
+    if (track.id === 'coast_mystic') return (TRACKS as any).COAST_MYSTIC_SCORE;
+    if (track.id === 'frostspine_gen') return (TRACKS as any).FROSTSPINE_GEN_SCORE;
+    if (track.id === 'frostspine_pastoral') return (TRACKS as any).FROSTSPINE_PASTORAL_SCORE;
+    if (track.id === 'frostspine_grand') return (TRACKS as any).FROSTSPINE_GRAND_SCORE;
+    if (track.id === 'abyssal_gen') return (TRACKS as any).ABYSSAL_GEN_SCORE;
+    if (track.id === 'abyssal_mystic') return (TRACKS as any).ABYSSAL_MYSTIC_SCORE;
+    if (track.id === 'abyssal_eerie') return (TRACKS as any).ABYSSAL_EERIE_SCORE;
+    if (track.id === 'barrow_entry') return (TRACKS as any).BARROW_ENTRY_SCORE;
+    if (track.id === 'barrow_inner') return (TRACKS as any).BARROW_INNER_SCORE;
+    if (track.id === 'forge_entry') return (TRACKS as any).FORGE_ENTRY_SCORE;
+    if (track.id === 'forge_inner') return (TRACKS as any).FORGE_INNER_SCORE;
+    if (track.id === 'rift_entry') return (TRACKS as any).RIFT_ENTRY_SCORE;
+    if (track.id === 'rift_inner') return (TRACKS as any).RIFT_INNER_SCORE;
     switch (track.style) {
         // FIX: Property 'TUTORIAL_SCORE' does not exist on type 'typeof import("file:///components/music/index")'.
         case 'tutorial': return (TRACKS as any).TUTORIAL_SCORE;

@@ -1,4 +1,4 @@
-import { SkillName, InventorySlot, ToolType } from './';
+import { SkillName, InventorySlot, ToolType, ItemId, MonsterId } from './';
 import { DialogueNode, DialogueCheckRequirement, QuestId } from './quests';
 
 export interface SkillRequirement {
@@ -7,7 +7,8 @@ export interface SkillRequirement {
   xp: number;
   description: string;
   actionText: string;
-  items?: { itemId: string; quantity: number }[];
+  items?: { itemId: ItemId; quantity: number }[];
+  regrowTime?: number; // In ms. If present, the obstacle is temporary.
 }
 
 export interface Region {
@@ -24,6 +25,7 @@ export interface Region {
   /** Max number of aggressive monsters that will join a single combat queue. Overridable per-POI. */
   defaultMaxGroupSize?: number;
   trackNum?: number;
+  worldMapId?: string;
 }
 
 export type BonfireActivity = { type: 'bonfire', uniqueId: string, logId: string, expiresAt: number, poiId: string };
@@ -35,10 +37,10 @@ export interface QuestCondition {
 }
 
 export type POIActivity =
-  | { type: 'skilling'; id: string; name?: string; skill: SkillName; requiredLevel: number; loot: { itemId: string; chance: number; xp: number; requiredLevel?: number }[]; resourceCount: { min: number, max: number }; respawnTime: number; gatherTime: number; harvestBoost?: number; requiredTool?: ToolType; treeHardness?: number; questCondition?: QuestCondition; }
-  | { type: 'ground_item'; id: string; itemId: string; resourceCount: number; respawnTimer: number; questCondition?: QuestCondition; }
+  | { type: 'skilling'; id: string; name?: string; skill: SkillName; requiredLevel: number; loot: { itemId: ItemId; chance: number; xp: number; requiredLevel?: number }[]; resourceCount: { min: number, max: number }; respawnTime: number; gatherTime: number; harvestBoost?: number; requiredTool?: ToolType; treeHardness?: number; questCondition?: QuestCondition; lootTableId?: string; }
+  | { type: 'ground_item'; id: string; itemId: ItemId; resourceCount: number; respawnTimer: number; questCondition?: QuestCondition; }
   | { type: 'cut_cactus'; id: string; name: string; }
-  | { type: 'combat'; monsterId: string }
+  | { type: 'combat'; monsterId: MonsterId }
   | { type: 'shop'; shopId: string }
   | {
     type: 'npc';
@@ -48,10 +50,13 @@ export type POIActivity =
     dialogue?: Record<string, DialogueNode>;
     startNode?: string;
     questTopics?: QuestId[];
-    actions?: { label: string; action: 'open_bank' | 'deposit_backpack' | 'deposit_equipment' }[];
+    actions?: (
+      | { label: string; action: 'open_bank' | 'deposit_backpack' | 'deposit_equipment' }
+      | { type: 'shop'; label: string; shopId: string }
+    )[];
     dialogueType?: 'random';
     questCondition?: QuestCondition;
-    attackableMonsterId?: string;
+    attackableMonsterId?: MonsterId;
     pickpocket?: { lootTableId: string; };
     conditionalGreetings?: { text: string; check: { requirements: DialogueCheckRequirement[] }; }[];
     visibilityCheck?: DialogueCheckRequirement[];
@@ -65,7 +70,7 @@ export type POIActivity =
   | { type: 'quest_board'; questCondition?: QuestCondition; }
   | { type: 'bank' }
   | { type: 'spinning_wheel' }
-  | { type: 'blimp_travel'; requiredSlayerLevel: number; name: string; }
+  | { type: 'blimp_travel'; requiredSlayerLevel: number; name: string; destinationPoiId?: string; cost?: number; }
   | { 
       type: 'slayer_master'; 
       name: string; 
@@ -75,12 +80,16 @@ export type POIActivity =
       startNode?: string;
       questTopics?: QuestId[];
       dialogueType?: 'random';
+      actions?: (
+        | { label: string; action: 'open_bank' | 'deposit_backpack' | 'deposit_equipment' }
+        | { type: 'shop'; label: string; shopId: string }
+      )[];
       conditionalGreetings?: { text: string; check: { requirements: DialogueCheckRequirement[] }; }[];
     }
   | { type: 'water_source', name: string, isHoly?: boolean }
   | { type: 'milking' }
   | { type: 'windmill' }
-  | { type: 'runecrafting_altar'; runeId: string; questCondition?: QuestCondition; }
+  | { type: 'runecrafting_altar'; runeId: ItemId; questCondition?: QuestCondition; }
   | { type: 'ancient_chest'; name: string; }
   | { type: 'quest_start'; questId: QuestId }
   | { type: 'ladder'; name: string; direction: 'up' | 'down'; toPoiId: string; questCondition?: QuestCondition; }
@@ -114,6 +123,7 @@ export type POIActivity =
     successMessage?: string;
   }
   | { type: 'start_agility_course'; courseId: string; name: string; }
+  | { type: 'agility_obstacle'; obstacleId: string; name: string; skill: SkillName.Agility; requiredLevel: number; xp: number; actionText: string; }
   | { type: 'sand_pit'; name: string; }
   | BonfireActivity;
 
@@ -122,7 +132,7 @@ export interface POI {
   name: string;
   description: string;
   connections: string[];
-  activities: POIActivity[];
+  activities?: POIActivity[];
   unlockRequirement?: { type: 'quest'; questId: QuestId; stage: number; operator?: 'gte' | 'lte' }
   connectionRequirements?: Record<string, SkillRequirement>; // Key is the destination POI id
   regionId: string;
@@ -212,4 +222,5 @@ export interface WorldState {
     silenceStartTime?: number;
   };
   questVariables?: Record<string, number>;
+  temporaryObstacles?: Record<string, number>; // key: obstacleId, value: expiry timestamp
 }

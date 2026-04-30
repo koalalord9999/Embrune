@@ -2,6 +2,9 @@
 import { Spell } from '../types';
 
 export const SPELLS: Spell[] = [
+    // Home Teleport (Always First)
+    { id: 'home_teleport', name: 'Home Teleport', description: 'A slow teleport back to Meadowdale square. (30 min Cooldown)', level: 1, runes: [], xp: 0, type: 'utility-teleport', autocastable: false, castTime: 17 }, // ~10s in ticks
+
     // --- COMBAT SPELLS ---
     // Tier 1: Dart (Lvl 1+)
     { id: 'gust_dart', name: 'Gust Dart', description: 'A basic blast of wind.', level: 1, runes: [{ itemId: 'gust_rune', quantity: 1 }, { itemId: 'binding_rune', quantity: 1 }], xp: 5.5, type: 'combat', maxHit: 2, element: 'wind', autocastable: true, castTime: 4 },

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { DialogueAction, DialogueCheckRequirement, WorldState, InventorySlot, BankTab, ActivePanel, POIActivity, DialogueResponse, SkillName, ActiveTutorialState, LogEntry } from '../types';
+import { DialogueAction, DialogueCheckRequirement, WorldState, InventorySlot, BankTab, ActivePanel, POIActivity, DialogueResponse, SkillName, ActiveTutorialState, LogEntry, ItemId, MonsterId } from '../types';
 import {  INVENTORY_CAPACITY, QUESTS, ITEMS  } from '../constants';
 import { useQuests } from './useQuests';
 import { useQuestLogic } from './useQuestLogic';
@@ -41,10 +41,11 @@ interface DialogueActionDependencies {
     session: ReturnType<typeof useGameSession>;
     setIsResting: React.Dispatch<React.SetStateAction<boolean>>;
     slayer: ReturnType<typeof useSlayer>;
+    bankLogic: any;
 }
 
 export const useDialogueActions = (deps: DialogueActionDependencies) => {
-    const { quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session, slayer } = deps;
+    const { quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session, slayer, bankLogic } = deps;
     const { setActiveDialogue } = ui;
 
     const handleDialogueCheck = useCallback((requirements: DialogueCheckRequirement[]): boolean => {
@@ -204,13 +205,90 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
             return true;
         });
     }, [inv, char, worldState, quests.playerQuests, questLogic, slayer]);
+    
+    const validateDialogueActions = useCallback((actions: DialogueAction[]): { success: boolean, error?: string } => {
+        let tempInv = [...inv.inventory];
+        let tempCoins = inv.coins;
+
+        for (const action of actions) {
+            switch (action.type) {
+                case 'give_item': {
+                    const itemData = ITEMS[action.itemId];
+                    if (!itemData) continue;
+                    const isNoted = !!action.noted;
+                    
+                    if (isNoted || itemData.stackable) {
+                        const stackIndex = tempInv.findIndex(i => i?.itemId === action.itemId && !!i.noted === isNoted);
+                        if (stackIndex === -1) {
+                            const emptySlotIndex = tempInv.findIndex(slot => slot === null);
+                            if (emptySlotIndex === -1) return { success: false, error: "Your inventory is full." };
+                            tempInv[emptySlotIndex] = { itemId: action.itemId, quantity: action.quantity, noted: isNoted || undefined };
+                        } else {
+                            const existing = tempInv[stackIndex]!;
+                            tempInv[stackIndex] = { ...existing, quantity: existing.quantity + action.quantity };
+                        }
+                    } else {
+                        for (let i = 0; i < action.quantity; i++) {
+                            const emptySlotIndex = tempInv.findIndex(slot => slot === null);
+                            if (emptySlotIndex === -1) return { success: false, error: "Your inventory is full." };
+                            tempInv[emptySlotIndex] = { itemId: action.itemId, quantity: 1, noted: false };
+                        }
+                    }
+                    break;
+                }
+                case 'take_item': {
+                    const itemData = ITEMS[action.itemId];
+                    const itemName = itemData ? itemData.name : 'item';
+                    if (action.quantity === 'all') {
+                        tempInv = tempInv.map(i => i?.itemId === action.itemId ? null : i);
+                    } else {
+                        const amountNeeded = action.quantity;
+                        let found = 0;
+                        // Count across all slots (same as hasItems)
+                        found = tempInv.reduce((acc, slot) => (slot && slot.itemId === action.itemId && !slot.noted) ? acc + slot.quantity : acc, 0);
+                        
+                        if (found < amountNeeded) return { success: false, error: `You do not have ${amountNeeded > 1 ? amountNeeded + 'x ' : ''}${itemName}.` };
+                        
+                        // Simulate removal
+                        let remainingToRemove = amountNeeded;
+                        for (let i = 0; i < tempInv.length && remainingToRemove > 0; i++) {
+                            const slot = tempInv[i];
+                            if (slot && slot.itemId === action.itemId && !slot.noted) {
+                                const toRemove = Math.min(slot.quantity, remainingToRemove);
+                                if (slot.quantity === toRemove) tempInv[i] = null;
+                                else tempInv[i] = { ...slot, quantity: slot.quantity - toRemove };
+                                remainingToRemove -= toRemove;
+                            }
+                        }
+                    }
+                    break;
+                }
+                case 'give_coins':
+                    tempCoins += action.amount;
+                    break;
+                case 'take_coins':
+                    if (tempCoins < action.amount) return { success: false, error: "You do not have enough coins." };
+                    tempCoins -= action.amount;
+                    break;
+                case 'instant_heat_temper':
+                    if (tempCoins < 15000) return { success: false, error: "You don't have enough coins." };
+                    tempCoins -= 15000;
+                    break;
+                case 'blimp_travel':
+                    if (action.cost && tempCoins < action.cost) return { success: false, error: `You need ${action.cost} coins to use the blimp.` };
+                    if (action.cost) tempCoins -= action.cost;
+                    break;
+            }
+        }
+        return { success: true };
+    }, [inv.inventory, inv.coins]);
 
     const handleDialogueAction = useCallback((actions: DialogueAction[]) => {
         for (const action of actions) {
             let success = true;
             switch (action.type) {
                 case 'give_item': {
-                    inv.modifyItem(action.itemId, action.quantity, false, { bypassAutoBank: true, noted: action.noted });
+                    inv.modifyItem(action.itemId as ItemId, action.quantity, false, { bypassAutoBank: true, noted: action.noted });
                     break;
                 }
                 case 'take_item': {
@@ -226,17 +304,8 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         if (totalQuantity > 0) {
                             inv.modifyItem(action.itemId, -totalQuantity, true);
                         }
-                        // Always succeeds, even if 0 items are taken.
                     } else {
-                        if (inv.hasItems([{ itemId: action.itemId, quantity: quantity, nameOverride: action.nameOverride }])) {
-                            inv.modifyItem(action.itemId, -quantity, true, { nameOverride: action.nameOverride });
-                        } else {
-                            const item = ITEMS[action.itemId];
-                            const itemName = item ? item.name : 'the required item';
-                            const quantityText = quantity > 1 ? `${quantity}x ` : '';
-                            addLog(`You do not have ${quantityText}${itemName}.`);
-                            success = false;
-                        }
+                        inv.modifyItem(action.itemId, -quantity, true, { nameOverride: action.nameOverride });
                     }
                     break;
                 }
@@ -281,6 +350,15 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     break;
                 case 'open_bank':
                     ui.setActivePanel('bank');
+                    break;
+                case 'deposit_backpack':
+                    bankLogic.handleDepositBackpack(ui.activeBankTabId);
+                    break;
+                case 'deposit_equipment':
+                    bankLogic.handleDepositEquipment(ui.activeBankTabId);
+                    break;
+                case 'shop':
+                    ui.setActiveShopId(action.shopId);
                     break;
                 case 'start_bank_tutorial': {
                     ui.setActivePanel('bank');
@@ -334,14 +412,14 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         { id: 'gust_rune', qty: 50 },
                         { id: 'binding_rune', qty: 50 },
                     ];
-                    starterItems.forEach(item => inv.modifyItem(item.id, item.qty, true, { bypassAutoBank: true }));
+                    starterItems.forEach(item => inv.modifyItem(item.id as ItemId, item.qty, true, { bypassAutoBank: true }));
                     addLog("You have completed your training and received a starter pack!");
 
                     questLogic.forceCompleteQuest('embrune_101');
                     break;
                 }
                 case 'set_quest_combat_reward': {
-                    setWorldState(ws => ({ ...ws, pendingQuestCombatReward: { itemId: action.itemId, quantity: action.quantity } }));
+                    setWorldState(ws => ({ ...ws, pendingQuestCombatReward: { itemId: action.itemId as ItemId, quantity: action.quantity } }));
                     break;
                 }
                 case 'start_mandatory_combat': {
@@ -375,8 +453,8 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     let totalTanned = 0;
 
                     hidesToTan.forEach(hide => {
-                        inv.modifyItem(hide.hideId, -hide.quantity, true);
-                        inv.modifyItem(hide.leatherId, hide.quantity, false, { bypassAutoBank: true });
+                        inv.modifyItem(hide.hideId as ItemId, -hide.quantity, true);
+                        inv.modifyItem(hide.leatherId as ItemId, hide.quantity, false, { bypassAutoBank: true });
                         totalTanned += hide.quantity;
                     });
 
@@ -472,12 +550,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     inv.modifyItem('unstable_core', 1, false, { bypassAutoBank: true });
                     break;
                 }
-                case 'instant_heat_temper': {
-                    if (inv.coins < 15000) {
-                        addLog("You don't have enough coins.");
-                        success = false;
-                        break;
-                    }
+                case 'instant_heat_temper':
                     inv.modifyItem('coins', -15000, true);
                     
                     // Remove ANY existing core to prevent duplication
@@ -508,7 +581,6 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         return newState;
                     });
                     break;
-                }
                 case 'cleanup_quest_state': {
                     questLogic.cleanupQuestState(action.questId);
                     break;
@@ -540,48 +612,74 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                 case 'slayer_get_task':
                     slayer.handleSlayerMasterInteraction(action.masterId);
                     break;
+                case 'slayer_complete_task':
+                    slayer.completeTask(action.masterId);
+                    break;
                 case 'slayer_reset_task':
                     slayer.resetTask(action.masterId);
                     break;
                 case 'slayer_open_shop':
                     slayer.openSlayerShop();
                     break;
+                case 'blimp_travel': {
+                    if (action.cost) {
+                        inv.modifyItem('coins', -action.cost);
+                    }
+                    session.setCurrentPoiId(action.destinationPoiId);
+                    addLog(`The blimp whisks you away to your destination: ${action.destinationPoiId.replace(/_/g, ' ')}.`);
+                    ui.setActiveDialogue(null);
+                    break;
+                }
             }
 
             if (!success) {
                 break; // Stop processing subsequent actions in this chain.
             }
         }
-    }, [quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session.currentPoiId, slayer]);
+    }, [quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session.currentPoiId, slayer, bankLogic]);
 
-    const onResponse = useCallback((response: DialogueResponse) => {
-        if (response.check) {
-            const checkResult = handleDialogueCheck(response.check.requirements);
-            // --- FIX: Handle optional branching nodes in check result ---
-            const nextNodeKey = checkResult ? response.check.successNode : response.check.failureNode;
-            
+    const onResponse = useCallback((response: DialogueResponse): { success: boolean, error?: string } => {
+        if (!ui.activeDialogue) return { success: true };
+
+        const checkResult = response.check ? handleDialogueCheck(response.check.requirements) : true;
+
+        if (response.check && response.check.successNode !== undefined) {
             if (checkResult) {
                 if (response.actions) {
+                    const validation = validateDialogueActions(response.actions);
+                    if (!validation.success) {
+                        addLog(validation.error!);
+                        return { success: false, error: validation.error };
+                    }
                     handleDialogueAction(response.actions);
+                }
+                if (response.check.successNode) {
+                    setActiveDialogue(prev => prev ? { ...prev, currentNodeKey: response.check.successNode! } : null);
+                } else {
+                    setActiveDialogue(null);
                 }
             } else {
                 if (response.failureActions) {
+                    const validation = validateDialogueActions(response.failureActions);
+                    if (!validation.success) {
+                        addLog(validation.error!);
+                        return { success: false, error: validation.error };
+                    }
                     handleDialogueAction(response.failureActions);
                 }
-            }
-
-            if (nextNodeKey !== undefined && nextNodeKey !== '') {
-                setActiveDialogue(prev => prev ? { ...prev, currentNodeKey: nextNodeKey } : null);
-            } else if (nextNodeKey === '') {
-                // Do nothing, let the check act as a filter.
-            } else if (response.next) {
-                setActiveDialogue(prev => prev ? { ...prev, currentNodeKey: response.next! } : null);
-            } else {
-                // Default to closing dialogue if no specific branch is provided (e.g. simple visibility gating)
-                setActiveDialogue(null);
+                if (response.check.failureNode) {
+                    setActiveDialogue(prev => prev ? { ...prev, currentNodeKey: response.check.failureNode! } : null);
+                } else if (response.check.failureNode === '') {
+                    setActiveDialogue(null);
+                }
             }
         } else {
             if (response.actions) {
+                const validation = validateDialogueActions(response.actions);
+                if (!validation.success) {
+                    addLog(validation.error!);
+                    return { success: false, error: validation.error };
+                }
                 handleDialogueAction(response.actions);
             }
             if (response.next) {
@@ -590,7 +688,8 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                 setActiveDialogue(null);
             }
         }
-    }, [handleDialogueCheck, handleDialogueAction, setActiveDialogue]);
+        return { success: true };
+    }, [ui.activeDialogue, handleDialogueCheck, validateDialogueActions, handleDialogueAction, addLog, setActiveDialogue]);
 
     return { handleDialogueAction, handleDialogueCheck, onResponse };
 };

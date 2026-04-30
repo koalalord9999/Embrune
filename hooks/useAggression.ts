@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import {  MONSTERS, REGIONS  } from '../constants';
-import { POI, POIActivity, Equipment, WorldState, PlayerRepeatableQuest } from '../types';
+import { POI, POIActivity, Equipment, WorldState, PlayerRepeatableQuest, PlayerSkill, InventorySlot, SkillName } from '../types';
 
 
 export const useAggression = (
@@ -19,6 +19,8 @@ export const useAggression = (
     isPlayerInvisible: boolean,
     isPlayerImmune: boolean,
     equipment: Equipment,
+    inventory: (InventorySlot | null)[],
+    skills: PlayerSkill[],
     setEquipment: React.Dispatch<React.SetStateAction<Equipment>>,
     worldState: WorldState,
     setWorldState: React.Dispatch<React.SetStateAction<WorldState>>,
@@ -47,7 +49,7 @@ export const useAggression = (
             );
             if (hasRecentlyKilledAtPoi) return;
 
-            const combatActivities = currentPoi.activities
+            const combatActivities = (currentPoi.activities ?? [])
                 .map((act, index) => ({ act, index }))
                 .filter(({ act }) => act.type === 'combat');
     
@@ -75,9 +77,18 @@ export const useAggression = (
                     const effectivePlayerCombatLevel = isPermAggroOn ? 1 : playerCombatLevel;
 
                     // The final level-based check is only evaluated if the others are false.
-                    return monster.alwaysAggressive ||
+                    const levelCheck = monster.alwaysAggressive ||
                            isQuestAggressive ||
                            (isEffectivelyAggressive && effectivePlayerCombatLevel < monster.level * 2);
+
+                    if (!levelCheck) return false;
+
+                    // Slayer requirements check
+                    if (monster.slayerLevel && (skills.find(s => s.name === SkillName.Slayer)?.level ?? 1) < monster.slayerLevel) {
+                        return false;
+                    }
+
+                    return true;
                 });
             
             if (aggressiveMonsterInstances.length > 0) {
@@ -119,5 +130,5 @@ export const useAggression = (
 
         return () => clearInterval(interval);
         
-    }, [currentPoi, isGameLoaded, isBusy, isInCombat, isTraveling, playerCombatLevel, startCombat, addLog, monsterRespawnTimers, isPermAggroOn, isPlayerInvisible, isPlayerImmune, equipment, setEquipment, worldState, setWorldState, activeRepeatableQuest]);
+    }, [currentPoi, isGameLoaded, isBusy, isInCombat, isTraveling, playerCombatLevel, startCombat, addLog, monsterRespawnTimers, isPermAggroOn, isPlayerInvisible, isPlayerImmune, equipment, inventory, skills, setEquipment, worldState, setWorldState, activeRepeatableQuest]);
 };

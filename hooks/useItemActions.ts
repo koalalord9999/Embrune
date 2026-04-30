@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 // FIX: Import Equipment type.
-import { InventorySlot, PlayerSkill, SkillName, ActiveCraftingAction, Item, CraftingContext, POIActivity, EquipmentSlot, PlayerQuestState, Spell, Equipment, ActiveBuff, DialogueResponse, DialogueCheckRequirement, WeaponType, EquipmentStats, BonfireActivity, WorldState } from '../types';
+import { InventorySlot, PlayerSkill, SkillName, ActiveCraftingAction, Item, CraftingContext, POIActivity, EquipmentSlot, PlayerQuestState, Spell, Equipment, ActiveBuff, DialogueResponse, DialogueCheckRequirement, WeaponType, EquipmentStats, BonfireActivity, WorldState, ItemId } from '../types';
 import { ITEMS, FLETCHING_RECIPES, HERBLORE_RECIPES, HERBS, INVENTORY_CAPACITY, rollOnLootTable, LootRollResult, FIREMAKING_RECIPES, QUESTS, COOKING_RECIPES, SMELTING_RECIPES, GEM_CUTTING_RECIPES, REGIONS, RENDERING_RECIPES, FIRE_FLASK_DATA, MISC_FURNACE_RECIPES } from '../constants';
 import { POIS } from '../data/pois';
 // FIX: Import ContextMenuOption from its source file instead of re-exporting from useUIState.
@@ -14,7 +14,7 @@ interface CraftingHandlers {
     // FIX: Corrected typo from onSmelt to handleSmelting and added handleStokeBonfire
     handleSmelting: (barType: BarType, quantity: number) => void;
     handleStokeBonfire: (logId: string, bonfireId: string, quantity: number) => void;
-    handleJewelryCrafting: (itemId: string, quantity: number) => void;
+    handleJewelryCrafting: (itemId: ItemId, quantity: number) => void;
 }
 
 interface UseItemActionsProps {
@@ -26,7 +26,8 @@ interface UseItemActionsProps {
     maxPrayer: number;
     setCurrentPrayer: (updater: React.SetStateAction<number>) => void;
     setRunEnergy: React.Dispatch<React.SetStateAction<number>>;
-    applyStatModifier: (skill: SkillName, value: number, baseLevelOnConsumption: number) => void;
+    applyStatModifier: (skill: SkillName, value: number, baseLevelOnConsumption: number, stackable?: boolean) => void;
+    restoreNegativeStatModifiers: (percent: number, base: number) => void;
     addBuff: (buff: Omit<ActiveBuff, 'id' | 'durationRemaining'>) => void;
     curePoison: () => void;
     setInventory: React.Dispatch<React.SetStateAction<(InventorySlot | null)[]>>;
@@ -35,8 +36,8 @@ interface UseItemActionsProps {
     inventory: (InventorySlot | null)[];
     activeCraftingAction: ActiveCraftingAction | null;
     setActiveCraftingAction: (action: ActiveCraftingAction | null) => void;
-    hasItems: (items: { itemId: string, quantity: number }[]) => boolean;
-    modifyItem: (itemId: string, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void;
+    hasItems: (items: { itemId: ItemId, quantity: number }[]) => boolean;
+    modifyItem: (itemId: ItemId, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void;
     addXp: (skill: SkillName, amount: number) => void;
     openCraftingView: (context: CraftingContext) => void;
     itemToUse: { item: InventorySlot, index: number } | null;
@@ -79,7 +80,7 @@ const MULTI_BITE_FOODS: Record<string, string> = {
 };
 
 export const useItemActions = (props: UseItemActionsProps) => {
-    const { addLog, currentHp, maxHp, setCurrentHp, currentPrayer, maxPrayer, setCurrentPrayer, setRunEnergy, applyStatModifier, setInventory, setEquipment, skills, inventory, activeCraftingAction, setActiveCraftingAction, hasItems, modifyItem, addXp, openCraftingView, itemToUse, setItemToUse, addBuff, curePoison, setMakeXPrompt, startQuest, currentPoiId, playerQuests, isStunned, setActiveDungeonMap, confirmValuableDrops, valuableDropThreshold, ui, equipment, onResponse, handleDialogueCheck, crafting, isBusy, navigation, rangeCooldowns, setRangeCooldowns, worldState, setWorldState, setIsResting, combatSpeedMultiplier } = props;
+    const { addLog, currentHp, maxHp, setCurrentHp, currentPrayer, maxPrayer, setCurrentPrayer, setRunEnergy, restoreNegativeStatModifiers, applyStatModifier, setInventory, setEquipment, skills, inventory, activeCraftingAction, setActiveCraftingAction, hasItems, modifyItem, addXp, openCraftingView, itemToUse, setItemToUse, addBuff, curePoison, setMakeXPrompt, startQuest, currentPoiId, playerQuests, isStunned, setActiveDungeonMap, confirmValuableDrops, valuableDropThreshold, ui, equipment, onResponse, handleDialogueCheck, crafting, isBusy, navigation, rangeCooldowns, setRangeCooldowns, worldState, setWorldState, setIsResting, combatSpeedMultiplier } = props;
     const { setActiveDialogue, setContextMenu } = ui;
     const lastFoodEatenTime = React.useRef<number>(0);
 
@@ -152,7 +153,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
     }, [setInventory, setEquipment, addLog, navigation]);
 
 
-    const handleConsume = useCallback((itemId: string, inventoryIndex: number) => {
+    const handleConsume = useCallback((itemId: ItemId, inventoryIndex: number) => {
         if (isStunned) {
             addLog("You are stunned and cannot eat or drink.");
             return;
@@ -174,7 +175,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 return newInv;
             });
 
-            modifyItem(itemData.cleanable.cleanItemId, 1, true, { bypassAutoBank: true });
+            modifyItem(itemData.cleanable.cleanItemId as ItemId, 1, true, { bypassAutoBank: true });
             addXp(SkillName.Herblore, itemData.cleanable.xp);
             return;
         }
@@ -201,7 +202,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 const gem = rollOnLootTable('gem_table');
                 if (gem) {
                     const gemId = typeof gem === 'string' ? gem : gem.itemId;
-                    modifyItem(gemId, 1, true, { bypassAutoBank: true, noted: true });
+                    modifyItem(gemId as ItemId, 1, true, { bypassAutoBank: true, noted: true });
                 }
             }
 
@@ -209,7 +210,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 const herb = rollOnLootTable('herb_table');
                 if (herb) {
                     const herbId = typeof herb === 'string' ? herb : herb.itemId;
-                    modifyItem(herbId, 1, true, { bypassAutoBank: true, noted: true });
+                    modifyItem(herbId as ItemId, 1, true, { bypassAutoBank: true, noted: true });
                 }
             }
 
@@ -240,7 +241,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
             const loot = rollOnLootTable('fishing_casket_table');
             if (loot) {
                 const { itemId: lootId, quantity, noted } = typeof loot === 'string' ? { itemId: loot, quantity: 1, noted: false } : loot;
-                modifyItem(lootId, quantity, false, { bypassAutoBank: false, noted });
+                modifyItem(lootId as ItemId, quantity, false, { bypassAutoBank: false, noted });
             } else {
                 addLog("The casket was completely empty!");
             }
@@ -347,13 +348,18 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 addBuff(buff);
             });
         }
+        if (itemData.consumable.restoresStats) {
+            restoreNegativeStatModifiers(itemData.consumable.restoresStats.percent, itemData.consumable.restoresStats.base);
+        }
 
         if (itemData.doseable) {
             const slot = inventory[inventoryIndex];
             if (slot) {
-                const currentDoses = slot.doses ?? itemData.maxDoses ?? 4;
-                if (currentDoses > 1) {
-                    addLog(`You have ${currentDoses - 1} doses of ${itemData.name} left.`);
+                const currentDoses = slot.doses ?? itemData.initialDoses ?? itemData.maxDoses ?? 4;
+                const nextDoses = currentDoses - 1;
+
+                if (nextDoses > 0) {
+                    addLog(`You have ${nextDoses} doses of ${itemData.name} left.`);
                 } else {
                     addLog(`You have finished the ${itemData.name}.`);
                 }
@@ -362,8 +368,17 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     const newInv = [...prev];
                     const s = newInv[inventoryIndex];
                     if (!s) return prev;
-                    if (currentDoses > 1) {
-                        newInv[inventoryIndex] = { ...s, doses: currentDoses - 1 };
+
+                    if (nextDoses > 0) {
+                        // Support for OSRS-style dose-suffixed items (e.g. potion_3 -> potion_2)
+                        const baseId = itemData.id.replace(/_\d$/, '');
+                        const nextDoseId = `${baseId}_${nextDoses}`;
+
+                        if (ITEMS[nextDoseId]) {
+                            newInv[inventoryIndex] = { ...s, itemId: nextDoseId as ItemId, doses: nextDoses };
+                        } else {
+                            newInv[inventoryIndex] = { ...s, doses: nextDoses };
+                        }
                     } else {
                         if (itemData.emptyable) {
                             newInv[inventoryIndex] = { itemId: itemData.emptyable.emptyItemId, quantity: 1 };
@@ -387,7 +402,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
             const nextBiteItem = MULTI_BITE_FOODS[itemId];
 
             if (nextBiteItem) {
-                newInv[inventoryIndex] = { itemId: nextBiteItem, quantity: 1 };
+                newInv[inventoryIndex] = { itemId: nextBiteItem as ItemId, quantity: 1 };
             } else if (itemData.stackable && itemSlot.quantity > 1) {
                 newInv[inventoryIndex] = { ...itemSlot, quantity: itemSlot.quantity - 1 };
             } else {
@@ -430,8 +445,8 @@ export const useItemActions = (props: UseItemActionsProps) => {
     }, [skills, currentHp, maxHp, setCurrentHp, setInventory, addLog, applyStatModifier, modifyItem, addXp, addBuff, inventory, isStunned, curePoison, currentPrayer, maxPrayer, setCurrentPrayer, setRunEnergy]);
 
     const handleCurePoisonFromOrb = useCallback(() => {
-        const antiPoisonPotions = ['antipoison_potion_3', 'antipoison_potion_2', 'antipoison_potion_1', 'super_antipoison_3', 'super_antipoison_2', 'super_antipoison_1'];
-        let potionToUse: { itemId: string, index: number } | null = null;
+        const antiPoisonPotions: ItemId[] = ['antipoison_potion_3' as ItemId, 'antipoison_potion_2' as ItemId, 'antipoison_potion_1' as ItemId, 'super_antipoison_3' as ItemId, 'super_antipoison_2' as ItemId, 'super_antipoison_1' as ItemId];
+        let potionToUse: { itemId: ItemId, index: number } | null = null;
 
         for (const potionId of antiPoisonPotions) {
             const inventoryIndex = inventory.findIndex(slot => slot?.itemId === potionId);
@@ -448,7 +463,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
         }
     }, [inventory, handleConsume, addLog]);
 
-    const handleBuryBones = useCallback((itemId: string, inventoryIndex: number) => {
+    const handleBuryBones = useCallback((itemId: ItemId, inventoryIndex: number) => {
         const itemData = ITEMS[itemId];
         if (!itemData?.buryable) return;
         addXp(SkillName.Prayer, itemData.buryable.prayerXp);
@@ -564,7 +579,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
         const usedItemData = ITEMS[usedItem.itemId];
 
         // --- Monolith Puzzle ---
-        const MONOLITH_LOGS = ['logs', 'oak_logs', 'willow_logs', 'maple_logs', 'yew_logs', 'feywood_logs'];
+        const MONOLITH_LOGS = ['logs', 'driftwood_logs', 'oak_logs', 'willow_logs', 'maple_logs', 'mahogany_logs', 'yew_logs', 'feywood_logs'];
         if (activity.type === 'npc' && activity.name === 'Empty Fire Pit' && currentPoiId === 'sp_ancient_monolith' && MONOLITH_LOGS.includes(usedItem.itemId)) {
             const fullPitId = (activity as any).id;
             if (!fullPitId || !fullPitId.startsWith('monolith_pit_')) return;
@@ -589,7 +604,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 addXp(SkillName.Firemaking, fmRecipe.xp);
             }
 
-            modifyItem(usedItem.itemId, -1);
+            modifyItem(usedItem.itemId as ItemId, -1);
             setWorldState(ws => ({
                 ...ws,
                 monolithFires: {
@@ -994,8 +1009,8 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 const flasks = flaskSlot.quantity;
                 const fillAmount = Math.min(doses, flasks);
 
-                modifyItem('throwing_flask_fused', -fillAmount, true);
-                modifyItem(recipe.flaskId, fillAmount, false, { bypassAutoBank: true });
+                modifyItem('throwing_flask_fused' as ItemId, -fillAmount, true);
+                modifyItem(recipe.flaskId as ItemId, fillAmount, false, { bypassAutoBank: true });
 
                 const newDoses = doses - fillAmount;
                 if (newDoses > 0) {
@@ -1017,17 +1032,17 @@ export const useItemActions = (props: UseItemActionsProps) => {
             }
 
             if ((usedId === 'knife' && targetId === 'ball_of_wool') || (targetId === 'knife' && usedId === 'ball_of_wool')) {
-                modifyItem('ball_of_wool', -1, true);
-                modifyItem('wool_string', 10, false, { bypassAutoBank: true });
+                modifyItem('ball_of_wool' as ItemId, -1, true);
+                modifyItem('wool_string' as ItemId, 10, false, { bypassAutoBank: true });
                 addXp(SkillName.Fletching, 2);
                 addLog("You carefully cut the wool into 10 strings.");
                 return;
             }
 
             if ((usedId === 'wool_string' && targetId === 'throwing_flask') || (targetId === 'wool_string' && usedId === 'throwing_flask')) {
-                modifyItem('wool_string', -1, true);
-                modifyItem('throwing_flask', -1, true);
-                modifyItem('throwing_flask_fused', 1, false, { bypassAutoBank: true });
+                modifyItem('wool_string' as ItemId, -1, true);
+                modifyItem('throwing_flask' as ItemId, -1, true);
+                modifyItem('throwing_flask_fused' as ItemId, 1, false, { bypassAutoBank: true });
                 addXp(SkillName.Fletching, 1);
                 addLog("You attach the string to the flask, creating a fuse.");
                 return;
@@ -1039,12 +1054,67 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     addLog("You need a Herblore level of 51 to make this potion.");
                     return;
                 }
-                modifyItem('agility_paste', -1, true);
-                modifyItem('super_energy_potion_3', -1, true);
-                modifyItem('stamina_potion_4', 1, false, { bypassAutoBank: true });
+                modifyItem('agility_paste' as ItemId, -1, true);
+                modifyItem('super_energy_potion_3' as ItemId, -1, true);
+                modifyItem('stamina_potion_4' as ItemId, 1, false, { bypassAutoBank: true });
                 addXp(SkillName.Herblore, 115);
                 addLog("You mix the agility paste into the super energy potion to create a stamina potion.");
                 return;
+            }
+
+            // --- Potion Decanting ---
+            if (usedItemData.doseable && targetItem.doseable) {
+                const usedBaseId = usedId.replace(/_\d$/, '');
+                const targetBaseId = targetId.replace(/_\d$/, '');
+
+                if (usedBaseId === targetBaseId) {
+                    const usedDoses = usedSlot.doses ?? usedItemData.initialDoses ?? 3;
+                    const targetDoses = targetSlot.doses ?? targetItem.initialDoses ?? 3;
+                    const maxDoses = targetItem.maxDoses ?? 4;
+
+                    if (targetDoses >= maxDoses) {
+                        addLog("That potion is already full.");
+                        return;
+                    }
+
+                    const spaceInTarget = maxDoses - targetDoses;
+                    const amountToTransfer = Math.min(usedDoses, spaceInTarget);
+
+                    if (amountToTransfer <= 0) return;
+
+                    const newTargetDoses = targetDoses + amountToTransfer;
+                    const newUsedDoses = usedDoses - amountToTransfer;
+
+                    const getDoseId = (baseId: string, doses: number) => {
+                        const suffixed = `${baseId}_${doses}`;
+                        if (ITEMS[suffixed]) return suffixed;
+                        return baseId;
+                    };
+
+                    setInventory(prev => {
+                        const newInv = [...prev];
+                        
+                        // Update Target
+                        const newTargetId = getDoseId(targetBaseId, newTargetDoses);
+                        newInv[targetIndex] = { ...targetSlot, itemId: newTargetId as ItemId, doses: newTargetDoses };
+
+                        // Update Used
+                        if (newUsedDoses > 0) {
+                            const newUsedId = getDoseId(usedBaseId, newUsedDoses);
+                            newInv[usedIndex] = { ...usedSlot, itemId: newUsedId as ItemId, doses: newUsedDoses };
+                        } else {
+                            if (usedItemData.emptyable) {
+                                newInv[usedIndex] = { itemId: usedItemData.emptyable.emptyItemId, quantity: 1 };
+                            } else {
+                                newInv[usedIndex] = null;
+                            }
+                        }
+                        return newInv;
+                    });
+
+                    addLog(`You combine the potions.`);
+                    return;
+                }
             }
 
             const validMeats: Record<string, number> = {
@@ -1065,10 +1135,10 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 const meatSlot = usedId === 'bread' ? target : used;
                 const meatHeal = validMeats[meatSlot.item.itemId];
 
-                modifyItem('bread', -1, true);
-                modifyItem(meatSlot.item.itemId, -1, true);
+                modifyItem('bread' as ItemId, -1, true);
+                modifyItem(meatSlot.item.itemId as ItemId, -1, true);
 
-                modifyItem('sandwich', 1, false, { bypassAutoBank: true });
+                modifyItem('sandwich' as ItemId, 1, false, { bypassAutoBank: true });
 
                 const xpGained = meatHeal * 5;
                 addXp(SkillName.Cooking, xpGained);
@@ -1140,13 +1210,13 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 }
 
                 // Remove ingredients
-                modifyItem('flour', -1, true);
-                modifyItem('cake_tin', -1, true);
-                modifyItem('eggs', -1, true);
-                modifyItem('bucket_of_milk', -1, true); // Removes milk
-                modifyItem('bucket', 1, false, { bypassAutoBank: true }); // Gives empty bucket back
+                modifyItem('flour' as ItemId, -1, true);
+                modifyItem('cake_tin' as ItemId, -1, true);
+                modifyItem('eggs' as ItemId, -1, true);
+                modifyItem('bucket_of_milk' as ItemId, -1, true); // Removes milk
+                modifyItem('bucket' as ItemId, 1, false, { bypassAutoBank: true }); // Gives empty bucket back
 
-                modifyItem('uncooked_cake', 1, false, { bypassAutoBank: true });
+                modifyItem('uncooked_cake' as ItemId, 1, false, { bypassAutoBank: true });
                 addLog("You mix the ingredients into the cake tin.");
                 return;
             }
@@ -1160,7 +1230,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     newInv[target.index] = null;
                     return newInv;
                 });
-                modifyItem('pie_shell', 1, false, { bypassAutoBank: true });
+                modifyItem('pie_shell' as ItemId, 1, false, { bypassAutoBank: true });
                 addLog("You press the dough into the dish to make a pie shell.");
                 return;
             }
@@ -1198,7 +1268,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                         }
                         return newInv;
                     });
-                    modifyItem(resultPieId, 1, false, { bypassAutoBank: true });
+                    modifyItem(resultPieId as ItemId, 1, false, { bypassAutoBank: true });
                     addLog(`You fill the pie shell with ${ITEMS[fillingId].name}.`);
                     return;
                 }
@@ -1213,7 +1283,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     newInv[target.index] = null;
                     return newInv;
                 });
-                modifyItem('incomplete_pizza', 1, false, { bypassAutoBank: true }); // Assuming this ID exists or falls back
+                modifyItem('incomplete_pizza' as ItemId, 1, false, { bypassAutoBank: true }); // Assuming this ID exists or falls back
                 addLog("You add tomato to the pizza base.");
                 return;
             }
@@ -1227,7 +1297,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     newInv[target.index] = null;
                     return newInv;
                 });
-                modifyItem('uncooked_pizza', 1, false, { bypassAutoBank: true });
+                modifyItem('uncooked_pizza' as ItemId, 1, false, { bypassAutoBank: true });
                 addLog("You add cheese to the pizza.");
                 return;
             }
@@ -1264,7 +1334,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     return newInv;
                 });
 
-                modifyItem(recipe.result, 1, false, { bypassAutoBank: true });
+                modifyItem(recipe.result as ItemId, 1, false, { bypassAutoBank: true });
                 addXp(SkillName.Cooking, recipe.xp);
                 addLog(`You add ${ITEMS[toppingId].name} to the pizza.`);
                 return;
@@ -1303,7 +1373,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                             addLog("You need at least 15 of that ammo to poison them.");
                             return;
                         }
-                        modifyItem(weaponSlot.item.itemId, -15, true, { noted: weaponSlot.item.noted, nameOverride: weaponSlot.item.nameOverride, statsOverride: weaponSlot.item.statsOverride });
+                        modifyItem(weaponSlot.item.itemId as ItemId, -15, true, { noted: weaponSlot.item.noted, nameOverride: weaponSlot.item.nameOverride, statsOverride: weaponSlot.item.statsOverride });
 
                         setInventory(prev => {
                             const newInv = [...prev];
@@ -1323,7 +1393,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                             const emptySlotIndex = newInv.findIndex(slot => slot === null);
                             if (emptySlotIndex === -1) {
                                 addLog("You don't have enough inventory space to create a new stack of poisoned ammo.");
-                                modifyItem(weaponSlot.item.itemId, 15, true, { noted: weaponSlot.item.noted });
+                                modifyItem(weaponSlot.item.itemId as ItemId, 15, true, { noted: weaponSlot.item.noted });
                                 return prev;
                             }
                             newInv[emptySlotIndex] = {
@@ -1352,8 +1422,8 @@ export const useItemActions = (props: UseItemActionsProps) => {
                         });
                     }
 
-                    modifyItem(poisonInfo.id, -1, true);
-                    modifyItem('vial', 1, false, { bypassAutoBank: true });
+                    modifyItem(poisonInfo.id as ItemId, -1, true);
+                    modifyItem('vial' as ItemId, 1, false, { bypassAutoBank: true });
 
                     return;
                 }
@@ -1420,7 +1490,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 const talisman = usedItemData.divining ? usedItemData : targetItem;
                 const altarPoiId = talisman.divining!.poiId;
                 const altarPoi = POIS[altarPoiId];
-                const altarActivity = altarPoi?.activities.find(a => a.type === 'runecrafting_altar') as Extract<POIActivity, { type: 'runecrafting_altar' }> | undefined;
+                const altarActivity = (altarPoi?.activities ?? []).find(a => a.type === 'runecrafting_altar') as Extract<POIActivity, { type: 'runecrafting_altar' }> | undefined;
 
                 if (currentPoiId !== altarPoiId || !altarActivity) {
                     addLog("You can only infuse a tiara at its corresponding runecrafting altar.");
@@ -1436,9 +1506,9 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 }
 
                 if (hasItems([{ itemId: 'silver_tiara', quantity: 1 }, { itemId: talisman.id, quantity: 1 }])) {
-                    modifyItem('silver_tiara', -1, true);
-                    modifyItem(talisman.id, -1, true);
-                    modifyItem(tiaraItem.id, 1, false, { bypassAutoBank: true });
+                    modifyItem('silver_tiara' as ItemId, -1, true);
+                    modifyItem(talisman.id as ItemId, -1, true);
+                    modifyItem(tiaraItem.id as ItemId, 1, false, { bypassAutoBank: true });
                     addXp(SkillName.Runecrafting, 50);
                     addLog(`You infuse the silver tiara with the power of the altar, creating a ${tiaraItem.name}.`);
                 }
@@ -1481,7 +1551,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     newInv[target.index] = null;
                     return newInv;
                 });
-                modifyItem('strange_key', 1, false, { bypassAutoBank: true });
+                modifyItem('strange_key' as ItemId, 1, false, { bypassAutoBank: true });
                 addLog("You combine the two key halves to create a strange key.");
                 return;
             }
@@ -1494,7 +1564,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     newInv[coreIndex] = null;
                     return newInv;
                 });
-                modifyItem('golem_core_shard', 10, true, { bypassAutoBank: true });
+                modifyItem('golem_core_shard' as ItemId, 10, true, { bypassAutoBank: true });
                 addXp(SkillName.Crafting, 25);
                 addLog("You carefully smash the golem core, breaking it into 10 smaller shards.");
                 return;
@@ -1517,8 +1587,8 @@ export const useItemActions = (props: UseItemActionsProps) => {
                 }
                 const onConfirm = (quantity: number) => {
                     if (quantity > 0) {
-                        modifyItem(crushTargetId, -quantity, true);
-                        modifyItem(recipe.dust, quantity, true, { bypassAutoBank: true });
+                        modifyItem(crushTargetId as ItemId, -quantity, true);
+                        modifyItem(recipe.dust as ItemId, quantity, true, { bypassAutoBank: true });
                         addLog(`You grind ${quantity}x ${ITEMS[crushTargetId].name} into dust.`);
                     }
                 };
@@ -1628,9 +1698,9 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     return;
                 }
                 if (hasItems([{ itemId: 'pouch_cleanser', quantity: 1 }, { itemId: 'grimy_coin_pouch', quantity: 1 }])) {
-                    modifyItem('pouch_cleanser', -1, true);
-                    modifyItem('grimy_coin_pouch', -1, true);
-                    modifyItem('clean_coin_pouch', 1, false, { bypassAutoBank: true });
+                    modifyItem('pouch_cleanser' as ItemId, -1, true);
+                    modifyItem('grimy_coin_pouch' as ItemId, -1, true);
+                    modifyItem('clean_coin_pouch' as ItemId, 1, false, { bypassAutoBank: true });
                     addXp(SkillName.Herblore, 15);
                     addLog("You use the cleanser to scrub the grime off the pouch.");
                 }
@@ -1648,7 +1718,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
                         newInv[target.index] = null;
                         return newInv;
                     });
-                    modifyItem(strungId, 1, false, { bypassAutoBank: true });
+                    modifyItem(strungId as ItemId, 1, false, { bypassAutoBank: true });
                     addXp(SkillName.Crafting, 5);
                     addLog(`You string the ${ITEMS[unstrungId].name}.`);
                 }
@@ -1761,6 +1831,29 @@ export const useItemActions = (props: UseItemActionsProps) => {
         addLog(message);
     }, [addLog]);
 
+    const handleCombine = useCallback((itemId: string, inventoryIndex: number) => {
+        console.log(`[useItemActions] handleCombine called for ${itemId} at index ${inventoryIndex}`);
+        if (isBusy || isStunned) {
+            console.log(`[useItemActions] handleCombine blocked: isBusy=${isBusy}, isStunned=${isStunned}`);
+            return;
+        }
+
+        if (itemId === 'infernal_key_fragment') {
+            const count = inventory.filter(slot => slot?.itemId === 'infernal_key_fragment').reduce((acc, curr) => acc + (curr?.quantity || 1), 0);
+
+            if (count >= 5) {
+                modifyItem('infernal_key_fragment' as ItemId, -5, true);
+                modifyItem('infernal_key' as ItemId, 1, false, { bypassAutoBank: true });
+                addLog("You combine the five fragments into an Infernal Key. The heat is almost unbearable.");
+            } else {
+                addLog(`You need 5 Infernal Key Fragments to create the Infernal Key. (You have ${count}/5)`);
+            }
+            return;
+        }
+
+        addLog("Nothing interesting happens.");
+    }, [isBusy, isStunned, inventory, modifyItem, addLog]);
+
     return {
         handleConsume,
         handleBuryBones,
@@ -1770,6 +1863,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
         handleDivine,
         handleExamine,
         handleReadMap,
+        handleCombine,
         handleCurePoisonFromOrb,
         handleTeleport,
     };

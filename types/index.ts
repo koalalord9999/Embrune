@@ -1,4 +1,6 @@
 export * from './enums';
+export * from './ItemIds';
+export * from './MonsterIds';
 export type {
   PlayerSkill,
   BankTab,

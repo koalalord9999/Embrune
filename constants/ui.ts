@@ -113,6 +113,11 @@ export const getIconClassName = (item?: Item | null): string => {
         case 'potion-super-energy': return 'item-icon-potion-super-energy';
         case 'potion-stamina': return 'item-icon-potion-stamina';
         case 'potion-combo': return 'item-icon-potion-combo';
+        case 'potion-overload': return 'item-icon-potion-overload';
+        case 'potion-accuracy': return 'item-icon-potion-accuracy';
+        case 'potion-evasion': return 'item-icon-potion-evasion';
+        case 'potion-battlemasters': return 'item-icon-potion-battlemasters';
+
         case 'potion-weak-mining': return 'item-icon-potion-weak-mining';
         case 'potion-mining': return 'item-icon-potion-mining';
         case 'potion-weak-smithing': return 'item-icon-potion-weak-smithing';

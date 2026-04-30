@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
-import { Spell, SkillName, InventorySlot, WeaponType } from '../types';
+import { Spell, SkillName, InventorySlot, WeaponType, ItemId } from '../types';
 import { useCharacter } from './useCharacter';
 import { useInventory } from './useInventory';
 import { useNavigation } from './useNavigation';
 import { useUIState } from './useUIState';
-import {  ITEMS  } from '../constants';
+import { ITEMS } from '../constants';
 
 interface SpellcastingDependencies {
     char: ReturnType<typeof useCharacter>;
@@ -40,7 +40,7 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
     // FIX: Destructure setIsResting from dependencies
     const { char, inv, addLog, navigation, ui, isStunned, combatSpeedMultiplier, setIsResting } = deps;
 
-    const getRunesNeeded = useCallback((spell: Spell): {itemId: string, quantity: number}[] => {
+    const getRunesNeeded = useCallback((spell: Spell): { itemId: ItemId, quantity: number }[] => {
         const equippedStaff = inv.equipment.weapon ? ITEMS[inv.equipment.weapon.itemId] : null;
         const providedRune = equippedStaff?.equipment?.weaponType === WeaponType.Staff ? equippedStaff.equipment.providesRune : null;
         return spell.runes.filter(r => r.itemId !== providedRune);
@@ -51,12 +51,12 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
     const onSpellOnItem = useCallback((spell: Spell, target: { item: InventorySlot, index: number }) => {
         setIsResting(false);
         if (Date.now() < char.globalActionCooldown) {
-             return;
+            return;
         }
 
         ui.setSpellToCast(null);
 
-        const isTargetValid = spell.targetItems?.includes(target.item.itemId) || spell.targetItems?.includes('all');
+        const isTargetValid = spell.targetItems?.includes(target.item.itemId) || (spell.targetItems as any)?.includes('all');
         if (!isTargetValid) {
             return;
         }
@@ -72,10 +72,10 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
             if (enchantedItemId) {
                 runesNeeded.forEach(rune => inv.modifyItem(rune.itemId, -rune.quantity, true));
                 char.addXp(SkillName.Magic, spell.xp);
-                inv.modifyItem(target.item.itemId, -1, true);
-                inv.modifyItem(enchantedItemId, 1, false, { bypassAutoBank: true });
+                inv.modifyItem(target.item.itemId as ItemId, -1, true);
+                inv.modifyItem(enchantedItemId as ItemId, 1, false, { bypassAutoBank: true });
                 addLog(`You enchant the ${ITEMS[target.item.itemId].name}.`);
-                
+
                 const tickMs = 600;
                 const cooldownMs = (spell.castTime ?? 5) * tickMs;
                 char.setGlobalActionCooldown(Date.now() + cooldownMs);
@@ -88,16 +88,16 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
                 addLog("This item cannot be transmuted.");
                 return;
             }
-            
+
             runesNeeded.forEach(rune => inv.modifyItem(rune.itemId, -rune.quantity, true));
             char.addXp(SkillName.Magic, spell.xp);
 
             const coinValue = Math.floor(itemData.value * (spell.id === 'greater_transmutation' ? 0.7 : 0.3));
-            
+
             inv.modifyItem(target.item.itemId, -1, true, { noted: target.item.noted });
             inv.modifyItem('coins', coinValue, true);
             addLog(`You transmute the ${itemData.name} into ${coinValue} coins.`);
-            
+
             const tickMs = 600;
             const cooldownMs = (spell.castTime ?? 5) * tickMs;
             char.setGlobalActionCooldown(Date.now() + cooldownMs);
@@ -110,10 +110,10 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
             addLog("You are stunned and cannot cast spells.");
             return;
         }
-        
+
         // Check global cooldown
         if (Date.now() < char.globalActionCooldown) {
-             return;
+            return;
         }
 
         if (!ui.isSelectingAutocastSpell) {
@@ -132,7 +132,7 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
             addLog("You are busy.");
             return;
         }
-        
+
         const magicLevel = char.skills.find(s => s.name === SkillName.Magic)?.currentLevel ?? 1;
 
         if (magicLevel < spell.level) {
@@ -146,7 +146,7 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
                 return;
             }
             const isCurrentlyAutocasting = char.autocastSpell?.id === spell.id;
-            
+
             if (isCurrentlyAutocasting) {
                 ui.setIsSelectingAutocastSpell(false);
                 return;
@@ -166,7 +166,7 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
             addLog("You can only cast this spell in combat.");
             return;
         }
-        
+
         if (['utility-enchant', 'utility-alchemy', 'utility-processing'].includes(spell.type)) {
             if (!inv.hasItems(getRunesNeeded(spell))) {
                 addLog("You do not have enough runes to cast this spell.");
@@ -182,10 +182,10 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
             addLog("You do not have enough runes to cast this spell.");
             return;
         }
-    
+
         runesNeeded.forEach(rune => inv.modifyItem(rune.itemId, -rune.quantity, true));
         char.addXp(SkillName.Magic, spell.xp);
-    
+
         // Set Cooldown using fixed tick time (600ms)
         const tickMs = 600;
         const cooldownMs = (spell.castTime ?? 5) * tickMs;
@@ -193,10 +193,37 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
 
         if (spell.type === 'utility-teleport') {
             let destinationPoiId = '';
+            if (spell.id === 'home_teleport') {
+                const now = Date.now();
+                const cooldownMs = 30 * 60 * 1000;
+                const timePassed = now - (char.lastHomeTeleport || 0);
+
+                if (timePassed < cooldownMs) {
+                    const remainingMins = Math.ceil((cooldownMs - timePassed) / 60000);
+                    addLog(`The arcane energies are still recharging. Try again in ${remainingMins} minutes.`);
+                    return;
+                }
+
+                ui.setActiveSingleAction({
+                    title: "Teleporting Home...",
+                    iconUrl: "portal",
+                    iconClassName: "text-blue-400",
+                    startTime: Date.now(),
+                    duration: 10000,
+                    onComplete: () => {
+                        navigation.handleForcedNavigate('meadowdale_square');
+                        char.setLastHomeTeleport(Date.now());
+                        addLog("You arrive safely in Meadowdale square.");
+                    },
+                    interruptOnDamage: true
+                });
+                return;
+            }
+
             if (spell.id === 'meadowdale_teleport') destinationPoiId = 'meadowdale_square';
             if (spell.id === 'oakhaven_teleport') destinationPoiId = 'oakhaven_square';
             if (spell.id === 'silverhaven_teleport') destinationPoiId = 'silverhaven_square';
-            
+
             if (destinationPoiId) {
                 addLog(`You cast ${spell.name} and feel a pull...`);
                 setTimeout(() => {
@@ -205,15 +232,15 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
             }
         } else if (spell.type === 'enhancement') {
             const duration = 300000; // 5 minutes
-            
+
             if (spell.id === 'warriors_grace') {
                 const attLevel = char.skills.find(s => s.name === SkillName.Attack)?.level ?? 1;
                 const strLevel = char.skills.find(s => s.name === SkillName.Strength)?.level ?? 1;
                 const defLevel = char.skills.find(s => s.name === SkillName.Defence)?.level ?? 1;
                 const boost = Math.floor(attLevel * 0.10) + 2;
-                
+
                 char.applyEnhancementSpell(
-                    spell.name, 
+                    spell.name,
                     `Boosts Attack, Strength, and Defence by ${boost}.`,
                     [
                         { skill: SkillName.Attack, value: boost },
@@ -258,7 +285,7 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
                 const strLevel = char.skills.find(s => s.name === SkillName.Strength)?.level ?? 1;
                 const defLevel = char.skills.find(s => s.name === SkillName.Defence)?.level ?? 1;
                 const boost = Math.floor(attLevel * 0.20) + 4;
-                
+
                 char.applyEnhancementSpell(
                     spell.name,
                     `Greatly boosts Attack, Strength, and Defence by ${boost}.`,
@@ -306,7 +333,7 @@ export const useSpellcasting = (deps: SpellcastingDependencies) => {
         } else {
             addLog(`You cast ${spell.name}.`);
         }
-    
+
     }, [char, addLog, inv, navigation, ui, isStunned, getRunesNeeded, setIsResting]);
 
     return { onCastSpell, onSpellOnItem };

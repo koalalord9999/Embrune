@@ -1,13 +1,13 @@
 
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ShopStates, InventorySlot } from '../types';
+import { ShopStates, InventorySlot, ItemId } from '../types';
 import {  SHOPS, ITEMS  } from '../constants';
 
 export const useShops = (
     initialShopStates: ShopStates, // This is kept for signature compatibility but is no longer used.
     playerCoins: number,
-    modifyItem: (itemId: string, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void,
+    modifyItem: (itemId: ItemId, quantity: number, quiet?: boolean, slotOverrides?: Partial<Omit<InventorySlot, 'itemId' | 'quantity'>> & { bypassAutoBank?: boolean }) => void,
     addLog: (message: string) => void,
     inventory: (InventorySlot | null)[]
 ) => {
@@ -83,7 +83,7 @@ export const useShops = (
     useEffect(() => { inventoryRef.current = inventory; }, [inventory]);
 
 
-    const handleBuy = useCallback((shopId: string, itemId: string, quantity: number) => {
+    const handleBuy = useCallback((shopId: string, itemId: ItemId, quantity: number) => {
         const currentShopStates = shopStatesRef.current;
         const currentInventory = inventoryRef.current;
         const currentCoins = playerCoinsRef.current;
@@ -140,7 +140,7 @@ export const useShops = (
             }
         }
     
-        modifyItem('coins', -totalCost, true);
+        modifyItem('coins' as ItemId, -totalCost, true);
         modifyItem(itemId, actualQuantityToBuy, true, { doses: itemData.initialDoses, charges: itemData.charges, bypassAutoBank: true });
         
         setShopStates(prev => {

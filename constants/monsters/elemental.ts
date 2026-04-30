@@ -1,4 +1,4 @@
-import { Monster, MonsterType, SkillName, SpellElement } from '@/types';
+import { Monster, MonsterType, SkillName, SpellElement, MonsterId } from '@/types';
 
 export const elemental: Monster[] = [
     {
