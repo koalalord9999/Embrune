@@ -238,7 +238,7 @@ export const anEchoOfBattle: Quest = {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "You did?! And since you're back here, you must have slain the beast! Wow. I wish we would have had you in our company back in the day, then Pregai might still be alive today... Did you find the shield?",
-            responses: [{ text: "Yea, I killed it.. it was holding a shield during our fight.", check: { requirements: [{ type: 'items', items: [{ itemId: 'pregais_shield', quantity: 1 }] }], successNode: 'aeb_bronn_complete_success', failureNode: 'aeb_bronn_no_shield' } }]
+            responses: [{ text: "Yea, I killed it.. it was holding a shield during our fight.", actions: [{ type: 'take_item', itemId: 'pregais_shield', quantity: 1 }], next: 'aeb_bronn_complete_success' }, { text: "I didn't find a shield.", next: 'aeb_bronn_no_shield' }]
         },
         aeb_bronn_no_shield: {
             npcName: 'Bronn the Retired Adventurer',
@@ -256,7 +256,7 @@ export const anEchoOfBattle: Quest = {
             npcName: 'Bronn the Retired Adventurer',
             npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
             text: "I have no more use for this. My battles are over. A shield like this belongs on the arm of a hero. Take it. Let it protect you as it once protected my friend. Now, if you'll excuse me... I think I can finally enjoy a quiet drink.",
-            responses: [{ text: "(Take the shield)", actions: [{ type: 'take_item', itemId: 'pregais_shield', quantity: 1 }, { type: 'advance_quest', questId: 'an_echo_of_battle' }] }]
+            responses: [{ text: "(Take the shield)", actions: [{ type: 'advance_quest', questId: 'an_echo_of_battle' }] }]
         },
         // Valerius's Dialogue
         aeb_valerius_intro: {

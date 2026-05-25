@@ -6,6 +6,7 @@ import { POIS } from '../data/pois';
 // FIX: Import ContextMenuOption from its source file instead of re-exporting from useUIState.
 import { MakeXPrompt, useUIState, ConfirmationPrompt } from './useUIState';
 import { useNavigation } from './useNavigation';
+import { useSoundEngine } from './useSoundEngine';
 
 type BarType = 'bronze_bar' | 'iron_bar' | 'steel_bar' | 'silver_bar' | 'gold_bar' | 'mithril_bar' | 'adamantite_bar' | 'runic_bar';
 
@@ -34,6 +35,7 @@ interface UseItemActionsProps {
     setEquipment: React.Dispatch<React.SetStateAction<Equipment>>;
     skills: (PlayerSkill & { currentLevel: number; })[];
     inventory: (InventorySlot | null)[];
+    activeBuffs: ActiveBuff[];
     activeCraftingAction: ActiveCraftingAction | null;
     setActiveCraftingAction: (action: ActiveCraftingAction | null) => void;
     hasItems: (items: { itemId: ItemId, quantity: number }[]) => boolean;
@@ -80,9 +82,10 @@ const MULTI_BITE_FOODS: Record<string, string> = {
 };
 
 export const useItemActions = (props: UseItemActionsProps) => {
-    const { addLog, currentHp, maxHp, setCurrentHp, currentPrayer, maxPrayer, setCurrentPrayer, setRunEnergy, restoreNegativeStatModifiers, applyStatModifier, setInventory, setEquipment, skills, inventory, activeCraftingAction, setActiveCraftingAction, hasItems, modifyItem, addXp, openCraftingView, itemToUse, setItemToUse, addBuff, curePoison, setMakeXPrompt, startQuest, currentPoiId, playerQuests, isStunned, setActiveDungeonMap, confirmValuableDrops, valuableDropThreshold, ui, equipment, onResponse, handleDialogueCheck, crafting, isBusy, navigation, rangeCooldowns, setRangeCooldowns, worldState, setWorldState, setIsResting, combatSpeedMultiplier } = props;
+    const { addLog, currentHp, maxHp, setCurrentHp, currentPrayer, maxPrayer, setCurrentPrayer, setRunEnergy, restoreNegativeStatModifiers, applyStatModifier, setInventory, setEquipment, skills, inventory, activeBuffs, activeCraftingAction, setActiveCraftingAction, hasItems, modifyItem, addXp, openCraftingView, itemToUse, setItemToUse, addBuff, curePoison, setMakeXPrompt, startQuest, currentPoiId, playerQuests, isStunned, setActiveDungeonMap, confirmValuableDrops, valuableDropThreshold, ui, equipment, onResponse, handleDialogueCheck, crafting, isBusy, navigation, rangeCooldowns, setRangeCooldowns, worldState, setWorldState, setIsResting, combatSpeedMultiplier } = props;
     const { setActiveDialogue, setContextMenu } = ui;
     const lastFoodEatenTime = React.useRef<number>(0);
+    const { playInstrumentNote, getContextTime } = useSoundEngine();
 
     const handleTeleport = useCallback((
         itemSlot: InventorySlot,
@@ -161,6 +164,39 @@ export const useItemActions = (props: UseItemActionsProps) => {
         const itemData = ITEMS[itemId];
         if (!itemData) return;
 
+        if (['red_whistle', 'blue_whistle', 'green_whistle', 'yellow_whistle'].includes(itemId)) {
+            const now = getContextTime();
+            if (itemId === 'red_whistle') {
+                // 🔴 Red - A minor arpeggio
+                playInstrumentNote('ocarina', 587.33, 150, now, 1.0, 'sfx'); // D5
+                playInstrumentNote('ocarina', 739.99, 150, now + 0.18, 1.0, 'sfx'); // F#5
+                playInstrumentNote('ocarina', 880.00, 250, now + 0.36, 1.0, 'sfx'); // A5
+                addLog("You blow your Red Whistle ♪ toot-toot-TOOT!");
+            }
+            else if (itemId === 'blue_whistle') {
+                // 🔵 Blue - F major arpeggio
+                playInstrumentNote('ocarina', 440.00, 150, now, 1.0, 'sfx'); // A4
+                playInstrumentNote('ocarina', 554.37, 150, now + 0.18, 1.0, 'sfx'); // C#5
+                playInstrumentNote('ocarina', 659.25, 250, now + 0.36, 1.0, 'sfx'); // E5
+                addLog("You blow your Blue Whistle ♪ toot-toot-TOOT!");
+            }
+            else if (itemId === 'green_whistle') {
+                // 🟢 Green - C major arpeggio
+                playInstrumentNote('ocarina', 493.88, 150, now, 1.0, 'sfx'); // B4
+                playInstrumentNote('ocarina', 587.33, 150, now + 0.18, 1.0, 'sfx'); // D5
+                playInstrumentNote('ocarina', 739.99, 250, now + 0.36, 1.0, 'sfx'); // F#5
+                addLog("You blow your Green Whistle ♪ toot-toot-TOOT!");
+            }
+            else if (itemId === 'yellow_whistle') {
+                // 🟡 Yellow - G major arpeggio
+                playInstrumentNote('ocarina', 392.00, 150, now, 1.0, 'sfx'); // G4
+                playInstrumentNote('ocarina', 493.88, 150, now + 0.18, 1.0, 'sfx'); // B4
+                playInstrumentNote('ocarina', 587.33, 250, now + 0.36, 1.0, 'sfx'); // D5
+                addLog("You blow your Yellow Whistle ♪ toot-toot-TOOT!");
+            }
+            return;
+        }
+
         if (itemData.cleanable) {
             const herbloreLevel = skills.find(s => s.name === SkillName.Herblore)?.currentLevel ?? 1;
             const herbData = HERBS.find(h => h.grimy === itemId);
@@ -181,6 +217,23 @@ export const useItemActions = (props: UseItemActionsProps) => {
         }
 
         if (!itemData.consumable) return;
+
+        if (itemId === 'swamp_ward_bundle') {
+            setInventory(prevInv => {
+                const newInv = [...prevInv];
+                newInv[inventoryIndex] = null;
+                return newInv;
+            });
+            setWorldState(prev => ({
+                ...prev,
+                questVariables: {
+                    ...(prev.questVariables || {}),
+                    swamp_ward_burned: 1
+                }
+            }));
+            addLog("You burn the Swamp Ward Bundle. A thick, sweet-smelling smoke surrounds you, parting the miasma.");
+            return;
+        }
 
         if (itemData.consumable.curesPoison) {
             curePoison();
@@ -323,6 +376,46 @@ export const useItemActions = (props: UseItemActionsProps) => {
                     duration: 420000, // 7 minutes
                 });
                 addLog('You drink some of the potion, restoring 40 run energy and boosting your stamina for 7 minutes.');
+            } else if (itemId.startsWith('overload_potion_weak')) {
+                const isOverloadActive = activeBuffs.some(b => b.type === 'overload');
+                if (isOverloadActive) {
+                    addLog('You are already overloaded.');
+                    return; // Prevent stacking/re-applying
+                }
+
+                if (currentHp <= 20) {
+                    addLog('You need more than 20 health to survive the effects of this potion.');
+                    return;
+                }
+
+                addBuff({
+                    type: 'overload',
+                    value: 0,
+                    duration: 300000, // 5 minutes
+                });
+
+                ['Attack', 'Strength', 'Defence', 'Ranged', 'Magic'].forEach(skill => {
+                    const skillData = skills.find(s => s.name === skill as SkillName);
+                    const baseLevel = skillData ? skillData.level : 1;
+                    const boostValue = Math.floor(baseLevel * 0.10 + 3);
+                    applyStatModifier(skill as SkillName, boostValue, baseLevel);
+                });
+
+                addLog('You drink the overload potion. You feel a sudden, violent surge of power!');
+            } else if (itemId.startsWith('battlemasters_draught')) {
+                const isAdrenalineActive = activeBuffs.some(b => b.type === 'adrenaline');
+                if (isAdrenalineActive) {
+                    addLog('You are already coursing with adrenaline.');
+                    return;
+                }
+
+                addBuff({
+                    type: 'adrenaline',
+                    value: 0,
+                    duration: 120000, // 2 minutes
+                });
+
+                addLog('You down the battlemaster\'s draught. Your heart hammers against your ribs as your perception of time slows down!');
             }
         }
         if (itemData.consumable.statModifiers) {
@@ -442,7 +535,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
             }
         }
 
-    }, [skills, currentHp, maxHp, setCurrentHp, setInventory, addLog, applyStatModifier, modifyItem, addXp, addBuff, inventory, isStunned, curePoison, currentPrayer, maxPrayer, setCurrentPrayer, setRunEnergy]);
+    }, [skills, currentHp, maxHp, setCurrentHp, setInventory, addLog, applyStatModifier, modifyItem, addXp, addBuff, inventory, isStunned, curePoison, currentPrayer, maxPrayer, setCurrentPrayer, setRunEnergy, playInstrumentNote, getContextTime]);
 
     const handleCurePoisonFromOrb = useCallback(() => {
         const antiPoisonPotions: ItemId[] = ['antipoison_potion_3' as ItemId, 'antipoison_potion_2' as ItemId, 'antipoison_potion_1' as ItemId, 'super_antipoison_3' as ItemId, 'super_antipoison_2' as ItemId, 'super_antipoison_1' as ItemId];
@@ -1093,7 +1186,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
 
                     setInventory(prev => {
                         const newInv = [...prev];
-                        
+
                         // Update Target
                         const newTargetId = getDoseId(targetBaseId, newTargetDoses);
                         newInv[targetIndex] = { ...targetSlot, itemId: newTargetId as ItemId, doses: newTargetDoses };

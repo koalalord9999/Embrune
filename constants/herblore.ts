@@ -84,7 +84,7 @@ export const HERBLORE_RECIPES = {
         { unfinishedPotionId: 'cinderbloom_potion_unf', secondaryId: 'serpent_scale', finishedPotionId: 'weapon_poison_super', level: 55, xp: 130, finishedNum: 694 },
         { unfinishedPotionId: 'cinderbloom_potion_unf', secondaryId: 'fey_dust', finishedPotionId: 'weak_herblore_potion', level: 56, xp: 128, finishedNum: 695 },
         { unfinishedPotionId: 'cinderbloom_potion_unf', secondaryId: 'willow_logs', finishedPotionId: 'fletching_potion', level: 59, xp: 140, finishedNum: 696 },
-        { unfinishedPotionId: 'cinderbloom_potion_unf', secondaryId: 'golem_core_shard', finishedPotionId: 'overload_potion_weak', level: 64, xp: 160, finishedNum: 697 },
+        { unfinishedPotionId: 'cinderbloom_potion_unf', secondaryId: 'golem_core', finishedPotionId: 'overload_potion_weak', level: 64, xp: 160, finishedNum: 697 },
 
         // --- Wyrmfire Petal Potions (Lvl 63 Herb) ---
         { unfinishedPotionId: 'wyrmfire_petal_potion_unf', secondaryId: 'fey_dust', finishedPotionId: 'magic_potion', level: 63, xp: 155, finishedNum: 698 },

@@ -17,11 +17,12 @@ import { useGameSession } from '../../hooks/useGameSession';
 import { useItemActions } from '../../hooks/useItemActions';
 import { useAgility } from '../../hooks/useAgility';
 import { SkillName, InventorySlot, CombatStance, POIActivity, GroundItem, Spell, BonfireActivity, DialogueCheckRequirement, DialogueAction, BankTab, WorldState, PlayerRepeatableQuest, ActiveBuff, DialogueResponse, Monster, MonsterType, SpellElement, PlayerType, POI, Equipment, WeaponType } from '../../types';
-import {  POIS, SHOPS  } from '../../constants';
+import { POIS, SHOPS } from '../../constants';
 import CraftingProgressView from '../views/crafting/CraftingProgressView';
 import CombatView from '../views/CombatView';
 import BankView from '../views/BankView';
 import ShopView from '../views/ShopView';
+import FestivalShopView from '../views/FestivalShopView';
 import AgilityShopView from '../views/AgilityShopView';
 import SlayerShopView from '../views/SlayerShopView';
 import CraftingView from '../views/crafting/CraftingView';
@@ -30,12 +31,13 @@ import SceneView from './SceneView';
 import TeleportView from '../views/TeleportView';
 import ExpandedMapView from '../views/ExpandedMapView';
 import AgilityCourseView from '../views/AgilityCourseView';
+import FestivalMinigameView from '../views/FestivalMinigameView';
 import LootView from '../views/LootView';
 import EquipmentStatsView from '../views/overlays/EquipmentStatsView';
 import SettingsPanel from '../panels/SettingsPanel';
 import SingleActionProgressView from './SingleActionProgressView';
 import { ThievingContainerState } from '../../types/world';
-import {  PILFERING_DURATION, FIREMAKING_RECIPES, QUESTS, MONSTERS  } from '../../constants';
+import { PILFERING_DURATION, FIREMAKING_RECIPES, QUESTS, MONSTERS } from '../../constants';
 import PilferingTimer from './PilferingTimer';
 
 
@@ -186,6 +188,18 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
         if (agility.agilityState.activeCourseId) {
             return <AgilityCourseView agility={agility} activeAction={ui.activeSingleAction} onCancelAction={() => ui.setActiveSingleAction(null)} />;
         }
+        if (ui.activeFestivalMinigame) {
+            return <FestivalMinigameView
+                activeFestivalMinigame={ui.activeFestivalMinigame}
+                setActiveFestivalMinigame={ui.setActiveFestivalMinigame}
+                ui={ui}
+                char={char}
+                inv={inv}
+                quests={quests}
+                addLog={addLog}
+                questLogic={questLogic}
+            />;
+        }
         if (ui.activeCraftingAction && ui.activeCraftingAction.recipeType !== 'firemaking-stoke') {
             return <CraftingProgressView
                 action={ui.activeCraftingAction}
@@ -196,29 +210,29 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
             />;
         }
         if (ui.combatQueue.length > 0) {
-            return <CombatView 
-                monsterQueue={ui.combatQueue} 
+            return <CombatView
+                monsterQueue={ui.combatQueue}
                 isMandatory={ui.isMandatoryCombat}
-                playerSkills={char.skills} 
-                playerHp={char.currentHp} 
-                equipment={inv.equipment} 
+                playerSkills={char.skills}
+                playerHp={char.currentHp}
+                equipment={inv.equipment}
                 combatStance={char.combatStance}
-                setCombatStance={char.setCombatStance} 
-                setPlayerHp={char.setCurrentHp} 
+                setCombatStance={char.setCombatStance}
+                setPlayerHp={char.setCurrentHp}
                 onCombatEnd={onWinCombat}
                 onFleeSuccess={onFleeSuccess}
-                addXp={handleCombatXpGain} 
+                addXp={handleCombatXpGain}
                 addLoot={inv.modifyItem}
                 onDropLoot={onItemDropped}
                 isAutoBankOn={isAutoBankOn}
-                addLog={addLog} 
-                onConsumeAmmo={inv.handleConsumeAmmo} 
-                onPlayerDeath={handlePlayerDeath} 
-                onKill={handleKill} 
+                addLog={addLog}
+                onConsumeAmmo={inv.handleConsumeAmmo}
+                onPlayerDeath={handlePlayerDeath}
+                onKill={handleKill}
                 onEncounterWin={onEncounterWin}
                 activeBuffs={char.activeBuffs}
                 combatSpeedMultiplier={combatSpeedMultiplier}
-                advanceTutorial={() => {}}
+                advanceTutorial={() => { }}
                 autocastSpell={char.autocastSpell}
                 inv={inv}
                 ui={ui}
@@ -248,7 +262,7 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
                 onClose={() => ui.setActiveTeleportBoardId(null)}
             />
         }
-        if (ui.activePanel === 'bank') return <BankView 
+        if (ui.activePanel === 'bank') return <BankView
             bank={bank}
             onClose={() => ui.setActivePanel(null)}
             onWithdraw={bankLogic.handleWithdraw}
@@ -272,7 +286,19 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
         if (ui.activeShopId) {
             const shopData = SHOPS[ui.activeShopId];
             if (shopData?.currency === 'agility_voucher') {
-                return <AgilityShopView 
+                return <AgilityShopView
+                    shopId={ui.activeShopId}
+                    inventory={inv.inventory}
+                    onExit={() => ui.setActiveShopId(null)}
+                    addLog={addLog}
+                    modifyItem={inv.modifyItem}
+                    setContextMenu={ui.setContextMenu}
+                    setMakeXPrompt={ui.setMakeXPrompt}
+                    setTooltip={ui.setTooltip}
+                    isOneClickMode={ui.isOneClickMode}
+                />;
+            } else if (shopData?.currency === 'festival_ticket') {
+                return <FestivalShopView
                     shopId={ui.activeShopId}
                     inventory={inv.inventory}
                     onExit={() => ui.setActiveShopId(null)}
@@ -284,7 +310,7 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
                     isOneClickMode={ui.isOneClickMode}
                 />;
             } else if (shopData?.currency === 'slayer_credits') {
-                return <SlayerShopView 
+                return <SlayerShopView
                     shopId={ui.activeShopId}
                     inventory={inv.inventory}
                     onExit={() => ui.setActiveShopId(null)}
@@ -301,21 +327,21 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
                     shrinkTask={slayer.shrinkTask}
                 />;
             } else {
-                return <ShopView 
+                return <ShopView
                     shopId={ui.activeShopId}
                     playerCoins={inv.coins}
-                    shopStates={shops.shopStates} 
+                    shopStates={shops.shopStates}
                     onBuy={shops.handleBuy}
-                    addLog={addLog} 
-                    onExit={() => ui.setActiveShopId(null)} 
-                    setContextMenu={ui.setContextMenu} 
-                    setMakeXPrompt={ui.setMakeXPrompt} 
+                    addLog={addLog}
+                    onExit={() => ui.setActiveShopId(null)}
+                    setContextMenu={ui.setContextMenu}
+                    setMakeXPrompt={ui.setMakeXPrompt}
                     setTooltip={ui.setTooltip}
                     isOneClickMode={ui.isOneClickMode}
                 />;
             }
         }
-        
+
         if (ui.activeCraftingContext) return <CraftingView
             context={ui.activeCraftingContext}
             inventory={inv.inventory}
@@ -337,8 +363,8 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
             handleRendering={crafting.handleRendering}
             onGlassblow={crafting.handleGlassblowing}
         />;
-        
-        if (ui.activeQuestBoardId) return <QuestBoardView 
+
+        if (ui.activeQuestBoardId) return <QuestBoardView
             boardId={ui.activeQuestBoardId}
             boardQuests={(repeatableQuests.boards[ui.activeQuestBoardId] ?? []).filter(q => !repeatableQuests.completedQuestIds.includes(q.id))}
             activePlayerQuest={repeatableQuests.activePlayerQuest}
@@ -349,8 +375,8 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
             nextResetTimestamp={repeatableQuests.nextResetTimestamp}
             boardCompletions={repeatableQuests.boardCompletions}
             onOpenTeleportModal={() => ui.setActiveTeleportBoardId(ui.activeQuestBoardId!)}
-         />
-        
+        />
+
         if (!poi) {
             console.error(`Error: Could not find POI with id "${session.currentPoiId}". Defaulting to start location.`);
             addLog(`Error: Location "${session.currentPoiId}" not found. Returning to Meadowdale.`);
@@ -416,7 +442,7 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
             />
         );
     })();
-    
+
     return (
         <>
             {worldState.activePilferingSession && (
@@ -443,8 +469,8 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
             )}
             {ui.isEquipmentStatsViewOpen && (
                 <div className="absolute inset-0 bg-black/80 z-30 p-4">
-                    <EquipmentStatsView 
-                        equipment={inv.equipment} 
+                    <EquipmentStatsView
+                        equipment={inv.equipment}
                         onClose={() => ui.setIsEquipmentStatsViewOpen(false)}
                         onUnequip={inv.handleUnequip}
                         setTooltip={ui.setTooltip}

@@ -35,6 +35,7 @@ import { barrowOfTheRevenantPois } from './dungeon_barrow';
 import { sunbrightUndergroundCavePois } from './sunbright_underground_cave';
 import { agilityCoursePois } from './agility_courses';
 import { newPois } from './new_pois';
+import { lanternFestivalPois } from './lantern_festival';
 
 import { DUSKWATCH_POIS } from './slayers_respite/duskwatch';
 import { IRONMAW_POIS } from './slayers_respite/ironmaw';
@@ -86,6 +87,7 @@ export const POIS: Record<string, POI> = {
     ...barrowOfTheRevenantPois,
     ...agilityCoursePois,
     ...newPois,
+    ...lanternFestivalPois,
     ...DUSKWATCH_POIS,
     ...IRONMAW_POIS,
     ...BLEAKPOST_POIS,

@@ -24,14 +24,21 @@ interface MusicEvent {
 }
 
 // --- MODULE SCOPE GLOBALS (Singleton Management) ---
-let globalSessionId = 0;
+// Clear old timers on hot-reload to prevent double music
+if ((window as any).__EM_MUSIC_TIMER) clearInterval((window as any).__EM_MUSIC_TIMER);
+if ((window as any).__EM_MUSIC_TIMEOUT) clearTimeout((window as any).__EM_MUSIC_TIMEOUT);
+
+let globalSessionId = ((window as any).__EM_MUSIC_SESSION || 0) + 1;
+(window as any).__EM_MUSIC_SESSION = globalSessionId;
+
 let globalSchedulerTimer: number | null = null;
 let globalPreStartTimeout: number | null = null;
-let globalActiveTrackId: string | null = null;
-let globalMusicMode: MusicMode = 'play'; // Default to 'play'
-let globalSelectedTrackId: string | null = null;
-let globalLastValidRegionId: string | undefined = undefined;
-let globalPlaybackNonce = 0; // Incremented to force effect re-runs
+let globalActiveTrackId: string | null = (window as any).__EM_ACTIVE_TRACK || null;
+let globalMusicMode: MusicMode = (window as any).__EM_MUSIC_MODE || 'play'; // Default to 'play'
+let globalSelectedTrackId: string | null = (window as any).__EM_SEL_TRACK || null;
+let globalLastValidRegionId: string | undefined = (window as any).__EM_LAST_REGION || undefined;
+let globalPlaybackNonce = ((window as any).__EM_NONCE || 0) + 1; // Incremented to force effect re-runs
+
 
 // Subscriber pattern so all hook instances share state
 type MusicStateListener = () => void;
@@ -239,6 +246,7 @@ export const useMusicEngine = (
 
     const setSelectedTrackId = useCallback((id: string | null) => {
         globalSelectedTrackId = id;
+        (window as any).__EM_SEL_TRACK = id;
         notifyListeners();
     }, []);
 
@@ -268,10 +276,12 @@ export const useMusicEngine = (
         if (globalSchedulerTimer) {
             clearInterval(globalSchedulerTimer);
             globalSchedulerTimer = null;
+            (window as any).__EM_MUSIC_TIMER = null;
         }
         if (globalPreStartTimeout) {
             clearTimeout(globalPreStartTimeout);
             globalPreStartTimeout = null;
+            (window as any).__EM_MUSIC_TIMEOUT = null;
         }
     }, []);
 
@@ -286,6 +296,7 @@ export const useMusicEngine = (
         const events = parseScore(score);
         playbackEventsRef.current = events;
         globalActiveTrackId = trackId;
+        (window as any).__EM_ACTIVE_TRACK = trackId;
         notifyListeners();
 
         const fadeOutTime = instant ? 0 : 0.5;
@@ -299,6 +310,7 @@ export const useMusicEngine = (
         nextEventIndexRef.current = startIdx;
 
         globalPreStartTimeout = window.setTimeout(() => {
+            (window as any).__EM_MUSIC_TIMEOUT = globalPreStartTimeout;
             if (currentSessionId !== globalSessionId) return;
 
             playbackStartTimeRef.current = getContextTime() + 0.1 - (startOffsetMs / 1000);
@@ -310,6 +322,7 @@ export const useMusicEngine = (
             }
 
             globalSchedulerTimer = window.setInterval(() => {
+                (window as any).__EM_MUSIC_TIMER = globalSchedulerTimer;
                 if (currentSessionId !== globalSessionId) {
                     if (globalSchedulerTimer) {
                         clearInterval(globalSchedulerTimer);
@@ -388,11 +401,14 @@ export const useMusicEngine = (
         if (mode === globalMusicMode) return;
 
         globalMusicMode = mode;
+        (window as any).__EM_MUSIC_MODE = mode;
         setMusicModeState(mode);
 
         if (mode === 'stop') {
             globalActiveTrackId = null;
+            (window as any).__EM_ACTIVE_TRACK = null;
             globalSelectedTrackId = null;
+            (window as any).__EM_SEL_TRACK = null;
             stopAllMusic(0);
             stopScheduler();
             pausedProgressRef.current = 0;
@@ -496,6 +512,7 @@ export const useMusicEngine = (
         const isZoneTransition = (regionId !== undefined && regionId !== globalLastValidRegionId);
         if (isZoneTransition) {
             globalLastValidRegionId = regionId;
+            (window as any).__EM_LAST_REGION = regionId;
             pausedProgressRef.current = 0; // Clear progress on zone change
         }
     }, [targetPlaybackTrackId, regionId, globalMusicMode, globalPlaybackNonce, stopAllMusic, stopScheduler, isAudioActive, playMusicSegmentInternal]);

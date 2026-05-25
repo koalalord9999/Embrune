@@ -274,12 +274,17 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
                         return true; // Keep menu open
                     },
                 });
-            } else if (item.consumable) {
-                let actionText = 'Consume';
-                if (item.consumable.givesCoins) actionText = 'Open';
-                else if (item.doseable) actionText = 'Drink';
-                else if (item.consumable.healAmount) actionText = 'Eat';
-                options.push({ label: actionText, onClick: () => performActionAndClose(() => onConsume(item.id, index)), disabled: isBusy });
+            } else {
+                const isWhistle = ['red_whistle', 'blue_whistle', 'green_whistle', 'yellow_whistle'].includes(item.id);
+                if (isWhistle) {
+                    options.push({ label: 'Blow', onClick: () => performActionAndClose(() => onConsume(item.id, index)), disabled: isBusy });
+                } else if (item.consumable) {
+                    let actionText = 'Consume';
+                    if (item.consumable.givesCoins) actionText = 'Open';
+                    else if (item.doseable) actionText = 'Drink';
+                    else if (item.consumable.healAmount) actionText = 'Eat';
+                    options.push({ label: actionText, onClick: () => performActionAndClose(() => onConsume(item.id, index)), disabled: isBusy });
+                }
             }
 
             if (item.divining) {
@@ -391,8 +396,10 @@ const InventorySlotDisplay: React.FC<InventorySlotProps> = (props) => {
         const isDivining = !!item.divining;
         const isMappable = !!item.mappable;
         const isCombinable = !!item.combinable;
+        const isWhistle = ['red_whistle', 'blue_whistle', 'green_whistle', 'yellow_whistle'].includes(item.id);
 
-        if (isMappable) performAction(() => onReadMap(item));
+        if (isWhistle) performAction(() => onConsume(item.id, index));
+        else if (isMappable) performAction(() => onReadMap(item));
         else if (isCombinable) performAction(() => {
             console.log(`[InventorySlot] Left click Combine triggered: ${item.id} at index ${index}`);
             onCombine(item.id, index);

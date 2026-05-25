@@ -179,12 +179,14 @@ const useUIStateInternal = () => {
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
     const [makeXPrompt, setMakeXPrompt] = useState<MakeXPrompt | null>(null);
     const [activeDialogue, setActiveDialogue] = useState<DialogueState | null>(null);
+    const [isDialogueProcessing, setIsDialogueProcessing] = useState<boolean>(false);
     const [confirmationPrompt, setConfirmationPrompt] = useState<ConfirmationPrompt | null>(null);
     const [exportData, setExportData] = useState<ExportDataState | null>(null);
     const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
     const [activeSkillGuide, setActiveSkillGuide] = useState<SkillName | null>(null);
     const [activeCraftingAction, setActiveCraftingAction] = useState<ActiveCraftingAction | null>(null);
     const [activeSingleAction, setActiveSingleAction] = useState<ActiveSingleAction | null>(null);
+    const [activeFestivalMinigame, setActiveFestivalMinigame] = useState<'trivia' | 'ring_toss' | 'lantern_launch' | 'log_balance' | 'whack_lantern' | 'smash_gourd' | 'high_striker' | null>(null);
     const [activeQuestDetail, setActiveQuestDetail] = useState<QuestDetailState | null>(null);
     const [isSelectingAutocastSpell, setIsSelectingAutocastSpell] = useState<boolean>(false);
     const [manualCastTrigger, setManualCastTrigger] = useState<Spell | null>(null);
@@ -313,12 +315,14 @@ const useUIStateInternal = () => {
         setActiveQuestBoardId(null);
         setActiveTeleportBoardId(null);
         setActiveDialogue(null);
+        setIsDialogueProcessing(false);
         setConfirmationPrompt(null);
         setExportData(null);
         setIsImportModalOpen(false);
         setActiveSkillGuide(null);
         setActiveCraftingAction(null);
         setActiveSingleAction(null);
+        setActiveFestivalMinigame(null);
         setActiveQuestDetail(null);
         setIsEquipmentStatsViewOpen(false);
         setItemsOnDeathData(null);
@@ -354,12 +358,14 @@ const useUIStateInternal = () => {
         contextMenu, setContextMenu,
         makeXPrompt, setMakeXPrompt,
         activeDialogue, setActiveDialogue,
+        isDialogueProcessing, setIsDialogueProcessing,
         confirmationPrompt, setConfirmationPrompt,
         exportData, setExportData,
         isImportModalOpen, setIsImportModalOpen,
         activeSkillGuide, setActiveSkillGuide,
         activeCraftingAction, setActiveCraftingAction,
         activeSingleAction, setActiveSingleAction,
+        activeFestivalMinigame, setActiveFestivalMinigame,
         activeQuestDetail, setActiveQuestDetail,
         isEquipmentStatsViewOpen, setIsEquipmentStatsViewOpen,
         itemsOnDeathData, setItemsOnDeathData,

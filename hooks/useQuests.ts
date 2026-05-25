@@ -7,16 +7,17 @@ export const useQuests = (initialData: { playerQuests: PlayerQuestState[], locke
     const [lockedPois, setLockedPois] = useState<string[]>(initialData.lockedPois);
 
     const startQuest = useCallback((questId: string, addLog: (message: string) => void) => {
-        if (playerQuests.some(q => q.questId === questId)) {
-            addLog("You have already started this quest.");
-            return;
-        }
         const questData = QUESTS[questId];
-        if (questData) {
-            setPlayerQuests(quests => [...quests, { questId, currentStage: 0, progress: 0, isComplete: false }]);
+        if (!questData) return;
+
+        setPlayerQuests(quests => {
+            if (quests.some(q => q.questId === questId)) {
+                return quests;
+            }
             addLog(`New quest started: ${questData.name}`);
-        }
-    }, [playerQuests]);
+            return [...quests, { questId, currentStage: 0, progress: 0, isComplete: false }];
+        });
+    }, []);
 
     const resetQuest = useCallback((questId: string, addLog: (message: string) => void) => {
         const questData = QUESTS[questId];

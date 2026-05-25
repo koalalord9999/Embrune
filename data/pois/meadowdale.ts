@@ -610,9 +610,36 @@ export const meadowdalePois: Record<string, POI> = {
         name: "Cook's Kitchen",
         description: "A cozy kitchen with a large cooking range. The smell of baked bread hangs in the air.",
         connections: ["south_meadow_street"],
-        activities: [{
-            type: "cooking_range",
-        }],
+        activities: [
+            {
+                type: "cooking_range",
+            },
+            {
+                type: "npc",
+                name: "Master Baker Thomas",
+                icon: "/assets/npcChatHeads/master_baker_thomas.png",
+                startNode: "thomas_default",
+                questTopics: ["the_bakers_apprentice"],
+                conditionalGreetings: [
+                    {
+                        text: "Ah, it's my star apprentice! I am thoroughly impressed by your technique and heart for the craft. From now on, I see you not just as a student, but as a true fellow baker. The ovens are always open to you.",
+                        check: {
+                            requirements: [
+                                { type: 'quest', questId: 'the_bakers_apprentice', status: 'completed' }
+                            ]
+                        }
+                    }
+                ],
+                dialogue: {
+                    thomas_default: {
+                        npcName: "Master Baker Thomas",
+                        npcIcon: "/assets/npcChatHeads/master_baker_thomas.png",
+                        text: "The secret to a good loaf is all in the hands, lad. And a bit of patience. Meadowdale never goes hungry as long as I'm at the oven!",
+                        responses: [],
+                    },
+                },
+            },
+        ],
         regionId: "meadowdale",
         x: 200,
         y: 350,

@@ -126,6 +126,8 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
                 if (isFinalStage) {
                     addLog(`Congratulations! You have completed the quest: ${questData.name}!`);
                     const rewards = questData.rewards;
+                    // FIX: Side-effects inside map are bad, but at least we guard with isComplete: true
+                    // In a future refactor, these should be handled by a useEffect or a separate action.
                     if (rewards.coins) modifyItem('coins', rewards.coins);
                     rewards.items?.forEach(item => modifyItem(item.itemId, item.quantity, false, { doses: item.doses, bypassAutoBank: true }));
                     rewards.xp?.forEach(xpReward => addXp(xpReward.skill, xpReward.amount));
@@ -263,6 +265,8 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
                 if(isCompletingFinalStage) {
                     addLog(`Congratulations! You have completed the quest: ${questData.name}!`);
                     const rewards = questData.rewards;
+                    
+                    // Side-effects
                     if(rewards.coins) modifyItem('coins', rewards.coins);
                     rewards.items?.forEach(item => modifyItem(item.itemId, item.quantity, false, { doses: item.doses, bypassAutoBank: true }));
                     rewards.xp?.forEach(xpReward => addXp(xpReward.skill, xpReward.amount));

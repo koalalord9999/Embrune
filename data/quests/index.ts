@@ -20,6 +20,8 @@ import { theSaintsFirstStep } from './the_saints_first_step';
 import { theTrialOfWar } from './the_trial_of_war';
 import { theGreatHunt } from './the_great_hunt';
 import { theSorcerersTrial } from './the_sorcerers_trial';
+import { theBakersApprentice } from './the_bakers_apprentice';
+import { scalesOfTheSwamp } from './scales_of_the_swamp';
 
 
 export const QUESTS: Record<string, Quest> = {
@@ -44,4 +46,6 @@ export const QUESTS: Record<string, Quest> = {
     [theTrialOfWar.id]: theTrialOfWar,
     [theGreatHunt.id]: theGreatHunt,
     [theSorcerersTrial.id]: theSorcerersTrial,
+    [theBakersApprentice.id]: theBakersApprentice,
+    [scalesOfTheSwamp.id]: scalesOfTheSwamp,
 };

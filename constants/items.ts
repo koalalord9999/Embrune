@@ -14,6 +14,7 @@ import { runes } from './items/runes';
 import { talismans } from './items/talismans';
 import { slayerGear } from './items/slayerGear';
 import { tools } from './items/tools';
+import { festival } from './items/festival';
 
 const allItemsUnsorted: Item[] = [
     ...armor,
@@ -29,6 +30,7 @@ const allItemsUnsorted: Item[] = [
     ...talismans,
     ...slayerGear,
     ...tools,
+    ...festival,
 ];
 
 // Sort the array alphabetically by item name for deterministic order if needed elsewhere

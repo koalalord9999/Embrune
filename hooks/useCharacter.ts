@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { PlayerSkill, SkillName, CombatStance, Spell, WorldState, Prayer, PrayerType, ActiveStatModifier, ActiveBuff, Equipment, Item } from '../types';
 import {  XP_TABLE, PRAYERS, ITEMS  } from '../constants';
+import { getActiveFestivalSkill } from '../constants/items/festival';
 
 const getLevelForXp = (xp: number): number => {
     const level = XP_TABLE.findIndex(xpVal => xpVal > xp);
@@ -282,10 +283,18 @@ export const useCharacter = (
         const timer = setInterval(() => {
             setStatModifiers(prev => {
                 const now = Date.now();
+                const isOverloadActive = activeBuffsRef.current.some(b => b.type === 'overload');
+                const combatSkills = [SkillName.Attack, SkillName.Strength, SkillName.Defence, SkillName.Ranged, SkillName.Magic];
+
                 const updatedModifiers = prev.map(mod => {
                     // Only decay if the timer is up
                     if (now < mod.nextDecayTimestamp) {
                         return mod;
+                    }
+
+                    if (isOverloadActive && combatSkills.includes(mod.skill) && mod.currentValue > 0) {
+                        // Reset the timer, do not decay while Overload is active
+                        return { ...mod, nextDecayTimestamp: now + 60000 };
                     }
 
                     const isBoost = mod.currentValue > 0;
@@ -324,12 +333,13 @@ export const useCharacter = (
             const now = Date.now();
             const currentBuffs = activeBuffsRef.current;
             let poisonDamageTotal = 0;
+            let adrenalineDrainTotal = 0;
             let poisonWoreOff = false;
             const expiredBuffIds: number[] = [];
 
             const updatedBuffs = currentBuffs.map(b => {
                 // 1. Handle standard time-based buffs
-                if (b.type !== 'poison') {
+                if (b.type !== 'poison' && b.type !== 'overload' && b.type !== 'adrenaline') {
                     const newDuration = b.durationRemaining - 1000;
                     if (newDuration <= 0) {
                         expiredBuffIds.push(b.id);
@@ -358,7 +368,48 @@ export const useCharacter = (
                         }
                         return { ...b, ticksApplied: ticks, nextTickTimestamp: nextTick };
                     }
+                    return b;
                 }
+
+                // 3. Handle Overload Logic
+                if (b.type === 'overload') {
+                    const newDuration = b.durationRemaining - 1000;
+                    
+                    let newTicks = b.ticksApplied ?? 0;
+                    let nextTick = b.nextTickTimestamp ?? now;
+                    
+                    if (now >= nextTick && newTicks < 5) {
+                        poisonDamageTotal += 4; // Use the same damage pipeline for visual effect
+                        newTicks += 1;
+                        nextTick = now + 1000;
+                    }
+                    
+                    if (newDuration <= 0) {
+                        expiredBuffIds.push(b.id);
+                        
+                        // Overload heals 20 at the end
+                        setCurrentHp(prevHp => Math.min(baseMaxHp + (worldState.hpBoost?.amount ?? 0), prevHp + 20));
+                        setStatModifiers(prev => prev.filter(m => !['Attack', 'Strength', 'Defence', 'Ranged', 'Magic'].includes(m.skill)));
+                        addLog("The overload's effects wear off, and you regain some health.");
+                        return null;
+                    }
+                    
+                    return { ...b, durationRemaining: newDuration, ticksApplied: newTicks, nextTickTimestamp: nextTick };
+                }
+
+                // 4. Handle Adrenaline Logic
+                if (b.type === 'adrenaline') {
+                    const newDuration = b.durationRemaining - 1000;
+                    
+                    adrenalineDrainTotal += 1; // Drain 1 point per second
+                    
+                    if (newDuration <= 0) {
+                        expiredBuffIds.push(b.id);
+                        return null;
+                    }
+                    return { ...b, durationRemaining: newDuration };
+                }
+                
                 return b;
             }).filter((b): b is ActiveBuff => b !== null);
 
@@ -374,7 +425,7 @@ export const useCharacter = (
                         addLog(`Your magical ${buff.statBoost.skill} boost has worn off.`);
                     } else if (buff.type === 'stamina') {
                         addLog("You feel your legs grow heavy again.");
-                    } else if (buff.type !== 'stun') {
+                    } else if (buff.type !== 'stun' && buff.type !== 'overload') {
                         addLog("A magical effect has worn off.");
                     }
                 }
@@ -384,12 +435,12 @@ export const useCharacter = (
                 addLog("The poison's effects have worn off.");
             }
 
-            // Apply Poison Damage
+            // Apply Poison / Overload Damage
             if (poisonDamageTotal > 0) {
                 setCurrentHp(prevHp => {
                     const newHp = Math.max(0, prevHp - poisonDamageTotal);
                     if (newHp > 0) {
-                        addLog(`You take ${poisonDamageTotal} poison damage.`);
+                        addLog(`You take ${poisonDamageTotal} damage.`);
                         // Trigger callback for visual effects
                         if (onPoisonDamageRef.current) {
                             onPoisonDamageRef.current(poisonDamageTotal);
@@ -397,6 +448,27 @@ export const useCharacter = (
                     }
                     return newHp;
                 });
+            }
+
+            // Apply Adrenaline Drain
+            if (adrenalineDrainTotal > 0) {
+                if (rawPrayerRef.current >= adrenalineDrainTotal) {
+                    setCurrentPrayer(p => p - adrenalineDrainTotal);
+                } else {
+                    const prayerDeficit = Math.ceil(adrenalineDrainTotal - rawPrayerRef.current);
+                    if (rawPrayerRef.current > 0) setCurrentPrayer(0);
+                    
+                    setCurrentHp(prevHp => {
+                        const newHp = Math.max(0, prevHp - prayerDeficit);
+                        if (newHp > 0) {
+                            addLog(`The adrenaline surge taxes your body, draining ${prayerDeficit} health.`);
+                            if (onPoisonDamageRef.current) {
+                                onPoisonDamageRef.current(prayerDeficit);
+                            }
+                        }
+                        return newHp;
+                    });
+                }
             }
 
             // Update State
@@ -642,6 +714,14 @@ export const useCharacter = (
 
     // VISIBLE LEVEL Calculation (Base + Potions)
     const skillsWithCurrentLevels = useMemo(() => {
+        const FESTIVE_OUTFIT = ['festive_hood', 'festive_tunic', 'festive_trousers', 'festive_gloves', 'festive_boots'];
+        const hasFullSet = FESTIVE_OUTFIT.every(itemId => {
+            const itemData = ITEMS[itemId];
+            if (!itemData?.equipment) return false;
+            const slotKey = itemData.equipment.slot.toLowerCase() as keyof Equipment;
+            return equipment[slotKey]?.itemId === itemId;
+        });
+
         return skills.map(skill => {
             let currentLevel = skill.level;
 
@@ -655,9 +735,37 @@ export const useCharacter = (
                 currentLevel = decayModifier.currentValue < 0 ? Math.max(1, Math.floor(modifiedLevel)) : Math.floor(modifiedLevel);
             }
 
+            if (hasFullSet) {
+                const activeSkill = getActiveFestivalSkill();
+                if (skill.name === activeSkill) {
+                    const hasCape = equipment.cape?.itemId === 'festival_cape';
+                    currentLevel += hasCape ? 6 : 3;
+                }
+            }
+
             return { ...skill, currentLevel: currentLevel };
         });
-    }, [skills, statModifiers]);
+    }, [skills, statModifiers, equipment]);
+
+    // Festival Set Equipped / Login Notification
+    const prevHasFullSetRef = useRef<boolean | null>(null);
+    useEffect(() => {
+        const FESTIVE_OUTFIT = ['festive_hood', 'festive_tunic', 'festive_trousers', 'festive_gloves', 'festive_boots'];
+        const hasFullSet = FESTIVE_OUTFIT.every(itemId => {
+            const itemData = ITEMS[itemId];
+            if (!itemData?.equipment) return false;
+            const slotKey = itemData.equipment.slot.toLowerCase() as keyof Equipment;
+            return equipment[slotKey]?.itemId === itemId;
+        });
+
+        if (hasFullSet) {
+            if (prevHasFullSetRef.current === null || prevHasFullSetRef.current === false) {
+                const activeSkill = getActiveFestivalSkill();
+                addLog(`Your Festive outfit hums with energy. Today's active skill is ${activeSkill}!`);
+            }
+        }
+        prevHasFullSetRef.current = hasFullSet;
+    }, [equipment, addLog]);
 
     // EFFECTIVE LEVEL Calculation (Visible + Prayers + Spells)
     // This is used for combat math (accuracy, damage).

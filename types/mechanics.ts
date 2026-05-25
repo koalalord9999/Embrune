@@ -5,7 +5,7 @@ export interface Shop {
     id: string;
     name: string;
     inventory: { itemId: ItemId; quantity: number; priceModifier: number; doses?: number; }[]; // modifier for buying/selling
-    currency?: 'coins' | 'agility_voucher' | 'slayer_credits';
+    currency?: 'coins' | 'agility_voucher' | 'slayer_credits' | 'festival_ticket';
     sellingDisabled?: boolean;
 }
 

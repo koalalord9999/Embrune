@@ -74,7 +74,17 @@ export type DialogueAction =
   | { type: 'slayer_reset_task'; masterId: string }
   | { type: 'slayer_open_shop' }
   | { type: 'blimp_travel'; destinationPoiId: string; cost?: number }
-  | { type: 'cleanup_quest_state'; questId: QuestId };
+  | { type: 'cleanup_quest_state'; questId: QuestId }
+  | { type: 'start_trivia' }
+  | { type: 'play_ring_toss'; peg?: 'small' | 'medium' | 'large'; rings?: number }
+  | { type: 'wait_draft' }
+  | { type: 'launch_lantern' }
+  | { type: 'smash_gourd' }
+  | { type: 'play_log_balance' }
+  | { type: 'play_whack_lantern' }
+  | { type: 'play_high_striker' }
+  | { type: 'buy_festival_tokens'; quantity: number }
+  | { type: 'record_game_played'; gameId: 'trivia' | 'gourd' | 'lantern' };
 
 export type DialogueCheckRequirement =
   | { type: 'items'; items: { itemId: ItemId, quantity: number, operator?: 'gte' | 'lt' | 'eq', nameOverride?: string }[] }
@@ -87,7 +97,9 @@ export type DialogueCheckRequirement =
   | { type: 'variable'; name: string; value: any; operator: 'eq' | 'lt' | 'gte' }
   | { type: 'quest_requirements'; questId: QuestId }
   | { type: 'slayer_credits'; amount: number; operator?: 'gte' | 'lt' | 'eq' }
-  | { type: 'slayer_task'; status: 'none' | 'active' | 'complete'; masterId?: string; operator?: 'eq' | 'ne' };
+  | { type: 'slayer_task'; status: 'none' | 'active' | 'complete'; masterId?: string; operator?: 'eq' | 'ne' }
+  | { type: 'festival_active'; value: boolean }
+  | { type: 'festival_playable'; gameId: 'trivia' | 'gourd' | 'lantern' };
 
 export interface DialogueCheck {
   requirements: DialogueCheckRequirement[];

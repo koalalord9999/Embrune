@@ -35,6 +35,13 @@ export const oakhavenPois: Record<string, POI> = {
                 },
                 attackableMonsterId: "guard",
                 startNode: "elara_default",
+                questTopics: ["capitals_call", "scales_of_the_swamp"],
+                conditionalGreetings: [
+                    {
+                        text: "You're back. Did you find him? Do you have proof?",
+                        check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 2 }] }
+                    }
+                ]
             },
         ],
         regionId: "oakhaven",
@@ -168,7 +175,7 @@ export const oakhavenPois: Record<string, POI> = {
         id: "oakhaven_market",
         name: "Oakhaven Market",
         description: "A bustling market street lined with various stalls. The general store is just off the main thoroughfare.",
-        connections: ["oakhaven_square", "oakhaven_general_store"],
+        connections: ["oakhaven_square", "oakhaven_general_store", "oakhaven_festival_entrance"],
         activities: [
             {
                 type: "thieving_stall",
@@ -306,7 +313,13 @@ export const oakhavenPois: Record<string, POI> = {
                 },
                 startNode: "start",
                 dialogueType: "random",
-                questTopics: ["petunia_problems"],
+                questTopics: ["petunia_problems", "scales_of_the_swamp"],
+                conditionalGreetings: [
+                    {
+                        text: "Ah, the adventurer heading into the deep swamp. I have what you need, but it won't be cheap.",
+                        check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 1 }] }
+                    }
+                ]
             },
         ],
         regionId: "oakhaven",
@@ -495,8 +508,16 @@ export const oakhavenPois: Record<string, POI> = {
                 name: "Bronn the Retired Adventurer",
                 icon: "/assets/npcChatHeads/bronn_the_retired_adventurer.png",
                 startNode: "default_dialogue",
-                questTopics: ["an_echo_of_battle", "art_of_the_warhammer"],
+                questTopics: ["an_echo_of_battle", "art_of_the_warhammer", "scales_of_the_swamp"],
                 conditionalGreetings: [
+                    {
+                        text: "Headed to the Serpent's Coil? You'll need more than just a sharp blade.",
+                        check: {
+                            requirements: [
+                                { type: "quest", questId: "scales_of_the_swamp", status: "in_progress", stage: 1 }
+                            ]
+                        }
+                    },
                     {
                         text: "Have you come to turn in a bounty?",
                         check: {

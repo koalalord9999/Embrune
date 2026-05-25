@@ -1,2 +1,2 @@
-export const GAME_VERSION = "0.2.7.5 (The Sorcerer's Trial)";
+export const GAME_VERSION = "0.2.7.6 (Oakhaven Lantern Festival)";
 //config

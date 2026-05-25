@@ -36,6 +36,19 @@ const GameManagerComponent: React.FC<GameManagerProps> = ({
     isShowMusicStatusOverlay, onToggleMusicStatusOverlay, onUnlockAllMusic
 }) => {
     const [selectedQuestId, setSelectedQuestId] = useState<string>('');
+    const [isFestivalForced, setIsFestivalForced] = useState<boolean>(
+        () => localStorage.getItem('force_festival_active') === 'true'
+    );
+
+    const handleToggleFestivalForce = () => {
+        const next = !isFestivalForced;
+        setIsFestivalForced(next);
+        if (next) {
+            localStorage.setItem('force_festival_active', 'true');
+        } else {
+            localStorage.removeItem('force_festival_active');
+        }
+    };
 
     return (
         <div className="p-2 space-y-4">
@@ -103,6 +116,21 @@ const GameManagerComponent: React.FC<GameManagerProps> = ({
                     </Button>
                 </div>
             </div>
+            {/* Festival Override: only visible when ai_utility folder is present */}
+            {hasMapManager && (
+                <div className="pt-2 border-t border-gray-700">
+                    <label className="block text-lg font-semibold mb-1 text-yellow-500/80">Force Festival Active</label>
+                    <button
+                        onClick={handleToggleFestivalForce}
+                        className={`w-full py-1 text-base rounded font-bold transition-colors ${
+                            isFestivalForced ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-700 hover:bg-gray-600'
+                        }`}
+                    >
+                        {isFestivalForced ? 'ON (Override)' : 'OFF (Date-Based)'}
+                    </button>
+                    <p className="text-gray-500 text-sm mt-1">Overrides the date check for the Oakhaven Lantern Festival. Persists until cleared.</p>
+                </div>
+            )}
         </div>
     );
 };

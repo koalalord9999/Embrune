@@ -37,17 +37,18 @@ export function useMusicStatus() {
     return globalMusicStatus;
 }
 
-export let globalAudioContext: AudioContext | null = null;
-let masterGain: GainNode | null = null;
-let musicGain: GainNode | null = null;
-let sfxGain: GainNode | null = null;
-let ambientGain: GainNode | null = null;
+export let globalAudioContext: AudioContext | null = (window as any).__EM_AUDIO_CTX || null;
+let masterGain: GainNode | null = (window as any).__EM_MASTER_GAIN || null;
+let musicGain: GainNode | null = (window as any).__EM_MUSIC_GAIN || null;
+let sfxGain: GainNode | null = (window as any).__EM_SFX_GAIN || null;
+let ambientGain: GainNode | null = (window as any).__EM_AMBIENT_GAIN || null;
 
-const activeMusicNodes = new Set<AudioScheduledSourceNode>();
+const activeMusicNodes = (window as any).__EM_ACTIVE_NODES || new Set<AudioScheduledSourceNode>();
+(window as any).__EM_ACTIVE_NODES = activeMusicNodes;
 
 export const useSoundEngine = () => {
     const ui = useUIState();
-    const [isAudioActive, setIsAudioActive] = useState(false);
+    const [isAudioActive, setIsAudioActive] = useState(() => globalAudioContext?.state === 'running');
     const contextRef = useRef<AudioContext | null>(null);
 
     useEffect(() => {
@@ -84,6 +85,12 @@ export const useSoundEngine = () => {
             ambientGain.connect(masterGain);
 
             masterGain.connect(globalAudioContext.destination);
+
+            (window as any).__EM_AUDIO_CTX = globalAudioContext;
+            (window as any).__EM_MASTER_GAIN = masterGain;
+            (window as any).__EM_MUSIC_GAIN = musicGain;
+            (window as any).__EM_SFX_GAIN = sfxGain;
+            (window as any).__EM_AMBIENT_GAIN = ambientGain;
         }
         
         if (globalAudioContext.state === 'suspended') {
@@ -336,7 +343,13 @@ export const useSoundEngine = () => {
         musicGain.gain.linearRampToValueAtTime(0, now + fadeSeconds);
 
         activeMusicNodes.forEach(node => {
-            try { node.stop(now + fadeSeconds); } catch(e) {}
+            try { 
+                node.stop(now + fadeSeconds); 
+            } catch(e) {
+                // If stop() throws, the node is scheduled to start in the future (after the stop time).
+                // Disconnecting it ensures it won't be audible when it does start.
+                try { node.disconnect(); } catch (err) {}
+            }
         });
         activeMusicNodes.clear();
     }, []);

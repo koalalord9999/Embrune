@@ -613,7 +613,10 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
         if (newMonsterHp <= 0) {
             handleMonsterDefeated('magic');
         } else {
-            const castTimeTicks = spell.castTime ?? 4;
+            let castTimeTicks = spell.castTime ?? 4;
+            if (activeBuffs.some(b => b.type === 'adrenaline')) {
+                castTimeTicks = Math.max(1, castTimeTicks - 1);
+            }
             setNextPlayerAttackTime(Date.now() + castTimeTicks * gameTickMs);
         }
     }, [monster, equipment.weapon, invRef, addLog, getEffectiveLevel, playerStats, monsterHp, addXp, isStunned, currentElementalWeakness, gameTickMs, handleMonsterDefeated, activeBuffs, addHitSplat, playerSkills, combatStance]);
@@ -793,6 +796,9 @@ const CombatView: React.FC<CombatViewProps> = ({ monsterQueue, isMandatory, play
                 let effectiveSpeed = playerWeapon.speed;
                 if (speedBuff) effectiveSpeed = Math.max(1, effectiveSpeed + speedBuff.value);
                 if ((playerWeapon.type === WeaponType.Bow || playerWeapon.type === WeaponType.Crossbow) && combatStance === CombatStance.RangedRapid) {
+                    effectiveSpeed = Math.max(1, effectiveSpeed - 1);
+                }
+                if (activeBuffs.some(b => b.type === 'adrenaline')) {
                     effectiveSpeed = Math.max(1, effectiveSpeed - 1);
                 }
                 setNextPlayerAttackTime(now + effectiveSpeed * gameTickMs);

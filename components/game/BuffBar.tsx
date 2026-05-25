@@ -139,8 +139,14 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs, activePra
     const allBuffs = useMemo(() => {
         const buffs: DisplayBuff[] = [];
 
+        const isOverloaded = activeBuffs.some(b => b.type === 'overload');
+
         // 1. Process statModifiers (potions)
         statModifiers.forEach(mod => {
+            if (isOverloaded && ['Attack', 'Strength', 'Defence', 'Ranged', 'Magic'].includes(mod.skill) && mod.currentValue > 0) {
+                return; // Hide these, as overload provides a unified buff icon
+            }
+
             buffs.push({
                 id: mod.id,
                 name: `${mod.skill} ${mod.currentValue > 0 ? 'Boost' : 'Drain'}`,
@@ -312,6 +318,30 @@ const BuffBar: React.FC<BuffBarProps> = ({ statModifiers, activeBuffs, activePra
                         valueColor: 'text-orange-400',
                         expiresAt: Infinity,
                         iconClassName: 'opacity-80'
+                    });
+                    break;
+                case 'overload':
+                    buffs.push({
+                        id: buff.id,
+                        name: 'Overload',
+                        description: 'Significantly boosts all combat stats. Damages you over time initially, but heals upon expiry.',
+                        iconUrl: ITEMS['overload_potion_weak']?.iconUrl || 'potion-ball',
+                        value: '',
+                        expiresAt,
+                        iconClassName: 'filter-none',
+                        colorClass: 'bg-purple-900/60'
+                    });
+                    break;
+                case 'adrenaline':
+                    buffs.push({
+                        id: buff.id,
+                        name: 'Adrenaline Surge',
+                        description: 'Reduces attack speed and spellcast time by 1 tick, but rapidly drains prayer and health.',
+                        iconUrl: ITEMS['battlemasters_draught']?.iconUrl || 'sprint',
+                        value: '',
+                        expiresAt,
+                        iconClassName: 'filter-none',
+                        colorClass: 'bg-red-900/60'
                     });
                     break;
                 /* Combined into spell_buff for the singular spell display */

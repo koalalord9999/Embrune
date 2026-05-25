@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { DialogueAction, DialogueCheckRequirement, WorldState, InventorySlot, BankTab, ActivePanel, POIActivity, DialogueResponse, SkillName, ActiveTutorialState, LogEntry, ItemId, MonsterId } from '../types';
-import {  INVENTORY_CAPACITY, QUESTS, ITEMS  } from '../constants';
+import { INVENTORY_CAPACITY, QUESTS, ITEMS } from '../constants';
 import { useQuests } from './useQuests';
 import { useQuestLogic } from './useQuestLogic';
 import { useNavigation } from './useNavigation';
@@ -12,6 +12,8 @@ import { useUIState } from './useUIState';
 import { POIS } from '../data/pois';
 import { useGameSession } from './useGameSession';
 import { useSlayer } from './useSlayer';
+import { isFestivalActive } from '../utils/festivalDates';
+import { FESTIVAL_TRIVIA_QUESTIONS, GOURD_LOOT_TABLE } from '../constants/festival';
 
 const TANNING_RECIPES: Record<string, { leatherId: string; cost: number }> = {
     'cowhide': { leatherId: 'leather', cost: 5 },
@@ -67,7 +69,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                             }
                             return acc;
                         }, 0);
-    
+
                         const operator = itemReq.operator ?? 'gte';
                         switch (operator) {
                             case 'gte': return totalQuantity >= itemReq.quantity;
@@ -103,7 +105,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         const now = Date.now();
                         const fire = fires[req.property];
                         const exists = !!fire && fire.expiresAt > now;
-                        
+
                         if (req.value === 'feywood_logs') {
                             return exists && fire?.logType === 'feywood_logs';
                         }
@@ -153,19 +155,19 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                 case 'quest_requirements': {
                     const questData = QUESTS[req.questId];
                     if (!questData?.requirements) return true;
-                    
+
                     const { skills: reqSkills = [], quests: reqQuests = [] } = questData.requirements;
-                    
+
                     const skillsMet = reqSkills.every(sReq => {
                         const playerSkill = char.skills.find(s => s.name === sReq.skill);
                         return playerSkill && playerSkill.level >= sReq.level;
                     });
-                    
+
                     const questsMet = reqQuests.every(qId => {
                         const playerQuest = quests.playerQuests.find(q => q.questId === qId);
                         return !!playerQuest && playerQuest.isComplete;
                     });
-                    
+
                     return skillsMet && questsMet;
                 }
                 case 'slayer_credits': {
@@ -181,11 +183,11 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                 case 'slayer_task': {
                     const task = slayer.slayerTask;
                     const operator = req.operator ?? 'eq';
-                    
+
                     if (req.status === 'none') {
                         return operator === 'eq' ? !task : !!task;
                     }
-                    
+
                     if (!task) return operator === 'ne';
 
                     if (req.status === 'active') {
@@ -193,19 +195,22 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         const result = !task.isComplete && masterMatch;
                         return operator === 'eq' ? result : !result;
                     }
-                    
-                    if (req.status === 'complete') {
-                        const result = task.isComplete;
-                        return operator === 'eq' ? result : !result;
-                    }
-                    
+
                     return false;
+                }
+                case 'festival_active': {
+                    return isFestivalActive() === req.value;
+                }
+                case 'festival_playable': {
+                    const lastPlayed = (questLogic as any).getQuestVariable(`last_played_${req.gameId}`) ?? 0;
+                    const today = Math.floor(Date.now() / 86400000);
+                    return lastPlayed < today;
                 }
             }
             return true;
         });
     }, [inv, char, worldState, quests.playerQuests, questLogic, slayer]);
-    
+
     const validateDialogueActions = useCallback((actions: DialogueAction[]): { success: boolean, error?: string } => {
         let tempInv = [...inv.inventory];
         let tempCoins = inv.coins;
@@ -216,7 +221,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     const itemData = ITEMS[action.itemId];
                     if (!itemData) continue;
                     const isNoted = !!action.noted;
-                    
+
                     if (isNoted || itemData.stackable) {
                         const stackIndex = tempInv.findIndex(i => i?.itemId === action.itemId && !!i.noted === isNoted);
                         if (stackIndex === -1) {
@@ -246,9 +251,9 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         let found = 0;
                         // Count across all slots (same as hasItems)
                         found = tempInv.reduce((acc, slot) => (slot && slot.itemId === action.itemId && !slot.noted) ? acc + slot.quantity : acc, 0);
-                        
+
                         if (found < amountNeeded) return { success: false, error: `You do not have ${amountNeeded > 1 ? amountNeeded + 'x ' : ''}${itemName}.` };
-                        
+
                         // Simulate removal
                         let remainingToRemove = amountNeeded;
                         for (let i = 0; i < tempInv.length && remainingToRemove > 0; i++) {
@@ -278,6 +283,21 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     if (action.cost && tempCoins < action.cost) return { success: false, error: `You need ${action.cost} coins to use the blimp.` };
                     if (action.cost) tempCoins -= action.cost;
                     break;
+                case 'buy_festival_tokens': {
+                    const cost = action.quantity * 100;
+                    if (tempCoins < cost) return { success: false, error: "You do not have enough coins." };
+                    tempCoins -= cost;
+                    const stackIndex = tempInv.findIndex(i => i?.itemId === 'festival_token' && !i.noted);
+                    if (stackIndex === -1) {
+                        const emptySlotIndex = tempInv.findIndex(slot => slot === null);
+                        if (emptySlotIndex === -1) return { success: false, error: "Your inventory is full." };
+                        tempInv[emptySlotIndex] = { itemId: 'festival_token', quantity: action.quantity, noted: false };
+                    } else {
+                        const existing = tempInv[stackIndex]!;
+                        tempInv[stackIndex] = { ...existing, quantity: existing.quantity + action.quantity };
+                    }
+                    break;
+                }
             }
         }
         return { success: true };
@@ -331,7 +351,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     navigation.handleForcedNavigate(action.poiId);
                     break;
                 case 'heal': //This runs when resting at an inn
-                    char.setCurrentHp(hp => action.amount === 'full' ? char.maxHp : Math.min(char.maxHp, hp + action.amount));                    
+                    char.setCurrentHp(hp => action.amount === 'full' ? char.maxHp : Math.min(char.maxHp, hp + action.amount));
                     char.setRunEnergy(100);
                     if (action.amount === 'full') {
                         addLog("You feel fully rested.");
@@ -382,13 +402,13 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     break;
                 }
                 case 'complete_tutorial': {
-                    
+
                     // Wipe everything
                     inv.setInventory(new Array(INVENTORY_CAPACITY).fill(null));
                     inv.setEquipment({ weapon: null, shield: null, head: null, body: null, legs: null, ammo: null, gloves: null, boots: null, cape: null, necklace: null, ring: null });
                     setBank([{ id: 0, name: 'Main', icon: null, items: [] }]);
                     setActivityLog([]);
-                    
+
                     // Automatically turn in the tutorial repeatable quest if it's active.
                     if (repeatableQuests.activePlayerQuest?.questId === 'tutorial_magic_rat') {
                         repeatableQuests.handleTurnInRepeatableQuest();
@@ -434,7 +454,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     const hidesToTan: { hideId: string; quantity: number; leatherId: string }[] = [];
 
                     for (const hideId in TANNING_RECIPES) {
-                        const count = inv.inventory.reduce((acc, slot) => 
+                        const count = inv.inventory.reduce((acc, slot) =>
                             (slot && slot.itemId === hideId && !slot.noted) ? acc + slot.quantity : acc, 0);
                         if (count > 0) {
                             const recipe = TANNING_RECIPES[hideId];
@@ -442,12 +462,12 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                             hidesToTan.push({ hideId, quantity: count, ...recipe });
                         }
                     }
-                    
+
                     if (inv.coins < totalCost) {
                         // This case is handled by the failureNode in the dialogue, but as a safeguard:
                         addLog("You can't afford to tan all your hides.");
                         break;
-                    } 
+                    }
 
                     inv.modifyItem('coins', -totalCost);
                     let totalTanned = 0;
@@ -461,10 +481,10 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     if (totalTanned > 0) {
                         addLog(`You pay Sven ${totalCost} coins to tan ${totalTanned} hides.`);
                     }
-                    
+
                     break;
                 }
-                 case 'open_make_x_for_grinding': {
+                case 'open_make_x_for_grinding': {
                     const { itemId } = action;
                     const count = inv.inventory.filter(slot => slot?.itemId === itemId).length;
                     if (count > 0) {
@@ -529,7 +549,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         if (progress?.heat === 'completed') trials.push('Heat');
                         if (progress?.pressure === 'completed') trials.push('Pressure');
                         if (progress?.silence === 'completed') trials.push('Silence');
-                        
+
                         const nameOverride = trials.length === 0 ? undefined : `Unstable Core (${trials.join(', ')})`;
                         inv.modifyItem('unstable_core', 1, false, { bypassAutoBank: true, nameOverride });
                     }
@@ -552,7 +572,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                 }
                 case 'instant_heat_temper':
                     inv.modifyItem('coins', -15000, true);
-                    
+
                     // Remove ANY existing core to prevent duplication
                     inv.inventory.forEach(slot => {
                         if (slot && slot.itemId === 'unstable_core') {
@@ -563,12 +583,12 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     setWorldState(ws => {
                         const newProgress = { ...ws.destructionTrialProgress, heat: 'completed' as const };
                         const newState = { ...ws, destructionTrialProgress: newProgress };
-                        
+
                         const trials = [];
                         if (newProgress.heat === 'completed') trials.push('Heat');
                         if (newProgress.pressure === 'completed') trials.push('Pressure');
                         if (newProgress.silence === 'completed') trials.push('Silence');
-                        
+
                         if (newProgress.heat === 'completed' && newProgress.pressure === 'completed' && newProgress.silence === 'completed') {
                             inv.modifyItem('tempered_core', 1, false, { bypassAutoBank: true });
                             addLog("The unstable core has been fully tempered. Durin's apprentices hand you the finished product.");
@@ -577,7 +597,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                             inv.modifyItem('unstable_core', 1, false, { bypassAutoBank: true, nameOverride });
                             addLog("The unstable core has been instantly tempered by Durin's master smiths.");
                         }
-                        
+
                         return newState;
                     });
                     break;
@@ -630,6 +650,95 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     ui.setActiveDialogue(null);
                     break;
                 }
+                case 'record_game_played': {
+                    const today = Math.floor(Date.now() / 86400000);
+                    (questLogic as any).setQuestVariable(`last_played_${action.gameId}`, today);
+                    break;
+                }
+                case 'start_trivia': {
+                    const randomIndex = Math.floor(Math.random() * FESTIVAL_TRIVIA_QUESTIONS.length);
+                    (questLogic as any).setQuestVariable('trivia_question_index', randomIndex);
+                    (questLogic as any).setQuestVariable('trivia_answered', 0);
+                    ui.setActiveFestivalMinigame('trivia');
+                    ui.setActiveDialogue(null);
+                    break;
+                }
+                case 'play_ring_toss': {
+                    if (action.peg) {
+                        (questLogic as any).setQuestVariable('ring_toss_peg', action.peg);
+                    }
+                    if (action.rings !== undefined) {
+                        (questLogic as any).setQuestVariable('ring_toss_rings_left', action.rings);
+                    } else {
+                        (questLogic as any).setQuestVariable('ring_toss_rings_left', 1);
+                    }
+                    ui.setActiveFestivalMinigame('ring_toss');
+                    ui.setActiveDialogue(null);
+                    break;
+                }
+                case 'wait_draft': {
+                    ui.setActiveFestivalMinigame('lantern_launch');
+                    ui.setActiveDialogue(null);
+                    break;
+                }
+                case 'launch_lantern': {
+                    ui.setActiveFestivalMinigame('lantern_launch');
+                    ui.setActiveDialogue(null);
+                    break;
+                }
+                case 'smash_gourd': {
+                    const today = Math.floor(Date.now() / 86400000);
+                    (questLogic as any).setQuestVariable('last_played_gourd', today);
+
+                    const roll = Math.floor(Math.random() * 100) + 1;
+                    let selectedEntry = GOURD_LOOT_TABLE[0];
+                    let cumulative = 0;
+                    for (const entry of GOURD_LOOT_TABLE) {
+                        cumulative += entry.weight;
+                        if (roll <= cumulative) {
+                            selectedEntry = entry;
+                            break;
+                        }
+                    }
+
+                    if (selectedEntry.type === 'festival_ticket') {
+                        const min = selectedEntry.minTickets ?? 10;
+                        const max = selectedEntry.maxTickets ?? 20;
+                        const tickets = Math.floor(Math.random() * (max - min + 1)) + min;
+                        inv.modifyItem('festival_ticket', tickets, false);
+                        addLog(`Gourd Smash! ${selectedEntry.logMessage} (Earned ${tickets} Festival Tickets)`);
+                        (questLogic as any).setQuestVariable('gourd_smash_result', `tickets:${tickets}`);
+                    } else if (selectedEntry.itemId) {
+                        inv.modifyItem(selectedEntry.itemId as ItemId, 1, false);
+                        addLog(`Gourd Smash! ${selectedEntry.logMessage}`);
+                        (questLogic as any).setQuestVariable('gourd_smash_result', `item:${selectedEntry.itemId}`);
+                    }
+                    ui.setActiveFestivalMinigame('smash_gourd');
+                    ui.setActiveDialogue(null);
+                    break;
+                }
+                case 'play_log_balance': {
+                    ui.setActiveFestivalMinigame('log_balance');
+                    ui.setActiveDialogue(null);
+                    break;
+                }
+                case 'play_whack_lantern': {
+                    ui.setActiveFestivalMinigame('whack_lantern');
+                    ui.setActiveDialogue(null);
+                    break;
+                }
+                case 'play_high_striker': {
+                    ui.setActiveFestivalMinigame('high_striker');
+                    ui.setActiveDialogue(null);
+                    break;
+                }
+                case 'buy_festival_tokens': {
+                    const cost = action.quantity * 100;
+                    inv.modifyItem('coins', -cost, true);
+                    inv.modifyItem('festival_token', action.quantity, false, { bypassAutoBank: true });
+                    addLog(`You purchase ${action.quantity} Festival Token${action.quantity > 1 ? 's' : ''} for ${cost} coins.`);
+                    break;
+                }
             }
 
             if (!success) {
@@ -638,8 +747,14 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
         }
     }, [quests, questLogic, navigation, inv, char, worldActions, addLog, worldState, setBank, setActivityLog, repeatableQuests, ui, setWorldState, session.currentPoiId, slayer, bankLogic]);
 
+    const isLocked = React.useRef(false);
+    const { isDialogueProcessing, setIsDialogueProcessing } = ui;
+
     const onResponse = useCallback((response: DialogueResponse): { success: boolean, error?: string } => {
-        if (!ui.activeDialogue) return { success: true };
+        if (!ui.activeDialogue || isLocked.current || isDialogueProcessing) return { success: true };
+
+        isLocked.current = true;
+        setIsDialogueProcessing(true);
 
         const checkResult = response.check ? handleDialogueCheck(response.check.requirements) : true;
 
@@ -688,8 +803,13 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                 setActiveDialogue(null);
             }
         }
+        setTimeout(() => {
+            isLocked.current = false;
+            setIsDialogueProcessing(false);
+        }, 150);
+
         return { success: true };
-    }, [ui.activeDialogue, handleDialogueCheck, validateDialogueActions, handleDialogueAction, addLog, setActiveDialogue]);
+    }, [ui.activeDialogue, isDialogueProcessing, handleDialogueCheck, validateDialogueActions, handleDialogueAction, addLog, setActiveDialogue, setIsDialogueProcessing]);
 
     return { handleDialogueAction, handleDialogueCheck, onResponse };
 };

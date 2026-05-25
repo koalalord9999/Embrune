@@ -552,7 +552,7 @@ export const useCrafting = (props: UseCraftingProps) => {
 
                     if (recipe.itemId === 'cake') {
                         modifyItem('cake_tin' as ItemId, 1, false, { bypassAutoBank: true });
-                    } else if (ITEMS[action.recipeId as ItemId]?.material === 'cooked-meat') {
+                    } else if (recipe.itemId.endsWith('_pie')) {
                         modifyItem('pie_dish' as ItemId, 1, false, { bypassAutoBank: true });
                     }
 

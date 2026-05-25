@@ -205,7 +205,7 @@ export type MonsterStatusEffect =
 
 export interface ActiveBuff {
   id: number;
-  type: 'recoil' | 'flat_damage' | 'poison_on_hit' | 'accuracy_boost' | 'evasion_boost' | 'damage_on_hit' | 'attack_speed_boost' | 'poison_immunity' | 'damage_reduction' | 'antifire' | 'stun' | 'poison' | 'stat_boost' | 'magic_damage_boost' | 'stamina' | 'spell_buff';
+  type: 'recoil' | 'flat_damage' | 'poison_on_hit' | 'accuracy_boost' | 'evasion_boost' | 'damage_on_hit' | 'attack_speed_boost' | 'poison_immunity' | 'damage_reduction' | 'antifire' | 'stun' | 'poison' | 'stat_boost' | 'magic_damage_boost' | 'stamina' | 'spell_buff' | 'overload' | 'adrenaline';
   value: number;
   name?: string;
   description?: string;

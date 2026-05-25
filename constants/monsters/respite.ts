@@ -446,7 +446,7 @@ export const respiteMonsters: Monster[] = [
         attack: 60, strength: 65, defence: 55,
         stabDefence: 52, slashDefence: 55, crushDefence: 58, rangedDefence: 60, magicDefence: 40,
         iconUrl: 'snake', types: [MonsterType.Beast],
-        attackSpeed: 3, respawnTime: 28000, alwaysDrops: true, aggressive: true, attackStyle: 'stab',
+        attackSpeed: 4, respawnTime: 28000, alwaysDrops: true, aggressive: true, attackStyle: 'stab',
         guaranteedDrops: [{ itemId: 'bones', minQuantity: 1, maxQuantity: 1 }],
         mainDrops: [
             { itemId: 'verdant_rune', chance: '1/4', minQuantity: 15, maxQuantity: 30 },
@@ -458,6 +458,7 @@ export const respiteMonsters: Monster[] = [
             { tableId: 'gem_table', chance: '1/96' },
             { itemId: 'adamantite_longsword', chance: '1/256' },
         ],
+        specialAttacks: [{ name: 'Poison Spit', chance: 0.4, effect: 'poison', damage: 5, poisonChance: 0.75 }],
     },
 
     // --- The Scorched Hollow (additional) ---

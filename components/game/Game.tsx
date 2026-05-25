@@ -771,7 +771,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         currentPrayer: char.currentPrayer, maxPrayer: char.maxPrayer, setCurrentPrayer: char.setCurrentPrayer,
         setRunEnergy: char.setRunEnergy, restoreNegativeStatModifiers: char.restoreNegativeStatModifiers,
         applyStatModifier: char.applyStatModifier, addBuff: char.addBuff, curePoison: char.curePoison, setInventory: inv.setInventory,
-        skills: char.skills, inventory: inv.inventory, activeCraftingAction: ui.activeCraftingAction,
+        skills: char.skills, inventory: inv.inventory, activeBuffs: char.activeBuffs, activeCraftingAction: ui.activeCraftingAction,
         setActiveCraftingAction: ui.setActiveCraftingAction, hasItems: inv.hasItems, modifyItem: inv.modifyItem,
         addXp: char.addXp, openCraftingView: ui.openCraftingView, itemToUse: ui.itemToUse, setItemToUse: ui.setItemToUse,
         setConfirmationPrompt: ui.setConfirmationPrompt,
@@ -1672,6 +1672,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                             setActivePanel={ui.setActivePanel}
                             onResponse={onResponse}
                             handleDialogueCheck={handleDialogueCheck}
+                            isDialogueProcessing={ui.isDialogueProcessing}
                             onNavigate={(nodeKey) => ui.setActiveDialogue(prev => prev ? { ...prev, currentNodeKey: nodeKey } : null)}
                         />
                     )}

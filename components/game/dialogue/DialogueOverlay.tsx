@@ -9,9 +9,10 @@ interface DialogueOverlayProps {
     onResponse: (response: DialogueResponse) => { success: boolean, error?: string };
     handleDialogueCheck: (requirements: DialogueCheckRequirement[]) => boolean;
     onNavigate: (nextNodeKey: string) => void;
+    isDialogueProcessing?: boolean;
 }
 
-const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePanel, onResponse, handleDialogueCheck, onNavigate }) => {
+const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePanel, onResponse, handleDialogueCheck, onNavigate, isDialogueProcessing }) => {
     const { npcName, npcIcon, nodes, currentNodeKey, onEnd } = dialogue;
 
     const [textPage, setTextPage] = useState(0);
@@ -131,7 +132,7 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
 
     useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
-            if (!currentNode) return;
+            if (!currentNode || isDialogueProcessing) return;
             const isLastTextPage = textPage >= paginatedText.length - 1;
             const hasResponses = visibleResponses && visibleResponses.length > 0;
 
@@ -225,18 +226,18 @@ const DialogueOverlay: React.FC<DialogueOverlayProps> = ({ dialogue, setActivePa
                     {isLastTextPage && hasResponses ? (
                         <div className="w-full space-y-2">
                             {displayedResponses.map((res, i) => (
-                                <Button key={i} size="sm" className="w-full text-left justify-start font-pixel-rpg text-xl py-1 leading-none" onClick={(e) => handleResponseClick(e, res)}>
+                                <Button key={i} size="sm" className="w-full text-left justify-start font-pixel-rpg text-xl py-1 leading-none" onClick={(e) => handleResponseClick(e, res)} disabled={isDialogueProcessing}>
                                     <span className="text-yellow-400 mr-2">{i + 1}.</span>{res.text}
                                 </Button>
                             ))}
                             {hasMoreOptions && (
-                                <Button size="sm" className="w-full text-left justify-start font-pixel-rpg text-xl py-1 leading-none" onClick={() => setOptionPage(p => (p + 1) % numOptionPages)}>
+                                <Button size="sm" className="w-full text-left justify-start font-pixel-rpg text-xl py-1 leading-none" onClick={() => setOptionPage(p => (p + 1) % numOptionPages)} disabled={isDialogueProcessing}>
                                     <span className="text-yellow-400 mr-2">4.</span>View more...
                                 </Button>
                             )}
                         </div>
                     ) : (
-                        <button onClick={handleNextPage} className="text-yellow-400 hover:text-yellow-300 text-sm font-semibold">
+                        <button onClick={handleNextPage} className="text-yellow-400 hover:text-yellow-300 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed" disabled={isDialogueProcessing}>
                             (Continue...)
                         </button>
                     )}

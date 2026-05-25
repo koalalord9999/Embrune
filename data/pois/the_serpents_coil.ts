@@ -13,6 +13,13 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         ],
         activities: [
             {
+                type: "npc",
+                name: "Venture Deeper",
+                icon: "/assets/icons/travel.png",
+                startNode: "venture_deeper_node",
+                questTopics: ["scales_of_the_swamp"]
+            },
+            {
                 type: "agility_shortcut",
                 id: "serpents_coil_shortcut",
                 name: "Stepping Stones (Lvl 50)",
@@ -46,6 +53,20 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         description: "A dense thicket of mangroves with tangled, arching roots that create a maze-like path. Something large slithers through the water nearby.",
         connections: ["serpents_coil_entrance", "serpent_nesting_ground"],
         activities: [
+            {
+                type: "npc",
+                name: "Muddy Tracks",
+                icon: "/assets/icons/search.png",
+                startNode: "muddy_tracks_node",
+                questTopics: ["scales_of_the_swamp"]
+            },
+            {
+                type: "npc",
+                name: "Bandit Scout",
+                icon: "/assets/npcChatHeads/bandit_scout.png",
+                startNode: "scout_encounter",
+                questTopics: ["scales_of_the_swamp"]
+            },
             {
                 type: "combat",
                 monsterId: "bog_serpent",
@@ -212,6 +233,13 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         ],
         activities: [
             {
+                type: "npc",
+                name: "Submerged Causeway",
+                icon: "/assets/icons/search.png",
+                startNode: "causeway_node",
+                questTopics: ["scales_of_the_swamp"]
+            },
+            {
                 type: "combat",
                 monsterId: "bog_serpent",
             },
@@ -230,6 +258,13 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         description: "The heart of a sunken temple. A massive stone altar, carved with images of serpents, is all that remains above the water.",
         connections: ["sunken_temple_approach", "hex_altar"],
         activities: [
+            {
+                type: "npc",
+                name: "Garath Voss",
+                icon: "/assets/npcChatHeads/garath_voss.png",
+                startNode: "voss_encounter",
+                questTopics: ["scales_of_the_swamp"]
+            },
             {
                 type: "combat",
                 monsterId: "bog_serpent",

@@ -6,7 +6,7 @@ import Button from '../common/Button';
 import { useUIState, TooltipState, ContextMenuState } from '../../hooks/useUIState';
 import { ContextMenuOption } from '../common/ContextMenu';
 import { useLongPress } from '../../hooks/useLongPress';
-import { getIsTouchDevice, useIsTouchDevice } from '../../hooks/useIsTouchDevice';
+import { useIsTouchDevice } from '../../hooks/useIsTouchDevice';
 import { getDisplayName, ItemIcon } from './InventorySlot';
 
 interface EquipmentPanelProps {

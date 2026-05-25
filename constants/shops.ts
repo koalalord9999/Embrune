@@ -350,5 +350,26 @@ export const SHOPS: Record<string, Shop> = {
             { itemId: 'mithril_sword', quantity: 2, priceModifier: 2.0 },
             { itemId: 'mithril_kiteshield', quantity: 2, priceModifier: 2.0 }
         ]
-    }
+    },
+    lantern_festival_shop: {
+        id: 'lantern_festival_shop',
+        name: "Mira's Festival Stall",
+        currency: 'festival_ticket',
+        sellingDisabled: true,
+        inventory: [
+            { itemId: 'red_whistle', quantity: 100, priceModifier: 25 },
+            { itemId: 'blue_whistle', quantity: 100, priceModifier: 25 },
+            { itemId: 'green_whistle', quantity: 100, priceModifier: 25 },
+            { itemId: 'yellow_whistle', quantity: 100, priceModifier: 25 },
+            { itemId: 'festive_hood', quantity: 10, priceModifier: 150 },
+            { itemId: 'festive_tunic', quantity: 10, priceModifier: 150 },
+            { itemId: 'festive_trousers', quantity: 10, priceModifier: 150 },
+            { itemId: 'festive_gloves', quantity: 10, priceModifier: 150 },
+            { itemId: 'festive_boots', quantity: 10, priceModifier: 150 },
+            { itemId: 'festival_pie', quantity: 100, priceModifier: 5 },
+            { itemId: 'festival_meat', quantity: 100, priceModifier: 8 },
+            { itemId: 'festival_cake', quantity: 100, priceModifier: 10 },
+            { itemId: 'festival_cape', quantity: 10, priceModifier: 1250 },
+        ]
+    },
 };
