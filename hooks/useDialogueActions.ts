@@ -705,12 +705,8 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         const min = selectedEntry.minTickets ?? 10;
                         const max = selectedEntry.maxTickets ?? 20;
                         const tickets = Math.floor(Math.random() * (max - min + 1)) + min;
-                        inv.modifyItem('festival_ticket', tickets, false);
-                        addLog(`Gourd Smash! ${selectedEntry.logMessage} (Earned ${tickets} Festival Tickets)`);
                         (questLogic as any).setQuestVariable('gourd_smash_result', `tickets:${tickets}`);
                     } else if (selectedEntry.itemId) {
-                        inv.modifyItem(selectedEntry.itemId as ItemId, 1, false);
-                        addLog(`Gourd Smash! ${selectedEntry.logMessage}`);
                         (questLogic as any).setQuestVariable('gourd_smash_result', `item:${selectedEntry.itemId}`);
                     }
                     ui.setActiveFestivalMinigame('smash_gourd');

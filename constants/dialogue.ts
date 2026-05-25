@@ -161,4 +161,21 @@ export const CIVILLIAN_DIALOGUE: Record<string, string[]> = {
         "Be wary of the eastern fields. There's an old fear that lingers there.",
         "The slums are a necessary evil, a place for those still finding their faith. We pray for them daily."
     ],
+    lantern_festival: [
+        "The glow of the lanterns over the lake is absolutely stunning!",
+        "I ate three meat pies from the food stalls. No regrets!",
+        "Have you tried the ring toss? Jin makes it look easy, but those pegs are slippery!",
+        "Brokk is showing off at the high striker again. That bell hasn't stopped ringing all evening.",
+        "Kenji's log balance pond is harder than it looks. I slipped right in on my first try!",
+        "I bought a lovely paper lantern from Mira's stall. I'm going to launch it with my family tonight.",
+        "The music, the lights, the laughter... I wish the Lantern Festival lasted all year!",
+        "Hana's Whack-a-Lantern game is incredibly addictive. My arm is sore from all the mallet swinging!",
+        "Make sure to visit the Gourd Patch! Smashing them open is surprisingly satisfying.",
+        "Lin's trivia kiosk really tested my brain today. I'm glad I paid attention to Oakhaven's history!",
+        "I love seeing the children running around with their small hand-held lanterns.",
+        "The lake breeze at night is chilly, but the warmth of the crowd keeps everyone cozy.",
+        "I'm saving up my Festival Tickets for one of those rare souvenir rewards!",
+        "Did you see the giant master lantern in the plaza? The carving on it is magnificent.",
+        "It's so wonderful to see everyone from town taking a break to celebrate together."
+    ],
 };

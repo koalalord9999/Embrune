@@ -1,5 +1,13 @@
 import { POI, SkillName, ToolType } from '../../types';
 import { CIVILLIAN_DIALOGUE } from '../../constants/dialogue';
+import {
+    ELDER_BRANDIC_DIALOGUE,
+    PIP_GOURD_CARVER_DIALOGUE,
+    CELIA_WISHMAKER_DIALOGUE,
+    ALPIN_SMELTER_DIALOGUE,
+    PILGRIM_TESSA_DIALOGUE,
+    FISHERMAN_RONALD_DIALOGUE
+} from '../dialogues/festivalDialogues';
 
 export const lanternFestivalPois: Record<string, POI> = {
     oakhaven_festival_entrance: {
@@ -7,7 +15,37 @@ export const lanternFestivalPois: Record<string, POI> = {
         name: "Oakhaven Festival Entrance",
         description: "A simple stone archway marking the entrance to a quiet town plaza.",
         connections: ["oakhaven_market", "mira_pavilion", "trivia_kiosk"],
-        activities: [],
+        activities: [
+            {
+                type: "npc",
+                name: "Pip the Gourd Carver",
+                icon: "/assets/npcChatHeads/artisan.png",
+                startNode: "start",
+                dialogue: PIP_GOURD_CARVER_DIALOGUE,
+            },
+            {
+                type: "npc",
+                name: "Merry Pilgrim Tessa",
+                icon: "woman-elf-face",
+                startNode: "start",
+                dialogue: PILGRIM_TESSA_DIALOGUE,
+            },
+            {
+                type: "npc",
+                name: "Festival Goer",
+                icon: "person",
+                dialogue: {
+                    start: {
+                        npcName: "Festival Goer",
+                        npcIcon: "person",
+                        text: CIVILLIAN_DIALOGUE.lantern_festival.join("\n\n"),
+                        responses: [],
+                    },
+                },
+                startNode: "start",
+                dialogueType: "random",
+            },
+        ],
         regionId: "oakhaven",
         type: "internal",
         x: 350,
@@ -291,14 +329,44 @@ export const lanternFestivalPois: Record<string, POI> = {
     grand_lantern_plaza: {
         id: "grand_lantern_plaza",
         name: "Grand Lantern Plaza",
-        description: "A quiet courtyard where local townspeople occasionally sit.",
+        description: "A quiet courtyard where local townspeople occasionally sit. A large masterwork lantern stands in the center of the plaza.",
         connections: [
             "trivia_kiosk",
             "mira_pavilion",
             "launch_platform",
             "lake_boardwalk",
         ],
-        activities: [],
+        activities: [
+            {
+                type: "npc",
+                name: "Elder Brandic",
+                icon: "/assets/npcChatHeads/artisan.png",
+                startNode: "start",
+                dialogue: ELDER_BRANDIC_DIALOGUE,
+            },
+            {
+                type: "npc",
+                name: "Celia the Wishmaker",
+                icon: "woman-elf-face",
+                startNode: "start",
+                dialogue: CELIA_WISHMAKER_DIALOGUE,
+            },
+            {
+                type: "npc",
+                name: "Festival Goer",
+                icon: "woman-elf-face",
+                dialogue: {
+                    start: {
+                        npcName: "Festival Goer",
+                        npcIcon: "woman-elf-face",
+                        text: CIVILLIAN_DIALOGUE.lantern_festival.join("\n\n"),
+                        responses: [],
+                    },
+                },
+                startNode: "start",
+                dialogueType: "random",
+            },
+        ],
         regionId: "oakhaven",
         type: "internal",
         x: 400,
@@ -641,7 +709,37 @@ export const lanternFestivalPois: Record<string, POI> = {
             "high_striker_pillar",
             "rolling_logs_pond",
         ],
-        activities: [],
+        activities: [
+            {
+                type: "npc",
+                name: "Fisherman Ronald",
+                icon: "person",
+                startNode: "start",
+                dialogue: FISHERMAN_RONALD_DIALOGUE,
+            },
+            {
+                type: "npc",
+                name: "Alpin the Smelter",
+                icon: "/assets/npcChatHeads/artisan.png",
+                startNode: "start",
+                dialogue: ALPIN_SMELTER_DIALOGUE,
+            },
+            {
+                type: "npc",
+                name: "Festival Goer",
+                icon: "person",
+                dialogue: {
+                    start: {
+                        npcName: "Festival Goer",
+                        npcIcon: "person",
+                        text: CIVILLIAN_DIALOGUE.lantern_festival.join("\n\n"),
+                        responses: [],
+                    },
+                },
+                startNode: "start",
+                dialogueType: "random",
+            },
+        ],
         regionId: "oakhaven",
         type: "internal",
         x: 450,

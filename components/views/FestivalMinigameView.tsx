@@ -10,6 +10,8 @@ const RING_TOSS_BOARD_LAYOUT: ('small' | 'medium' | 'large')[] = [
     'small', 'small', 'medium', 'small', 'small'
 ];
 
+const PEG_COORDS = [36.4, 93.2, 150, 206.8, 263.6];
+
 type FestivalGame = 'trivia' | 'ring_toss' | 'lantern_launch' | 'log_balance' | 'whack_lantern' | 'smash_gourd' | 'high_striker';
 
 interface FestivalMinigameViewProps {
@@ -42,18 +44,13 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
 
     // RING TOSS STATE
     const [pegs, setPegs] = useState<{ size: 'small' | 'medium' | 'large' }[]>([]);
-    const [ringPos, setRingPos] = useState<{ left: string; top: string }>({ left: '50%', top: '102%' });
-    const [ringTossOffsets, setRingTossOffsets] = useState<{
-        targetLeft: string;
-        targetTop: string;
-        midLeft: string;
-        midTop: string;
-    }>({
-        targetLeft: '50%',
-        targetTop: '102%',
-        midLeft: '50%',
-        midTop: '102%',
-    });
+    const [ringPos, setRingPos] = useState<{ left: string; top: string }>({ left: '150px', top: '310px' });
+    const [throwCoords, setThrowCoords] = useState<{
+        finalLeft: number;
+        finalTop: number;
+        midLeft: number;
+        midTop: number;
+    } | null>(null);
     const [isThrowing, setIsThrowing] = useState<boolean>(false);
     const [throwTarget, setThrowTarget] = useState<number | null>(null);
     const [ringTossResult, setRingTossResult] = useState<'success' | 'failure' | null>(null);
@@ -61,6 +58,7 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
     const [showPopup, setShowPopup] = useState<boolean>(false);
     const [hasFallen, setHasFallen] = useState<boolean>(false);
     const [ringsLeft, setRingsLeft] = useState<number>(1);
+    const [throwId, setThrowId] = useState<number>(0);
     const ringRef = useRef<HTMLDivElement>(null);
 
     // LANTERN LAUNCH STATE
@@ -69,6 +67,17 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
         status: null,
         tickets: 0,
     });
+
+    // LANTERN LAUNCH TIMING GAME — extra state
+    const [lanternPhase, setLanternPhase] = useState<'idle' | 'playing' | 'done'>('idle');
+    const [lanternClicks, setLanternClicks] = useState<number>(0);
+    const [lanternNeedle, setLanternNeedle] = useState<number>(0);
+    const [lanternLastZone, setLanternLastZone] = useState<{ label: string; color: string } | null>(null);
+    const lanternNeedleRef = useRef<number>(10);
+    const lanternNeedleDirRef = useRef<number>(1);
+    const lanternNeedleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const lanternClicksRef = useRef<number>(0);
+    const lanternDraftRef = useRef<number>(0);
 
     // LOG BALANCE STATE
     const [leanAngle, setLeanAngle] = useState<number>(0);
@@ -149,13 +158,8 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
     const initRingTossBoard = () => {
         const newPegs = RING_TOSS_BOARD_LAYOUT.map(size => ({ size }));
         setPegs(newPegs);
-        setRingPos({ left: '50%', top: '102%' });
-        setRingTossOffsets({
-            targetLeft: '50%',
-            targetTop: '102%',
-            midLeft: '50%',
-            midTop: '102%',
-        });
+        setRingPos({ left: '150px', top: '310px' });
+        setThrowCoords(null);
         setIsThrowing(false);
         setThrowTarget(null);
         setRingTossResult(null);
@@ -173,45 +177,43 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
     }, [activeFestivalMinigame, questLogic]);
 
     const handleInteractiveToss = () => {
-        if (isThrowing || ringTossResult !== null || ringsLeft <= 0) return;
+        // Prevent new throws while a throw is in progress or during fall animation
+        if (isThrowing || hasFallen || ringTossResult !== null || ringsLeft <= 0) return;
 
+        // Decrement rings left
         const nextRings = ringsLeft - 1;
         setRingsLeft(nextRings);
+        setRingPos({ left: '150px', top: '310px' });
         (questLogic as any).setQuestVariable('ring_toss_rings_left', nextRings);
 
-        const isSuccess = Math.random() < 0.25;
+        const isSuccess = Math.random() < 0.35;
         const targetIndex = Math.floor(Math.random() * 25);
         const col = targetIndex % 5;
         const row = Math.floor(targetIndex / 5);
         const targetPeg = pegs[targetIndex] || { size: 'large' };
         const reward = isSuccess ? getRingTossReward(targetPeg.size) : 0;
 
-        // Target coordinates in percentages for rendering ringPos
-        const targetLeft = 10 + col * 20;
-        const targetTop = 10 + row * 20;
+        // Absolute target coordinates on the 300x300 board
+        const targetLeft = PEG_COORDS[col];
+        const targetTop = PEG_COORDS[row];
 
-        // Offset positions for failure (miss)
-        const offsetLeft = targetLeft + (col < 4 ? 10 : -10);
-        const offsetTop = targetTop + (row < 4 ? 10 : -10);
+        // Miss offsets (slightly away from the target peg)
+        const offsetLeft = targetLeft + (col < 4 ? 20 : -20);
+        const offsetTop = targetTop + (row < 4 ? 20 : -20);
 
         const finalLeft = isSuccess ? targetLeft : offsetLeft;
         const finalTop = isSuccess ? targetTop : offsetTop;
+        const midLeft = 150 + (finalLeft - 150) * 0.5;
+        const midTop = 310 + (finalTop - 310) * 0.5;
 
-        // Set CSS custom properties on the ring element before animating via React state
-        const midLeft = 50 + (finalLeft - 50) * 0.5;
-        const midTop = 102 + (finalTop - 102) * 0.5;
+        // Create a fresh animation keyframe identifier
+        const currentThrowId = throwId + 1;
+        setThrowId(currentThrowId);
 
-        setRingTossOffsets({
-            targetLeft: `${finalLeft}%`,
-            targetTop: `${finalTop}%`,
-            midLeft: `${midLeft}%`,
-            midTop: `${midTop}%`,
-        });
+        // Provide coordinates for the dynamic keyframe
+        setThrowCoords({ finalLeft, finalTop, midLeft, midTop });
 
-        // Set ringPos to final landing spot so that when isThrowing becomes false,
-        // it naturally rests at this landing position!
-        setRingPos({ left: `${finalLeft}%`, top: `${finalTop}%` });
-
+        // Initialise throw state
         setIsThrowing(true);
         setHasFallen(false);
         setThrowTarget(null);
@@ -219,91 +221,122 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
         if (isSuccess) {
             setThrowTarget(targetIndex);
             setRingTossTickets(reward);
-
+            // After animation completes, award reward and show success popup
             setTimeout(() => {
                 inv.modifyItem('festival_ticket', reward, false);
                 addLog(`Ring Toss Success! Landed ring on the ${targetPeg.size} peg and won ${reward} Festival Tickets.`);
+                // Snap ring to final peg position (animation already ends there)
+                setRingPos({ left: `${finalLeft}px`, top: `${finalTop}px` });
                 setRingTossResult('success');
                 setShowPopup(true);
                 setIsThrowing(false);
-            }, 1000);
+            }, 1100); // Slightly longer than animation duration
         } else {
+            // Missed throw – animate fall after reaching miss coordinates
             setTimeout(() => {
-                // Throw finishes, turn off throwing state and start falling state
                 setIsThrowing(false);
-                setHasFallen(true);
-                // Animate ring falling down to bottom of the board (top: 105%)
-                setRingPos({ left: `${offsetLeft}%`, top: '105%' });
-
+                setRingPos({ left: `${offsetLeft}px`, top: `${offsetTop}px` });
+                // Start fall animation shortly after positioning
+                setTimeout(() => {
+                    setHasFallen(true);
+                    setRingPos(prev => ({ ...prev, top: '340px' }));
+                }, 50);
+                // Show failure popup after fall completes
                 setTimeout(() => {
                     addLog("Ring Toss Failure. The ring bounced off the pegs.");
                     setRingTossResult('failure');
                     setShowPopup(true);
-                }, 400);
-            }, 1000);
+                    // Reset ring position after a short pause so the player sees the fall
+                    setTimeout(() => {
+                        setRingPos({ left: '150px', top: '310px' });
+                        setHasFallen(false);
+                    }, 500);
+                }, 600);
+            }, 1100);
         }
+
+
     };
 
-    // HANDLE LANTERN WAIT DRAFT
-    const handleLanternWaitDraft = () => {
-        if (isBusy || lanternResult.status) return;
+    // LANTERN TIMING GAME — needle speed table indexed by click count (0-3)
+    const LANTERN_NEEDLE_SPEEDS = [1.4, 2.1, 2.9, 3.8];
 
-        ui.setActiveSingleAction({
-            title: "Waiting for Thermal Draft...",
-            iconUrl: "/assets/items/festival_ticket.png",
-            iconClassName: "animate-bounce",
-            startTime: Date.now(),
-            duration: 1000,
-            onComplete: () => {
-                const increment = Math.floor(Math.random() * 15) + 8; // 8-22%
-                const newDraft = lanternDraft + increment;
-                (questLogic as any).setQuestVariable('lantern_thermal_draft', newDraft);
-
-                if (newDraft > 100) {
-                    // Overheat automatic fail
-                    const today = getTodayCode();
-                    (questLogic as any).setQuestVariable('last_played_lantern', today);
-                    inv.modifyItem('festival_ticket', 2, false);
-                    addLog(`The lantern draft exceeded 100%! It overheated and caught fire! Awarded 2 Festival Tickets.`);
-                    setLanternResult({ status: 'overheat', tickets: 2 });
-                } else {
-                    addLog(`The hot air rises! Thermal Draft is now at ${newDraft}%.`);
-                }
-            }
-        });
+    // Zone lookup — returns label, ticket gain, and display color for a given needle position 0-100
+    const getLanternZone = (pos: number): { label: string; gain: number; color: string; textColor: string } => {
+        if (pos >= 80 && pos <= 95) return { label: 'PERFECT!', gain: 28, color: '#10b981', textColor: 'text-emerald-400' };
+        if ((pos >= 60 && pos < 80) || (pos > 95 && pos <= 100)) return { label: 'GOOD', gain: 16, color: '#f59e0b', textColor: 'text-amber-400' };
+        if (pos >= 30 && pos < 60) return { label: 'WARM', gain: 8, color: '#f97316', textColor: 'text-orange-400' };
+        if (pos > 100) return { label: 'TOO HOT!', gain: 18, color: '#ef4444', textColor: 'text-rose-500' };
+        return { label: 'COLD', gain: 3, color: '#6b7280', textColor: 'text-gray-500' };
     };
 
-    // HANDLE LANTERN LAUNCH
-    const handleLanternLaunch = () => {
-        if (isBusy || lanternResult.status) return;
+    const startLanternGame = () => {
+        (questLogic as any).setQuestVariable('lantern_thermal_draft', 0);
+        lanternDraftRef.current = 0;
+        lanternClicksRef.current = 0;
+        lanternNeedleRef.current = 10;
+        lanternNeedleDirRef.current = 1;
+        setLanternPhase('playing');
+        setLanternClicks(0);
+        setLanternNeedle(10);
+        setLanternLastZone(null);
+        setLanternResult({ status: null, tickets: 0 });
 
+        if (lanternNeedleTimerRef.current) clearInterval(lanternNeedleTimerRef.current);
+        lanternNeedleTimerRef.current = setInterval(() => {
+            const speed = LANTERN_NEEDLE_SPEEDS[Math.min(lanternClicksRef.current, 3)];
+            let pos = lanternNeedleRef.current + lanternNeedleDirRef.current * speed;
+            if (pos >= 100) { pos = 100; lanternNeedleDirRef.current = -1; }
+            if (pos <= 0) { pos = 0; lanternNeedleDirRef.current = 1; }
+            lanternNeedleRef.current = pos;
+            setLanternNeedle(pos);
+        }, 30);
+    };
+
+    const finalizeLanternLaunch = (draft: number) => {
+        if (lanternNeedleTimerRef.current) clearInterval(lanternNeedleTimerRef.current);
         const today = getTodayCode();
         (questLogic as any).setQuestVariable('last_played_lantern', today);
-
-        let tickets = 3;
-        let rating = "poor";
-
-        if (lanternDraft >= 80 && lanternDraft <= 95) {
-            tickets = 15;
-            rating = "perfect";
-        } else if ((lanternDraft >= 60 && lanternDraft <= 79) || (lanternDraft >= 96 && lanternDraft <= 100)) {
-            tickets = 8;
-            rating = "good";
+        if (draft > 100) {
+            inv.modifyItem('festival_ticket', 2, false);
+            addLog(`The lantern overheated at ${draft}% draft! It caught fire. Awarded 2 Festival Tickets.`);
+            setLanternResult({ status: 'overheat', tickets: 2 });
+        } else {
+            let tickets = 3;
+            if (draft >= 80 && draft <= 95) tickets = 15;
+            else if (draft >= 60) tickets = 8;
+            inv.modifyItem('festival_ticket', tickets, false);
+            addLog(`Lantern Launched! ${draft}% draft. Awarded ${tickets} Festival Tickets.`);
+            setLanternResult({ status: 'success', tickets });
         }
+        setLanternPhase('done');
+    };
 
-        inv.modifyItem('festival_ticket', tickets, false);
-        addLog(`Lantern Launched! Result: ${rating.toUpperCase()} (${lanternDraft}% draft). Awarded ${tickets} Festival Tickets.`);
-        setLanternResult({ status: 'success', tickets });
+    const handleFeedFuel = () => {
+        if (lanternPhase !== 'playing') return;
+        const needle = lanternNeedleRef.current;
+        const zone = getLanternZone(needle);
+        const newDraft = lanternDraftRef.current + zone.gain;
+        const newClicks = lanternClicksRef.current + 1;
+
+        lanternDraftRef.current = newDraft;
+        lanternClicksRef.current = newClicks;
+        (questLogic as any).setQuestVariable('lantern_thermal_draft', newDraft);
+        setLanternClicks(newClicks);
+        setLanternLastZone({ label: zone.label, color: zone.textColor });
+
+        // Immediately clear zone flash after 600ms
+        setTimeout(() => setLanternLastZone(null), 600);
+
+        // After 4 clicks OR if draft exceeded 100%, finalize
+        if (newDraft > 100 || newClicks >= 4) {
+            setTimeout(() => finalizeLanternLaunch(newDraft), 400);
+        }
     };
 
     // RESET MINIGAME STATE (For Play Again)
     const handleResetRingToss = () => {
         initRingTossBoard();
-    };
-
-    const handleResetLantern = () => {
-        (questLogic as any).setQuestVariable('lantern_thermal_draft', 0);
-        setLanternResult({ status: null, tickets: 0 });
     };
 
     // RENDER FUNCTIONS
@@ -358,36 +391,34 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
     const renderRingToss = () => {
         return (
             <div className="flex flex-col items-center justify-between w-full h-full max-w-md mx-auto p-1 relative gap-2 font-pixel-rpg">
-                <style>{`
-                    @keyframes throwArc {
-                        0%   { left: 50%; top: 102%; transform: translate(-50%, -50%) scale(1); }
-                        50%  { 
-                            left: var(--mid-left); 
-                            top: calc(var(--mid-top) - 80px); 
-                            transform: translate(-50%, -50%) scale(1.6); 
+                {throwCoords && (
+                    <style>{`
+                        @keyframes throwArc_${throwId} {
+                            0%   { left: 150px; top: 310px; transform: translate(-50%, -50%) scale(1); }
+                            50%  { 
+                                left: ${throwCoords.midLeft}px; 
+                                top: ${throwCoords.midTop - 80}px; 
+                                transform: translate(-50%, -50%) scale(1.6); 
+                            }
+                            100% { 
+                                left: ${throwCoords.finalLeft}px; 
+                                top: ${throwCoords.finalTop}px; 
+                                transform: translate(-50%, -50%) scale(1); 
+                            }
                         }
-                        100% { left: var(--target-left); top: var(--target-top); transform: translate(-50%, -50%) scale(1); }
-                    }
-                    .animate-throw-arc {
-                        animation: throwArc 1000ms ease-out forwards;
-                    }
-                    
-                    @keyframes scaleUp {
-                        0% { transform: scale(0.9) opacity: 0; }
-                        100% { transform: scale(1) opacity: 1; }
-                    }
-                    .scale-up-bounce {
-                        animation: scaleUp 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-                    }
-                `}</style>
+                        .animate-throw-arc {
+                            animation: throwArc_${throwId} 1000ms ease-out forwards;
+                        }
+                    `}</style>
+                )}
 
                 <p className="text-[11px] text-gray-400 font-sans leading-tight text-center shrink-0">
                     Click the <strong className="text-yellow-400">golden ring</strong> below to toss it. Land on a peg to win up to <strong className="text-yellow-400">20 tickets</strong>!
                 </p>
 
                 {/* Pegboard Area */}
-                <div className="flex-1 w-full aspect-square max-h-[300px] flex items-center justify-center shrink overflow-hidden relative mx-auto animate-fade-in">
-                    <div className="relative aspect-square w-full h-full max-w-[300px] max-h-[300px] bg-gradient-to-b from-amber-950/20 to-amber-950/40 border border-amber-900/40 rounded-xl p-3 shadow-inner overflow-hidden">
+                <div className="flex-1 w-full aspect-square max-h-[340px] flex items-center justify-center shrink overflow-visible relative mx-auto animate-fade-in">
+                    <div className="relative aspect-square w-[300px] h-[300px] bg-gradient-to-b from-amber-950/20 to-amber-950/40 border border-amber-900/40 rounded-xl p-3 shadow-inner overflow-visible">
                         {/* 5x5 Grid layout */}
                         <div className="grid grid-cols-5 grid-rows-5 gap-2 w-full h-full relative">
                             {pegs.map((peg, index) => {
@@ -426,30 +457,25 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
                             })}
 
                             {/* Absolutely positioned Ring representing the flying ring */}
-                            <div
-                                ref={ringRef}
-                                className={`absolute pointer-events-none z-10 ${isThrowing ? 'animate-throw-arc' : ''}`}
-                                style={{
-                                    left: ringPos.left,
-                                    top: ringPos.top,
-                                    transform: 'translate(-50%, -50%)',
-                                    transition: isThrowing
-                                        ? 'none'
-                                        : hasFallen
-                                            ? 'top 400ms cubic-bezier(0.55, 0.085, 0.68, 0.53)'
-                                            : 'none',
-                                    ...({
-                                        '--target-left': ringTossOffsets.targetLeft,
-                                        '--target-top': ringTossOffsets.targetTop,
-                                        '--mid-left': ringTossOffsets.midLeft,
-                                        '--mid-top': ringTossOffsets.midTop,
-                                    } as React.CSSProperties),
-                                }}
-                            >
-                                <div className="w-8 h-8 rounded-full border-[3px] border-yellow-500 shadow-[0_4px_8px_rgba(0,0,0,0.6)] flex items-center justify-center bg-transparent">
-                                    <div className="w-4 h-4 rounded-full border border-yellow-400/40 bg-black/5" />
+                            {(!hasFallen || ringTossResult !== 'failure') && (
+                                <div
+                                    ref={ringRef}
+                                    className={`absolute pointer-events-none z-10 ${isThrowing ? 'animate-throw-arc' : ''}`}
+                                    style={{
+                                        ...(isThrowing ? {} : { left: ringPos.left, top: ringPos.top }),
+                                        transform: 'translate(-50%, -50%)',
+                                        transition: isThrowing
+                                            ? 'none'
+                                            : hasFallen
+                                                ? 'top 400ms cubic-bezier(0.55, 0.085, 0.68, 0.53)'
+                                                : 'none',
+                                    }}
+                                >
+                                    <div className="w-8 h-8 rounded-full border-[3px] border-yellow-500 shadow-[0_4px_8px_rgba(0,0,0,0.6)] flex items-center justify-center bg-yellow-500/20 z-20">
+                                        <div className="w-4 h-4 rounded-full border border-yellow-400/40 bg-black/5" />
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         {/* Result Popup Overlay inside Grid */}
@@ -489,13 +515,8 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
                                             <Button
                                                 onClick={() => {
                                                     // Clear throw state, but do not regenerate pegs
-                                                    setRingPos({ left: '50%', top: '102%' });
-                                                    setRingTossOffsets({
-                                                        targetLeft: '50%',
-                                                        targetTop: '102%',
-                                                        midLeft: '50%',
-                                                        midTop: '102%',
-                                                    });
+                                                    setRingPos({ left: '150px', top: '310px' });
+                                                    setThrowCoords(null);
                                                     setIsThrowing(false);
                                                     setThrowTarget(null);
                                                     setRingTossResult(null);
@@ -529,186 +550,203 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
                     <div className="text-[10px] text-gray-400 font-pixel-rpg uppercase">
                         Rings left: <span className="text-yellow-400 font-bold">{ringsLeft}</span>
                     </div>
-                    {!isThrowing && ringTossResult === null ? (
-                        <div className="flex flex-col items-center gap-1 w-full">
-                            {ringsLeft > 0 ? (
-                                <>
-                                    <span className="text-[8px] text-yellow-500 font-bold uppercase tracking-[0.2em] font-pixel-rpg animate-pulse">Click the ring below to throw!</span>
-                                    <div
-                                        onClick={handleInteractiveToss}
-                                        className="w-10 h-10 rounded-full border-4 border-yellow-500 shadow-xl flex items-center justify-center bg-transparent cursor-pointer hover:scale-110 active:scale-95 hover:border-yellow-400 hover:shadow-yellow-500/20 hover:bg-yellow-500/10 transition-all duration-200"
-                                        title="Click to Throw Ring!"
+                    <div className="h-[68px] flex flex-col items-center justify-center w-full">
+                        {!isThrowing && ringTossResult === null ? (
+                            <div className="flex flex-col items-center gap-1 w-full">
+                                {ringsLeft > 0 ? (
+                                    <>
+                                        <span className="text-[8px] text-yellow-500 font-bold uppercase tracking-[0.2em] font-pixel-rpg animate-pulse">Click the ring below to throw!</span>
+                                        <div
+                                            onClick={handleInteractiveToss}
+                                            className="w-10 h-10 rounded-full border-4 border-yellow-500 shadow-xl flex items-center justify-center bg-transparent cursor-pointer hover:scale-110 active:scale-95 hover:border-yellow-400 hover:shadow-yellow-500/20 hover:bg-yellow-500/10 transition-all duration-200"
+                                            title="Click to Throw Ring!"
+                                        >
+                                            <div className="w-5 h-5 rounded-full border border-yellow-400/40" />
+                                        </div>
+                                    </>
+                                ) : (
+                                    <Button
+                                        onClick={() => setActiveFestivalMinigame(null)}
+                                        className="w-full py-1.5 font-pixel-rpg text-xs"
                                     >
-                                        <div className="w-5 h-5 rounded-full border border-yellow-400/40" />
-                                    </div>
-                                </>
-                            ) : (
-                                <Button
-                                    onClick={() => setActiveFestivalMinigame(null)}
-                                    className="w-full py-1.5 font-pixel-rpg text-xs"
-                                >
-                                    Leave Game
-                                </Button>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-10">
+                                        Leave Game
+                                    </Button>
+                                )}
+                            </div>
+                        ) : (
                             <span className="text-[9px] text-gray-400 tracking-[0.15em] font-pixel-rpg uppercase animate-pulse">
                                 {isThrowing ? "Flying..." : "Resolving..."}
                             </span>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         );
     };
 
     const renderLanternLaunch = () => {
-        const activeAction = ui.activeSingleAction;
-        const isWaiting = activeAction && activeAction.title === "Waiting for Thermal Draft...";
+        const currentDraft = lanternDraftRef.current;
+        const needlePos = lanternNeedle; // 0-100
 
-        const getDraftColor = () => {
-            if (lanternDraft > 100) return 'bg-rose-600 shadow-[0_0_10px_rgba(239,68,68,0.7)] animate-pulse';
-            if (lanternDraft >= 80 && lanternDraft <= 95) return 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.9)]';
-            if ((lanternDraft >= 60 && lanternDraft <= 79) || (lanternDraft >= 96 && lanternDraft <= 100)) return 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.7)]';
-            return 'bg-amber-600';
+        // Colors for the horizontal zone bar segments
+        const zoneSegments = [
+            { label: 'COLD', from: 0, to: 30, bg: 'bg-gray-700', border: 'border-gray-600' },
+            { label: 'WARM', from: 30, to: 60, bg: 'bg-orange-700', border: 'border-orange-600' },
+            { label: 'GOOD', from: 60, to: 80, bg: 'bg-amber-500', border: 'border-amber-400' },
+            { label: 'PERFECT', from: 80, to: 95, bg: 'bg-emerald-500', border: 'border-emerald-400' },
+            { label: 'HOT', from: 95, to: 100, bg: 'bg-rose-600', border: 'border-rose-500' },
+        ];
+
+        const currentZone = getLanternZone(needlePos);
+
+        // Draft fill color
+        const getDraftFillClass = () => {
+            if (currentDraft > 100) return 'bg-rose-500';
+            if (currentDraft >= 80) return 'bg-emerald-500';
+            if (currentDraft >= 60) return 'bg-amber-400';
+            if (currentDraft >= 30) return 'bg-orange-500';
+            return 'bg-gray-600';
         };
 
-        const getDraftRating = () => {
-            if (lanternDraft > 100) return { label: "OVERHEATED!", color: "text-rose-500 font-extrabold" };
-            if (lanternDraft >= 80 && lanternDraft <= 95) return { label: "PERFECT ZONE!", color: "text-emerald-400 font-extrabold animate-bounce" };
-            if ((lanternDraft >= 60 && lanternDraft <= 79) || (lanternDraft >= 96 && lanternDraft <= 100)) return { label: "GOOD ZONE", color: "text-amber-400 font-bold" };
-            return { label: "WEAK DRAFT", color: "text-gray-400 font-medium" };
-        };
-
-        const rating = getDraftRating();
 
         return (
             <div className="bg-gray-900/90 border border-yellow-500/40 rounded-2xl p-4 sm:p-6 backdrop-blur-md shadow-2xl max-w-md w-full flex flex-col gap-4 font-pixel-rpg my-auto">
+
+                {/* Header */}
                 <p className="text-[11px] text-gray-400 font-sans text-center">
-                    Heat the lantern to build thermal draft. Launch when the meter hits the <strong className="text-emerald-400">80-95% SWEET SPOT</strong> for 15 tickets! Over 100% will catch fire!
+                    Click <strong className="text-yellow-400">Feed Fuel</strong> when the marker is in the{' '}
+                    <strong className="text-emerald-400">green zone</strong> to build a perfect thermal draft.
+                    You get <strong className="text-yellow-400">4 feeds</strong> — make them count!
                 </p>
 
-                {/* Gauge Display */}
-                <div className="flex gap-4 items-center justify-center h-40 py-1">
-                    {/* Thermal Draft Meter */}
-                    <div className="w-10 h-full bg-gray-950 rounded-xl border border-gray-800 p-[3px] relative flex flex-col justify-end overflow-hidden">
-                        {/* Sweet Spot Overlay Highlight */}
-                        <div className="absolute left-[3px] right-[3px] bottom-[80%] top-[5%] bg-emerald-500/10 border-y border-emerald-500/40 pointer-events-none flex items-center justify-center">
-                            <span className="text-[6px] text-emerald-400/60 vertical-text select-none tracking-tighter uppercase font-pixel-rpg">Sweet</span>
-                        </div>
-                        <div className="absolute left-[3px] right-[3px] bottom-[60%] top-[20%] bg-amber-400/5 border-y border-amber-400/20 pointer-events-none" />
-
-                        {/* Draft Fill bar */}
-                        <div
-                            className={`w-full rounded-lg transition-all duration-300 ease-out origin-bottom ${getDraftColor()}`}
-                            style={{ height: `${Math.min(100, lanternDraft)}%` }}
-                        />
-                    </div>
-
-                    {/* Stats */}
-                    <div className="flex-1 flex flex-col justify-center items-start text-left gap-1 font-pixel-rpg bg-gray-950/40 p-3 rounded-xl border border-gray-850 h-full">
-                        <span className="text-[9px] text-gray-500 uppercase tracking-wider">Current Thermal Draft</span>
-                        <span className="text-2xl font-extrabold text-yellow-400 leading-none">
-                            {lanternDraft}%
-                        </span>
-                        <span className={`text-[9px] uppercase tracking-wide leading-none mt-0.5 ${rating.color}`}>
-                            {rating.label}
-                        </span>
-
-                        <div className="border-t border-gray-850 w-full mt-1.5 pt-1.5 flex flex-col gap-0.5 text-[8px] text-gray-400 font-sans leading-relaxed">
-                            <div className="flex justify-between"><span className="text-emerald-400 font-bold">80-95% (Sweet):</span> <strong className="text-gray-250">15 🎟</strong></div>
-                            <div className="flex justify-between"><span className="text-amber-400 font-bold">60-79% / 96-100%:</span> <strong className="text-gray-250">8 🎟</strong></div>
-                            <div className="flex justify-between"><span className="text-gray-400">Under 60% (Weak):</span> <strong className="text-gray-250">3 🎟</strong></div>
-                            <div className="flex justify-between"><span className="text-rose-500 font-bold">Over 100%:</span> <strong className="text-gray-250">2 🎟</strong></div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Progress meter for wait tick */}
-                {isWaiting && (
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[9px] text-yellow-400 tracking-[0.2em] font-bold uppercase animate-pulse font-pixel-rpg text-center">Feeding Fuel...</span>
-                        <div className="relative w-full h-2 bg-gray-950 rounded-full border border-gray-800 overflow-hidden">
-                            <div
-                                className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 to-teal-400 origin-left"
-                                style={{
-                                    width: '100%',
-                                    transform: 'scaleX(0)',
-                                    transition: `transform ${activeAction?.duration}ms linear`,
-                                    transformOrigin: 'left',
-                                }}
-                                ref={(el) => {
-                                    if (el) {
-                                        el.getBoundingClientRect();
-                                        el.style.transform = 'scaleX(1)';
-                                    }
-                                }}
-                            />
+                {lanternPhase === 'idle' && !lanternResult.status && (
+                    <div className="flex flex-col items-center gap-3 py-4">
+                        <div className="text-4xl select-none">&#127982;</div>
+                        <Button onClick={startLanternGame} className="px-8 py-2 font-pixel-rpg text-sm">
+                            Begin Heating
+                        </Button>
+                        <div className="text-[9px] text-gray-500 font-sans text-center">
+                            Each fuel feed adds draft based on where the marker lands.<br />
+                            Hit the green zone for maximum lift!
                         </div>
                     </div>
                 )}
 
-                {/* Result Display */}
+                {(lanternPhase === 'playing' || lanternPhase === 'done') && (
+                    <>
+                        {/* Zone bar + needle */}
+                        <div className="flex flex-col gap-1">
+                            <div className="flex justify-between text-[7px] text-gray-500 font-sans uppercase tracking-wider px-0.5">
+                                <span>Cold</span>
+                                <span>Warm</span>
+                                <span>Good</span>
+                                <span className="text-emerald-400 font-bold">Perfect</span>
+                                <span className="text-rose-400">Hot</span>
+                            </div>
+                            {/* Zone bar */}
+                            <div className="relative w-full h-7 rounded-lg overflow-hidden flex">
+                                {/* Cold 0-30 */}
+                                <div className="h-full bg-gray-700" style={{ width: '30%' }} />
+                                {/* Warm 30-60 */}
+                                <div className="h-full bg-orange-700" style={{ width: '30%' }} />
+                                {/* Good 60-80 */}
+                                <div className="h-full bg-amber-500" style={{ width: '20%' }} />
+                                {/* Perfect 80-95 */}
+                                <div className="h-full bg-emerald-500 shadow-[inset_0_0_8px_rgba(16,185,129,0.6)]" style={{ width: '15%' }} />
+                                {/* Hot 95-100 */}
+                                <div className="h-full bg-rose-600" style={{ width: '5%' }} />
+
+                                {/* Moving needle */}
+                                <div
+                                    className="absolute top-0 h-full w-1 bg-white shadow-[0_0_6px_2px_rgba(255,255,255,0.8)] rounded-full pointer-events-none transition-none"
+                                    style={{ left: `calc(${needlePos}% - 2px)` }}
+                                />
+                            </div>
+                            {/* Zone label under bar */}
+                            <div className="h-4 text-center">
+                                {lanternLastZone ? (
+                                    <span className={`text-[10px] font-bold uppercase tracking-widest animate-pulse ${lanternLastZone.color}`}>
+                                        {lanternLastZone.label}
+                                    </span>
+                                ) : lanternPhase === 'playing' ? (
+                                    <span className={`text-[10px] font-semibold uppercase tracking-wide ${currentZone.textColor}`}>
+                                        {currentZone.label}
+                                    </span>
+                                ) : null}
+                            </div>
+                        </div>
+
+                        {/* Draft accumulator bar */}
+                        <div className="flex flex-col gap-1">
+                            <div className="flex justify-between items-baseline">
+                                <span className="text-[9px] text-gray-400 uppercase tracking-wider">Thermal Draft</span>
+                                <span className="text-sm font-extrabold text-yellow-400">{Math.min(currentDraft, 100)}%</span>
+                            </div>
+                            <div className="w-full h-3 bg-gray-950 rounded-full border border-gray-800 overflow-hidden relative">
+                                {/* Perfect zone guide markers */}
+                                <div className="absolute top-0 bottom-0 bg-emerald-500/20 border-x border-emerald-500/40" style={{ left: '80%', right: '5%' }} />
+                                <div
+                                    className={`h-full rounded-full transition-all duration-300 ${getDraftFillClass()}`}
+                                    style={{ width: `${Math.min(currentDraft, 100)}%` }}
+                                />
+                            </div>
+                            <div className="flex justify-between text-[7px] text-gray-600 font-sans">
+                                <span>0%</span>
+                                <span className="text-emerald-500/60">80–95 = Perfect</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+
+                        {/* Click counter */}
+                        <div className="flex justify-center gap-2">
+                            {[0, 1, 2, 3].map(i => (
+                                <div
+                                    key={i}
+                                    className={`w-4 h-4 rounded-full border-2 transition-all duration-200 ${i < lanternClicks
+                                        ? 'bg-yellow-400 border-yellow-300 shadow-[0_0_6px_rgba(250,204,21,0.7)]'
+                                        : 'bg-gray-800 border-gray-600'
+                                        }`}
+                                />
+                            ))}
+                        </div>
+                        <p className="text-[9px] text-gray-500 font-sans text-center -mt-2">
+                            {lanternClicks < 4 ? `${lanternClicks}/4 feeds used` : 'Launching...'}
+                        </p>
+                    </>
+                )}
+
+                {/* Result */}
                 {lanternResult.status && (
                     <div className="bg-gray-950/80 p-3 rounded-xl border border-gray-800 text-center flex flex-col gap-0.5 animate-fade-in font-pixel-rpg">
                         {lanternResult.status === 'overheat' ? (
                             <>
-                                <span className="text-rose-500 text-sm font-extrabold uppercase tracking-widest animate-pulse">🔥 BOOM! OVERHEATED!</span>
-                                <span className="text-[10px] text-gray-300 font-sans mt-0.5">
-                                    The lantern caught fire and burned to ash.
-                                </span>
-                                <span className="text-yellow-400 text-xs font-bold mt-1">
-                                    +2 tickets awarded.
-                                </span>
+                                <span className="text-rose-500 text-sm font-extrabold uppercase tracking-widest animate-pulse">BOOM! OVERHEATED!</span>
+                                <span className="text-[10px] text-gray-300 font-sans mt-0.5">The lantern caught fire and burned to ash.</span>
+                                <span className="text-yellow-400 text-xs font-bold mt-1">+2 tickets awarded.</span>
                             </>
                         ) : (
                             <>
-                                <span className="text-emerald-400 text-sm font-extrabold uppercase tracking-widest">🚀 LAUNCH SUCCESS!</span>
-                                <span className="text-[10px] text-gray-300 font-sans mt-0.5">
-                                    The lantern drifts beautifully into the stars!
-                                </span>
-                                <span className="text-yellow-400 text-xs font-bold mt-1">
-                                    +{lanternResult.tickets} Tickets Earned!
-                                </span>
+                                <span className="text-emerald-400 text-sm font-extrabold uppercase tracking-widest">LAUNCH SUCCESS!</span>
+                                <span className="text-[10px] text-gray-300 font-sans mt-0.5">The lantern drifts beautifully into the night sky!</span>
+                                <span className="text-yellow-400 text-xs font-bold mt-1">+{lanternResult.tickets} Tickets Earned!</span>
                             </>
                         )}
                     </div>
                 )}
 
-                {/* Actions */}
-                <div className="flex gap-2">
-                    {!lanternResult.status && (
-                        <>
-                            <Button
-                                disabled={isBusy}
-                                onClick={handleLanternWaitDraft}
-                                className="flex-1 py-1.5 font-pixel-rpg text-xs"
-                            >
-                                Wait for Draft (+8-22%)
-                            </Button>
-                            <Button
-                                disabled={isBusy || lanternDraft === 0}
-                                onClick={handleLanternLaunch}
-                                className="flex-1 py-1.5 font-pixel-rpg text-xs bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border-emerald-500"
-                            >
-                                Launch!
-                            </Button>
-                        </>
-                    )}
-
-                    {lanternResult.status && (
-                        <Button
-                            onClick={handleResetLantern}
-                            className="flex-1 py-1.5 font-pixel-rpg text-xs"
-                        >
-                            Prepare Next Lantern
-                        </Button>
-                    )}
-                </div>
+                {/* Feed Fuel action button */}
+                {lanternPhase === 'playing' && (
+                    <button
+                        onPointerDown={handleFeedFuel}
+                        className="w-full py-3 rounded-xl font-pixel-rpg text-sm font-bold uppercase tracking-widest bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 border border-orange-400/50 shadow-lg active:scale-95 transition-transform select-none"
+                    >
+                        Feed Fuel
+                    </button>
+                )}
             </div>
         );
     };
+
 
 
     // ─── LOG BALANCE ──────────────────────────────────────────────────────────
@@ -723,29 +761,43 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
         logPhaseRef.current = 'playing';
         logStartTimeRef.current = Date.now();
 
-        const schedulePush = () => {
-            const delay = 2000 + Math.random() * 1500;
-            logPushTimerRef.current = setTimeout(() => {
-                if (logPhaseRef.current === 'done') return;
-                const dir = Math.random() < 0.5 ? 1 : -1;
-                leanVelocityRef.current += dir * (1.5 + Math.random());
-                setLeanVelocity(leanVelocityRef.current);
-                schedulePush();
-            }, delay);
-        };
-        schedulePush();
+        // Push the player only one time in either direction after 1 second
+        logPushTimerRef.current = setTimeout(() => {
+            if (logPhaseRef.current === 'done') return;
+            const dir = Math.random() < 0.5 ? 1 : -1;
+            leanVelocityRef.current = dir * 1.5;
+            setLeanVelocity(leanVelocityRef.current);
+        }, 1000);
 
         logPhysicsRef.current = setInterval(() => {
-            leanAngleRef.current += leanVelocityRef.current * 0.3;
+            const ms = Date.now() - logStartTimeRef.current;
+            if (ms >= 15000) {
+                setLogSurviveMs(15000);
+                endLogBalance(true);
+                return;
+            }
+
+            // Gravity accelerates based on how far you are from center.
+            // A small multiplier keeps the initial slide gentle but allows runaway if ignored.
+            const gravityMultiplier = 0.055;
+            const gravityAcc = leanAngleRef.current * gravityMultiplier;
+            leanVelocityRef.current += gravityAcc;
+
+            // Apply velocity to angle (scaled to 50ms interval)
+            leanAngleRef.current += leanVelocityRef.current * 0.22;
+
+            // Fail if lean angle exceeds 90 degrees
             if (Math.abs(leanAngleRef.current) >= 90) {
                 endLogBalance(false);
                 return;
             }
+
             setLeanAngle(leanAngleRef.current);
-            leanVelocityRef.current *= 0.97; // friction
+            // Minimal passive damping — the player's clicks are the primary recovery tool
+            leanVelocityRef.current *= 0.97;
             setLeanVelocity(leanVelocityRef.current);
-            setLogSurviveMs(Date.now() - logStartTimeRef.current);
-        }, 100);
+            setLogSurviveMs(ms);
+        }, 50);
     };
 
     const endLogBalance = (survived: boolean) => {
@@ -754,8 +806,8 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
         setLogPhase('done');
         logPhaseRef.current = 'done';
         const ms = Date.now() - logStartTimeRef.current;
-        const seconds = Math.floor(ms / 1000);
-        const tickets = survived ? Math.min(15, Math.max(1, seconds)) : Math.max(0, Math.floor(seconds / 3));
+        const seconds = survived ? 15 : Math.floor(ms / 1000);
+        const tickets = survived ? 15 : Math.max(0, Math.floor(seconds / 3));
         setLogTickets(tickets);
         if (tickets > 0) {
             inv.modifyItem('festival_ticket', tickets, false);
@@ -767,11 +819,34 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
 
     const handleLogLean = (dir: 'left' | 'right') => {
         if (logPhaseRef.current !== 'playing') return;
-        const push = dir === 'left' ? -2.5 : 2.5;
-        leanVelocityRef.current += push;
-        if (Math.abs(leanVelocityRef.current) >= 12) {
-            endLogBalance(false);
+
+        const v = leanVelocityRef.current;
+        const a = leanAngleRef.current;
+
+        // Determine if this click is correcting (pushing against the current lean/velocity)
+        // or worsening the tilt.
+        const isCorrectingLean = (dir === 'left' && a > 0) || (dir === 'right' && a < 0);
+        const isCorrectingVelocity = (dir === 'left' && v > 0) || (dir === 'right' && v < 0);
+        const isCountering = isCorrectingLean || isCorrectingVelocity;
+
+        if (isCountering) {
+            // Strong recovery: heavily dampen velocity toward zero and nudge angle back.
+            // This makes recovery feel like a real skill action — one good click at the right
+            // moment can pull you back, but it has to be timed when you're not over the edge.
+            leanVelocityRef.current *= -0.35; // Reverse and strongly reduce velocity
+            const angleNudge = dir === 'left' ? -3.5 : 3.5;
+            leanAngleRef.current += angleNudge;
+        } else {
+            // Clicking the wrong direction adds a small adverse push
+            const push = dir === 'left' ? -1.8 : 1.8;
+            leanVelocityRef.current += push;
+            leanAngleRef.current += push * 0.8;
         }
+
+        // Clamp angle so a single misclick cannot immediately end the game
+        leanAngleRef.current = Math.max(-89, Math.min(89, leanAngleRef.current));
+
+        setLeanAngle(leanAngleRef.current);
         setLeanVelocity(leanVelocityRef.current);
     };
 
@@ -875,19 +950,31 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
                 }
                 return t - 1;
             });
-        }, 1000);
+        }, 1800);
 
         const spawnLantern = () => {
             if (whalPhase === 'done') return;
-            setWhalLanterns(prev => {
-                const dark = prev.filter(l => !l.lit).map(l => l.id);
-                if (dark.length === 0) return prev;
-                const idx = dark[Math.floor(Math.random() * dark.length)];
-                const isRed = Math.random() < 0.12;
-                const color = isRed ? '#ef4444' : LANTERN_COLORS[Math.floor(Math.random() * LANTERN_COLORS.length)];
-                return prev.map(l => l.id === idx ? { ...l, lit: true, isRed, color } : l);
-            });
-            const next = 400 + Math.random() * 600;
+
+            const countToSpawn = Math.random() < 0.45 ? 2 : 1;
+
+            for (let i = 0; i < countToSpawn; i++) {
+                setWhalLanterns(prev => {
+                    const dark = prev.filter(l => !l.lit).map(l => l.id);
+                    if (dark.length === 0) return prev;
+                    const idx = dark[Math.floor(Math.random() * dark.length)];
+                    const isRed = Math.random() < 0.12;
+                    const color = isRed ? '#ef4444' : LANTERN_COLORS[Math.floor(Math.random() * LANTERN_COLORS.length)];
+
+                    // Automatically turn off this specific lantern after 2000 - 2500ms
+                    setTimeout(() => {
+                        setWhalLanterns(curr => curr.map(l => l.id === idx ? { ...l, lit: false } : l));
+                    }, 1000 + Math.random() * 1500);
+
+                    return prev.map(l => l.id === idx ? { ...l, lit: true, isRed, color } : l);
+                });
+            }
+
+            const next = 300 + Math.random() * 350; // Faster spawn interval (300-650ms)
             whalLanternTimerRef.current = setTimeout(spawnLantern, next);
         };
         whalLanternTimerRef.current = setTimeout(spawnLantern, 300);
@@ -1048,7 +1135,34 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
             if (isSmashed) return;
             const next = gourdHits + 1;
             setGourdHits(next);
-            if (next >= maxHits) setGourdExploded(true);
+            if (next >= maxHits) {
+                setGourdExploded(true);
+                if (gourdResult) {
+                    const parts = gourdResult.split(':');
+                    if (parts[0] === 'tickets') {
+                        const amt = parseInt(parts[1] ?? '0', 10);
+                        inv.modifyItem('festival_ticket', amt, false);
+                        let logMsg = "A modest haul of tickets falls from the gourd!";
+                        const matchingEntry = GOURD_LOOT_TABLE.find(entry =>
+                            entry.type === 'festival_ticket' &&
+                            amt >= (entry.minTickets ?? 0) &&
+                            amt <= (entry.maxTickets ?? 0)
+                        );
+                        if (matchingEntry) logMsg = matchingEntry.logMessage;
+                        addLog(`Gourd Smash! ${logMsg} (Earned ${amt} Festival Tickets)`);
+                    } else if (parts[0] === 'item' && parts[1]) {
+                        const itemId = parts[1];
+                        inv.modifyItem(itemId, 1, false);
+                        let logMsg = `A ${itemId.replace(/_/g, ' ')} tumbles out of the gourd!`;
+                        const matchingEntry = GOURD_LOOT_TABLE.find(entry =>
+                            entry.type === 'item' &&
+                            entry.itemId === itemId
+                        );
+                        if (matchingEntry) logMsg = matchingEntry.logMessage;
+                        addLog(`Gourd Smash! ${logMsg}`);
+                    }
+                }
+            }
         };
 
         // Parse the pre-resolved result
@@ -1183,17 +1297,17 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
         const puckSvgY = 350 - (strikerPuckY / 100) * towerH;
 
         return (
-            <div className="flex flex-col items-center justify-between w-full h-full max-w-xs mx-auto p-2 gap-2 font-pixel-rpg">
+            <div className="flex flex-col items-center justify-between w-full h-full max-w-lg mx-auto p-3 gap-3 font-pixel-rpg">
                 <p className="text-[11px] text-gray-400 font-sans text-center shrink-0">
                     Strike the pedal and <strong className="text-yellow-400">ring the bell</strong> for the top prize!
                 </p>
 
-                <div className="flex gap-4 items-end justify-center flex-1 w-full overflow-hidden">
-                    {/* Tower SVG */}
-                    <svg viewBox="0 0 100 380" className="h-full max-h-[320px] w-auto shrink-0">
+                <div className="flex gap-6 items-end justify-center flex-1 w-full overflow-hidden">
+                    {/* Tower SVG — wider viewBox so labels and elements are readable on desktop */}
+                    <svg viewBox="0 0 200 400" className="h-full max-h-[460px] w-auto shrink-0">
                         {/* Tower poles */}
-                        <rect x="44" y="20" width="6" height="330" rx="3" fill="#374151" />
-                        <rect x="50" y="20" width="6" height="330" rx="3" fill="#4b5563" />
+                        <rect x="94" y="20" width="6" height="330" rx="3" fill="#374151" />
+                        <rect x="100" y="20" width="6" height="330" rx="3" fill="#4b5563" />
 
                         {/* Tier markers */}
                         {STRIKER_TIERS.map((t, i) => {
@@ -1201,11 +1315,11 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
                             const isActive = strikerTierIndex !== null && i <= strikerTierIndex;
                             return (
                                 <g key={t.label}>
-                                    <line x1="38" y1={markerY} x2="62" y2={markerY} stroke={isActive ? t.color : '#374151'} strokeWidth="2" />
-                                    <text x="34" y={markerY + 4} textAnchor="end" fontSize="7" fill={isActive ? t.color : '#6b7280'} fontFamily="monospace">
+                                    <line x1="76" y1={markerY} x2="124" y2={markerY} stroke={isActive ? t.color : '#374151'} strokeWidth="2.5" />
+                                    <text x="72" y={markerY + 4} textAnchor="end" fontSize="10" fill={isActive ? t.color : '#6b7280'} fontFamily="monospace">
                                         {t.label}
                                     </text>
-                                    <text x="66" y={markerY + 4} textAnchor="start" fontSize="7" fill={isActive ? t.color : '#6b7280'} fontFamily="monospace">
+                                    <text x="128" y={markerY + 4} textAnchor="start" fontSize="10" fill={isActive ? t.color : '#6b7280'} fontFamily="monospace">
                                         {t.tickets > 0 ? `${t.tickets}T` : '-'}
                                     </text>
                                 </g>
@@ -1213,31 +1327,31 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
                         })}
 
                         {/* Bell */}
-                        <g transform="translate(47, 14)">
-                            <path d="M0,0 Q-10,10 -10,20 L10,20 Q10,10 0,0Z" fill={isBell ? '#eab308' : '#78716c'}
-                                style={{ filter: isBell ? 'drop-shadow(0 0 6px #eab308)' : 'none', transition: 'filter 0.3s' }} />
-                            <circle cx="0" cy="22" r="2" fill={isBell ? '#ca8a04' : '#57534e'} />
+                        <g transform="translate(97, 14)">
+                            <path d="M0,0 Q-14,12 -14,26 L14,26 Q14,12 0,0Z" fill={isBell ? '#eab308' : '#78716c'}
+                                style={{ filter: isBell ? 'drop-shadow(0 0 8px #eab308)' : 'none', transition: 'filter 0.3s' }} />
+                            <circle cx="0" cy="28" r="3" fill={isBell ? '#ca8a04' : '#57534e'} />
                         </g>
 
                         {/* Puck / ball */}
                         <circle
-                            cx="47"
+                            cx="97"
                             cy={puckSvgY}
-                            r="5"
+                            r="7"
                             fill="#94a3b8"
                             stroke="#cbd5e1"
-                            strokeWidth="1"
+                            strokeWidth="1.5"
                             style={{ transition: strikerPhase === 'animating' ? 'cy 1.4s cubic-bezier(0.22, 1, 0.36, 1)' : 'none' }}
                         />
 
                         {/* Base pedal */}
-                        <rect x="25" y="348" width="50" height="32" rx="4" fill="#374151" stroke="#4b5563" strokeWidth="1.5" />
-                        <rect x="32" y="345" width="36" height="32" rx="3"
+                        <rect x="58" y="350" width="84" height="36" rx="5" fill="#374151" stroke="#4b5563" strokeWidth="2" />
+                        <rect x="66" y="347" width="68" height="36" rx="4"
                             fill={strikerPhase === 'idle' ? '#f59e0b' : '#78350f'}
                             style={{ cursor: strikerPhase === 'idle' ? 'pointer' : 'default', transition: 'fill 0.2s' }}
                             onClick={handleStrikerHit}
                         />
-                        <text x="50" y="360" textAnchor="middle" fontSize="10" fill={strikerPhase === 'idle' ? '#1f2937' : '#6b7280'} fontFamily="monospace"
+                        <text x="100" y="369" textAnchor="middle" fontSize="13" fontWeight="bold" fill={strikerPhase === 'idle' ? '#1f2937' : '#6b7280'} fontFamily="monospace"
                             style={{ cursor: strikerPhase === 'idle' ? 'pointer' : 'default' }}
                             onClick={handleStrikerHit}
                         >STRIKE</text>
@@ -1247,11 +1361,11 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
                     {strikerPhase === 'done' && tier && (
                         <div className="flex flex-col items-center gap-2 animate-fade-in text-center shrink-0">
                             <span className="font-pixel-rpg text-[9px] text-gray-500 uppercase tracking-widest">Result</span>
-                            <span className="font-bold text-sm" style={{ color: tier.color }}>{tier.label}</span>
-                            <span className="text-yellow-400 font-bold text-lg">
+                            <span className="font-bold text-base" style={{ color: tier.color }}>{tier.label}</span>
+                            <span className="text-yellow-400 font-bold text-xl">
                                 {tier.tickets > 0 ? `+${tier.tickets} Tickets` : 'No Prize'}
                             </span>
-                            {isBell && <span className="text-yellow-300 text-xs animate-bounce font-sans">DING DING DING!</span>}
+                            {isBell && <span className="text-yellow-300 text-sm animate-bounce font-sans">DING DING DING!</span>}
                             <span className="text-[10px] text-gray-500 font-sans mt-1">Speak to Brokk to play again.</span>
                         </div>
                     )}
@@ -1264,6 +1378,7 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
             </div>
         );
     };
+
 
     // ─── SHARED ───────────────────────────────────────────────────────────────
     const getMinigameDetails = () => {
@@ -1282,6 +1397,15 @@ const FestivalMinigameView: React.FC<FestivalMinigameViewProps> = ({
 
     return (
         <div className="flex flex-col h-full w-full text-gray-200 p-2 bg-gray-950/40 rounded-lg font-pixel-rpg overflow-hidden select-none border border-gray-800">
+            <style>{`
+                @keyframes scaleUp {
+                    0% { transform: scale(0.9); opacity: 0; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+                .scale-up-bounce {
+                    animation: scaleUp 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                }
+            `}</style>
             {/* Common Top Bar */}
             <div className="flex justify-between items-center w-full mb-2 bg-black/40 p-2 rounded border border-gray-805 shrink-0">
                 <div className="flex flex-col">
