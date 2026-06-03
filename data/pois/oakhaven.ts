@@ -43,6 +43,26 @@ export const oakhavenPois: Record<string, POI> = {
                     }
                 ]
             },
+            {
+                type: "skilling",
+                name: "Sentinel Oak",
+                id: "oakhaven_sentinel_oak",
+                skill: SkillName.Woodcutting,
+                requiredLevel: 15,
+                loot: [
+                    {
+                        itemId: "oak_logs",
+                        chance: 1,
+                        xp: 65,
+                    },
+                ],
+                resourceCount: {
+                    min: 200,
+                    max: 300,
+                },
+                respawnTime: 600000,
+                gatherTime: 5000,
+            },
         ],
         regionId: "oakhaven",
         type: "internal",

@@ -83,6 +83,8 @@ export type DialogueAction =
   | { type: 'play_log_balance' }
   | { type: 'play_whack_lantern' }
   | { type: 'play_high_striker' }
+  | { type: 'play_skeeball' }
+  | { type: 'play_balloon_pop' }
   | { type: 'buy_festival_tokens'; quantity: number }
   | { type: 'record_game_played'; gameId: 'trivia' | 'gourd' | 'lantern' };
 

@@ -1,0 +1,422 @@
+.balloon-pop-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  max-height: 100%;
+  margin: 0 auto;
+  padding: 12px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top, #1c2e4a 0%, #090909 70%);
+  border: 4px solid #8d6733;
+  border-radius: 22px;
+  box-shadow:
+    0 0 0 3px #ffd75e,
+    0 16px 40px rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+}
+
+.balloon-pop-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.balloon-pop-side-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.balloon-pop-side-panel h2 {
+  margin: 0;
+  color: #ffd75e;
+  font-size: 20px;
+  letter-spacing: 2px;
+  text-shadow:
+    0 0 8px rgba(255, 215, 94, 0.6),
+    0 2px 0 #000;
+  text-align: center;
+}
+
+.balloon-pop-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.balloon-pop-hud > div {
+  min-width: 90px;
+  padding: 8px 12px;
+  background: linear-gradient(to bottom, #342414, #21160d);
+  border: 2px solid #8d6733;
+  border-radius: 10px;
+  color: #f8e7b4;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.balloon-pop-hud span {
+  display: block;
+  font-size: 10px;
+  opacity: 0.8;
+  margin-bottom: 2px;
+}
+
+.balloon-pop-hud strong {
+  font-size: 18px;
+  color: #ffd75e;
+}
+
+.balloon-pop-cabinet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================================================
+   Main Board
+   ========================================================= */
+
+.balloon-board {
+  position: relative;
+
+  width: 320px;
+  height: 340px;
+
+  overflow: hidden;
+
+  border-radius: 14px;
+
+  border: 3px solid #8d6733;
+
+  background:
+    linear-gradient(to bottom,
+      #13284c 0%,
+      #1d3967 45%,
+      #2b2118 100%);
+
+  box-shadow:
+    inset 0 0 25px rgba(0, 0, 0, .45),
+    0 0 18px rgba(0, 0, 0, .35);
+}
+
+/* Lantern glow layer */
+
+.balloon-board::before {
+  content: '';
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at 20% 20%,
+      rgba(255, 210, 120, .08),
+      transparent 30%),
+    radial-gradient(circle at 80% 25%,
+      rgba(255, 180, 80, .08),
+      transparent 30%);
+
+  z-index: 0;
+}
+
+/* =========================================================
+   Balloon Base
+   ========================================================= */
+
+.festival-balloon {
+  position: absolute;
+
+  width: 28px;
+  height: 40px;
+
+  border-radius:
+    50% 50% 45% 45%;
+
+  transform-origin: center bottom;
+
+  animation:
+    balloonFloat 3s ease-in-out infinite;
+
+  z-index: 5;
+}
+
+/* shine */
+
+.festival-balloon::before {
+  content: '';
+
+  position: absolute;
+
+  width: 9px;
+  height: 9px;
+
+  left: 5px;
+  top: 6px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, .28);
+}
+
+/* string */
+
+.festival-balloon::after {
+  content: '';
+
+  position: absolute;
+
+  left: 13px;
+  top: 38px;
+
+  width: 1px;
+  height: 16px;
+
+  background:
+    rgba(255, 255, 255, .6);
+}
+
+/* =========================================================
+   Balloon Colors
+   ========================================================= */
+
+.balloon-red {
+  background:
+    radial-gradient(circle at 30% 30%,
+      #ff9393,
+      #d43c3c);
+}
+
+.balloon-blue {
+  background:
+    radial-gradient(circle at 30% 30%,
+      #8ed1ff,
+      #2f72d6);
+}
+
+.balloon-green {
+  background:
+    radial-gradient(circle at 30% 30%,
+      #9ef4a0,
+      #2c9f4a);
+}
+
+.balloon-yellow {
+  background:
+    radial-gradient(circle at 30% 30%,
+      #fff2a6,
+      #d8b025);
+}
+
+.balloon-gold {
+  background:
+    radial-gradient(circle at 30% 30%,
+      #fff7c9,
+      #f4b400);
+
+  box-shadow:
+    0 0 10px rgba(255, 220, 90, .8),
+    0 0 18px rgba(255, 220, 90, .45);
+}
+
+.balloon-bomb {
+  background:
+    radial-gradient(circle at 30% 30%,
+      #8a8a8a,
+      #242424);
+
+  box-shadow:
+    0 0 10px rgba(255, 50, 50, .3);
+}
+
+.balloon-clock {
+  background:
+    radial-gradient(circle at 30% 30%,
+      #d4c6ff,
+      #6f58d9);
+}
+
+.balloon-rainbow {
+  background:
+    linear-gradient(135deg,
+      #ff5555,
+      #ffd555,
+      #55ff87,
+      #55a5ff,
+      #bf55ff);
+
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, .3);
+}
+
+/* =========================================================
+   Floating Animation
+   ========================================================= */
+
+@keyframes balloonFloat {
+
+  0% {
+    transform:
+      translateY(0px) rotate(-2deg);
+  }
+
+  25% {
+    transform:
+      translateY(-4px) rotate(1deg);
+  }
+
+  50% {
+    transform:
+      translateY(-8px) rotate(2deg);
+  }
+
+  75% {
+    transform:
+      translateY(-4px) rotate(-1deg);
+  }
+
+  100% {
+    transform:
+      translateY(0px) rotate(-2deg);
+  }
+}
+
+/* =========================================================
+   Dart
+   ========================================================= */
+
+.festival-dart {
+  position: absolute;
+  width: 36px;
+  height: 12px;
+  z-index: 25;
+}
+
+/* =========================================================
+   Trajectory
+   ========================================================= */
+
+.trajectory-dot {
+  position: absolute;
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, .75);
+
+  z-index: 15;
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   Pop Particles
+   ========================================================= */
+
+.particle {
+  position: absolute;
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background:
+    #ffe38a;
+
+  pointer-events: none;
+
+  z-index: 30;
+
+  animation:
+    particleFade .5s ease-out forwards;
+}
+
+@keyframes particleFade {
+
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(.2);
+  }
+}
+
+/* =========================================================
+   End Screen
+   ========================================================= */
+
+.round-complete-overlay {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 10px;
+
+  background:
+    rgba(10, 10, 10, .85);
+
+  backdrop-filter: blur(3px);
+
+  z-index: 100;
+}
+
+.round-complete-title {
+  color: #ffd75e;
+
+  font-size: 1.8rem;
+  font-weight: bold;
+
+  text-shadow:
+    0 0 8px rgba(255, 215, 94, .5);
+}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .balloon-board {
+    width: 300px;
+    height: 320px;
+  }
+
+  .festival-title {
+    font-size: 1.5rem;
+  }
+
+}

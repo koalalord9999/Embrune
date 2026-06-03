@@ -129,12 +129,12 @@ export type WithdrawMode = 1 | 5 | 10 | 'x' | 'all';
 export type GameFont = 'VT323' | 'MedievalSharp' | 'Inter' | 'Monospace' | 'Press Start 2P' | 'Almendra';
 
 export const FONT_OPTIONS: { label: string; value: GameFont; family: string; baseScale?: number }[] = [
-    { label: 'VT323 (Default)',  value: 'VT323',         family: "'VT323', monospace"        },
-    { label: 'MedievalSharp',    family: "'MedievalSharp', cursive", value: 'MedievalSharp' },
-    { label: 'Almendra',         value: 'Almendra',       family: "'Almendra', serif"         },
-    { label: 'Press Start 2P',   value: 'Press Start 2P', family: "'Press Start 2P', cursive", baseScale: 0.65 },
-    { label: 'Inter',            value: 'Inter',          family: "'Inter', sans-serif"       },
-    { label: 'Monospace',        value: 'Monospace',      family: 'monospace'                },
+    { label: 'VT323 (Default)', value: 'VT323', family: "'VT323', monospace" },
+    { label: 'MedievalSharp', family: "'MedievalSharp', cursive", value: 'MedievalSharp' },
+    { label: 'Almendra', value: 'Almendra', family: "'Almendra', serif" },
+    { label: 'Press Start 2P', value: 'Press Start 2P', family: "'Press Start 2P', cursive", baseScale: 0.65 },
+    { label: 'Inter', value: 'Inter', family: "'Inter', sans-serif" },
+    { label: 'Monospace', value: 'Monospace', family: 'monospace' },
 ];
 
 // Helper for localStorage
@@ -186,7 +186,7 @@ const useUIStateInternal = () => {
     const [activeSkillGuide, setActiveSkillGuide] = useState<SkillName | null>(null);
     const [activeCraftingAction, setActiveCraftingAction] = useState<ActiveCraftingAction | null>(null);
     const [activeSingleAction, setActiveSingleAction] = useState<ActiveSingleAction | null>(null);
-    const [activeFestivalMinigame, setActiveFestivalMinigame] = useState<'trivia' | 'ring_toss' | 'lantern_launch' | 'log_balance' | 'whack_lantern' | 'smash_gourd' | 'high_striker' | null>(null);
+    const [activeFestivalMinigame, setActiveFestivalMinigame] = useState<'trivia' | 'lantern_launch' | 'log_balance' | 'whack_lantern' | 'smash_gourd' | 'high_striker' | 'skeeball' | 'balloon_pop' | null>(null);
     const [activeQuestDetail, setActiveQuestDetail] = useState<QuestDetailState | null>(null);
     const [isSelectingAutocastSpell, setIsSelectingAutocastSpell] = useState<boolean>(false);
     const [manualCastTrigger, setManualCastTrigger] = useState<Spell | null>(null);
@@ -233,7 +233,7 @@ const useUIStateInternal = () => {
     useEffect(() => {
         const option = FONT_OPTIONS.find(o => o.value === gameFont);
         const baseWeight = option?.baseScale ?? 1;
-        
+
         document.documentElement.style.setProperty('--game-font-family', option?.family ?? "'VT323', monospace");
         document.documentElement.style.setProperty('--game-font-scale', (gameFontScale * baseWeight).toString());
     }, [gameFont, gameFontScale]);
@@ -301,7 +301,7 @@ const useUIStateInternal = () => {
     const closeSkillGuide = useCallback(() => setActiveSkillGuide(null), []);
     const openCraftingView = useCallback((context: CraftingContext) => setActiveCraftingContext(context), []);
     const closeCraftingView = useCallback(() => setActiveCraftingContext(null), []);
-    
+
     const resetKeybindings = useCallback(() => {
         setKeybindings(DEFAULT_KEYBINDINGS);
     }, [setKeybindings]);

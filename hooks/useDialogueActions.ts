@@ -663,19 +663,6 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     ui.setActiveDialogue(null);
                     break;
                 }
-                case 'play_ring_toss': {
-                    if (action.peg) {
-                        (questLogic as any).setQuestVariable('ring_toss_peg', action.peg);
-                    }
-                    if (action.rings !== undefined) {
-                        (questLogic as any).setQuestVariable('ring_toss_rings_left', action.rings);
-                    } else {
-                        (questLogic as any).setQuestVariable('ring_toss_rings_left', 1);
-                    }
-                    ui.setActiveFestivalMinigame('ring_toss');
-                    ui.setActiveDialogue(null);
-                    break;
-                }
                 case 'wait_draft': {
                     ui.setActiveFestivalMinigame('lantern_launch');
                     ui.setActiveDialogue(null);
@@ -733,6 +720,16 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     inv.modifyItem('coins', -cost, true);
                     inv.modifyItem('festival_token', action.quantity, false, { bypassAutoBank: true });
                     addLog(`You purchase ${action.quantity} Festival Token${action.quantity > 1 ? 's' : ''} for ${cost} coins.`);
+                    break;
+                }
+                case 'play_skeeball': {
+                    ui.setActiveFestivalMinigame('skeeball');
+                    ui.setActiveDialogue(null);
+                    break;
+                }
+                case 'play_balloon_pop': {
+                    ui.setActiveFestivalMinigame('balloon_pop');
+                    ui.setActiveDialogue(null);
                     break;
                 }
             }
