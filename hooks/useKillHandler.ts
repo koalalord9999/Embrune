@@ -48,16 +48,18 @@ export const useKillHandler = (deps: KillHandlerDependencies) => {
         if (!poi) return;
 
         // Temporarily flag these monsters as "dying" to prevent instant re-attack
-        setWorldState(ws => ({ ...ws, recentlyKilled: [...(ws.recentlyKilled || []), ...defeatedInstanceIds] }));
+        if (!isInstantRespawnOn) {
+            setWorldState(ws => ({ ...ws, recentlyKilled: [...(ws.recentlyKilled || []), ...defeatedInstanceIds] }));
 
-        // After a delay, clear the "dying" flag.
-        // This gives React enough time to render the respawn timer.
-        setTimeout(() => {
-            setWorldState(ws => ({
-                ...ws,
-                recentlyKilled: (ws.recentlyKilled || []).filter(id => !defeatedInstanceIds.includes(id))
-            }));
-        }, 7000);
+            // After a delay, clear the "dying" flag.
+            // This gives React enough time to render the respawn timer.
+            setTimeout(() => {
+                setWorldState(ws => ({
+                    ...ws,
+                    recentlyKilled: (ws.recentlyKilled || []).filter(id => !defeatedInstanceIds.includes(id))
+                }));
+            }, 7000);
+        }
 
         const isInstanceQuestLocation = repeatableQuests.activePlayerQuest?.generatedQuest.isInstance && repeatableQuests.activePlayerQuest?.generatedQuest.instancePoiId === poiId;
 

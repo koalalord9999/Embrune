@@ -196,6 +196,12 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                         return operator === 'eq' ? result : !result;
                     }
 
+                    if (req.status === 'complete') {
+                        const masterMatch = req.masterId ? task.masterId === req.masterId : true;
+                        const result = task.isComplete && masterMatch;
+                        return operator === 'eq' ? result : !result;
+                    }
+
                     return false;
                 }
                 case 'festival_active': {
