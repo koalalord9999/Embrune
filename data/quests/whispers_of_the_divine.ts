@@ -114,6 +114,13 @@ export const whispersOfTheDivine: Quest = {
             requirement: { type: 'talk', poiId: 'silverhaven_arcane_wares', npcName: 'Archmage Theron' }
         }
     ],
+    npcDefs: {
+        archmage_theron: { npcName: 'Archmage Theron', npcIcon: 'wizard-face' },
+        echo_of_the_verdant: { npcName: 'Echo of the Verdant', npcIcon: 'rune-stone' },
+        echo_of_the_hex: { npcName: 'Echo of the Hex', npcIcon: 'rune-stone' },
+        echo_of_the_nexus: { npcName: 'Echo of the Nexus', npcIcon: 'rune-stone' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Runecrafting, amount: 25000 }, { skill: SkillName.Magic, amount: 15000 }],
         items: [{ itemId: 'celestial_verse', quantity: 1 }]
@@ -169,16 +176,14 @@ export const whispersOfTheDivine: Quest = {
     ],
     dialogue: {
         wod_quest_intro: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Ah, adventurer. I'm glad you're here. Since you stabilized the Arcane Weave, I've noticed something... new. Or rather, something ancient that was previously obscured. Do you have a moment?",
             responses: [
                 { text: "Of course. What have you discovered?", next: 'wod_intro_hub' }
             ]
         },
         wod_intro_hub: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The 'quiet' of the Weave has allowed me to hear whispers—echoes from the divine. I believe the runecrafting altars hold a deeper purpose than merely crafting runes. I need your help to investigate this phenomenon.",
             responses: [
                 { text: "What do you mean the Weave is 'quiet'?", next: 'wod_lore_weave' },
@@ -188,24 +193,21 @@ export const whispersOfTheDivine: Quest = {
             ]
         },
         wod_lore_weave: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Before you stopped the Resonance Cascade, the world's magic was like a constant roar of static. It was powerful, yes, but chaotic. Now that it's gone, I can perceive much subtler, more ancient energies that were drowned out by the noise.",
             responses: [
                 { text: "(Ask about something else)", next: 'wod_intro_hub' }
             ]
         },
         wod_lore_echoes: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "I believe the gods who shaped this world left behind imprints of their consciousness at their places of power—the great altars. They are more than just tools for crafting runes; they are repositories of forgotten history, fragments of the divine will.",
             responses: [
                 { text: "(Ask about something else)", next: 'wod_intro_hub' }
             ]
         },
         wod_task_hub: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "I need you to investigate three of the most powerful altars. I have created this Attuned Locus to capture their echoes. Which would you like to know more about before you begin?",
             responses: [
                 { text: "Tell me about the Verdant Altar.", next: 'wod_altar_verdant_lore' },
@@ -215,54 +217,47 @@ export const whispersOfTheDivine: Quest = {
             ]
         },
         wod_altar_verdant_lore: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The Verdant Altar lies deep within the Feywood, a place of untamed, rampant life. It is the echo of the god of growth, nature, and the 'Great Song' of existence. The forest itself is a living, breathing entity that does not welcome outsiders.",
             responses: [
                 { text: "(Ask about another altar)", next: 'wod_task_hub' }
             ]
         },
         wod_altar_hex_lore: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The Hex Altar is a place of dark power, hidden within the Serpent's Coil. It resonates with energies of control, binding, and fate. It represents the laws and patterns that were set before life itself began. Tread carefully there.",
             responses: [
                 { text: "(Ask about another altar)", next: 'wod_task_hub' }
             ]
         },
         wod_altar_nexus_lore: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The Nexus Altar is the most enigmatic. It is found at the heart of the Sunken Labyrinth and represents balance, endings, and the silence from which new beginnings emerge. It is the echo of death, not as an evil, but as a necessary part of the cycle.",
             responses: [
                 { text: "(Ask about another altar)", next: 'wod_task_hub' }
             ]
         },
         wod_task_accept: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Excellent. We must proceed in a specific order to properly calibrate the Locus. Your first destination is the Verdant Altar. Take this, and be careful. The Feywood is not to be trifled with.",
             responses: [
                 { text: "I will retrieve the first echo.", actions: [{ type: 'start_quest', questId: 'whispers_of_the_divine' }, { type: 'give_item', itemId: 'attuned_locus', quantity: 1 }] }
             ]
         },
         wod_return_verdant_check: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "You've returned! Did you succeed? Did you hear the echo from the Verdant Altar?",
             responses: [
                 { text: "I did. The Locus recorded its impression.", check: { requirements: [{ type: 'items', items: [{ itemId: 'fragment_of_verdant_verse', quantity: 1 }] }], successNode: 'wod_riddle_verdant_intro', failureNode: 'wod_in_progress_0' } }
             ]
         },
         wod_in_progress_0: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The Verdant Altar in the Feywood awaits. The secrets of our world's dawn are waiting to be heard.",
             responses: []
         },
         wod_riddle_verdant_intro: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Excellent! The Locus captured the raw energy, but the meaning is... jumbled. My translation is incomplete. It says: 'The ___ began, a chorus newly born.' Your impression is the key. What did you feel at the altar?",
             responses: [
                 { text: "Impressions of Growth and Song.", next: 'wod_riddle_verdant_success' },
@@ -271,8 +266,7 @@ export const whispersOfTheDivine: Quest = {
             ]
         },
         wod_riddle_fail: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "No... that doesn't align with the energy signature. Think back to the feeling of the place. The clues are in your memory, and your activity log.",
             responses: [],
             conditionalResponses: [
@@ -282,30 +276,26 @@ export const whispersOfTheDivine: Quest = {
             ]
         },
         wod_riddle_verdant_success: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Yes, 'Great Song'! The Locus glows as the verse settles into clarity. One piece of the puzzle is in place. Now, for the second. You must travel to the Hex Altar, hidden in the Serpent's Coil. It resonates with a much different energy—one of control and binding.",
             responses: [
                 { text: "I'm on my way.", actions: [{ type: 'advance_quest', questId: 'whispers_of_the_divine' }, { type: 'take_item', itemId: 'fragment_of_verdant_verse', quantity: 1 }] }
             ]
         },
         wod_return_hex_check: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The air around you feels... heavy. You have been to the Hex Altar. Did the Locus capture its echo?",
             responses: [
                 { text: "Yes, I have the second impression.", check: { requirements: [{ type: 'items', items: [{ itemId: 'fragment_of_hex_verse', quantity: 1 }] }], successNode: 'wod_riddle_hex_intro', failureNode: 'wod_in_progress_2' } }
             ]
         },
         wod_in_progress_2: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The Hex Altar is a place of dark power, deep within the Serpent's Coil. Be careful, adventurer.",
             responses: []
         },
         wod_riddle_hex_intro: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Excellent. This one feels... older. Colder. My partial translation reads: 'The ___ ___, the fate that can't be fought.' What was the core concept you felt?",
             responses: [
                 { text: "Growth and Song.", next: 'wod_riddle_fail' },
@@ -314,30 +304,26 @@ export const whispersOfTheDivine: Quest = {
             ]
         },
         wod_riddle_hex_success: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "'Binding Word'! Of course! The echo clarifies. Two verses are now known. The final piece awaits. You must journey to the Nexus Altar at the heart of the Sunken Labyrinth. It speaks of balance, of endings and beginnings.",
             responses: [
                 { text: "I will face the Labyrinth.", actions: [{ type: 'advance_quest', questId: 'whispers_of_the_divine' }, { type: 'take_item', itemId: 'fragment_of_hex_verse', quantity: 1 }] }
             ]
         },
         wod_return_nexus_check: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "You have an aura of... stillness about you. You have been to the place where life and death meet. Did you capture the final echo?",
             responses: [
                 { text: "I have the final impression.", check: { requirements: [{ type: 'items', items: [{ itemId: 'fragment_of_nexus_verse', quantity: 1 }] }], successNode: 'wod_riddle_nexus_intro', failureNode: 'wod_in_progress_4' } }
             ]
         },
         wod_in_progress_4: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The Sunken Labyrinth is a dangerous, forgotten place. The Nexus Altar at its heart holds the final key. Be safe.",
             responses: []
         },
         wod_riddle_nexus_intro: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The final piece. This one feels... patient. The translation is faint: 'I am the ___, where every story ends...'. What was the feeling that dominated that place?",
             responses: [
                 { text: "Growth and Song.", next: 'wod_riddle_fail' },
@@ -346,40 +332,35 @@ export const whispersOfTheDivine: Quest = {
             ]
         },
         wod_riddle_nexus_success: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The 'Pause'... yes, it fits perfectly. The final echo is clear! You have all three parts of the verse. Now, let me combine them. This is a historic moment!",
             responses: [
                 { text: "(Listen)", actions: [{ type: 'advance_quest', questId: 'whispers_of_the_divine' }, { type: 'take_item', itemId: 'fragment_of_nexus_verse', quantity: 1 }], next: 'wod_final_recitation' }
             ]
         },
         wod_final_recitation: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Before the Song, there was the single thought, a pattern drawn, a boundary newly wrought... From silent stone, the First Root drank the sun, Life's green fire... the Great Song began... When the Song fades, and the final leaf descends... I am the pause, where new life then depends.",
             responses: [
                 { text: "What does it mean?", next: 'wod_interpretation' }
             ]
         },
         wod_interpretation: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "It's a creation myth! 'Before the Song'—before life—there was the thought, the pattern. The Hex. The laws of reality. Then came the 'Great Song'—life itself. The Verdant. And finally, the 'pause', the silence, the end of the song... The Nexus. It's the cycle! Order, Life, and Death. You haven't just found some old poetry, you've found the divine blueprint of our world!",
             responses: [
                 { text: "Incredible. What now?", next: 'wod_reward_intro' }
             ]
         },
         wod_reward_intro: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Now? Now we celebrate this monumental discovery! Your Attuned Locus still resonates with the echoes of these three aspects. I believe I can channel that energy, weave it into a physical form. A reward, for your service to all magical and historical understanding. Choose which aspect you feel most attuned to, and I shall craft you a cape worthy of its power.",
             responses: [
                 { text: "Show me the options.", next: 'wod_reward_choice' }
             ]
         },
         wod_reward_choice: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "The Cape of Verdant Growth, imbued with the life-giving energy of the Great Song. The Cape of the Hex-binder, resonating with the power of control and arcane law. Or the Cape of the Abyssal Nexus, a mantle of balance and the quiet strength of endings and beginnings. Which will you choose?",
             responses: [
                 { text: "I choose the Cape of Verdant Growth.", actions: [{ type: 'give_item', itemId: 'cape_of_verdant_growth', quantity: 1 }, { type: 'advance_quest', questId: 'whispers_of_the_divine' }], next: 'wod_completion' },
@@ -388,32 +369,28 @@ export const whispersOfTheDivine: Quest = {
             ]
         },
         wod_completion: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "An excellent choice. Wear it as a symbol of your connection to the very foundations of this world. You have done a great service today, adventurer. Thank you.",
             responses: []
         },
 
         // --- Altar Echoes ---
         wod_verdant_echo: {
-            npcName: 'Echo of the Verdant',
-            npcIcon: 'rune-stone',
+            npc: 'echo_of_the_verdant',
             text: "As you hold the Locus to the altar, your mind is flooded not with words, but with impressions: the feeling of a seed sprouting, the first note of a world-spanning song, the inexorable flow of a river, and the warmth of the sun on new leaves.",
             responses: [
                 { text: "(The Locus vibrates, recording the impression)", actions: [{ type: 'give_item', itemId: 'fragment_of_verdant_verse', quantity: 1 }, { type: 'advance_quest', questId: 'whispers_of_the_divine' }, { type: 'add_log', message: 'Verdant Altar Impression: Growth and Song.' }] }
             ]
         },
         wod_hex_echo: {
-            npcName: 'Echo of the Hex',
-            npcIcon: 'rune-stone',
+            npc: 'echo_of_the_hex',
             text: "The Locus grows cold as you approach the altar. You feel a sense of immense, ancient order. Impressions of mathematical precision, unbreakable laws, and the chilling certainty of fate fill your mind. It is the feeling of a pattern being drawn, a boundary set in stone before anything else existed.",
             responses: [
                 { text: "(The Locus hums, absorbing the echo)", actions: [{ type: 'give_item', itemId: 'fragment_of_hex_verse', quantity: 1 }, { type: 'advance_quest', questId: 'whispers_of_the_divine' }, { type: 'add_log', message: 'Hex Altar Impression: Law and Fate.' }] }
             ]
         },
         wod_nexus_echo: {
-            npcName: 'Echo of the Nexus',
-            npcIcon: 'rune-stone',
+            npc: 'echo_of_the_nexus',
             text: "A profound silence emanates from the altar. You feel a sense of finality, of a song ending and a story closing. But beneath it, there is a patient, quiet waiting—the feeling of fertile soil after a harvest, ready for a new seed. It is an impression of endings that enable new beginnings.",
             responses: [
                 { text: "(The Locus grows still as it records the impression)", actions: [{ type: 'give_item', itemId: 'fragment_of_nexus_verse', quantity: 1 }, { type: 'advance_quest', questId: 'whispers_of_the_divine' }, { type: 'add_log', message: 'Nexus Altar Impression: Endings and Beginnings.' }] }

@@ -70,6 +70,20 @@ export const embrune101: Quest = {
         { description: "Receive your final lesson from the Magic Guide.", requirement: { type: 'talk', poiId: 'tutorial_tavern', npcName: 'Magic Guide' } }, // 28
         { description: "Speak to the Magic Guide to leave the island.", requirement: { type: 'talk', poiId: 'tutorial_tavern', npcName: 'Magic Guide' } } // 29
     ],
+    npcDefs: {
+        leo_the_guide: { npcName: 'Leo the Guide', npcIcon: 'person' },
+        survival_guide: { npcName: 'Survival Guide', npcIcon: 'person' },
+        baker: { npcName: 'Baker', npcIcon: 'person' },
+        information_guide: { npcName: 'Information Guide', npcIcon: 'person' },
+        mining_guide: { npcName: 'Mining Guide', npcIcon: 'person' },
+        weapon_guide: { npcName: 'Weapon Guide', npcIcon: 'person' },
+        banker: { npcName: 'Banker', npcIcon: 'person' },
+        money_guide: { npcName: 'Money Guide', npcIcon: 'person' },
+        prayer_guide: { npcName: 'Prayer Guide', npcIcon: 'person' },
+        tavern_manager: { npcName: 'Tavern Manager', npcIcon: 'person' },
+        magic_guide: { npcName: 'Magic Guide', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Attack, amount: 100 }],
         coins: 100
@@ -115,8 +129,7 @@ export const embrune101: Quest = {
     
     dialogue: {
         in_progress_embrune_101_0: {
-            npcName: 'Leo the Guide',
-            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            npc: 'leo_the_guide',
             text: "Welcome to Embrune! I'm Leo, your guide. Before you set off, let me show you how to find your way around.",
             dim: true,
             responses: [
@@ -124,8 +137,7 @@ export const embrune101: Quest = {
             ]
         },
         tutorial_navigation: {
-            npcName: 'Leo the Guide',
-            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            npc: 'leo_the_guide',
             text: "This is the Main View. It shows where you are, who's there with you, and any interesting things you can interact with.",
             dim: true,
             highlight: 'main-view',
@@ -134,8 +146,7 @@ export const embrune101: Quest = {
             ]
         },
         tutorial_actions: {
-            npcName: 'Leo the Guide',
-            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            npc: 'leo_the_guide',
             text: "The Actions list contains everything you can do here—like talking to folks, gathering resources, or starting a fight!",
             dim: true,
             highlight: 'activity-buttons',
@@ -144,8 +155,7 @@ export const embrune101: Quest = {
             ]
         },
         tutorial_travel: {
-            npcName: 'Leo the Guide',
-            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            npc: 'leo_the_guide',
             text: "The Travel grid lets you move between locations. The center is where you are, and the surrounding buttons lead elsewhere.",
             dim: true,
             highlight: 'navigation-buttons',
@@ -154,8 +164,7 @@ export const embrune101: Quest = {
             ]
         },
         tutorial_outro: {
-            npcName: 'Leo the Guide',
-            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            npc: 'leo_the_guide',
             text: "Follow the path and speak to the Survival Guide to begin your training. You can always check your Quest Journal if you're lost!",
             dim: true,
             highlight: 'side-panel-button-quests',
@@ -166,16 +175,14 @@ export const embrune101: Quest = {
             ]
         },
         leo_lore: {
-            npcName: 'Leo the Guide',
-            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            npc: 'leo_the_guide',
             text: "This island is a sanctuary. Before you venture to the mainland of Embrune, we make sure you have the skills to survive. Many masters have gathered here to share their knowledge. It's a peaceful place, though the tavern rats are a bit of a nuisance.",
             responses: [
                 { text: "Okay, I'm ready to start.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }
             ]
         },
         skip_tutorial_confirm: {
-            npcName: 'Leo the Guide',
-            npcIcon: '/assets/npcChatHeads/leo_the_guide.png',
+            npc: 'leo_the_guide',
             text: "Are you sure? This tutorial teaches you some core mechanics. If you skip, you'll be teleported directly to the town of Meadowdale with a full set of starter gear.",
             responses: [
                 { text: "Yes, I'm sure. To Meadowdale!", actions: [{ type: 'complete_tutorial' }, { type: 'teleport', poiId: 'meadowdale_square' }] },
@@ -183,8 +190,7 @@ export const embrune101: Quest = {
             ]
         },
         in_progress_embrune_101_1_router: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "Let's see if you're equipped for the task.",
             responses: [],
             conditionalResponses: [
@@ -193,8 +199,7 @@ export const embrune101: Quest = {
             ]
         },
         in_progress_embrune_101_1_text: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "An adventurer who can't feed themselves is a dead adventurer. Your first task: chop a tree for logs, and catch a raw shrimp from the fishing spot. Come back to me when you have both.",
             responses: [
                 { text: "How do I gather things?", next: 'survival_how_to' },
@@ -202,8 +207,7 @@ export const embrune101: Quest = {
             ]
         },
         baker_default: {
-            npcName: 'Baker',
-            npcIcon: '/assets/npcChatHeads/baker.png',
+            npc: 'baker',
             text: "Nothing warms the soul like a fresh loaf of bread!",
             responses: [],
             conditionalResponses: [
@@ -212,14 +216,12 @@ export const embrune101: Quest = {
             ]
         },
         survival_apple_easter_egg: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "Ah, a rare find! Most folks just get splinters and logs from those trees. Yes, it's perfectly edible. Apples are a fine source of natural energy and heal you a small amount. No fire needed—just eat it whenever you're feeling peckish. Consider it a gift from the grove!",
             responses: [{ text: "Good to know, thanks!" }]
         },
         survival_how_to: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "It's simple. Look around the clearing. You'll see buttons for 'Chop Tree' and 'Net Fish'. As long as you have the right tool in your pack, just click the button and your character will do the work. Just make sure you have enough space in your bag!",
             responses: [{ text: "I see. I'll get to it." }],
             conditionalResponses: [
@@ -227,15 +229,13 @@ export const embrune101: Quest = {
             ]
         },
         survival_guide_give_tools: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "Right, you'll need these. Here's an axe for chopping and a tinderbox for making a fire. I'll also give you a net for the shrimp. Get to work!",
             highlight: ['activity-button-1', 'activity-button-2'],
             responses: [{ text: "Time to get to work.", actions: [{ type: 'give_item', itemId: 'bronze_axe', quantity: 1 }, { type: 'give_item', itemId: 'tinderbox', quantity: 1 }, { type: 'give_item', itemId: 'small_fishing_net', quantity: 1 }, { type: 'advance_quest', questId: 'embrune_101' }] }]
         },
         survival_stage_2_router: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "Let's see where you're at...",
             responses: [{ text: "I'll figure it out." }],
             conditionalResponses: [
@@ -249,8 +249,7 @@ export const embrune101: Quest = {
             ]
         },
         shrimp_missing_router: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "Something isn't right. Let me check your pack.",
             responses: [{ text: "Okay." }],
             conditionalResponses: [
@@ -264,29 +263,26 @@ export const embrune101: Quest = {
             ]
         },
         survival_explain_burnt: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "Ouch, you burnt the shrimp! Don't worry, even master chefs burn a dish now and then. As you practice and your Cooking level increases, the chance of burning food goes down significantly. I'll take that charred mess off your hands—you'll need to catch another shrimp and try again.",
             responses: [{ text: "Thanks, I'll try again.", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 'all' }], next: 'survival_stage_2_router' }]
         },
         survival_need_logs_with_shrimp: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "I see you've got the shrimp, but you're missing the wood for a fire! If there isn't a fire nearby, go chop another tree and use your tinderbox on the logs.",
             responses: [{ text: "On it." }]
         },
-        survival_give_all_tools: { npcName: 'Survival Guide', npcIcon: '/assets/npcChatHeads/survival_guide.png', text: "Clumsy! You've lost all your tools. Here, take a new set. Don't lose them again.", responses: [{ text: "Thank you.", actions: [{ type: 'give_item', itemId: 'bronze_axe', quantity: 1 }, { type: 'give_item', itemId: 'tinderbox', quantity: 1 }, { type: 'give_item', itemId: 'small_fishing_net', quantity: 1 }] }] },
-        survival_give_axe: { npcName: 'Survival Guide', npcIcon: '/assets/npcChatHeads/survival_guide.png', text: "No axe? You can't chop wood with your bare hands. Here.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'bronze_axe', quantity: 1 }] }] },
-        survival_give_tinderbox: { npcName: 'Survival Guide', npcIcon: '/assets/npcChatHeads/survival_guide.png', text: "A fire needs a spark. Take this tinderbox.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'tinderbox', quantity: 1 }] }] },
-        survival_give_net: { npcName: 'Survival Guide', npcIcon: '/assets/npcChatHeads/survival_guide.png', text: "Can't catch shrimp with a wish. Take this net.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'small_fishing_net', quantity: 1 }] }] },
-        survival_need_logs_and_shrimp: { npcName: 'Survival Guide', npcIcon: '/assets/npcChatHeads/survival_guide.png', text: "You need both a log and a raw shrimp. Chop a tree and net a fish!", responses: [{ text: "On it." }] },
-        survival_need_shrimp: { npcName: 'Survival Guide', npcIcon: '/assets/npcChatHeads/survival_guide.png', text: "You have wood, but no fish. Head to the fishing spot and catch a raw shrimp.", responses: [{ text: "On it." }] },
-        survival_need_logs: { npcName: 'Survival Guide', npcIcon: '/assets/npcChatHeads/survival_guide.png', text: "You have a shrimp, but no wood for a fire. Go chop down a tree.", responses: [{ text: "On it." }] },
-        survival_instruction_cook: { npcName: 'Survival Guide', npcIcon: '/assets/npcChatHeads/survival_guide.png', text: "You have the materials! Now, 'Use' your tinderbox on the logs to start a fire, then 'Use' the raw shrimp on the fire to cook it.", responses: [{ text: "I'll do that now." }] },
+        survival_give_all_tools: { npc: 'survival_guide', text: "Clumsy! You've lost all your tools. Here, take a new set. Don't lose them again.", responses: [{ text: "Thank you.", actions: [{ type: 'give_item', itemId: 'bronze_axe', quantity: 1 }, { type: 'give_item', itemId: 'tinderbox', quantity: 1 }, { type: 'give_item', itemId: 'small_fishing_net', quantity: 1 }] }] },
+        survival_give_axe: { npc: 'survival_guide', text: "No axe? You can't chop wood with your bare hands. Here.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'bronze_axe', quantity: 1 }] }] },
+        survival_give_tinderbox: { npc: 'survival_guide', text: "A fire needs a spark. Take this tinderbox.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'tinderbox', quantity: 1 }] }] },
+        survival_give_net: { npc: 'survival_guide', text: "Can't catch shrimp with a wish. Take this net.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'small_fishing_net', quantity: 1 }] }] },
+        survival_need_logs_and_shrimp: { npc: 'survival_guide', text: "You need both a log and a raw shrimp. Chop a tree and net a fish!", responses: [{ text: "On it." }] },
+        survival_need_shrimp: { npc: 'survival_guide', text: "You have wood, but no fish. Head to the fishing spot and catch a raw shrimp.", responses: [{ text: "On it." }] },
+        survival_need_logs: { npc: 'survival_guide', text: "You have a shrimp, but no wood for a fire. Go chop down a tree.", responses: [{ text: "On it." }] },
+        survival_instruction_cook: { npc: 'survival_guide', text: "You have the materials! Now, 'Use' your tinderbox on the logs to start a fire, then 'Use' the raw shrimp on the fire to cook it.", responses: [{ text: "I'll do that now." }] },
 
         in_progress_embrune_101_3: {
-            npcName: 'Survival Guide',
-            npcIcon: '/assets/npcChatHeads/survival_guide.png',
+            npc: 'survival_guide',
             text: "Well done! You've cooked your first meal. Survival is key. I'll take that burnt food off your hands if you have any. Now, head north to the village and speak to the Baker. He'll teach you about more advanced cooking.",
             responses: [{ text: "Thank you, I'll head there now.", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 'all' }, { type: 'advance_quest', questId: 'embrune_101' }] }],
             conditionalResponses: [
@@ -294,8 +290,7 @@ export const embrune101: Quest = {
             ]
         },
         in_progress_embrune_101_4: {
-            npcName: 'Baker',
-            npcIcon: '/assets/npcChatHeads/baker.png',
+            npc: 'baker',
             text: "Hello there! The Survival Guide sent you? Wonderful! I'll teach you to make bread from scratch. It's a bit more work than roasting a shrimp on a stick, but far more rewarding!",
             responses: [
                 { text: "What's the process?", next: 'baker_process' },
@@ -303,8 +298,7 @@ export const embrune101: Quest = {
             ]
         },
         baker_process: {
-            npcName: 'Baker',
-            npcIcon: '/assets/npcChatHeads/baker.png',
+            npc: 'baker',
             text: "First, take this bucket and gather some wheat from the field. Take the wheat to the Windmill to grind it into flour. Then, fill your bucket with water and mix it with the flour to make dough. Finally, bake that dough on my range!",
             highlight: 'activity-button-1',
             responses: [
@@ -312,8 +306,7 @@ export const embrune101: Quest = {
             ]
         },
         baker_stage_5_router: {
-            npcName: 'Baker',
-            npcIcon: '/assets/npcChatHeads/baker.png',
+            npc: 'baker',
             text: "Let's see what you've got in your pack...",
             responses: [{ text: "Nevermind, I'll figure it out." }],
             conditionalResponses: [
@@ -328,8 +321,7 @@ export const embrune101: Quest = {
             ]
         },
         baker_easter_egg_pie_dough: {
-            npcName: 'Baker',
-            npcIcon: '/assets/npcChatHeads/baker.png',
+            npc: 'baker',
             text: "Oh! I see you've made pie dough instead of bread dough. While pies are delicious—whether they're filled with red berries, apples, or meat—they require a pie dish and a bit more skill. Stick to the basics for now and try making bread dough!",
             responses: [{ text: "My mistake, I'll try again." }],
             conditionalResponses: [
@@ -337,20 +329,18 @@ export const embrune101: Quest = {
             ]
         },
         baker_easter_egg_pizza_base: {
-            npcName: 'Baker',
-            npcIcon: '/assets/npcChatHeads/baker.png',
+            npc: 'baker',
             text: "A pizza base? You're already thinking like a master chef! Pizzas are great, but you'll need tomatoes and cheese to finish one. For your lesson today, I really need to see you make some bread dough first.",
             responses: [{ text: "Got it, bread dough it is." }]
         },
-        baker_guide_no_bucket: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "Where's your bucket, lad? Here, take another one, but try to hold onto it!", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'bucket', quantity: 1 }] }] },
-        baker_guide_flour_and_water: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "You have flour and water! Open your inventory and 'Use' the water on the flour to mix them into dough.", highlight: 'side-panel-button-inventory', responses: [{ text: "Mixing it now!" }] },
-        baker_guide_flour_and_empty: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "You have the flour, but you need water! Fill your bucket at the sink.", highlight: 'activity-button-4', responses: [{ text: "Of course." }] },
-        baker_guide_hopper_check: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "The flour is in the hopper! Collect it from the windmill.", highlight: 'activity-button-2', responses: [{ text: "Right away." }] },
-        baker_guide_wheat_check: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "You have the wheat. Use it on the Windmill hopper to make flour.", highlight: 'activity-button-2', responses: [{ text: "To the Windmill!" }] },
-        baker_guide_no_wheat_check: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "You need some wheat! Go harvest some stalks from the field.", highlight: 'activity-button-1', responses: [{ text: "Right." }] },
+        baker_guide_no_bucket: { npc: 'baker', text: "Where's your bucket, lad? Here, take another one, but try to hold onto it!", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'bucket', quantity: 1 }] }] },
+        baker_guide_flour_and_water: { npc: 'baker', text: "You have flour and water! Open your inventory and 'Use' the water on the flour to mix them into dough.", highlight: 'side-panel-button-inventory', responses: [{ text: "Mixing it now!" }] },
+        baker_guide_flour_and_empty: { npc: 'baker', text: "You have the flour, but you need water! Fill your bucket at the sink.", highlight: 'activity-button-4', responses: [{ text: "Of course." }] },
+        baker_guide_hopper_check: { npc: 'baker', text: "The flour is in the hopper! Collect it from the windmill.", highlight: 'activity-button-2', responses: [{ text: "Right away." }] },
+        baker_guide_wheat_check: { npc: 'baker', text: "You have the wheat. Use it on the Windmill hopper to make flour.", highlight: 'activity-button-2', responses: [{ text: "To the Windmill!" }] },
+        baker_guide_no_wheat_check: { npc: 'baker', text: "You need some wheat! Go harvest some stalks from the field.", highlight: 'activity-button-1', responses: [{ text: "Right." }] },
         baker_stage_6_router: {
-            npcName: 'Baker',
-            npcIcon: '/assets/npcChatHeads/baker.png',
+            npc: 'baker',
             text: "How's the baking going?",
             responses: [{ text: "Still working on it." }],
             conditionalResponses: [
@@ -359,18 +349,16 @@ export const embrune101: Quest = {
                 { text: '', check: { requirements: [{ type: 'items', items: [{ itemId: 'bread_dough', quantity: 0, operator: 'eq' }] }], successNode: 'baker_stage_5_router', failureNode: '' } },
             ]
         },
-        baker_burnt_bread: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "Oh no! You left it on the range too long! Don't worry, even master bakers burn a loaf. Remake the dough and try again.", responses: [{ text: "(Listen to instructions)", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 'all' }], next: 'baker_stage_5_router' }] },
-        baker_has_dough_instruction: { npcName: 'Baker', npcIcon: '/assets/npcChatHeads/baker.png', text: "You have the dough! 'Use' it on my cooking range to bake it into a fresh loaf.", highlight: 'activity-button-3', responses: [{ text: "Right." }] },
+        baker_burnt_bread: { npc: 'baker', text: "Oh no! You left it on the range too long! Don't worry, even master bakers burn a loaf. Remake the dough and try again.", responses: [{ text: "(Listen to instructions)", actions: [{ type: 'take_item', itemId: 'burnt_food', quantity: 'all' }], next: 'baker_stage_5_router' }] },
+        baker_has_dough_instruction: { npc: 'baker', text: "You have the dough! 'Use' it on my cooking range to bake it into a fresh loaf.", highlight: 'activity-button-3', responses: [{ text: "Right." }] },
 
         in_progress_embrune_101_6: {
-            npcName: 'Baker',
-            npcIcon: '/assets/npcChatHeads/baker.png',
+            npc: 'baker',
             text: "Smells delicious! You're a natural. Before you go, here's a secret: take that cooked shrimp from earlier and 'Use' it on the bread to make a sandwich! It's far more filling. Now, head south to the learning hut.",
             responses: [{ text: "Thanks!", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }]
         },
         in_progress_embrune_101_7: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "Pay attention! This magical journal you carry is your most vital tool. Let's take a look at the different panels on your sidebar. Which one should we start with?",
             responses: [
                 { text: "Explain the Quest Journal.", next: 'info_quests_1' },
@@ -381,8 +369,7 @@ export const embrune101: Quest = {
             ]
         },
         info_guide_hub: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "What else would you like to know about the sidebar?",
             responses: [
                 { text: "Explain the Quest Journal.", next: 'info_quests_1' },
@@ -393,8 +380,7 @@ export const embrune101: Quest = {
             ]
         },
         info_quests_1: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "The Quest Journal keeps track of your adventures. It uses a simple color code: Red means a quest has not been started, Yellow means it's in progress, and Green means it's complete!",
             highlight: 'side-panel-button-quests',
             responses: [
@@ -404,8 +390,7 @@ export const embrune101: Quest = {
             ]
         },
         info_quests_2: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "Clicking on a quest in the list will show you more details, including a hint on how to start it or your current objective. It's the best way to make sure you never get lost in your own story!",
             highlight: 'side-panel-button-quests',
             responses: [
@@ -415,8 +400,7 @@ export const embrune101: Quest = {
             ]
         },
         info_equipment_1: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "The Equipment Panel shows what you're currently wearing. You'll find or make gear throughout your journey—swords, bows, and armor—that will significantly improve your combat prowess.",
             highlight: 'side-panel-button-equipment',
             responses: [
@@ -426,8 +410,7 @@ export const embrune101: Quest = {
             ]
         },
         info_equipment_2: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "Every piece of gear has unique properties. You can view your total bonuses by clicking the 'Equipment Stats' button at the bottom of the panel. This helps you see exactly how well-defended or powerful you truly are.",
             highlight: 'side-panel-button-equipment',
             responses: [
@@ -437,8 +420,7 @@ export const embrune101: Quest = {
             ]
         },
         info_skills_1: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "The Skills Window displays your progress in 20 different disciplines. As you perform actions like chopping wood or fighting monsters, you'll earn experience and eventually level up, unlocking more content!",
             highlight: 'side-panel-button-skills',
             responses: [
@@ -448,8 +430,7 @@ export const embrune101: Quest = {
             ]
         },
         info_skills_2: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "Right-clicking an item (or long-pressing on a magical scroll-slab) will reveal a context menu with more information and actions. Clicking a skill will open a detailed guide showing everything you can do at your current level!",
             highlight: 'side-panel-button-skills',
             responses: [
@@ -459,8 +440,7 @@ export const embrune101: Quest = {
             ]
         },
         info_inventory_1: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "The Inventory is your main storage, with space for 35 different items. It also tracks your current coin purse. Managing your space is a skill in itself for any serious adventurer.",
             highlight: 'side-panel-button-inventory',
             responses: [
@@ -469,8 +449,7 @@ export const embrune101: Quest = {
             ]
         },
         info_inventory_2: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "Almost every item in your pack has multiple functions. Right-clicking an item or long-pressing will reveal a context menu with options like 'Use', 'Equip', or 'Examine'.",
             highlight: 'side-panel-button-inventory',
             responses: [
@@ -480,8 +459,7 @@ export const embrune101: Quest = {
             ]
         },
         info_orbs: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "Finally, keep an eye on the orbs surrounding your map. These are your vitals: Red for Health, Blue for Prayer, and Yellow for Run Energy. Toggle run on to move instantly between locations, this does cost some Run Energy.",
             highlight: ['hp-orb', 'run-energy-orb'],
             responses: [
@@ -489,16 +467,14 @@ export const embrune101: Quest = {
             ]
         },
         info_tour_end: {
-            npcName: 'Information Guide',
-            npcIcon: '/assets/npcChatHeads/information_guide.png',
+            npc: 'information_guide',
             text: "You've learned much today. Now, the path leads downward. Descend the ladder into the tutorial mines when you are ready to learn the arts of the forge.",
             responses: [
                 { text: "Thank you. I'm ready to move on.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }
             ]
         },
         in_progress_embrune_101_8: {
-            npcName: 'Mining Guide',
-            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            npc: 'mining_guide',
             text: "So you're the new blood. To make Bronze, we need Copper and Tin. Take this hammer and pickaxe and mine one of each. You don't need the hammer to mine, but you'll need it later.",
             highlight: ['activity-button-1', 'activity-button-2'],
             responses: [
@@ -507,8 +483,7 @@ export const embrune101: Quest = {
             ]
         },
         mining_guide_router: {
-            npcName: 'Mining Guide',
-            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            npc: 'mining_guide',
             text: "Let me check your pack and your tools.",
             responses: [{ text: "Okay." }],
             conditionalResponses: [
@@ -528,15 +503,13 @@ export const embrune101: Quest = {
             ]
         },
         mining_instruction_smith: {
-            npcName: 'Mining Guide',
-            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            npc: 'mining_guide',
             text: "You have the Bronze bar. Now, take it to the anvil and use your hammer to smith a Bronze Dagger.",
             highlight: 'activity-button-4',
             responses: [{ text: "On it." }]
         },
         mining_default: {
-            npcName: 'Mining Guide',
-            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            npc: 'mining_guide',
             text: "The ring of a hammer, the heat of the forge... that's the life for me.",
             responses: [],
             conditionalResponses: [
@@ -544,47 +517,42 @@ export const embrune101: Quest = {
             ]
         },
         mining_conf_gem: {
-            npcName: 'Mining Guide',
-            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            npc: 'mining_guide',
             text: "Ooh, what's that glittering in your pack? A gem! Yes, mining can sometimes reveal precious stones from the rock. Quite a lucky find for a novice.",
             responses: [
                 { text: "Can I keep it?", next: 'mining_conf_gem_2' }
             ]
         },
         mining_conf_gem_2: {
-            npcName: 'Mining Guide',
-            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            npc: 'mining_guide',
             text: "Hah! Not a chance. Rule of the island: everything you find during training stays on the island. For safety and... taxes. Yes, definitely taxes. I'll take that off your hands before it distracts you from your hammer.",
             responses: [
                 { text: "Aww, okay.", actions: [{ type: 'take_item', itemId: 'uncut_sapphire', quantity: 1 }, { type: 'take_item', itemId: 'uncut_emerald', quantity: 1 }, { type: 'take_item', itemId: 'uncut_ruby', quantity: 1 }, { type: 'take_item', itemId: 'uncut_diamond', quantity: 1 }], next: 'mining_guide_router' }
             ]
         },
-        mining_give_pickaxe: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "No pickaxe? You're not going to get far mining with your fingernails. Here, take another one.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'bronze_pickaxe', quantity: 1 }] }] },
-        mining_give_hammer: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "Lost your hammer? The anvil needs a heavy hand. Here, take this one.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'hammer', quantity: 1 }] }] },
-        mining_give_both_tools: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "You've lost everything! Here, take a new pickaxe and a hammer. Try to keep them in your pack this time.", responses: [{ text: "Thank you.", actions: [{ type: 'give_item', itemId: 'bronze_pickaxe', quantity: 1 }, { type: 'give_item', itemId: 'hammer', quantity: 1 }] }] },
-        mining_need_both_ores: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "You don't have any ore! You need one Copper and one Tin to make Bronze.", highlight: ['activity-button-1', 'activity-button-2'], responses: [{ text: "I'll go get them." }] },
-        mining_need_copper: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "You've got the Tin, but you're missing the Copper. Head to the orange-tinted rocks.", highlight: 'activity-button-1', responses: [{ text: "Right away." }] },
-        mining_need_tin: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "You have Copper, but no Tin. You'll find it in the greyish-white rocks.", highlight: 'activity-button-2', responses: [{ text: "Got it." }] },
-        mining_need_bar: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "You've lost your Bronze bar! Since we're training, I'll give you one more, but you'll have to mine for real on the mainland.", responses: [{ text: "Thank you, I'll be careful.", actions: [{ type: 'give_item', itemId: 'bronze_bar', quantity: 1 }] }] },
-        mining_instruction_smelt: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "You have both ores! Now 'Use' them on the furnace over there to smelt a Bronze bar.", highlight: 'activity-button-3', responses: [{ text: "I'll do that." }] },
+        mining_give_pickaxe: { npc: 'mining_guide', text: "No pickaxe? You're not going to get far mining with your fingernails. Here, take another one.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'bronze_pickaxe', quantity: 1 }] }] },
+        mining_give_hammer: { npc: 'mining_guide', text: "Lost your hammer? The anvil needs a heavy hand. Here, take this one.", responses: [{ text: "Thanks.", actions: [{ type: 'give_item', itemId: 'hammer', quantity: 1 }] }] },
+        mining_give_both_tools: { npc: 'mining_guide', text: "You've lost everything! Here, take a new pickaxe and a hammer. Try to keep them in your pack this time.", responses: [{ text: "Thank you.", actions: [{ type: 'give_item', itemId: 'bronze_pickaxe', quantity: 1 }, { type: 'give_item', itemId: 'hammer', quantity: 1 }] }] },
+        mining_need_both_ores: { npc: 'mining_guide', text: "You don't have any ore! You need one Copper and one Tin to make Bronze.", highlight: ['activity-button-1', 'activity-button-2'], responses: [{ text: "I'll go get them." }] },
+        mining_need_copper: { npc: 'mining_guide', text: "You've got the Tin, but you're missing the Copper. Head to the orange-tinted rocks.", highlight: 'activity-button-1', responses: [{ text: "Right away." }] },
+        mining_need_tin: { npc: 'mining_guide', text: "You have Copper, but no Tin. You'll find it in the greyish-white rocks.", highlight: 'activity-button-2', responses: [{ text: "Got it." }] },
+        mining_need_bar: { npc: 'mining_guide', text: "You've lost your Bronze bar! Since we're training, I'll give you one more, but you'll have to mine for real on the mainland.", responses: [{ text: "Thank you, I'll be careful.", actions: [{ type: 'give_item', itemId: 'bronze_bar', quantity: 1 }] }] },
+        mining_instruction_smelt: { npc: 'mining_guide', text: "You have both ores! Now 'Use' them on the furnace over there to smelt a Bronze bar.", highlight: 'activity-button-3', responses: [{ text: "I'll do that." }] },
         mining_smelt_info: {
-            npcName: 'Mining Guide',
-            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            npc: 'mining_guide',
             text: "Use the furnace once you have the ores. After that, take the bar to the anvil and use your hammer.",
             responses: [
                 { text: "Got it.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }
             ]
         },
-        dagger_missing_check: { npcName: 'Mining Guide', npcIcon: '/assets/npcChatHeads/mining_guide.png', text: "You don't have the Bronze Dagger. If you lost your materials, you'll need to mine more ore and smelt a new bar.", responses: [{ text: "Okay." }] },
+        dagger_missing_check: { npc: 'mining_guide', text: "You don't have the Bronze Dagger. If you lost your materials, you'll need to mine more ore and smelt a new bar.", responses: [{ text: "Okay." }] },
         in_progress_embrune_101_12: {
-            npcName: 'Mining Guide',
-            npcIcon: '/assets/npcChatHeads/mining_guide.png',
+            npc: 'mining_guide',
             text: "A fine dagger! Take it to the Weapon Guide east of here for combat training.",
             responses: [{ text: "On my way.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }]
         },
         in_progress_embrune_101_13: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Let's see if you can use that blade. Equip it, pick a style, and defeat a rat.",
             highlight: ['side-panel-button-equipment', 'side-panel-button-combat'],
             responses: [
@@ -594,8 +562,7 @@ export const embrune101: Quest = {
             ]
         },
         combat_lore_hub: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Combat is a science, boy. It's about knowing your gear, your limits, and your enemy's weaknesses. What do you want to know about?",
             responses: [
                 { text: "Tell me about the 'Combat Triangle'.", next: 'combat_triangle_lore' },
@@ -605,48 +572,42 @@ export const embrune101: Quest = {
             ]
         },
         combat_triangle_lore: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Most monsters have a preferred way of fighting. If they use Melee, they're often slow and vulnerable to Magic. If they use Ranged, they try to stay back, but are weak if you close the gap with Melee. And if they use Magic, their robes offer little protection against a well-aimed Ranged attack.",
             responses: [
                 { text: "So Melee beats Ranged, Ranged beats Magic, and Magic beats Melee?", next: 'combat_triangle_confirm' }
             ]
         },
         combat_triangle_confirm: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Exactly. It's not a law, but it's a darn good rule of thumb. Pay attention to how a monster attacks you, and switch your tactics to match.",
             responses: [
                 { text: "I have other questions.", next: 'combat_lore_hub' }
             ]
         },
         combat_stats_lore: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Every piece of armor or weapon has stats. Generally, higher 'Attack' stats help you land a hit more often, while 'Strength' makes those hits land harder. On the defensive side, 'Defence' stats make you harder to hit. Different materials offer different protections.",
             responses: [
                 { text: "How do I see these stats?", next: 'combat_stats_ui' }
             ]
         },
         combat_stats_ui: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Open your Equipment panel and click 'Equipment Stats'. You'll see exactly how balanced your loadout is. A heavy knight in plate is great against swords, but might be a sitting duck for a wizard.",
             responses: [
                 { text: "I see. What else?", next: 'combat_lore_hub' }
             ]
         },
         combat_buffs_lore: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Beyond steel, there's spirit and alchemy. The gods favor those who fight, and have blessed us with combat prayers that can sharpen your aim or steady your arm. You'll learn more at the chapel later. As for potions... well, some herbs have interesting effects when brewed. You'll have to figure that out on your own.",
             responses: [
                 { text: "Interesting. I'll keep that in mind.", next: 'combat_lore_hub' }
             ]
         },
         combat_equipment_check: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Lost your arms? An adventurer needs their gear.",
             responses: [{ text: "Sorry." }],
             conditionalResponses: [
@@ -655,27 +616,23 @@ export const embrune101: Quest = {
             ]
         },
         combat_styles_info: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Accurate trains Attack, Aggressive trains Strength, and Defensive trains Defence. Choose the one that fits your goals!",
             responses: [{ text: "Ready.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }]
         },
         in_progress_embrune_101_15: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "Good. Now for ranged. Take this bow and arrows. Equip the arrows and take down the other rat. Remember: Ranged beats Magic, but you'll want to stay away from anyone with a sword!",
             highlight: ['inventory-slot-shortbow', 'inventory-slot-bronze_arrow'],
             responses: [{ text: "Got it!", actions: [{ type: 'give_item', itemId: 'shortbow', quantity: 1 }, { type: 'give_item', itemId: 'bronze_arrow', quantity: 50 }, { type: 'advance_quest', questId: 'embrune_101' }] }]
         },
         in_progress_embrune_101_17: {
-            npcName: 'Weapon Guide',
-            npcIcon: '/assets/npcChatHeads/weapon_guide.png',
+            npc: 'weapon_guide',
             text: "You're a natural! You've learned the basics of the blade and the bow. Now, head north to learn about banking your items. An adventurer with a full pack is a slow target!",
             responses: [{ text: "On my way.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }]
         },
         in_progress_embrune_101_18: {
-            npcName: 'Banker',
-            npcIcon: '/assets/npcChatHeads/banker.png',
+            npc: 'banker',
             text: "Welcome to the Bank of Embrune. Here, you can store your hard-earned items and gold in a secure vault that is accessible from any bank branch in the world. Even if you fall in battle, items stored here remain perfectly safe.",
             responses: [
                 { text: "How do I use it?", next: 'banker_tutorial_2' },
@@ -683,40 +640,35 @@ export const embrune101: Quest = {
             ]
         },
         banker_tutorial_2: {
-            npcName: 'Banker',
-            npcIcon: '/assets/npcChatHeads/banker.png',
+            npc: 'banker',
             text: "I can give you a quick tour of the vault's features, if you wish. It's a marvel of dwarven security!",
             responses: [
                 { text: "I'll take the tour.", actions: [{ type: 'start_bank_tutorial' }, { type: 'advance_quest', questId: 'embrune_101' }] }
             ]
         },
         in_progress_embrune_101_19: {
-            npcName: 'Money Guide',
-            npcIcon: '/assets/npcChatHeads/money_guide.png',
+            npc: 'money_guide',
             text: "Ah, gold. The glittering blood of Embrune! You'll find that coins are essential for everything from buying supplies to renting a room at an inn. Do you know how to fill your pockets?",
             responses: [
                 { text: "Tell me about making gold.", next: 'money_lore_1' }
             ]
         },
         money_lore_1: {
-            npcName: 'Money Guide',
-            npcIcon: '/assets/npcChatHeads/money_guide.png',
+            npc: 'money_guide',
             text: "There are many paths to wealth. Quests are the most reliable—helping folks with their troubles often leads to a direct reward. Then there are Quest Boards in every major town, offering repeatable tasks for steady income.",
             responses: [
                 { text: "What else?", next: 'money_lore_2' }
             ]
         },
         money_lore_2: {
-            npcName: 'Money Guide',
-            npcIcon: '/assets/npcChatHeads/money_guide.png',
+            npc: 'money_guide',
             text: "You can sell resources to shops, or use high-level magic to 'transmute' items directly into gold. If you're a skilled hunter, Slayer Master Kaelen in Silverhaven pays bounties for dangerous beasts.",
             responses: [
                 { text: "Are there... quicker ways?", next: 'money_lore_3' }
             ]
         },
         money_lore_3: {
-            npcName: 'Money Guide',
-            npcIcon: '/assets/npcChatHeads/money_guide.png',
+            npc: 'money_guide',
             text: "Some prefer 'extra-legal' methods... Thieving. It's risky and, well, illegal, but very profitable if you don't get caught. But enough of that! Head east to the chapel. The Prayer Guide will show you that not everything has a price.",
             responses: [
                 { text: "Where is the first Quest Board?", next: 'money_hint_board' },
@@ -724,24 +676,21 @@ export const embrune101: Quest = {
             ]
         },
         money_hint_board: {
-            npcName: 'Money Guide',
-            npcIcon: '/assets/npcChatHeads/money_guide.png',
+            npc: 'money_guide',
             text: "Once you reach the mainland, visit the 'The Rusty Flagon' inn in Meadowdale. They have the first Quest Board you'll encounter. It's a great place for a new adventurer to start. Now, the chapel is waiting!",
             responses: [
                 { text: "Thank you for the tip!", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }
             ]
         },
         in_progress_embrune_101_20: {
-            npcName: 'Prayer Guide',
-            npcIcon: '/assets/npcChatHeads/prayer_guide.png',
+            npc: 'prayer_guide',
             text: "Peace be with you. I will teach you to harness the spiritual energy that flows through the Weave. See that Blue Orb by your map? That is your Prayer. It is finite, and it drains as you use holy auras to protect yourself.",
             responses: [
                 { text: "How do I use it?", next: 'prayer_lore_1' }
             ]
         },
         prayer_lore_1: {
-            npcName: 'Prayer Guide',
-            npcIcon: '/assets/npcChatHeads/prayer_guide.png',
+            npc: 'prayer_guide',
             text: "First, you must learn to pay respects. Burying the remains of fallen creatures is the simplest way to grow your connection. Take these bones and bury them. Then, if your energy is low, 'Pray' at the Altar here to restore it.",
             highlight: ['activity-button-2', 'hp-orb'],
             responses: [
@@ -749,32 +698,28 @@ export const embrune101: Quest = {
             ]
         },
         in_progress_embrune_101_22: {
-            npcName: 'Prayer Guide',
-            npcIcon: '/assets/npcChatHeads/prayer_guide.png',
+            npc: 'prayer_guide',
             text: "You feel it, don't you? The warmth of the light. As you grow stronger, you may travel to the city of Sanctity. There, the faithful undergo trials to obtain total protection from blades, arrows, and spells.",
             responses: [
                 { text: "Total protection?", next: 'prayer_lore_2' }
             ]
         },
         prayer_lore_2: {
-            npcName: 'Prayer Guide',
-            npcIcon: '/assets/npcChatHeads/prayer_guide.png',
+            npc: 'prayer_guide',
             text: "Indeed. But that is for later. For now, head north to the tavern. The Manager there is looking for someone with your... versatile set of skills. Go with the light.",
             responses: [
                 { text: "Thank you.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }
             ]
         },
         in_progress_embrune_101_23: {
-            npcName: 'Tavern Manager',
-            npcIcon: '/assets/npcChatHeads/barkeep_grimley.png',
+            npc: 'tavern_manager',
             text: "Welcome to the hearth! A tavern is an adventurer's second home. We offer rest to heal your wounds and restore your energy. We're also a hub for gossip and information—the kind you won't find in any library.",
             responses: [
                 { text: "What else can I do here?", next: 'tavern_lore_1' }
             ]
         },
         tavern_lore_1: {
-            npcName: 'Tavern Manager',
-            npcIcon: '/assets/npcChatHeads/barkeep_grimley.png',
+            npc: 'tavern_manager',
             text: "Opportunity! See that board over there? That's the Quest Board. Local folks post their problems there, and we pay the bounties. It's good work if you can get it. Go ahead, check the board and accept the 'Magical Pest Control' task.",
             highlight: 'activity-button-2',
             responses: [
@@ -782,24 +727,21 @@ export const embrune101: Quest = {
             ]
         },
         in_progress_embrune_101_25: {
-            npcName: 'Magic Guide',
-            npcIcon: '/assets/npcChatHeads/wizard_elmsworth.png',
+            npc: 'magic_guide',
             text: "*The air in the corner suddenly ripples like water, collapsing into a pinpoint of blinding light before expanding into the form of a robed man.* Salutations, most esteemed guest! I trust my sudden manifestation has not overly perturbed your constitution? I am Elmsworth, a seeker of the unseen. I understand you've just accepted a contract to deal with a... vermin problem?",
             responses: [
                 { text: "You just... appeared!", next: 'magic_regal_1' }
             ]
         },
         magic_regal_1: {
-            npcName: 'Magic Guide',
-            npcIcon: '/assets/npcChatHeads/wizard_elmsworth.png',
+            npc: 'magic_guide',
             text: "Teleportation, my dear friend. A trifle for one well-versed in the Arcane. Since you seek to eradicate a pest, might I suggest a more... elegant solution than a simple blade? The Weave is waiting for a conductor.",
             responses: [
                 { text: "Teach me.", next: 'magic_regal_2' }
             ]
         },
         magic_regal_2: {
-            npcName: 'Magic Guide',
-            npcIcon: '/assets/npcChatHeads/wizard_elmsworth.png',
+            npc: 'magic_guide',
             text: "I shall provide the reagents. Take these runes. Open your spellbook, select 'Gust Dart', and unleash the elements upon that rodent. It is time for you to learn the true potential of your mind.",
             highlight: ['side-panel-button-spellbook', 'activity-button-3'],
             responses: [
@@ -807,32 +749,28 @@ export const embrune101: Quest = {
             ]
         },
         in_progress_embrune_101_27: {
-            npcName: 'Tavern Manager',
-            npcIcon: '/assets/npcChatHeads/barkeep_grimley.png',
+            npc: 'tavern_manager',
             text: "Hah! I saw the sparks from here! The rat is gone, and the floor is only slightly scorched. Excellent work. Speak to the Wizard one last time before you head to the mainland.",
             responses: [
                 { text: "Will do.", actions: [{ type: 'advance_quest', questId: 'embrune_101' }] }
             ]
         },
         in_progress_embrune_101_28: {
-            npcName: 'Magic Guide',
-            npcIcon: '/assets/npcChatHeads/wizard_elmsworth.png',
+            npc: 'magic_guide',
             text: "You've handled the Weave with remarkable poise. Beyond this sanctuary lies a vast world—from the gleaming spires of Silverhaven to the desolate dunes of Fouthia. There is much to see, and much to master.",
             responses: [
                 { text: "I am ready to depart.", next: 'magic_regal_3' }
             ]
         },
         magic_regal_3: {
-            npcName: 'Magic Guide',
-            npcIcon: '/assets/npcChatHeads/wizard_elmsworth.png',
+            npc: 'magic_guide',
             text: "Then let us not delay. Simply say the word, and I shall whisk you away to the square of Meadowdale. May your path be illuminated by wisdom.",
             responses: [
                 { text: "Teleport me now.", actions: [{ type: 'teleport', poiId: 'meadowdale_square' }, { type: 'complete_tutorial' }] }
             ]
         },
         in_progress_embrune_101_29: {
-            npcName: 'Magic Guide',
-            npcIcon: '/assets/npcChatHeads/wizard_elmsworth.png',
+            npc: 'magic_guide',
             text: "Safe travels, adventurer. The world of Embrune awaits.",
             responses: [
                 { text: "To the mainland!", actions: [{ type: 'teleport', poiId: 'meadowdale_square' }, { type: 'complete_tutorial' }] }

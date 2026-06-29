@@ -7,6 +7,27 @@ const DB_NAME = 'EmbruneDB';
 
 const db = new Dexie(DB_NAME);
 
+// Request persistent storage to protect save databases (IndexedDB) from browser cache eviction
+if (typeof navigator !== 'undefined' && navigator.storage && navigator.storage.persist) {
+    navigator.storage.persisted().then((isPersisted) => {
+        if (!isPersisted) {
+            navigator.storage.persist().then((granted) => {
+                if (granted) {
+                    console.log("Storage persistence granted. Save data will not be evicted under low memory.");
+                } else {
+                    console.warn("Storage persistence denied. Saves are subject to standard browser eviction rules.");
+                }
+            }).catch(err => {
+                console.error("Error requesting storage persistence:", err);
+            });
+        } else {
+            console.log("Storage is already marked as persistent.");
+        }
+    }).catch(err => {
+        console.error("Error checking storage persistence status:", err);
+    });
+}
+
 // V1 Schema (for migration)
 db.version(1).stores({
     saveData: '&key',

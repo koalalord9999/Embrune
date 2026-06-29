@@ -821,6 +821,25 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
 
     useWorldEvents({ session, worldState, setWorldState, char, inv, addLog, questLogic, playerQuests: quests.playerQuests });
 
+    // Swamp ejection: if the player is in a deep swamp POI without sufficient quest progress, teleport them out.
+    useEffect(() => {
+        const DEEP_SWAMP_POIS = new Set([
+            'mangrove_thicket_west', 'serpent_nesting_ground', 'flooded_forest',
+            'murky_channel_east', 'isolated_islet', 'shipwreck_shallows',
+            'sunken_temple_approach', 'sunken_temple_altar', 'hex_altar',
+        ]);
+        if (!DEEP_SWAMP_POIS.has(session.currentPoiId)) return;
+
+        const swampQuest = quests.playerQuests.find(q => q.questId === 'scales_of_the_swamp');
+        const questStage = swampQuest ? (swampQuest.isComplete ? 999 : swampQuest.currentStage) : -1;
+
+        if (questStage < 3) {
+            addLog("The miasma is too thick without the ward. You are forced back to the entrance.");
+            navigation.handleForcedNavigate('serpents_coil_entrance');
+        }
+    }, [session.currentPoiId, quests.playerQuests, navigation, addLog]);
+
+
     const killHandler = useKillHandler({ questLogic, repeatableQuests, slayer, setMonsterRespawnTimers, isInstantRespawnOn: devMode.isInstantRespawnOn, setWorldState, addLog, worldState, inv, navigation });
     const handleKill = useCallback((id: string, style?: 'melee' | 'ranged' | 'magic') => { killHandler.handleKill(id, style); }, [killHandler]);
     const handleEncounterWin = useCallback((ids: string[]) => { killHandler.handleEncounterWin(ids); }, [killHandler]);
@@ -1414,6 +1433,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     useKeyboardManager({
         keybindings: ui.keybindings,
         isBusy,
+        hasActiveDialogue: !!ui.activeDialogue,
         onTravel: handleTravelKey,
         onAction: handleActionKey,
         onEsc: () => {

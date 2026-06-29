@@ -257,7 +257,7 @@ export const meadowdalePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Old Man Fitzwilliam",
-                icon: "/assets/npcChatHeads/old_man_fitzwilliam.png",
+                icon: 'person',
                 startNode: "fitzwilliam_default",
                 questTopics: ["goblin_menace", "petunia_problems"],
                 conditionalGreetings: [
@@ -282,7 +282,7 @@ export const meadowdalePois: Record<string, POI> = {
                 dialogue: {
                     fitzwilliam_default: {
                         npcName: "Old Man Fitzwilliam",
-                        npcIcon: "/assets/npcChatHeads/old_man_fitzwilliam.png",
+                        npcIcon: 'person',
                         text: "Hmph. What do you want? Can't you see I'm busy being miserable?",
                         responses: [],
                     },
@@ -402,7 +402,7 @@ export const meadowdalePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Valerius the Master Smith",
-                icon: "/assets/npcChatHeads/valerius_the_master_smith.png",
+                icon: 'person',
                 startNode: "valerius_default",
                 questTopics: [
                     "a_smiths_apprentice",
@@ -593,7 +593,7 @@ export const meadowdalePois: Record<string, POI> = {
                 dialogue: {
                     valerius_default: {
                         npcName: "Valerius the Master Smith",
-                        npcIcon: "/assets/npcChatHeads/valerius_the_master_smith.png",
+                        npcIcon: 'person',
                         text: "Welcome to the forge. If you need something smithed, you've come to the right place. Just don't waste my time.",
                         responses: [],
                     },
@@ -617,7 +617,7 @@ export const meadowdalePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Master Baker Thomas",
-                icon: "/assets/npcChatHeads/master_baker_thomas.png",
+                icon: 'person',
                 startNode: "thomas_default",
                 questTopics: ["the_bakers_apprentice"],
                 conditionalGreetings: [
@@ -633,7 +633,7 @@ export const meadowdalePois: Record<string, POI> = {
                 dialogue: {
                     thomas_default: {
                         npcName: "Master Baker Thomas",
-                        npcIcon: "/assets/npcChatHeads/master_baker_thomas.png",
+                        npcIcon: 'person',
                         text: "The secret to a good loaf is all in the hands, lad. And a bit of patience. Meadowdale never goes hungry as long as I'm at the oven!",
                         responses: [],
                     },
@@ -667,11 +667,11 @@ export const meadowdalePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Barkeep Grimley",
-                icon: "/assets/npcChatHeads/barkeep_grimley.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Barkeep Grimley",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "Welcome to The Rusty Flagon. What can I get for you?",
                         responses: [
                             {
@@ -686,7 +686,7 @@ export const meadowdalePois: Record<string, POI> = {
                     },
                     buy_drink_intro: {
                         npcName: "Barkeep Grimley",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "You've got good taste! I import the best beer in the region, all the way from Silverhaven. None of that watered-down rubbish you get elsewhere. Fancy a pint? It's only 2 coins.",
                         responses: [
                             {
@@ -720,19 +720,19 @@ export const meadowdalePois: Record<string, POI> = {
                     },
                     buy_drink_success: {
                         npcName: "Barkeep Grimley",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "Here you are. Enjoy!",
                         responses: [],
                     },
                     buy_drink_fail: {
                         npcName: "Barkeep Grimley",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "Sorry, you don't have enough coins for that.",
                         responses: [],
                     },
                     rent_room_intro: {
                         npcName: "Barkeep Grimley",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "A wise choice. A good night's rest can make all the difference. I keep this place nice and tidy, you know. Sometimes I even post odd jobs on the adventurer's board to keep it that way.",
                         responses: [
                             {
@@ -743,7 +743,7 @@ export const meadowdalePois: Record<string, POI> = {
                     },
                     rent_room_confirm: {
                         npcName: "Barkeep Grimley",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "A room for the night will cost you 10 coins. It'll restore your health and make you feel right as rain. What do you say?",
                         responses: [
                             {
@@ -776,7 +776,7 @@ export const meadowdalePois: Record<string, POI> = {
                     },
                     rent_room_success: {
                         npcName: "Barkeep Grimley",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "Excellent choice. Sweet dreams!",
                         responses: [],
                     },
@@ -858,12 +858,12 @@ export const meadowdalePois: Record<string, POI> = {
         activities: [
             {
                 type: "npc",
-                name: "Librarian Elara",
-                icon: "/assets/npcChatHeads/librarian_elara.png",
+                name: "Librarian Alexia",
+                icon: 'person',
                 dialogue: {
                     start: {
-                        npcName: "Librarian Elara",
-                        npcIcon: "/assets/npcChatHeads/librarian_elara.png",
+                        npcName: "Librarian Alexia",
+                        npcIcon: 'person',
                         text: "Shh! This is a place of learning, not a tavern.\n\nFeel free to browse, but do it quietly. The knowledge of ages rests on these shelves.\n\nThe town was founded on the ruins of an older settlement from before the Age of Kings. No one knows who built the original foundations.\n\nThe road south to Oakhaven used to be a major trade route. Now, with the bandits, it's a shadow of its former self.",
                         responses: [],
                     },
@@ -1011,13 +1011,13 @@ export const meadowdalePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Clerk Augustus",
-                icon: "/assets/npcChatHeads/clerk_augustus.png",
+                icon: 'person',
                 startNode: "augustus_default",
                 questTopics: ["bandit_toll"],
                 dialogue: {
                     augustus_default: {
                         npcName: "Clerk Augustus",
-                        npcIcon: "/assets/npcChatHeads/clerk_augustus.png",
+                        npcIcon: 'person',
                         text: "Welcome to the Meadowdale Town Hall. State your business.",
                         responses: [],
                     },
@@ -1045,7 +1045,7 @@ export const meadowdalePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Banker Theron",
-                icon: "/assets/npcChatHeads/banker_theron.png",
+                icon: 'person',
                 actions: [
                     {
                         label: "Bank",
@@ -1063,7 +1063,7 @@ export const meadowdalePois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Banker Theron",
-                        npcIcon: "/assets/npcChatHeads/banker_theron.png",
+                        npcIcon: 'person',
                         text: "Welcome to the Bank of Embrune. Your items are safe with us.",
                         responses: [
                             {
@@ -1077,7 +1077,7 @@ export const meadowdalePois: Record<string, POI> = {
                     },
                     access_bank: {
                         npcName: "Banker Theron",
-                        npcIcon: "/assets/npcChatHeads/banker_theron.png",
+                        npcIcon: 'person',
                         text: "Of course. Here you can deposit or withdraw items from your personal vault. Would you like to access it now?",
                         responses: [
                             {

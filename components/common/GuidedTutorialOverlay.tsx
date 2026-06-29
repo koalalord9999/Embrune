@@ -70,16 +70,29 @@ const GuidedTutorialOverlay: React.FC<GuidedTutorialOverlayProps> = ({ ui }) => 
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
 
-        let boxX = left + width / 2;
-        let boxY = top + height + 20; // Default to below
+        // Keep at least 16px of clearance from the viewport edges
+        const padding = 16;
+        const boxWidth = 320; // Matches absolute w-80 (320px)
 
-        // If too close to bottom, show above
-        if (boxY + 220 > screenHeight) {
-            boxY = Math.max(20, top - 240); // At least 20px from top
+        // Detect active game container frame bounding box if available to remain inside it
+        const gameFrame = document.querySelector('.game-container') || document.querySelector('.aspect-\\[16\\/9\\]') || document.body;
+        const frameRect = gameFrame.getBoundingClientRect();
+
+        // Calculate Y position relative to target element
+        let boxY = top + height + 12; // 12px below the target
+
+        // If rendering below target would overflow the frame or screen, render above target
+        const estimatedBoxHeight = 240;
+        if (boxY + estimatedBoxHeight > frameRect.bottom - padding || boxY + estimatedBoxHeight > screenHeight - padding) {
+            boxY = Math.max(frameRect.top + padding, top - estimatedBoxHeight - 12);
         }
 
-        // Horizontal clamping
-        boxX = Math.max(170, Math.min(screenWidth - 170, boxX));
+        // Clamp boxY inside screen/frame safety margins
+        boxY = Math.max(frameRect.top + padding, Math.min(frameRect.bottom - estimatedBoxHeight - padding, boxY));
+
+        // Horizontal clamping centered on target element
+        let boxX = left + width / 2;
+        boxX = Math.max(frameRect.left + (boxWidth / 2) + padding, Math.min(frameRect.right - (boxWidth / 2) - padding, boxX));
 
         return {
             top: boxY,

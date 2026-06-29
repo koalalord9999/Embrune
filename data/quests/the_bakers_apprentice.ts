@@ -49,6 +49,10 @@ export const theBakersApprentice: Quest = {
             requirement: { type: 'talk', poiId: 'meadowdale_kitchen', npcName: 'Master Baker Thomas' }
         }
     ],
+    npcDefs: {
+        master_baker_thomas: { npcName: 'Master Baker Thomas', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Cooking, amount: 2500 }],
         items: [
@@ -110,14 +114,12 @@ export const theBakersApprentice: Quest = {
     ],
     dialogue: {
         ba_low_level: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "The kitchen is a place of precision, not play! Come back when you've at least reached Level 35 in Cooking. I won't have you burning down my bakery.",
             responses: []
         },
         ba_intro_branching: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "Speak to me, apprentice. Do you seek the simple path, or do you understand the true alchemy of the oven? What knowledge do you lack? Many think it's just 'heating food', but they are fools.",
             responses: [
                 { text: "Where do I find the best ingredients?", next: 'ba_sourcing' },
@@ -126,8 +128,7 @@ export const theBakersApprentice: Quest = {
             ]
         },
         ba_sourcing: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "Quality is paramount! Cheese isn't 'found' in a crate; it's churned from a bucket of milk at the windmill. Tomatoes? McGregor's Farm or the village shops. And those Red Berries? Only the wild ones from Feywood Forest or the Northern Wilderness will suffice for my recipes. Don't bring me those bruised ones from the roadside!",
             responses: [
                 { text: "And the dough?", next: 'ba_technique' },
@@ -135,8 +136,7 @@ export const theBakersApprentice: Quest = {
             ]
         },
         ba_technique: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "Listen closely! The dough for a Pie and the base for a Pizza use the same fundamental ingredients—flour and water—but the technique is worlds apart! Making the dough is like bread, but the handling is different. A Pie requires a folding method in a ceramic Pie Dish, while a Pizza Base demands a flat, crisp execution. If you treat a pizza like bread, it will be a disaster!",
             responses: [
                 { text: "Where do I get ingredients?", next: 'ba_sourcing' },
@@ -144,46 +144,40 @@ export const theBakersApprentice: Quest = {
             ]
         },
         ba_assignment_start: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "Fine. Prove you understand the process. Gather 3 Red Berries, a Tomato, some Cheese, and buy a Pie Dish from the shops. Bake a Berry Pie and a Plain Pizza. Flawlessly! If I see a single burnt edge, you'll be scrubbing pots for a month.",
             responses: [
                 { text: "I'll get to work.", actions: [{ type: 'start_quest', questId: 'the_bakers_apprentice' }, { type: 'advance_quest', questId: 'the_bakers_apprentice' }] }
             ]
         },
         ba_recipe_help: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "Right. You want to know how the equipment works, do you? Like I’m teaching calculus to a truffle pig! Fine. Pay attention.",
             responses: [
                 { text: "(Continue)", next: 'ba_recipe_pizza' }
             ]
         },
         ba_recipe_pizza: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "For the Pizza: Take the pizza base and apply the tomato evenly to create an incomplete pizza. Then, distribute the cheese across it to create the uncooked pizza. Only then is it ready for the heat!",
             responses: [
                 { text: "(Continue)", next: 'ba_recipe_pie' }
             ]
         },
         ba_recipe_pie: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "For the Pie: You need the pie dish as your vessel. Combine the red berries and the pie dough inside it to form the uncooked berry pie. It's simple geometry, really.",
             responses: [
                 { text: "(Continue)", next: 'ba_recipe_oven' }
             ]
         },
         ba_recipe_oven: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "And don't you dare use some roadside fire. My cooking range is the only precision apparatus in Meadowdale worthy of this work. Now get out of my sight!",
             responses: []
         },
         ba_final_inspection: {
-            npcName: 'Master Baker Thomas',
-            npcIcon: '/assets/npcChatHeads/master_baker_thomas.png',
+            npc: 'master_baker_thomas',
             text: "*Thomas prods the pizza base with a floured finger and sniffs the pie deeply.* ...The hydration is acceptable. The crust has the proper flake. It seems you've actually listened to me. Meadowdale might survive your cooking after all. Take these, and continue your practice.",
             responses: [
                 {

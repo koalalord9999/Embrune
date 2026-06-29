@@ -219,7 +219,7 @@ export const minePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Prospector Gudrun",
-                icon: "/assets/npcChatHeads/prospector_gudrun.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_dwarf_table",
                 },
@@ -227,7 +227,7 @@ export const minePois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Prospector Gudrun",
-                        npcIcon: "/assets/npcChatHeads/prospector_gudrun.png",
+                        npcIcon: 'person',
                         text: "Careful down here, friend. It's not just rocks and ore you'll find.\n\nSome of the lads swear they've seen veins of ore that glow with a strange, silvery-blue light. They call it Mithril. Nonsense, I say.\n\nAnd don't even get me started on the legends of Adamantite... dark green metal, harder than steel. Found only at the highest peaks, they say.",
                         responses: [],
                     },

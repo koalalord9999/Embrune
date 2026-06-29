@@ -93,7 +93,7 @@ export const SHOPS: Record<string, Shop> = {
     },
     oakhaven_herblore: {
         id: 'oakhaven_herblore',
-        name: "Elara's Apothecary",
+        name: "Anise's Apothecary",
         inventory: [
             { itemId: 'pestle_and_mortar', quantity: 10, priceModifier: 1.0 },
             { itemId: 'vial_of_water', quantity: 1000, priceModifier: 1.0 },

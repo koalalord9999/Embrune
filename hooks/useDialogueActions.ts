@@ -388,7 +388,6 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                     break;
                 case 'start_bank_tutorial': {
                     ui.setActivePanel('bank');
-                    // FIX: Using React.createElement instead of JSX in .ts file
                     ui.setActiveTutorial({
                         id: 'bank-tour',
                         currentStepIndex: 0,
@@ -397,7 +396,7 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                             { targetId: 'bank-tabs', description: React.createElement('p', null, "These are your ", React.createElement('span', { className: "text-yellow-300 font-bold" }, "Bank Tabs"), ". You can organize your items by dragging them into different tabs. You can have up to 6 tabs!") },
                             { targetId: 'bank-item-grid', description: React.createElement('p', null, "This is the ", React.createElement('span', { className: "text-yellow-300 font-bold" }, "Main Vault"), ". It shows all the items in your current tab. Click an item to withdraw it, or drag to reorganize.") },
                             { targetId: 'bank-quantity-toggles', description: React.createElement('p', null, "Choose ", React.createElement('span', { className: "text-yellow-300 font-bold" }, "how many"), " items you want to move at once. Select 1, 5, 10, or 'All'. Use 'X' to set a custom amount.") },
-                            { targetId: 'bank-withdraw-mode', description: React.createElement('p', null, "You can withdraw items as physical objects or as ", React.createElement('span', { className: "text-yellow-300 font-bold" }, "Bank Notes"), ". Notes stack in your bag, making them easier to carry in bulk!") },
+                            { targetId: 'bank-withdraw-mode', description: React.createElement('p', null, "You can withdraw items as physical objects or as ", React.createElement('span', { className: "text-yellow-300 font-bold" }, "Bank Notes"), ". Notes stack in your bag, making them easier to carry in bulk!", React.createElement('br'), React.createElement('br'), "However, these cannot be used as normal items. It's great for trading with players (NYI) or selling to a shop in large quantities.") },
                             { targetId: 'bank-search', description: React.createElement('p', null, "Need to find something specific? Use the ", React.createElement('span', { className: "text-yellow-300 font-bold" }, "Search Bar"), " to filter items across all your tabs instantly.") },
                             { targetId: 'bank-deposit-backpack', description: React.createElement('p', null, "Need space? Click this to ", React.createElement('span', { className: "text-yellow-300 font-bold" }, "deposit everything"), " currently in your inventory into the bank.") },
                             { targetId: 'bank-deposit-equipment', description: React.createElement('p', null, "Use this to quickly ", React.createElement('span', { className: "text-yellow-300 font-bold" }, "deposit all equipped items"), ". Great for changing gear sets in a hurry!") },

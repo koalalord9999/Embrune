@@ -11,12 +11,12 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Pip the Gourd Carver",
-                icon: "/assets/npcChatHeads/artisan.png",
+                icon: 'person',
                 startNode: "start",
                 dialogue: {
                     start: {
                         npcName: "Pip the Gourd Carver",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Hey! Watch the blade, it's razor-sharp! I'm trying to carve out a traditional design here. People think paper lanterns are all the rage, but hollowing out a dried gourd is a true art form!",
                         responses: [
                             {
@@ -34,7 +34,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     carving: {
                         npcName: "Pip the Gourd Carver",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "My master says the trick is not to carve too deep. One slip, and you ruin the structural integrity of the shell! The smell of fresh wood shavings and dried pulp is what Oakhaven is all about. True craftsmanship is in our blood.",
                         responses: [
                             {
@@ -45,7 +45,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     patch: {
                         npcName: "Pip the Gourd Carver",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Just down the path at the Gourd Patch! The soil there is incredibly rich. We harvest them in autumn, dry them out over winter, and then they're ready to be carved or smashed for the festival! Have you tried smashing one today?",
                         responses: [
                             {
@@ -138,7 +138,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Event Host Mira",
-                icon: "/assets/npcChatHeads/mira.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -156,7 +156,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Event Host Mira",
-                        npcIcon: "/assets/npcChatHeads/mira.png",
+                        npcIcon: 'person',
                         text: "Welcome, traveller! The Oakhaven Lantern Festival is in full swing! Earn Festival Tickets from the games around the grounds and spend them right here at my stall. You'll need Festival Tokens to play most of the games, which I sell for 100 coins each.",
                         responses: [
                             {
@@ -187,7 +187,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     buy_tokens: {
                         npcName: "Event Host Mira",
-                        npcIcon: "/assets/npcChatHeads/mira.png",
+                        npcIcon: 'person',
                         text: "I sell Festival Tokens for 100 coins each. How many would you like to buy?",
                         responses: [
                             {
@@ -237,7 +237,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     buy_confirm_1: {
                         npcName: "Event Host Mira",
-                        npcIcon: "/assets/npcChatHeads/mira.png",
+                        npcIcon: 'person',
                         text: "Here is your Festival Token. Have fun at the games!",
                         responses: [
                             {
@@ -254,7 +254,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     buy_confirm_5: {
                         npcName: "Event Host Mira",
-                        npcIcon: "/assets/npcChatHeads/mira.png",
+                        npcIcon: 'person',
                         text: "Here are 5 Festival Tokens. Have fun at the games!",
                         responses: [
                             {
@@ -271,7 +271,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     buy_confirm_10: {
                         npcName: "Event Host Mira",
-                        npcIcon: "/assets/npcChatHeads/mira.png",
+                        npcIcon: 'person',
                         text: "Here are 10 Festival Tokens. Have fun at the games!",
                         responses: [
                             {
@@ -288,7 +288,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     not_enough_coins: {
                         npcName: "Event Host Mira",
-                        npcIcon: "/assets/npcChatHeads/mira.png",
+                        npcIcon: 'person',
                         text: "You don't seem to have enough coins for that amount. Come back when you have a bit more gold!",
                         responses: [
                             {
@@ -321,7 +321,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Trivia Master Lin",
-                icon: "/assets/npcChatHeads/trivia_master_lin.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -339,7 +339,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Trivia Master Lin",
-                        npcIcon: "/assets/npcChatHeads/trivia_master_lin.png",
+                        npcIcon: 'person',
                         text: "Ah, a sharp mind! Test your knowledge of Embrune's history for Festival Tickets. Only one question per day, so make it count!",
                         responses: [
                             {
@@ -366,7 +366,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     confirm_play: {
                         npcName: "Trivia Master Lin",
-                        npcIcon: "/assets/npcChatHeads/trivia_master_lin.png",
+                        npcIcon: 'person',
                         text: "Excellent! You only get one attempt per day. Are you ready to test your knowledge?",
                         responses: [
                             {
@@ -384,7 +384,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     already_played: {
                         npcName: "Trivia Master Lin",
-                        npcIcon: "/assets/npcChatHeads/trivia_master_lin.png",
+                        npcIcon: 'person',
                         text: "You have already attempted today's question. The kiosk is locked until tomorrow!",
                         responses: [
                             {
@@ -414,12 +414,12 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Elder Brandic",
-                icon: "/assets/npcChatHeads/artisan.png",
+                icon: 'person',
                 startNode: "start",
                 dialogue: {
                     start: {
                         npcName: "Elder Brandic",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Greetings, young traveler. I have watched seventy-two seasons of the Lantern Festival in Oakhaven, and yet the sight of these lights floating into the night sky never fails to warm my old bones. What would you like to know of our history?",
                         responses: [
                             {
@@ -441,7 +441,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     gourds: {
                         npcName: "Elder Brandic",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Ah, today everyone uses wax and paper. But in the old Embrune harvest festivals, long before the modern style, our lanterns were traditionally crafted from dried gourds! We would hollow them out and place a simple tallow candle inside to guide the spirits of the harvest. You can still see them at the Gourd Patch.",
                         responses: [
                             {
@@ -452,7 +452,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     north_gate: {
                         npcName: "Elder Brandic",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Ah, the sturdy North Gate of Oakhaven! The first iron gate was forged by Durnwall the Elder back in the year 312 of the Embrune calendar. It was a masterpiece of smelting and blacksmithing, designed to withstand the cold winds and protect our artisans from outside threats.",
                         responses: [
                             {
@@ -463,7 +463,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     pale_shepherd: {
                         npcName: "Elder Brandic",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Shh... speak softly of such things. Deep beneath our peaceful town, in the old Sanctity catacombs, lies the altar of the forgotten deity known as the Pale Shepherd. Centuries ago, silent pilgrims would wander those dark tunnels to leave humble offerings of wax at its feet, hoping for guidance through life's shadows.",
                         responses: [
                             {
@@ -552,7 +552,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Ritch",
-                icon: "/assets/npcChatHeads/ritch.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -570,7 +570,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Ritch",
-                        npcIcon: "/assets/npcChatHeads/ritch.png",
+                        npcIcon: 'person',
                         text: "Aha, fancy yourself a lantern launcher, do ya? Step right up! Hit the peak zone and I'll make it worth your while in tickets.",
                         responses: [
                             {
@@ -597,7 +597,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     confirm_play: {
                         npcName: "Ritch",
-                        npcIcon: "/assets/npcChatHeads/ritch.png",
+                        npcIcon: 'person',
                         text: "Alright, grab a standard paper lantern. Ready to feed the flame and wait for the perfect thermal draft?",
                         responses: [
                             {
@@ -615,7 +615,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     already_played: {
                         npcName: "Ritch",
-                        npcIcon: "/assets/npcChatHeads/ritch.png",
+                        npcIcon: 'person',
                         text: "We only prepare one lantern launch per customer per day, friend. Safety code and all! Come back tomorrow.",
                         responses: [
                             {
@@ -640,7 +640,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Stall Host Jin",
-                icon: "/assets/npcChatHeads/stall_host_jin.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -658,7 +658,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Stall Host Jin",
-                        npcIcon: "/assets/npcChatHeads/stall_host_jin.png",
+                        npcIcon: 'person',
                         text: "All the rings have been stolen, and the stall is closed for the rest of the festival, unfortunately.",
                         responses: [
                             {
@@ -672,7 +672,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     closed_info: {
                         npcName: "Stall Host Jin",
-                        npcIcon: "/assets/npcChatHeads/stall_host_jin.png",
+                        npcIcon: 'person',
                         text: "We won't get another shipment of rings until next year's festival.",
                         responses: [
                             {
@@ -700,7 +700,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Strongman Brokk",
-                icon: "/assets/npcChatHeads/strongman_brokk.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -718,7 +718,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Strongman Brokk",
-                        npcIcon: "/assets/npcChatHeads/strongman_brokk.png",
+                        npcIcon: 'person',
                         text: "RING THE BELL! Hit the mallet and we'll see what you're made of. It costs 2 Festival Tokens to play. Win big tickets if you strike true!",
                         responses: [
                             {
@@ -757,7 +757,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     play_confirm: {
                         npcName: "Strongman Brokk",
-                        npcIcon: "/assets/npcChatHeads/strongman_brokk.png",
+                        npcIcon: 'person',
                         text: "Alright, let's see how much strength you've got!",
                         responses: [
                             {
@@ -772,7 +772,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     need_tokens: {
                         npcName: "Strongman Brokk",
-                        npcIcon: "/assets/npcChatHeads/strongman_brokk.png",
+                        npcIcon: 'person',
                         text: "You need 2 Festival Tokens to swing the hammer, buddy! Go see Mira for tokens.",
                         responses: [
                             {
@@ -850,12 +850,12 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Alpin the Smelter",
-                icon: "/assets/npcChatHeads/artisan.png",
+                icon: 'person',
                 startNode: "start",
                 dialogue: {
                     start: {
                         npcName: "Alpin the Smelter",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Ah, nothing like a festival to get a hard-working smelter out of the smithy! The heat of the furnace is nothing compared to the warmth of these festival fires. Are you here to test your strength, traveler?",
                         responses: [
                             {
@@ -873,7 +873,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     pass_road: {
                         npcName: "Alpin the Smelter",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "We rely heavily on the Copperback Pass to bring in raw materials and trade goods from the Silverhaven road. It got its name from the copper-bearing rock formations running along the hillside. If you travel that road, keep your eyes on the sparkling stones!",
                         responses: [
                             {
@@ -884,7 +884,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     durnwall: {
                         npcName: "Alpin the Smelter",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Of course! Every apprentice smelter learns of Durnwall the Elder. He was the legendary craftsman who forged the original iron gates of the North Gate in year 312. The iron was so pure and well-tempered that parts of his work still stand strong today.",
                         responses: [
                             {
@@ -925,7 +925,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Instructor Kenji",
-                icon: "/assets/npcChatHeads/instructor_kenji.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -943,7 +943,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Instructor Kenji",
-                        npcIcon: "/assets/npcChatHeads/instructor_kenji.png",
+                        npcIcon: 'person',
                         text: "Balance is the art of stillness in motion. Step onto the log, stay centered, and earn your tickets. It costs 1 Festival Token to participate.",
                         responses: [
                             {
@@ -982,7 +982,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     play_confirm: {
                         npcName: "Instructor Kenji",
-                        npcIcon: "/assets/npcChatHeads/instructor_kenji.png",
+                        npcIcon: 'person',
                         text: "Excellent. Remember to adjust your weight carefully.",
                         responses: [
                             {
@@ -997,7 +997,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     need_tokens: {
                         npcName: "Instructor Kenji",
-                        npcIcon: "/assets/npcChatHeads/instructor_kenji.png",
+                        npcIcon: 'person',
                         text: "You need 1 Festival Token to attempt the logs pond. Speak to Mira to buy some.",
                         responses: [
                             {
@@ -1022,7 +1022,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Booth Host Hana",
-                icon: "/assets/npcChatHeads/booth_host_hana.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -1040,7 +1040,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Booth Host Hana",
-                        npcIcon: "/assets/npcChatHeads/booth_host_hana.png",
+                        npcIcon: 'person',
                         text: "Click as many lanterns as you can before the time runs out! But watch out — hit a red one and it's all over! It costs 2 Festival Tokens to play.",
                         responses: [
                             {
@@ -1079,7 +1079,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     play_confirm: {
                         npcName: "Booth Host Hana",
-                        npcIcon: "/assets/npcChatHeads/booth_host_hana.png",
+                        npcIcon: 'person',
                         text: "Grab the hammer and get ready to smash!",
                         responses: [
                             {
@@ -1094,7 +1094,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     need_tokens: {
                         npcName: "Booth Host Hana",
-                        npcIcon: "/assets/npcChatHeads/booth_host_hana.png",
+                        npcIcon: 'person',
                         text: "You need 2 Festival Tokens to play Whack-a-Lantern. Mira can sell you some.",
                         responses: [
                             {
@@ -1119,7 +1119,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Patch Keeper",
-                icon: "/assets/npcChatHeads/patch_keeper.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -1137,7 +1137,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Patch Keeper",
-                        npcIcon: "/assets/npcChatHeads/patch_keeper.png",
+                        npcIcon: 'person',
                         text: "These gourds are grown ripe and ready for smashin'! One smash per day — what's inside is a surprise. Could be a modest haul, could be something truly special.",
                         responses: [
                             {
@@ -1164,7 +1164,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     confirm_smash: {
                         npcName: "Patch Keeper",
-                        npcIcon: "/assets/npcChatHeads/patch_keeper.png",
+                        npcIcon: 'person',
                         text: "Alright, grab that wooden mallet. One swing, one smash! Ready?",
                         responses: [
                             {
@@ -1183,7 +1183,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     already_played: {
                         npcName: "Patch Keeper",
-                        npcIcon: "/assets/npcChatHeads/patch_keeper.png",
+                        npcIcon: 'person',
                         text: "You've already smashed a gourd today, friend. Give the others a chance! Come back tomorrow.",
                         responses: [
                             {
@@ -1193,7 +1193,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     smash_result: {
                         npcName: "Patch Keeper",
-                        npcIcon: "/assets/npcChatHeads/patch_keeper.png",
+                        npcIcon: 'person',
                         text: "CRASH! That gourd shattered clean open. Check your activity log to see what surprise was waiting inside!",
                         responses: [
                             {
@@ -1218,7 +1218,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Ball Loader Victoria",
-                icon: "/assets/npcChatHeads/ball_loader_victoria.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -1236,7 +1236,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Ball Loader Victoria",
-                        npcIcon: "/assets/npcChatHeads/ball_loader_victoria.png",
+                        npcIcon: 'person',
                         text: "Looking for an exciting minigame testing your skill? Look no further than Lane Roller!",
                         responses: [
                             {
@@ -1272,7 +1272,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     play_confirm: {
                         npcName: "Ball Loader Victoria",
-                        npcIcon: "/assets/npcChatHeads/ball_loader_victoria.png",
+                        npcIcon: 'person',
                         text: "Ready to play Lane Roller!",
                         responses: [
                             {
@@ -1286,7 +1286,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     need_tokens: {
                         npcName: "Ball Loader Victoria",
-                        npcIcon: "/assets/npcChatHeads/ball_loader_victoria.png",
+                        npcIcon: 'person',
                         text: "You need 1 Festival Tokens to play Lane Roller. Mira can sell you some.",
                         responses: [
                             {
@@ -1312,7 +1312,7 @@ export const lanternFestivalPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Dart Thrower Kevin",
-                icon: "/assets/npcChatHeads/booth_host_hana.png",
+                icon: 'person',
                 startNode: "start",
                 conditionalGreetings: [
                     {
@@ -1330,7 +1330,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Dart Thrower Kevin",
-                        npcIcon: "/assets/npcChatHeads/dart_thrower_kevin.png",
+                        npcIcon: 'person',
                         text: "Pickup and throw darts at the balloons to pop them, earn prizes the more you pop! Want to have a go?",
                         responses: [
                             {
@@ -1369,7 +1369,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     play_confirm: {
                         npcName: "Dart Thrower Kevin",
-                        npcIcon: "/assets/npcChatHeads/dart_thrower_kevin.png",
+                        npcIcon: 'person',
                         text: "Alright, let me get you some darts!",
                         responses: [
                             {
@@ -1384,7 +1384,7 @@ export const lanternFestivalPois: Record<string, POI> = {
                     },
                     need_tokens: {
                         npcName: "Dart Thrower Kevin",
-                        npcIcon: "/assets/npcChatHeads/dart_thrower_kevin.png",
+                        npcIcon: 'person',
                         text: "You need 2 Festival Tokens to play Balloon Popper. Mira can sell you some.",
                         responses: [
                             {

@@ -38,14 +38,21 @@ export const capitalsCall: Quest = {
             requirement: { type: 'talk', poiId: 'oakhaven_west_gate', npcName: 'Guard Captain Elara' }
         }
     ],
+    npcDefs: {
+        guard_captain_elara: { npcName: 'Guard Captain Elara', npcIcon: 'person' },
+        investigate_debris: { npcName: 'Investigate Debris', npcIcon: 'magnifying-glass' },
+        finn_the_rope_maker: { npcName: 'Finn the Rope-maker', npcIcon: 'person' },
+        alaric_the_woodworker: { npcName: 'Alaric the Woodworker', npcIcon: 'person' },
+        bronn_the_retired_adventurer: { npcName: 'Bronn the Retired Adventurer', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Crafting, amount: 2000 }, { skill: SkillName.Woodcutting, amount: 2000 }],
         coins: 2500,
     },
     dialogue: {
         elara_default: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Keep the roads safe, adventurer. A watchful eye prevents a bandit's blade.",
             responses: [],
             conditionalResponses: [
@@ -72,16 +79,14 @@ export const capitalsCall: Quest = {
             ]
         },
         quest_intro_capitals_call: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Trouble? It's a disaster! The main bridge collapsed, cutting off our trade with Silverhaven. Food and supplies are running low, and to make matters worse, a patrol I sent to investigate hasn't returned.",
             responses: [
                 { text: "That sounds serious. How can I help?", next: 'details_capitals_call' },
             ]
         },
         details_capitals_call: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "I need someone capable to go to the bridge and find out what really happened. An engineer's report said it was sound just last month... this feels wrong. Find out what happened to my patrol, and to the bridge. Here, take my signet. Show it to any survivors.",
             responses: [
                 { text: "I'll get to the bottom of this.", actions: [{ type: 'start_quest', questId: 'capitals_call' }, { type: 'give_item', itemId: 'elaras_signet', quantity: 1 }] },
@@ -89,44 +94,38 @@ export const capitalsCall: Quest = {
             ]
         },
         reject_capitals_call: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Disappointing. I had hoped you had more spine. The safety of two towns rests on this, and you shy away? Then step aside. I need a real hero.",
             responses: []
         },
         in_progress_capitals_call_0: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Be careful out there. The situation at the bridge is more dangerous than it seems. Find out what happened.",
             responses: []
         },
         in_progress_capitals_call_1: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "An insignia? This is good work, soldier. Let me see... I don't recognize this serpent mark. It's not a known bandit clan in this region. However, Oakhaven's artisans have an eye for detail. They deal with shipments from all over and might recognize the craftsmanship.",
             responses: [
                 { text: "Who should I speak to?", next: 'cc_elara_send_to_finn' }
             ]
         },
         cc_elara_send_to_finn: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Take this to Finn the Rope-maker in the Artisan's Quarter. If anyone has seen this mark on a shipping crate or a coil of rope, it's him. Let me know what you find.",
             responses: [
                 { text: "I'll see what he knows.", actions: [{ type: 'advance_quest', questId: 'capitals_call' }] }
             ]
         },
         in_progress_capitals_call_4: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "You have them! By the forge, you've done it! With these specialized materials, my engineers can finally repair the bridge properly. You've saved this town from economic collapse. Thank you, adventurer.",
             responses: [
                 { text: "Happy to help restore the trade route.", actions: [{ type: 'take_item', itemId: 'reinforced_bridge_cable', quantity: 1 }, { type: 'take_item', itemId: 'reinforced_bridge_supports', quantity: 1 }, { type: 'advance_quest', questId: 'capitals_call' }] },
             ]
         },
         post_quest_capitals_call: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Thanks to your help, the bridge is secure and the road to Silverhaven is open once more. We're all in your debt. Be wary of those Serpent Bandits, though.",
             conditionalResponses: [
                 { text: "I still have your signet.", check: { requirements: [{ type: 'items', items: [{ itemId: 'elaras_signet', quantity: 1 }] }], successNode: 'return_elaras_signet', failureNode: '' } },
@@ -135,32 +134,28 @@ export const capitalsCall: Quest = {
             responses: []
         },
         return_elaras_signet: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Ah, yes. I had almost forgotten about that. Thank you for returning it; those aren't cheap to forge. Here's a little extra for your honesty.",
             responses: [
                 { text: "Thank you.", actions: [{ type: 'take_item', itemId: 'elaras_signet', quantity: 1 }, { type: 'give_coins', amount: 500 }] }
             ]
         },
         return_bandit_insignia: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "The Serpent Bandits... so they're back. Thank you for bringing this to my attention. This confirms they're operating in this region. We'll need to increase patrols.",
             responses: [
                 { text: "Thank you.", actions: [{ type: 'take_item', itemId: 'torn_bandit_insignia', quantity: 1 }, { type: 'give_coins', amount: 500 }] }
             ]
         },
         investigate_debris_start: {
-            npcName: 'Investigate Debris',
-            npcIcon: 'magnifying-glass',
+            npc: 'investigate_debris',
             text: "The bridge supports look like they were cut with an axe, and there are scorch marks here. It was sabotage! You find a torn piece of cloth with a strange coiled serpent insignia nearby.",
             responses: [
                 { text: "(Take the insignia)", actions: [{ type: 'advance_quest', questId: 'capitals_call' }] }
             ]
         },
         finn_default: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "Need some rope? I make the strongest in the land.",
             responses: [],
             conditionalResponses: [
@@ -184,8 +179,7 @@ export const capitalsCall: Quest = {
             ]
         },
         finn_recognizes_insignia: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "An insignia? Let me see... By my grandfather's beard, it's the mark of the Serpent Bandits! A nasty clan known for economic sabotage. They must be behind the bridge collapse!",
             responses: [
                 { text: "Who exactly are these Serpent Bandits?", next: 'cc_finn_serpent_lore_1' },
@@ -193,8 +187,7 @@ export const capitalsCall: Quest = {
             ]
         },
         cc_finn_serpent_lore_1: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "They're a ruthless syndicate operating out of the eastern marshes. They don't just rob carts; they strangle trade routes, forcing merchants to pay exorbitant tolls to use 'safe' passages they control.",
             responses: [
                 { text: "So they destroyed the bridge to create a monopoly?", next: 'cc_finn_serpent_lore_2' },
@@ -202,58 +195,50 @@ export const capitalsCall: Quest = {
             ]
         },
         cc_finn_serpent_lore_2: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "Exactly. By crippling the King's Road, they force all Silverhaven traffic to use their hidden smuggler routes through the eastern marshes. It's a labyrinth of poison fog and sinkholes—impossible to navigate unless you're one of them, making it a perfect extortion racket.",
             responses: [
                 { text: "What needs to be done to fix the bridge?", next: 'cc_finn_explain_materials' }
             ]
         },
         cc_finn_explain_materials: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "To repair the bridge properly, we need two very specific components. I can weave a new Reinforced Bridge Cable, but the bandits stole my entire supply of Glimmer-thread Fibers. You'll need to get five of them from the Glimmerhorn Stags in the Verdant Fields.",
             responses: [
                 { text: "What's the other component?", next: 'cc_finn_explain_alaric' }
             ]
         },
         cc_finn_explain_alaric: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "The engineers also need new anchor supports. You'll need to speak with Alaric the Woodworker. He's the only one skilled enough to make them. He's been grumbling about needing 10 Yew Logs to make the supports. His shop is just around the corner in the Artisan's Quarter. Get both components, and we can save this town.",
             responses: [
                 { text: "I'll get the materials.", actions: [{ type: 'advance_quest', questId: 'capitals_call' }] }
             ]
         },
         craft_cable_success: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "Wonderful! I'll get to work right away. Here is the Reinforced Bridge Cable. Now get those supports from Alaric!",
             responses: []
         },
         fibers_fail: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "Trying to pull a fast one on a craftsman, eh? I can tell Glimmer-thread from a mile away, and you don't have it. Now go get it before I tie you up with your own shoelaces.",
             responses: [
                 { text: "My mistake. I'll be back." },
             ]
         },
         finn_exit_working: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "Well, don't dally. The longer that bridge is out, the tighter our belts get around here. You'll find the stags in the Verdant Fields.",
             responses: []
         },
         finn_post_quest_capitals_call: {
-            npcName: 'Finn the Rope-maker',
-            npcIcon: '/assets/npcChatHeads/finn_the_rope_maker.png',
+            npc: 'finn_the_rope_maker',
             text: "Good to see you again! Thanks to you, my ropes are securing the King's Road once more. A fine day's work!",
             responses: []
         },
         alaric_default: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Welcome to my workshop. Finest woods in the land, shaped by a master's hand.",
             responses: [],
             conditionalResponses: [
@@ -268,8 +253,7 @@ export const capitalsCall: Quest = {
             ]
         },
         alaric_in_progress_capitals_call_3: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Ah, an adventurer! Finn sent you, I presume? I heard about the bridge. A real shame. I can craft the supports, but I'll need the right material. Ten Yew Logs, to be exact. They're strong and flexible, perfect for the job. You'll find them up on the treacherous Gale-Swept Peaks.",
             responses: [
                 { text: "I have the 10 Yew Logs right here.", check: { requirements: [{ type: 'items', items: [{ itemId: 'yew_logs', quantity: 10 }] }], successNode: 'craft_supports_success', failureNode: 'yew_logs_fail' }, actions: [{ type: 'take_item', itemId: 'yew_logs', quantity: 10 }, { type: 'give_item', itemId: 'reinforced_bridge_supports', quantity: 1 }] },
@@ -278,28 +262,24 @@ export const capitalsCall: Quest = {
             ]
         },
         craft_supports_success: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Perfect! These will do nicely. Give me a moment... There. One set of Reinforced Bridge Supports, ready for installation. Good luck out there.",
             responses: []
         },
         yew_logs_fail: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Do you take me for a fool? I can tell Yew from Pine just by the smell of it, and you certainly don't have ten Yew logs on you. Don't try to pull a fast one on a master woodworker. Now go get what I need!",
             responses: [
                 { text: "Right. Of course. I'll be back." },
             ]
         },
         alaric_exit_gale: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Be careful up there. The peaks are named 'Gale-Swept' for a reason. The wind can knock a man off his feet if he's not careful. The Yew trees grow in the most sheltered spots, usually.",
             responses: []
         },
         alaric_post_quest_capitals_call: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Good to see you again. Thanks to those supports, the bridge should hold for another hundred years. Fine work.",
             responses: [
                 { text: "Tell me about the woods of this land.", next: 'wood_lore_pine' },
@@ -307,8 +287,7 @@ export const capitalsCall: Quest = {
             ]
         },
         wood_lore_pine: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Ah, a connoisseur! Well, the most common is Pine. It's what most of Meadowdale is built from. It's soft, easy to work with, but not very durable. Good for kindling and cheap furniture.",
             responses: [
                 { text: "Interesting. What else?", next: 'wood_lore_oak' },
@@ -317,8 +296,7 @@ export const capitalsCall: Quest = {
             ]
         },
         wood_lore_oak: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Then you have Oak. Much harder, much stronger. Makes for fine bows and sturdy shields. Takes a keen eye to work it properly without splitting, but the results are worth it.",
             responses: [
                 { text: "Tell me more.", next: 'wood_lore_willow' },
@@ -327,8 +305,7 @@ export const capitalsCall: Quest = {
             ]
         },
         wood_lore_willow: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Willow is a curious one. It's very light and flexible. Not much good for construction, but excellent for fletching lighter bows. It has a slight greenish tint to it.",
             responses: [
                 { text: "And the magical ones?", next: 'wood_lore_feywood' },
@@ -337,8 +314,7 @@ export const capitalsCall: Quest = {
             ]
         },
         wood_lore_feywood: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "The Feywood... now that's a different beast entirely. The logs have a purple hue and hum with a faint energy. They say it never rots. Makes for the most powerful bows, but the forest itself doesn't like giving it up.",
             responses: [
                 { text: "So why Yew for the bridge?", next: 'wood_lore_yew' },
@@ -346,60 +322,52 @@ export const capitalsCall: Quest = {
             ]
         },
         wood_lore_yew: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Yew is the king of woods for structural work. It's incredibly dense and strong, but also has a natural resilience to water and rot. It can bend under great strain without breaking. Perfect for something like a bridge that needs to withstand the elements and heavy loads. It's the only choice, really.",
             responses: [
                 { text: "Thank you for the info.", next: 'alaric_exit_thanks' },
             ]
         },
         alaric_exit_lore_info: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "Okay, well if you want more information, you know where to find me.",
             responses: []
         },
         alaric_exit_thanks: {
-            npcName: 'Alaric the Woodworker',
-            npcIcon: '/assets/npcChatHeads/artisan.png',
+            npc: 'alaric_the_woodworker',
             text: "You're most welcome, and I hope you enjoy knowing a bit more about the life of a master woodworker.",
             responses: []
         },
         bronn_in_progress_capitals_call_2: {
-            npcName: 'Bronn the Retired Adventurer',
-            npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+            npc: 'bronn_the_retired_adventurer',
             text: "Looking for information, are ya? Captain Elara send you? Hah! Knew she'd need a real adventurer's expertise eventually. The Serpent Bandits, you say? Not your average thugs.",
             responses: [
                 { text: "What do you know about them?", next: 'cc_bronn_lore_1' },
             ]
         },
         bronn_in_progress_capitals_call_3: {
-            npcName: 'Bronn the Retired Adventurer',
-            npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+            npc: 'bronn_the_retired_adventurer',
             text: "Looking for information, are ya? Captain Elara send you? Hah! Knew she'd need a real adventurer's expertise eventually. The Serpent Bandits, you say? Not your average thugs.",
             responses: [
                 { text: "What do you know about them?", next: 'cc_bronn_lore_1' },
             ]
         },
         cc_bronn_lore_1: {
-            npcName: 'Bronn the Retired Adventurer',
-            npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+            npc: 'bronn_the_retired_adventurer',
             text: "I've crossed paths with their work before, up near the northern peaks. They don't fight like bandits. They fight like soldiers. Coordinated. Precise. They use the terrain, strike at weak points... it's sabotage, not robbery. They never leave witnesses, either.",
             responses: [
                 { text: "Any idea who they are?", next: 'cc_bronn_lore_2' },
             ]
         },
         cc_bronn_lore_2: {
-            npcName: 'Bronn the Retired Adventurer',
-            npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+            npc: 'bronn_the_retired_adventurer',
             text: "Some say they're remnants of a disgraced legion from the old wars. Others say they're something... older.沼地の蛇 (Numachi no hebi)... that's what a traveler from the far east called them. 'Swamp Serpents'. Said they rise from the muck when kingdoms get too comfortable. Now, buy an old man a drink, this talk is making me thirsty!",
             responses: [
                 { text: "Thank you for the information, Bronn.", next: 'bronn_exit_thanks' },
             ]
         },
         bronn_exit_thanks: {
-            npcName: 'Bronn the Retired Adventurer',
-            npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+            npc: 'bronn_the_retired_adventurer',
             text: "Hmph. Information's not free, but I'll let it slide this time. Now let me get back to my drink.",
             responses: []
         }

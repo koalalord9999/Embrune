@@ -22,6 +22,10 @@ export const ancientBlade: Quest = {
             requirement: { type: 'talk', poiId: 'meadowdale_smithy', npcName: 'Valerius the Master Smith' }
         }
     ],
+    npcDefs: {
+        valerius_the_master_smith: { npcName: 'Valerius the Master Smith', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Smithing, amount: 250 }],
         items: [{ itemId: 'steel_scimitar', quantity: 1 }],
@@ -32,8 +36,7 @@ export const ancientBlade: Quest = {
     ],
     dialogue: {
         start_ancient_blade: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "I am quite knowledgable when it comes to historical blades, I've been around long enough, I may have even made some of them myself.",
             responses: [
                 { text: "What kind of swords have you worked on?", next: 'lore_ancient_blade' }
@@ -43,14 +46,12 @@ export const ancientBlade: Quest = {
             ]
         },
         lore_ancient_blade: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: 'I\'ve made a sword for the King of Silverhaven, named Silvthrill the Undead Slayer. It is mostly a decoration piece, but I enhanced the durability by imbuing Runic bars and Silver Bars together so that if needed, it could be used as a powerful weapon against the undead.',
             responses: []
         },
         intro_ancient_blade: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: 'Let me see here... *Valerius pulls up his goggles* Hmm. Yes. This seems familiar... OH! That old coot... How dare he throw my sword in a well!',
             responses: [
                 { text: "Who threw it away?", next: 'owner_ancient_blade'},
@@ -58,16 +59,14 @@ export const ancientBlade: Quest = {
             ]
         },
         owner_ancient_blade: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: 'I gave this sword to Sir Fitswilliam decades ago... Back when he wasn\'t a senile old man. He was quite the adventurer back in the day. It was more of a sparring sword for him at the time, to hone his techniques.',
             responses: [
                 { text: 'Interesting... Would you be able to repair it for me?', next: 'pre_details_ancient_blade' },
             ]
         },
         pre_details_ancient_blade: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: 'Not a problem, just let me give a thorough inspection first... *He holds out the blade, feeling the weight, balancing it in his hands, swinging it gently* Ah, yes a fine blade I made back then, quite weak compared to what I can do now, but I\'ll give you the details.',
             responses: [
                 { text: "Alright, lets hear it.", next: 'details_ancient_blade'}
@@ -75,8 +74,7 @@ export const ancientBlade: Quest = {
 
         },
         details_ancient_blade: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "The core is iron. I'll need 5 Iron Ores to reforge the blade and draw out its former strength. Bring them to me, and I'll see what I can do. It would be a crime to let a blade like this turn to dust.",
             responses: [
                 { text: "I'll get the ore for you.", actions: [{ type: 'start_quest', questId: 'ancient_blade' }] }
@@ -92,8 +90,7 @@ export const ancientBlade: Quest = {
             ]
         },
         in_progress_ancient_blade_0: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Have you gathered those 5 Iron Ores yet? That old sword is practically humming, waiting to be reborn.",
             responses: [],
             conditionalResponses: [
@@ -102,36 +99,31 @@ export const ancientBlade: Quest = {
             ]
         },
         iron_ore_hint: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "You'll find iron ore veins in the mines, and down there with the dwarves, at the Dwarven Outpost. Some monsters also drop the ore, if you don't want to mine it yourself.",
             responses: [{ text: "Thank you for the hint."}]
         },
         silly_ancient_blade: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Well thats quite a peculiar thing to just be carrying around with you, but no matter, give me a moment and I'll fix it right up for you! In fact, I'll even throw in some of my coal to make it better!",
             responses: [
                 { text: "Sounds good, here's the iron ore.", actions: [{ type: 'take_item', itemId: 'iron_ore', quantity: 5}, { type: 'take_item', itemId: 'rusty_iron_sword', quantity: 1}, { type: 'complete_quest', questId: 'ancient_blade'}]}, 
             ]
         },
         in_progress_ancient_blade_1: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Excellent! With this ore, I can restore the blade. Give me a moment... There! Good as new. I even added some of my coal to make it a bit better! A fine Steel Scimitar for your troubles. Take good care of it.",
             responses: [
                 { text: "Thank you, Valerius!", actions: [{ type: 'take_item', itemId: 'rusty_iron_sword', quantity: 1}, { type: 'take_item', itemId: 'iron_ore', quantity: 5}, { type: 'complete_quest', questId: 'ancient_blade' }] }
             ]
         },
         only_ore_ancient_blade: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: 'You have the Iron ore, but you don\'t have the sword with you',
             responses: []
         },
         post_quest_ancient_blade: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "How's that old blade holding up? A fine piece of work, if I do say so myself.",
             responses: []
         }

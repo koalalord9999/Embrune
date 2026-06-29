@@ -154,16 +154,19 @@ const PilferButton: React.FC<{
 
     // Perform conditional checks *after* all hooks have been called
     const houseInfo = worldState.generatedHouses?.[activity.id];
-    if (!houseInfo) return null;
+    const containerData = houseInfo ? THIEVING_CONTAINER_TARGETS[houseInfo.tierId] : undefined;
 
-    const containerData = THIEVING_CONTAINER_TARGETS[houseInfo.tierId];
-    if (!containerData) return null;
+    // Only hide the button if the house has no generated data AND is not depleted.
+    // Depleted houses always render so the player sees "Recently Pilfered".
+    if (!houseInfo && !isDepleted) return null;
+    if (houseInfo && !containerData) return null;
 
     const handleMouseEnter = (e: React.MouseEvent) => {
         if (isDepleted) {
             setTooltip({ content: <p>This house has been recently pilfered. Check back later.</p>, position: { x: e.clientX, y: e.clientY } });
             return;
         }
+        if (!containerData) return;
         const thievingSkill = skills.find(s => s.name === SkillName.Thieving)?.currentLevel ?? 1;
         const requiredLevel = containerData.level;
         const hasLevel = thievingSkill >= requiredLevel;

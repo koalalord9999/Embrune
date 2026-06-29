@@ -18,7 +18,7 @@ export const theVerdantFieldsPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Rancher McGregor",
-                icon: "/assets/npcChatHeads/rancher_mcgregor.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_farmer_table",
                 },

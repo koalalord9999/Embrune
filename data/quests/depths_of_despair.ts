@@ -74,6 +74,12 @@ export const depthsOfDespair: Quest = {
             requirement: { type: 'talk', poiId: 'dwarven_forge', npcName: 'Durin' }
         }
     ],
+    npcDefs: {
+        durin: { npcName: 'Durin', npcIcon: 'person' },
+        enter_the_chasm: { npcName: 'Enter the Chasm', npcIcon: 'cave-entrance' },
+        approach_the_golem: { npcName: 'Approach the Golem', npcIcon: 'rock-golem' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Mining, amount: 15000 }, { skill: SkillName.Smithing, amount: 15000 }],
     },
@@ -106,8 +112,7 @@ export const depthsOfDespair: Quest = {
     ],
     dialogue: {
         dod_intro: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Worried? I'm about to lose my beard to stress! We broke into a new chasm, thought we'd struck the motherlode. But now... tremors. Getting worse every day. The whole outpost shakes like a jelly in a giant's hand!",
             responses: [
                 { text: "Tremors? What's causing them?", next: 'dod_durin_explain' },
@@ -116,32 +121,28 @@ export const depthsOfDespair: Quest = {
             ]
         },
         dod_durin_silly: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Wobbly knees?! I've stood firm against rockfalls that would turn you to paste, you long-legged twig! This is serious!",
             responses: [
                 { text: "My apologies. What seems to be the problem?", next: 'dod_durin_explain' }
             ]
         },
         dod_durin_explain: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "That's what I need to find out! My miners are too spooked to go back down. They say the very rock groans, and strange, chitinous creatures are crawling out of the dark. We've dubbed it the 'Chasm of Woe'.",
             responses: [
                 { text: "So you need someone to go in and take a look?", next: 'dod_durin_task' }
             ]
         },
         dod_durin_explain_2: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "And fighting might be just what's needed! My miners are too spooked to go back down. They say the very rock groans, and strange, chitinous creatures are crawling out of the dark. We've dubbed it the 'Chasm of Woe'.",
             responses: [
                 { text: "So you need someone to go in and take a look?", next: 'dod_durin_task' }
             ]
         },
         dod_durin_task: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Exactly. I need a brave soul to venture into that chasm, find the source of these tremors, and put a stop to it. There's a hefty reward in it for you, of course. My outpost's stability is worth more than a few coins.",
             responses: [
                 { text: "I'll do it. Point me to the chasm.", actions: [{ type: 'start_quest', questId: 'depths_of_despair' }], next: 'dod_durin_accept' },
@@ -149,14 +150,12 @@ export const depthsOfDespair: Quest = {
             ]
         },
         dod_durin_accept: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Good on ya! The entrance is through our outpost mine. Be careful down there. The lads weren't exaggerating about the creatures.",
             responses: []
         },
         dod_durin_return: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "You're back! And in one piece! Did you find the source?",
             responses: [
                 {
@@ -170,60 +169,52 @@ export const depthsOfDespair: Quest = {
             ]
         },
         dod_durin_no_core: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Did you now? Seems you forgot the most important part! A trophy! Proof! Without its core, I can't be sure the tremors won't return. Go back and get it!",
             responses: []
         },
         dod_durin_core_reveal: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "By my ancestors' anvil... The Heart of the Mountain! You defeated the Earth-Render? Incredible! This thing... it's pure terrestrial energy. I can feel it thrumming. With this, I could forge a masterpiece.",
             responses: [
                 { text: "A masterpiece?", next: 'dod_durin_masterpiece' }
             ]
         },
         dod_durin_masterpiece: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Aye! But to work with a core this powerful, I need a worthy vessel. A simple iron pickaxe would shatter. I need something strong, something... resonant. A Runic Pickaxe. Do you have one?",
             responses: [
                 { text: "(Show him your Runic Pickaxe)", check: { requirements: [{ type: 'items', items: [{ itemId: 'runic_pickaxe', quantity: 1 }] }], successNode: 'dod_durin_upgrade', failureNode: 'dod_durin_no_pickaxe' } }
             ]
         },
         dod_durin_no_pickaxe: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Hmph. As I thought. Can't forge a masterpiece on a rusty nail, lad. You'll need to smith a Runic Pickaxe yourself. It requires the finest materials. Come back when you have one.",
             responses: []
         },
         dod_durin_upgrade: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Aye, that's the stuff! A fine pickaxe. Give me the Heart and your pick. I will fuse them. This will be my greatest work! ... It is done! Behold... the Crystal-Tipped Runic Pickaxe! It will bite through rock like a shark through a sardine!",
             responses: [
                 { text: "It's magnificent!", next: 'dod_durin_complete' }
             ]
         },
         dod_durin_complete: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "It's a fitting reward for saving my outpost. Take it, hero. By the way, with the big one gone, the chasm should be more stable. I'd wager that crystal-filled alcove my scouts saw is accessible now. Should be some prime mining in there for a pickaxe like that.",
             responses: [
                 { text: "Thank you, Durin.", actions: [{ type: 'take_item', itemId: 'heart_of_the_mountain', quantity: 1 }, { type: 'take_item', itemId: 'runic_pickaxe', quantity: 1 }, { type: 'give_item', itemId: 'crystal_tipped_runic_pickaxe', quantity: 1 }, { type: 'advance_quest', questId: 'depths_of_despair' }] }
             ]
         },
         dod_enter_chasm: {
-            npcName: 'Enter the Chasm',
-            npcIcon: 'cave-entrance',
+            npc: 'enter_the_chasm',
             text: "A gust of cold, ancient air blows from the chasm. The tremors are stronger here. You can hear the skittering of unseen things in the darkness below.",
             responses: [
                 { text: "(Descend)", actions: [{ type: 'advance_quest', questId: 'depths_of_despair' }, { type: 'teleport', poiId: 'chasm_ledge_1' }] }
             ]
         },
         dod_approach_golem: {
-            npcName: 'Approach the Golem',
-            npcIcon: 'rock-golem',
+            npc: 'approach_the_golem',
             text: "As you step into the cavern's heart, the tremors intensify. Dust rains from the ceiling. Before you, a colossal figure of stone and crystal begins to move. It was not a statue. It was sleeping. Its single, glowing eye fixes on you. The Earth-Render has awoken.",
             responses: [
                 { text: "(Prepare for battle!)", actions: [{ type: 'advance_quest', questId: 'depths_of_despair' }, { type: 'start_mandatory_combat', monsterId: 'the_earth_render' }] }

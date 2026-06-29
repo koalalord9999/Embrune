@@ -13,9 +13,10 @@ interface KeyboardManagerProps {
     onEsc?: () => void;
     onSlash?: () => void;
     onR?: () => void;
+    hasActiveDialogue?: boolean;
 }
 
-export const useKeyboardManager = ({ keybindings, isBusy, onTravel, onAction, onPanelSwitch, onEsc, onSlash, onR }: KeyboardManagerProps) => {
+export const useKeyboardManager = ({ keybindings, isBusy, onTravel, onAction, onPanelSwitch, onEsc, onSlash, onR, hasActiveDialogue }: KeyboardManagerProps) => {
     const keysPressed = useRef<Set<string>>(new Set());
 
     const resolveTravel = useCallback((): Direction | null => {
@@ -108,6 +109,7 @@ export const useKeyboardManager = ({ keybindings, isBusy, onTravel, onAction, on
             // Check for actions (1-9)
             const actionIdx = resolveAction(e.key, e.code);
             if (actionIdx !== null) {
+                if (hasActiveDialogue) return;
                 // Prevent default for number keys to avoid chatbox focus (if handled elsewhere)
                 e.preventDefault();
                 onAction(actionIdx, e.shiftKey);
@@ -146,5 +148,5 @@ export const useKeyboardManager = ({ keybindings, isBusy, onTravel, onAction, on
             window.removeEventListener('keyup', handleKeyUp);
             window.removeEventListener('blur', handleBlur);
         };
-    }, [isBusy, onTravel, onAction, resolveTravel, resolveAction, onEsc, onSlash, onR, onPanelSwitch, resolvePanel]);
+    }, [isBusy, onTravel, onAction, resolveTravel, resolveAction, onEsc, onSlash, onR, onPanelSwitch, resolvePanel, hasActiveDialogue]);
 };

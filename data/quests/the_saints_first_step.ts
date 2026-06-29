@@ -31,6 +31,11 @@ export const theSaintsFirstStep: Quest = {
         { description: "Offer 25 Holy Paste at the Chapel Altar.", requirement: { type: 'offer', itemId: 'holy_paste', quantity: 25, poiId: 'sanctity_chapel', npcName: 'Altar' } }, // 7
         { description: "Return to Brother Thaddeus.", requirement: { type: 'talk', poiId: 'sanctity_chapel', npcName: 'Brother Thaddeus' } } // 8
     ],
+    npcDefs: {
+        brother_thaddeus: { npcName: 'Brother Thaddeus', npcIcon: 'priest-hat' },
+        sister_seraphina: { npcName: 'Sister Seraphina', npcIcon: 'woman-elf-face' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Prayer, amount: 2000 }],
         coins: 1000,
@@ -95,8 +100,7 @@ export const theSaintsFirstStep: Quest = {
     ],
     dialogue: {
         tfs_quest_intro: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "I see a spark in you... a potential for more than simple faith. You honor the dead by burying their bones, a common and respectable practice. But there is a deeper path, a way to truly elevate their sacrifice. A path of Intercession.",
             responses: [
                 { text: "Intercession? What's that?", next: 'tfs_explain_intercession_new' },
@@ -105,24 +109,21 @@ export const theSaintsFirstStep: Quest = {
             ]
         },
         tfs_wastefulness_question: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "A practical question. Burying bones is a quick prayer, a shout into the void that is heard. Intercession is a reasoned sermon, a direct conversation with the divine. It is slower, yes, but the understanding it brings is far deeper. It is the difference between asking for a blessing and becoming one.",
             responses: [
                 { text: "I see. Tell me more about this 'conversation'.", next: 'tfs_explain_intercession_new' }
             ]
         },
         tfs_moral_conflict: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "A thoughtful question. It is not desecration, but elevation. Their struggle in life is over. Through this ritual, their physical remnants—the last echo of their strength—can be used to commune with the divine, to seek guidance and power to protect others.",
             responses: [
                 { text: "(Continue)", next: 'tfs_moral_conflict_2' }
             ]
         },
         tfs_moral_conflict_2: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "Their sacrifice continues to serve the light. It is the greatest honor we can give them, ensuring their legacy is not buried and forgotten, but a foundation upon which a safer world is built.",
             responses: [
                 { text: "I understand. Their sacrifice serves a greater purpose.", next: 'tfs_explain_intercession_new' },
@@ -130,24 +131,21 @@ export const theSaintsFirstStep: Quest = {
             ]
         },
         tfs_moral_conflict_reassurance: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "Doubt is the companion of a thinking mind. Trust in the process. The intent is one of honor, not exploitation. This is the path to truly understanding the Divine.",
             responses: [
                 { text: "Very well. Tell me about Intercession.", next: 'tfs_explain_intercession_new' }
             ]
         },
         tfs_explain_intercession_new: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "Intercession is the first step towards undertaking the Divine Trials. These trials are communions with the three primary aspects of the divine that shape our world. Only by understanding them can one truly walk in the light.",
             responses: [
                 { text: "Tell me about these 'aspects'.", next: 'tfs_explain_aspects_hub' }
             ]
         },
         tfs_explain_aspects_hub: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "They are War, the Hunt, and Sorcery. Each is a pillar of existence, a fundamental truth of our reality. Which would you learn of first?",
             responses: [
                 { text: "Tell me of War.", next: 'tfs_lore_war_1' },
@@ -165,104 +163,91 @@ export const theSaintsFirstStep: Quest = {
             ]
         },
         tfs_lore_other_gods_1: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "An astute question. Many cultures worship other, lesser gods—spirits of the hearth, patrons of a particular craft, and so on. But we believe these are simply facets or interpretations of the three great pillars.",
             responses: [
                 { text: "(Continue)", next: 'tfs_lore_other_gods_2' }
             ]
         },
         tfs_lore_other_gods_2: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "A god of the forge, for example, is an expression of both War's strength and Sorcery's creation. A god of the harvest is an expression of the Hunt's cycle of life. All divinity flows from these three sources. To understand them is to understand the whole.",
             responses: [
                 { text: "I see.", next: 'tfs_explain_aspects_hub' }
             ]
         },
         tfs_lore_fail_1: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "The gods do not seek perfection, child, but sincerity of effort. Failure is simply another lesson on the path. The trials will test you, but they are not designed to destroy you.",
             responses: [
                 { text: "(Continue)", next: 'tfs_lore_fail_2' }
             ]
         },
         tfs_lore_fail_2: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "However... those who approach the trials with a dark heart, with intent to corrupt or misuse the divine power... they are not merely turned away. They are broken.",
             responses: [
                 { text: "I understand.", next: 'tfs_explain_aspects_hub' }
             ]
         },
         tfs_prayer_meditation: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "You have a strong connection to the divine. Very well. Close your eyes. I will guide your thoughts. The trials are not contests against mortals, but against Avatars—beings of pure aspect. The God of War is not a man, but the concept of righteous battle made manifest. To face it is to face the ultimate test of your own strength and resolve.",
             responses: [
                 { text: "I understand.", next: 'tfs_explain_aspects_hub' }
             ]
         },
         tfs_lore_war_1: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "The Aspect of War is not the god of mindless slaughter. It is the divine will of Strength, Discipline, and Sacrifice. It is the courage to stand against the dark, the discipline to hold the line when all hope seems lost.",
             responses: [
                 { text: "(Continue)", next: 'tfs_lore_war_2' }
             ]
         },
         tfs_lore_war_2: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "It is honorable combat that tests a warrior's soul, forging them into a shield for the weak. Great heroes of old, like Pregai who fell at the Forgotten Barrow, embodied this aspect. Their sacrifice was a prayer in steel and blood.",
             responses: [
                 { text: "I understand.", next: 'tfs_explain_aspects_hub' }
             ]
         },
         tfs_lore_hunt_1: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "The Hunt is the sacred cycle. It is the wisdom of the predator and the resilience of the prey. It is the understanding that all life feeds on life, not out of malice, but as part of a divine dance that sustains the world.",
             responses: [
                 { text: "(Continue)", next: 'tfs_lore_hunt_2' }
             ]
         },
         tfs_lore_hunt_2: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "To honor the Hunt is to respect the wild, to survive by your wits and skill, and to understand your place in the great chain. The hermit Sister Seraphina, whom you will soon meet, embodies this aspect. She lives in harmony with the cycle, a true daughter of the grove.",
             responses: [
                 { text: "I understand.", next: 'tfs_explain_aspects_hub' }
             ]
         },
         tfs_lore_sorcery_1: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "Sorcery is the most volatile aspect. It is the raw power of Creation and the terrifying finality of Destruction. It is the untamed energy of the Arcane Weave that mages struggle to command.",
             responses: [
                 { text: "(Continue)", next: 'tfs_lore_sorcery_2' }
             ]
         },
         tfs_lore_sorcery_2: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "To serve this aspect is to pursue knowledge relentlessly, to understand the immense responsibility that comes with shaping reality itself. Great mages like Elmsworth and Theron walk this dangerous, yet vital, path.",
             responses: [
                 { text: "I understand.", next: 'tfs_explain_aspects_hub' }
             ]
         },
         tfs_task_1: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "To begin, you must prove your understanding. Gather 5 Big Bones from the fallen beasts of the world. Then, bring them here to the chapel and 'Use' them on the main altar. This act of consecration is your first true step on the path.",
             responses: [
                 { text: "I will consecrate the bones.", actions: [{ type: 'start_quest', questId: 'the_saints_first_step' }] }
             ]
         },
         tfs_return_after_consecrate: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "Let me see... yes, they radiate with holy energy. You have done well.",
             responses: [
                 {
@@ -276,36 +261,31 @@ export const theSaintsFirstStep: Quest = {
             ]
         },
         tfs_fail_consecrate_check: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "It seems you do not have all 5 consecrated bones yet. The altar awaits. Remember, 'Use' the bones on the altar itself.",
             responses: []
         },
         tfs_explain_grind: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "The next step is to release the essence within. Take all 5 of the consecrated bones to the Reliquary Grinder here in the chapel. It will turn them into 100 units of Sacred Dust. Once you have done that, return to me.",
             responses: [
                 { text: "I will grind the bones.", actions: [{ type: 'advance_quest', questId: 'the_saints_first_step' }] }
             ]
         },
         tfs_return_after_grind: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "Ah, 100 units of Sacred Dust. Excellent. The next component is Anointing Oil, a blessed liquid that purifies the dust. It can only be brewed by one who lives in harmony with nature, one who understands the Hunt. Seek out Sister Seraphina, a hermit who lives in a secluded part of the Wyrmwood Grove.",
             responses: [
                 { text: "I will find her.", actions: [{ type: 'advance_quest', questId: 'the_saints_first_step' }] }
             ]
         },
         seraphina_default: {
-            npcName: 'Sister Seraphina',
-            npcIcon: 'woman-elf-face',
+            npc: 'sister_seraphina',
             text: "It is not often I get visitors. State your purpose, but do not disturb the quiet of this grove.",
             responses: []
         },
         tfs_seraphina_intro: {
-            npcName: 'Sister Seraphina',
-            npcIcon: 'woman-elf-face',
+            npc: 'sister_seraphina',
             text: "Brother Thaddeus sent you? He seeks to prepare you for the trials, then. He understands the power of the chapel, but I understand the power of the wild. To truly know the divine, you must understand the Great Hunt—the endless cycle of life and death that governs all things.",
             responses: [
                 { text: "He said you could make Anointing Oil.", next: 'tfs_seraphina_task' }
@@ -313,7 +293,7 @@ export const theSaintsFirstStep: Quest = {
         },
         tfs_seraphina_task: {
             npcName: 'Sister Seraphina',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "I can. But you must first prove you respect the earth from which all things grow. Bring me 5 Grimy Marleaf. They grow in dark places, often carried by creatures of the deep. It is a humble task, but a necessary one.",
             responses: [
                 { text: "I will gather the herbs.", actions: [{ type: 'advance_quest', questId: 'the_saints_first_step' }] },
@@ -326,8 +306,7 @@ export const theSaintsFirstStep: Quest = {
             ]
         },
         tfs_seraphina_herblore_skip: {
-            npcName: 'Sister Seraphina',
-            npcIcon: 'woman-elf-face',
+            npc: 'sister_seraphina',
             text: "Ah, a fellow student of the green-leaf! Your eyes are sharp. Marleaf, a prized herb for its medicinal aroma. Yes, it will be burned, but not in its normal state, first it needs to be crafted into Anointing Oil, which as you are experienced enough already, I'll give you this.",
             responses: [
                 { text: "Thank you, Sister.", actions: [{ type: 'give_item', itemId: 'anointing_oil', quantity: 5 }, { type: 'advance_quest', questId: 'the_saints_first_step', quantity: 3 }] }
@@ -335,7 +314,7 @@ export const theSaintsFirstStep: Quest = {
         },
         tfs_seraphina_stage4_router: {
             npcName: 'Sister Seraphina',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Let's see what you've brought...",
             responses: [],
             conditionalResponses: [
@@ -355,7 +334,7 @@ export const theSaintsFirstStep: Quest = {
         },
         tfs_seraphina_stage5_router: {
             npcName: 'Sister Seraphina',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Have you cleaned the herbs as I asked?",
             responses: [],
             conditionalResponses: [
@@ -371,19 +350,19 @@ export const theSaintsFirstStep: Quest = {
         },
         tfs_seraphina_still_gathering: {
             npcName: 'Sister Seraphina',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "You don't seem to have the herbs I need. I need 5 Grimy Marleaf from the creatures in the dark caves.",
             responses: []
         },
         tfs_seraphina_herb_is_still_grimy: {
             npcName: 'Sister Seraphina',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "The herbs are still grimy. Please clean them before I can prepare the oil.",
             responses: []
         },
         tfs_seraphina_give_oil_from_stage4: {
             npcName: 'Sister Seraphina',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Ah, you've already cleaned them! Excellent foresight. Here is your Anointing Oil. Use it well. Combine it with your Sacred Dust to create the Holy Paste for your offering.",
             responses: [
                 { text: "Thank you, Sister.", actions: [{ type: 'take_item', itemId: 'clean_marleaf', quantity: 5 }, { type: 'give_item', itemId: 'anointing_oil', quantity: 5 }, { type: 'advance_quest', questId: 'the_saints_first_step', quantity: 2 }] }
@@ -391,15 +370,14 @@ export const theSaintsFirstStep: Quest = {
         },
         tfs_seraphina_herb_is_grimy: {
             npcName: 'Sister Seraphina',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "They are still covered in grime. You must clean them first before I can use them. It is a simple but important part of the process.",
             responses: [
                 { text: "I'll clean them now.", actions: [{ type: 'advance_quest', questId: 'the_saints_first_step' }] }
             ]
         },
         tfs_seraphina_give_oil: {
-            npcName: 'Sister Seraphina',
-            npcIcon: 'woman-elf-face',
+            npc: 'sister_seraphina',
             text: "Excellent. You show respect for the process. Here is your Anointing Oil. Use it well. Combine it with your Sacred Dust to create the Holy Paste for your offering.",
             responses: [
                 { text: "Thank you, Sister.", actions: [{ type: 'take_item', itemId: 'clean_marleaf', quantity: 5 }, { type: 'give_item', itemId: 'anointing_oil', quantity: 5 }, { type: 'advance_quest', questId: 'the_saints_first_step' }] }
@@ -437,8 +415,7 @@ export const theSaintsFirstStep: Quest = {
             responses: [{ text: "Return", next: 'tfs_offer_paste' }]
         },
         tfs_thaddeus_final: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "A vision! Just as the scriptures foretold. You have been acknowledged by the Divines. The three paths you saw are the Divine Trials. You are ready to begin. Each path requires a different master to guide you.",
             responses: [
                 { text: "Tell me about the masters.", next: 'tfs_thaddeus_explain_masters' },
@@ -446,8 +423,7 @@ export const theSaintsFirstStep: Quest = {
             ]
         },
         tfs_thaddeus_explain_masters: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "For the Trial of War, seek Lieutenant Cassia at our west gate. For the Trial of the Hunt, find the master hunter Fenris in the Wyrmwood Grove. And for the Trial of Sorcery, speak with Librarian Anya in our library. They will guide you further. Which master do you wish to know more about?",
             responses: [
                 { text: "Tell me about Lieutenant Cassia.", next: 'tfs_master_lore_cassia' },
@@ -457,20 +433,17 @@ export const theSaintsFirstStep: Quest = {
             ]
         },
         tfs_master_lore_cassia: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "Lieutenant Cassia is the embodiment of the Warrior aspect. She sees the divine not in prayer, but in the perfect order of a shield wall and the righteous fury of a counter-attack. Her discipline is her devotion. She will not suffer fools.",
             responses: [{ text: "Return to questions.", next: 'tfs_thaddeus_explain_masters' }]
         },
         tfs_master_lore_fenris: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "Fenris is a man of the wild. He speaks the language of the wind and the track. He understands the sacred pact between predator and prey. He does not worship the Hunt; he *is* the Hunt. He values skill and respect for nature above all else.",
             responses: [{ text: "Return to questions.", next: 'tfs_thaddeus_explain_masters' }]
         },
         tfs_master_lore_anya: {
-            npcName: 'Brother Thaddeus',
-            npcIcon: 'priest-hat',
+            npc: 'brother_thaddeus',
             text: "Anya finds the divine in patterns and knowledge. She sees the hand of Sorcery not in flashy spells, but in the fundamental laws of magic and the great tapestry of fate. Her library is her temple. Approach her with a curious mind.",
             responses: [{ text: "Return to questions.", next: 'tfs_thaddeus_explain_masters' }]
         }

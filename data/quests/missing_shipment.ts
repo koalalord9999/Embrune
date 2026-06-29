@@ -16,6 +16,10 @@ export const missingShipment: Quest = {
             requirement: { type: 'talk', poiId: 'silverhaven_trade_district', npcName: 'Merchant Theron' }
         }
     ],
+    npcDefs: {
+        merchant_theron: { npcName: 'Merchant Theron', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Slayer, amount: 1000 }],
         coins: 2000,
@@ -39,8 +43,7 @@ export const missingShipment: Quest = {
     ],
     dialogue: {
         theron_default: {
-            npcName: 'Merchant Theron',
-            npcIcon: '/assets/npcChatHeads/merchant_theron.png',
+            npc: 'merchant_theron',
             text: "Welcome to the Silverhaven market! A fine day for trade, wouldn't you say? It would be even better if my latest shipment hadn't been stolen...",
             responses: [],
             conditionalResponses: [
@@ -48,16 +51,14 @@ export const missingShipment: Quest = {
             ]
         },
         quest_intro_missing_shipment: {
-            npcName: 'Merchant Theron',
-            npcIcon: '/assets/npcChatHeads/merchant_theron.png',
+            npc: 'merchant_theron',
             text: "My caravan goods! You found them! I thought they were lost forever. The bandits on the King's Road have been a plague on my business. Thank you, adventurer. Please, take this for your trouble.",
             responses: [
                 { text: "Glad I could help.", actions: [{ type: 'start_quest', questId: 'missing_shipment' }, { type: 'advance_quest', questId: 'missing_shipment' }, { type: 'take_item', itemId: 'stolen_caravan_goods', quantity: 1 }] }
             ]
         },
         post_quest_missing_shipment: {
-            npcName: 'Merchant Theron',
-            npcIcon: '/assets/npcChatHeads/merchant_theron.png',
+            npc: 'merchant_theron',
             text: "Thanks to you, my shipments are getting through again. I'm in your debt.",
             responses: []
         }

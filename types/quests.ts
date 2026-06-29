@@ -118,9 +118,15 @@ export interface DialogueResponse {
   failureActions?: DialogueAction[];
 }
 
-export interface DialogueNode {
+export interface NPCDefinition {
   npcName: string;
   npcIcon: string;
+}
+
+export interface DialogueNode {
+  npc?: string;
+  npcName?: string;
+  npcIcon?: string;
   text: string;
   responses: DialogueResponse[];
   conditionalResponses?: DialogueResponse[];
@@ -151,6 +157,7 @@ export interface Quest {
   rewards: { xp?: { skill: SkillName; amount: number }[]; items?: InventorySlot[]; coins?: number };
   isHidden?: boolean;
   isSuperHidden?: boolean;
+  npcDefs?: Record<string, NPCDefinition>;
   dialogue?: Record<string, DialogueNode>;
   dialogueEntryPoints?: DialogueEntryPoint[];
   // FIX: Removed unused 'Terrell' property and added 'startDialogueNode'

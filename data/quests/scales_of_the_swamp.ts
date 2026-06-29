@@ -1,3 +1,4 @@
+import { type } from 'os';
 import { Quest, SkillName } from '../../types';
 
 export const scalesOfTheSwamp: Quest = {
@@ -39,7 +40,7 @@ export const scalesOfTheSwamp: Quest = {
             requirement: { type: 'talk', poiId: 'mangrove_thicket_west', npcName: 'Bandit Scout' }
         },
         {
-            description: "Follow the submerged causeway to discover the Sunken Temple.",
+            description: "Follow the submerged causeway at the Sunken Temple Approach to discover the Sunken Temple.",
             requirement: { type: 'talk', poiId: 'sunken_temple_approach', npcName: 'Submerged Causeway' }
         },
         {
@@ -51,6 +52,17 @@ export const scalesOfTheSwamp: Quest = {
             requirement: { type: 'talk', poiId: 'oakhaven_west_gate', npcName: 'Guard Captain Elara' }
         }
     ],
+    npcDefs: {
+        guard_captain_elara: { npcName: 'Guard Captain Elara', npcIcon: 'person' },
+        bronn_the_retired_adventurer: { npcName: 'Bronn the Retired Adventurer', npcIcon: 'person' },
+        herbalist_anise: { npcName: 'Herbalist Anise', npcIcon: 'person' },
+        bandit_scout: { npcName: 'Bandit Scout', npcIcon: 'person' },
+        garath_voss: { npcName: 'Garath Voss', npcIcon: 'person' },
+        venture_deeper: { npcName: 'Venture Deeper', npcIcon: 'person' },
+        muddy_tracks: { npcName: 'Muddy Tracks', npcIcon: 'person' },
+        submerged_causeway: { npcName: 'Submerged Causeway', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Agility, amount: 5000 }, { skill: SkillName.Thieving, amount: 3000 }],
         coins: 5000,
@@ -68,7 +80,7 @@ export const scalesOfTheSwamp: Quest = {
             npcName: 'Guard Captain Elara',
             response: {
                 text: "I've been adventuring for a while, have you found any more leads on the Serpent Bandits?",
-                check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'not_started' }], successNode: 'elara_scales_intro', failureNode: '' }
+                check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'not_started' }, { type: 'quest', questId: 'capitals_call', status: 'completed' }], successNode: 'elara_scales_intro', failureNode: '' }
             }
         },
         {
@@ -90,6 +102,13 @@ export const scalesOfTheSwamp: Quest = {
             response: {
                 text: "Bronn said you could help me prepare for the Serpent's Coil.",
                 check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 1 }], successNode: 'anise_scales_prep', failureNode: '' }
+            }
+        },
+        {
+            npcName: 'Herbalist Anise',
+            response: {
+                text: "I need another swamp ward bundle.",
+                check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 2 }, { type: 'variable', name: 'swamp_ward_burned', value: 1, operator: 'eq' }], successNode: 'anise_lost_ward', failureNode: '' }
             }
         },
         {
@@ -131,8 +150,7 @@ export const scalesOfTheSwamp: Quest = {
     // The dialog nodes handle the heavy narrative lifting.
     dialogue: {
         elara_scales_intro: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "You have excellent timing. Yes, we do. A merchant named Corvin Aldrecht staggered into the gate an hour ago. He was extorted by them on the southern road. But he heard something—a voice coordinating them. A man they call the Coilmaster.",
             responses: [
                 { text: "The Serpent Bandits?", next: 'elara_scales_lore_bandits' },
@@ -142,8 +160,7 @@ export const scalesOfTheSwamp: Quest = {
             conditionalResponses: []
         },
         elara_scales_lore_bandits: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "They operate out of the Serpent's Coil. Most assume they're simple highwaymen, but Bronn warned me they are a remnant of something older. They control the deep terrain. The 'Coilmaster' is their leader—a title we haven't heard in sixty years.",
             responses: [
                 { text: "Is the merchant going to live?", next: 'elara_scales_lore_aldrecht' },
@@ -151,8 +168,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         elara_scales_lore_aldrecht: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "He'll survive. But he was stripped of a year's wages just for safe passage. He said the bandits didn't act like thugs; they acted like soldiers. Coordinated. Disciplined. Led by a single, precise voice.",
             responses: [
                 { text: "The Serpent Bandits?", next: 'elara_scales_lore_bandits' },
@@ -160,16 +176,14 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         elara_scales_briefing_1: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "They are deep in the Serpent's Coil. They aren't just brigands, they're structured like a military legion. I can't send my guards into that terrain, but you... you've survived worse. I need you to find this Coilmaster.",
             responses: [
                 { text: "What do I bring back?", next: 'elara_scales_briefing_2' }
             ]
         },
         elara_scales_briefing_2: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Proof of who leads them, if you can get it cleanly. A name, a document, a seal. The Serpent's Coil is lethal. Speak to Bronn in the tavern if you want to know what you're up against, or Herbalist Anise for supplies. They might keep you alive. Good luck.",
             responses: [
                 { text: "I'll find him.", actions: [{ type: 'start_quest', questId: 'scales_of_the_swamp' as any }] },
@@ -179,16 +193,14 @@ export const scalesOfTheSwamp: Quest = {
 
         // Bronn's optional prep path
         bronn_scales_prep: {
-            npcName: 'Bronn the Retired Adventurer',
-            npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+            npc: 'bronn_the_retired_adventurer',
             text: "The Serpent Bandits. I've been waiting for someone to ask me about them properly. They aren't mere thieves. They are a remnant of something older... and they are patient. They think in decades.",
             responses: [
                 { text: "What about the Coilmaster?", next: 'bronn_scales_prep_2' }
             ]
         },
         bronn_scales_prep_2: {
-            npcName: 'Bronn the Retired Adventurer',
-            npcIcon: '/assets/npcChatHeads/bronn_the_retired_adventurer.png',
+            npc: 'bronn_the_retired_adventurer',
             text: "A title I haven't heard in sixty years. If he exists, he'll lead with an offer. That's how they operate. Don't dismiss it immediately—listen to his reasons. Also, talk to Anise. She knows the ecology, and the ecology is what will kill you first.",
             responses: [
                 { text: "Thanks, Bronn.", actions: [{ type: 'advance_quest', questId: 'scales_of_the_swamp' as any }] }
@@ -197,26 +209,69 @@ export const scalesOfTheSwamp: Quest = {
 
         // Anise's prep path
         anise_scales_prep: {
-            npcName: 'Herbalist Anise',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
-            text: "You smell of Elara's boot polish and midnight. Going to the Coil? Take this waxy bundle. Burn it when you enter. The murky delta is choked with a toxic fog that will make you walk into sinkholes otherwise. Keep your wits about you.",
+            npc: 'herbalist_anise',
+            text: "You smell of Elara's boot polish and midnight. Going to the Coil? I have what you need—a waxy bundle. Burn it when you enter. The murky delta is choked with a toxic fog that'll walk you straight into a sinkhole otherwise.\n\nIt'll cost you 150 coins. Fresh ingredients don't come free.",
             responses: [
-                { text: "I'll be careful.", actions: [{ type: 'give_item', itemId: 'swamp_ward_bundle', quantity: 1 }, { type: 'advance_quest', questId: 'scales_of_the_swamp' as any }] }
+                {
+                    text: "150 coins. Fine. (Pay)",
+                    check: {
+                        requirements: [{ type: 'coins', amount: 150 }],
+                        successNode: 'anise_scales_paid',
+                        failureNode: 'anise_scales_no_gold'
+                    }
+                },
+                { text: "I don't have that kind of coin right now." }
+            ]
+        },
+
+        anise_scales_paid: {
+            npc: 'herbalist_anise',
+            text: "Keep your wits about you. The Coil doesn't forgive foolishness.",
+            responses: [
+                { text: "I'll be careful.", actions: [{ type: 'take_coins', amount: 150 }, { type: 'give_item', itemId: 'swamp_ward_bundle', quantity: 1 }, { type: 'advance_quest', questId: 'scales_of_the_swamp' as any }] }
+            ]
+        },
+        anise_lost_ward: {
+            npc: 'herbalist_anise',
+            text: "Another one? Hmph. Fine. I've got one more, but it'll cost you another 150 coins.",
+            responses: [
+                {
+                    text: "150 coins. Fine. (Pay)",
+                    check: {
+                        requirements: [{ type: 'coins', amount: 150 }],
+                        successNode: 'anise_scales_paid_no_advance',
+                        failureNode: 'anise_scales_no_gold'
+                    }
+                },
+                { text: "I don't have that kind of coin right now." }
+            ]
+        },
+        anise_scales_paid_no_advance: {
+            npc: 'herbalist_anise',
+            text: "Keep your wits about you. The Coil doesn't forgive foolishness.",
+            responses: [
+                { text: "(Continue)", actions: [{ type: 'take_coins', amount: 150 }, { type: 'give_item', itemId: 'swamp_ward_bundle', quantity: 1 }] }
+            ]
+        },
+
+        anise_scales_no_gold: {
+            npc: 'herbalist_anise',
+            text: "150 coins. I'm not running a charity. Come back when you have the coin.",
+            responses: [
+                { text: "(Continue)" }
             ]
         },
 
         // Stage 2: Venture Deeper
         venture_deeper_no_burn: {
-            npcIcon: '/assets/npcChatHeads/venture_deeper.png',
-            npcName: 'Venture Deeper',
+            npc: 'venture_deeper',
             text: "(The miasma is too thick to see through. You need to burn the Swamp Ward Bundle before entering.)",
             responses: [
-                { text: "(Step back)" }
+                { text: "(Continue)" }
             ]
         },
         venture_deeper_node: {
-            npcIcon: '/assets/npcChatHeads/venture_deeper.png',
-            npcName: 'Venture Deeper',
+            npc: 'venture_deeper',
             text: "(The burnt Swamp Ward Bundle's smoke parts the miasma perfectly. You step forward into the deeper swamp.)",
             responses: [
                 { text: "(Enter the Swamp)", actions: [{ type: 'advance_quest', questId: 'scales_of_the_swamp' as any }] }
@@ -225,8 +280,7 @@ export const scalesOfTheSwamp: Quest = {
 
         // Stage 3: Muddy Tracks
         muddy_tracks_node: {
-            npcIcon: '/assets/npcChatHeads/muddy_tracks.png',
-            npcName: 'Muddy Tracks',
+            npc: 'muddy_tracks',
             text: "(You find deep, fresh footprints in the mud. They are organized, not the chaotic scatter of animals. They lead toward the Nesting Ground.)",
             responses: [
                 { text: "(Follow the tracks)", actions: [{ type: 'advance_quest', questId: 'scales_of_the_swamp' as any }] }
@@ -235,8 +289,7 @@ export const scalesOfTheSwamp: Quest = {
 
         // The Scout Encounter
         scout_encounter: {
-            npcName: 'Bandit Scout',
-            npcIcon: '/assets/npcChatHeads/bandit.png',
+            npc: 'bandit_scout',
             text: "(The scout is perfectly still. He does not draw his weapon, but he watches you intensely.)",
             responses: [
                 { text: "[Interrogate] I'm here for the Coilmaster.", next: 'scout_interrogate_1' },
@@ -244,8 +297,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         scout_interrogate_1: {
-            npcName: 'Bandit Scout',
-            npcIcon: '/assets/npcChatHeads/bandit.png',
+            npc: 'bandit_scout',
             text: "That name is not used here... but we both know who you mean. Follow the submerged causeway to the Sunken Temple. Do not step off it. He will know you are coming.",
             responses: [
                 {
@@ -257,8 +309,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         scout_release_1: {
-            npcName: 'Bandit Scout',
-            npcIcon: '/assets/npcChatHeads/bandit.png',
+            npc: 'bandit_scout',
             text: "(The scout acknowledges your withdrawal. You take the long way around, costing time but avoiding a fight.)",
             responses: [
                 {
@@ -272,18 +323,28 @@ export const scalesOfTheSwamp: Quest = {
 
         // Stage 5: Submerged Causeway
         causeway_node: {
-            npcIcon: '/assets/npcChatHeads/causeway.png',
-            npcName: 'Submerged Causeway',
+            npc: 'submerged_causeway',
             text: "(The stone path is submerged but solid. It leads directly toward a looming structure in the distance—the Sunken Temple.)",
             responses: [
-                { text: "(Follow the causeway)", actions: [{ type: 'advance_quest', questId: 'scales_of_the_swamp' as any }] }
+                {
+                    text: "(Follow the causeway)",
+                    actions: [
+                        { type: 'advance_quest', questId: 'scales_of_the_swamp' as any },
+                        { type: 'teleport', poiId: 'sunken_temple_altar' }
+                    ]
+                }
             ]
+        },
+
+        voss_default: {
+            npc: 'garath_voss',
+            text: "The swamp does not welcome visitors, yet here you are.",
+            responses: []
         },
 
         // Garath Voss (Coilmaster) Encounter
         voss_encounter: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "You are the one from Oakhaven. My scout said you moved with intelligence. My name is Garath Voss. The outside world calls me the Coilmaster. Come inside.",
             responses: [
                 { text: "Why are you attacking the roads?", next: 'voss_explain_roads' },
@@ -292,8 +353,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         voss_explain_roads: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "We do not 'attack' the roads. We regulate them. The kingdom's reach ends where the swamp begins. We provide passage for those who cannot navigate the Coil themselves, and we charge a toll for that service. It is a necessary friction.",
             responses: [
                 { text: "You run the Serpent Bandits.", next: 'voss_explain_bandits' },
@@ -301,8 +361,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         voss_explain_bandits: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "We are not bandits. We are the stewards of the Coil. This swamp is lethal, and it swallows armies. My people know its currents, its poisons, and its paths. We are organized because survival here demands absolute discipline.",
             responses: [
                 { text: "Why are you attacking the roads?", next: 'voss_explain_roads' },
@@ -310,8 +369,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         voss_dialogue_1: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "The bridge was sabotaged on my order. But what Elara didn't find was the reason. Three nights prior, an unmarked, armored convoy moved across it at midnight. Sixteen carts. Moving prisoners or contraband for the King, completely off the books.",
             responses: [
                 { text: "Are you sure it was the King?", next: 'voss_explain_king' },
@@ -320,8 +378,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         voss_explain_king: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "Only someone with royal authority can move sixteen unmarked carts across a guarded bridge without a single record appearing in the road captain's log. My people in Silverhaven confirmed it. It was sanctioned from the very top.",
             responses: [
                 { text: "What was in the carts?", next: 'voss_explain_carts' },
@@ -329,8 +386,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         voss_explain_carts: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "I do not know, and that is what worries me. Carts of that size, moving under maximum security and total secrecy... it is the kind of transport used for human beings who are not traveling voluntarily. Or weapons that shouldn't exist.",
             responses: [
                 { text: "Are you sure it was the King?", next: 'voss_explain_king' },
@@ -338,8 +394,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         voss_dialogue_2: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "Yes. I will not dress it up. Services have a cost. But the question is: is my extortion worse than officially sanctioned, secret royal convoys moving in the night?",
             responses: [
                 { text: "[Sympathize] You might be right. But I still need proof to bring to Elara.", next: 'voss_sympathize_1' },
@@ -347,24 +402,21 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         voss_sympathize_1: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "(Voss's posture relaxes slightly) You see the larger board. That is rare. The kingdom's structure might still be able to correct itself, if the right pressure is applied.",
             responses: [
                 { text: "What kind of proof do you have?", next: 'voss_sympathize_2' }
             ]
         },
         voss_sympathize_2: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "There is a sealed document in the chest. It contains everything I know about the convoys—dates, cargo estimates, and witness names in Silverhaven. Take it to Elara.",
             responses: [
                 { text: "Why hand this over so easily?", next: 'voss_sympathize_3' }
             ]
         },
         voss_sympathize_3: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "Because I am tired. And because you are the first person to enter this swamp who was willing to listen rather than just swing a blade. Tell Elara I offer my witnesses in exchange for a negotiated settlement.",
             responses: [
                 {
@@ -377,24 +429,21 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         voss_challenge_1: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "(Voss's tone remains careful, not angry) You would reduce the significance of the convoys to focus on a few extorted merchants? You operate on a very narrow moral compass.",
             responses: [
                 { text: "You operate on terror and financial coercion, dressed up as philosophy.", next: 'voss_challenge_2' }
             ]
         },
         voss_challenge_2: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "I have known enough governors to know the difference between crime and governance. But I have no desire to find out which of us is better at fighting in a flooded temple.",
             responses: [
                 { text: "Then sign a written confession about the convoys. Hand over your badge.", next: 'voss_challenge_3' }
             ]
         },
         voss_challenge_3: {
-            npcName: 'Garath Voss',
-            npcIcon: '/assets/npcChatHeads/garath_voss.png',
+            npc: 'garath_voss',
             text: "In exchange, you tell Elara I cooperated and requested the extortion be addressed through negotiation rather than military action? (He pauses) You have leverage. I will sign.",
             responses: [
                 {
@@ -410,8 +459,7 @@ export const scalesOfTheSwamp: Quest = {
 
         // Return to Elara
         elara_scales_return: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "You're back. Did you find him?",
             responses: [],
             conditionalResponses: [
@@ -428,8 +476,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         elara_scales_evidence_resolution: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "(Elara breaks the seal and reads the document. Her face pales.) Convoy movements. Witnesses in Silverhaven... He claims the King is moving unmarked carts through the night.",
             responses: [
                 { text: "Have you heard anything about these convoys?", next: 'elara_evidence_convoys' },
@@ -437,16 +484,14 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         elara_evidence_convoys: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Only rumors. Late-night riders passing through Oakhaven without stopping. Supply requisitions that don't match the garrison sizes. I thought it was just bureaucratic rot... not this. Not secret prisoners or weapons.",
             responses: [
                 { text: "He wants a negotiated settlement.", next: 'elara_evidence_negotiate' }
             ]
         },
         elara_evidence_negotiate: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "A settlement with a bandit who knows royal secrets. This is far above my rank. I will write to the Road Surveyor in Silverhaven. The network remains, but you've done what I asked. Go rest, and keep this quiet.",
             responses: [
                 {
@@ -458,8 +503,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         elara_scales_confrontation_resolution: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "You forced a confession out of him... (She reads the signed testimony). He admits to the extortion, but he claims he's sabotaging secret royal convoys. He is a different problem than a simple bandit.",
             responses: [
                 { text: "Are there actually secret convoys?", next: 'elara_confrontation_convoys' },
@@ -468,8 +512,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         elara_confrontation_convoys: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "I'm just a Captain in Oakhaven, but... yes. I've seen riders wearing the King's black insignia moving past the gates long after curfew. No logs. No inspections. If Voss is fighting them, this isn't just crime. It's a shadow war.",
             responses: [
                 { text: "Why do you need to talk to Bronn?", next: 'elara_confrontation_bronn' },
@@ -477,8 +520,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         elara_confrontation_bronn: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "Bronn warned me about the 'Coilmaster' title years ago. He knew it was an old mantle, passed down to steward the swamp. If he knew this much about Voss, he might know what the King is moving in those carts.",
             responses: [
                 { text: "Are there actually secret convoys?", next: 'elara_confrontation_convoys' },
@@ -486,8 +528,7 @@ export const scalesOfTheSwamp: Quest = {
             ]
         },
         elara_confrontation_end: {
-            npcName: 'Guard Captain Elara',
-            npcIcon: '/assets/npcChatHeads/guard_captain_elara.png',
+            npc: 'guard_captain_elara',
             text: "I will send this testimony to the Magistrates in Silverhaven. It forces their hand. They have to acknowledge Voss, which means they have to acknowledge the convoys. You did well. Stay sharp, the roads might get dangerous.",
             responses: [
                 {

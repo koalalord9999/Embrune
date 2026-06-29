@@ -31,6 +31,10 @@ export const aSmithsApprentice: Quest = {
             requirement: { type: 'talk', poiId: 'meadowdale_smithy', npcName: 'Valerius the Master Smith' }
         }
     ],
+    npcDefs: {
+        valerius_the_master_smith: { npcName: 'Valerius the Master Smith', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Smithing, amount: 1250 }],
         coins: 500
@@ -44,8 +48,7 @@ export const aSmithsApprentice: Quest = {
     ],
     dialogue: {
         quest_intro_a_smiths_apprentice: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Help? Hah! You've got the look of someone not afraid of a bit of hard work. This town was built on the sweat of good smiths, but the young folk these days... they'd rather read books in the library. The Captain of the Guard just dropped a huge order on me. The guards' old iron gear is rusted through, and they need basic bronze replacements immediately. I need hands, not books. Interested?",
             responses: [
                 { text: "I'm always ready to learn. What do you need?", next: 'details_a_smiths_apprentice' },
@@ -53,22 +56,19 @@ export const aSmithsApprentice: Quest = {
             ],
         },
         decline_smithing_quest: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Hmph. Another one. Go on then, bury your nose in dusty pages. See if a book will stop a goblin's blade. The forge is here if you change your mind.",
             responses: []
         },
         details_a_smiths_apprentice: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Good. The guards need a set of 5 Bronze Swords, 5 Bronze Kiteshields, and 5 Bronze Full Helms. I'll lend you a spare hammer, but you'll have to source the bronze yourself. Mining copper and tin is a good start. Once you have the bars, bring them to the anvil and shape them into the gear. We'll start with the swords. Show me what you can do.",
             responses: [
                 { text: "I'll get to work.", actions: [{ type: 'start_quest', questId: 'a_smiths_apprentice' }, { type: 'give_item', itemId: 'hammer', quantity: 1 }] },
             ],
         },
         a_smiths_apprentice_progress_router: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: '',
             responses: [],
             conditionalResponses: [
@@ -79,26 +79,22 @@ export const aSmithsApprentice: Quest = {
             ]
         },
         in_progress_a_smiths_apprentice_0: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "The anvil isn't going to strike itself! Gather the bronze bars and start with the 5 Bronze Swords. Heat, pressure, and a steady hand.",
             responses: []
         },
         in_progress_a_smiths_apprentice_1: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "I saw you finish those swords. Not bad. Now, onto the 5 Bronze Kiteshields. They take more material and a broader strike. Get to it.",
             responses: []
         },
         in_progress_a_smiths_apprentice_2: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Just the 5 Bronze Full Helms left. Shape them well; a guard's life depends on that metal protecting their skull.",
             responses: []
         },
         in_progress_a_smiths_apprentice_3_check: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Have you finished the equipment for the guards?",
             conditionalResponses: [
                 { text: "Yes, I have it all here.", check: { requirements: [{ type: 'items', items: [{itemId: 'bronze_sword', quantity: 5}, {itemId: 'bronze_kiteshield', quantity: 5}, {itemId: 'bronze_full_helm', quantity: 5}] }], successNode: 'in_progress_a_smiths_apprentice_3', failureNode: '' } }
@@ -108,22 +104,19 @@ export const aSmithsApprentice: Quest = {
             ]
         },
         in_progress_a_smiths_apprentice_3_missing: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Where is the equipment? I need 5 Bronze Swords, 5 Bronze Kiteshields, and 5 Bronze Full Helms. You'll need to mine copper and tin, smelt them into bronze bars, and smith the equipment at the anvil.",
             responses: []
         },
         in_progress_a_smiths_apprentice_3: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Let me see... The swords are balanced, the shields are sturdy, and the helms... decent. They'll protect the guards well enough. You've got a knack for this. Here's something for your trouble. Keep at it.",
             responses: [
                 { text: "Thank you for the lesson!", actions: [{ type: 'take_item', itemId: 'bronze_sword', quantity: 5 }, { type: 'take_item', itemId: 'bronze_kiteshield', quantity: 5 }, { type: 'take_item', itemId: 'bronze_full_helm', quantity: 5 }, { type: 'advance_quest', questId: 'a_smiths_apprentice' }] }
             ]
         },
         post_quest_a_smiths_apprentice: {
-            npcName: 'Valerius the Master Smith',
-            npcIcon: '/assets/npcChatHeads/valerius_the_master_smith.png',
+            npc: 'valerius_the_master_smith',
             text: "Good to see you again, apprentice. Remember what I taught you: heat, pressure, and a strong arm. That's all there is to it... mostly. How's the forge treating you?",
             conditionalResponses: [ 
                 { text: 'About the Ancient blade', check: { requirements: [{ type: 'quest', questId: 'ancient_blade', status: 'in_progress' }, { type: 'items', items: [{ itemId: 'iron_ore', quantity: 5 }] }, { type: 'items', items: [{ itemId: 'rusty_iron_sword', quantity: 1 }] }], successNode: 'in_progress_ancient_blade_2', failureNode: '' }},

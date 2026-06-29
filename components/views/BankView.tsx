@@ -487,22 +487,22 @@ const BankView: React.FC<BankViewProps> = (props) => {
             id: 'bank-tour',
             currentStepIndex: 0,
             steps: [
-                { targetId: 'bank-container', description: <p>Welcome to the <span className="text-yellow-400 font-bold">Bank of Embrune</span>!</p> },
-                { targetId: 'bank-tabs', description: <p>Organize items by dragging them into tabs.</p> },
-                { targetId: 'bank-item-grid', description: <p>This is the <span className="text-yellow-300 font-bold">Main Vault</span>.</p> },
-                { targetId: 'bank-quantity-toggles', description: <p>Choose how many items to move.</p> },
-                { targetId: 'bank-withdraw-mode', description: <p>Withdraw as physical items or notes.</p> },
-                { targetId: 'bank-search', description: <p>Search across all tabs.</p> },
-                { targetId: 'bank-deposit-backpack', description: <p>Deposit inventory.</p> },
-                { targetId: 'bank-deposit-equipment', description: <p>Deposit gear.</p> },
-                { targetId: 'bank-placeholders', description: <p>Toggle placeholders.</p> },
-                { targetId: 'bank-exit', description: <p>Exit when finished.</p> },
+                { targetId: 'bank-container', description: <p>Welcome to the <span className="text-yellow-400 font-bold">Bank of Embrune</span>! Here you can store your valuables safely. Even if you fall in battle, items kept here remain secure.</p> },
+                { targetId: 'bank-tabs', description: <p>These are your <span className="text-yellow-300 font-bold">Bank Tabs</span>. You can organize your items by dragging them into different tabs. You can have up to 6 tabs!</p> },
+                { targetId: 'bank-item-grid', description: <p>This is the <span className="text-yellow-300 font-bold">Main Vault</span>. It shows all the items in your current tab. Click an item to withdraw it, or drag to reorganize.</p> },
+                { targetId: 'bank-quantity-toggles', description: <p>Choose <span className="text-yellow-300 font-bold">how many</span> items you want to move at once. Select 1, 5, 10, or 'All'. Use 'X' to set a custom amount.</p> },
+                { targetId: 'bank-withdraw-mode', description: <p>You can withdraw items as physical objects or as <span className="text-yellow-300 font-bold">Bank Notes</span>. Notes stack in your bag, making them easier to carry in bulk!<br /><br />However, these cannot be used as normal items. It's great for trading with players (NYI) or selling to a shop in large quantities.</p> },
+                { targetId: 'bank-search', description: <p>Need to find something specific? Use the <span className="text-yellow-300 font-bold">Search Bar</span> to filter items across all your tabs instantly.</p> },
+                { targetId: 'bank-deposit-backpack', description: <p>Need space? Click this to <span className="text-yellow-300 font-bold">deposit everything</span> currently in your inventory into the bank.</p> },
+                { targetId: 'bank-deposit-equipment', description: <p>Use this to quickly <span className="text-yellow-300 font-bold">deposit all equipped items</span>. Great for changing gear sets in a hurry!</p> },
+                { targetId: 'bank-placeholders', description: <p>This padlock icon toggles <span className="text-yellow-300 font-bold">Bank Placeholders</span>. When ON, withdrawing all of an item leaves a slot so your bank stays organized.</p> },
+                { targetId: 'bank-exit', description: <p>That's the basics! Click <span className="text-yellow-300 font-bold">Exit Bank</span> when you're finished to return to the world.</p> },
             ]
         });
     }, [ui]);
 
     return (
-        <div data-tut="bank-container" className="flex flex-col h-full animate-fade-in text-gray-200" onClick={() => setTooltip(null)}>
+        <div data-tut="bank-container" className="flex flex-col h-[60vh] min-h-[380px] md:h-full max-h-[500px] md:max-h-none animate-fade-in text-gray-200" onClick={() => setTooltip(null)}>
             <div className="flex justify-between items-start mb-2 pb-2 border-b-2 border-gray-600">
                 <h1 className="text-3xl font-bold text-yellow-400">Bank of Embrune</h1>
                 <div className="text-right">
@@ -513,8 +513,7 @@ const BankView: React.FC<BankViewProps> = (props) => {
                     </div>
                 </div>
             </div>
-            
-            <div data-tut="bank-tabs" className="bank-tabs-container flex items-end -mb-px">
+            <div data-tut="bank-tabs" className="bank-tabs-container flex items-end overflow-x-auto pb-1">
                 {bank.map(tab => {
                     let iconContent = null;
                     if (tab.id === 0) iconContent = <img src={getIconUrl("infinity")} alt="Main Tab" className="bank-tab-icon filter invert w-8 h-8" />;
@@ -596,26 +595,26 @@ const BankView: React.FC<BankViewProps> = (props) => {
 
             <div className="mt-2 pt-2 border-t-2 border-gray-600 flex flex-wrap justify-between items-center gap-2">
                 <div className="flex items-center gap-2">
-                    <button onClick={() => setWithdrawAsNote(prev => !prev)} className={`w-10 h-10 relative overflow-hidden rounded ${withdrawAsNote ? 'bg-yellow-600 border-2 border-yellow-500' : 'bg-gray-700 border-2 border-gray-600 hover:bg-gray-600'}`}>
+                    <button data-tut="bank-withdraw-mode" onClick={() => setWithdrawAsNote(prev => !prev)} className={`w-10 h-10 relative overflow-hidden rounded ${withdrawAsNote ? 'bg-yellow-600 border-2 border-yellow-500' : 'bg-gray-700 border-2 border-gray-600 hover:bg-gray-600'}`}>
                         <img src={getIconUrl("folded-paper")} alt="Note" className="item-note-paper" />
                     </button>
-                    <button onClick={handleToggleBankPlaceholders} className={`w-10 h-10 flex items-center justify-center rounded ${bankPlaceholders ? 'bg-yellow-600 border-2 border-yellow-500' : 'bg-gray-700 border-2 border-gray-600 hover:bg-gray-600'}`}>
+                    <button data-tut="bank-placeholders" onClick={handleToggleBankPlaceholders} className={`w-10 h-10 flex items-center justify-center rounded ${bankPlaceholders ? 'bg-yellow-600 border-2 border-yellow-500' : 'bg-gray-700 border-2 border-gray-600 hover:bg-gray-600'}`}>
                         <img src={bankPlaceholders ? "https://api.iconify.design/game-icons:padlock.svg" : "https://api.iconify.design/game-icons:padlock-open.svg"} alt="Placeholders" className="w-6 h-6 filter invert" />
                     </button>
                 </div>
-                <div className="flex items-center gap-1">
+                <div data-tut="bank-quantity-toggles" className="flex items-center gap-1">
                      {[1, 5, 10, 'x', 'all'].map(qty => (
                         <button key={qty} onClick={() => handleToggleClick(qty as WithdrawMode)} className={`h-10 px-3 rounded font-bold text-sm ${activeWithdrawMode === qty ? 'bg-yellow-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
                             {qty === 'x' ? (customWithdrawAmount ? `X: ${customWithdrawAmount}` : 'X') : qty}
                         </button>
-                    ))}
+                     ))}
                 </div>
                 <div className="flex-grow max-w-xs mx-2">
-                    <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full h-10 px-3 rounded bg-gray-800 border border-gray-600 text-sm text-white focus:outline-none focus:border-yellow-500" />
+                    <input data-tut="bank-search" type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full h-10 px-3 rounded bg-gray-800 border border-gray-600 text-sm text-white focus:outline-none focus:border-yellow-500" />
                 </div>
                 <div className="flex justify-center gap-2">
-                    <button onClick={() => onDepositBackpack()} className="w-10 h-10 flex items-center justify-center rounded bg-gray-700 border-2 border-gray-600 hover:bg-gray-600"><img src={getIconUrl("profit")} alt="Deposit" className="w-6 h-6 filter invert" /></button>
-                    <button onClick={() => onDepositEquipment()} className="w-10 h-10 relative flex items-center justify-center rounded bg-gray-700 border-2 border-gray-600 hover:bg-gray-600 overflow-hidden"><img src={getIconUrl("contract")} alt="" className="bank-action-bg-icon" /><img src={getIconUrl("battle-gear")} alt="Deposit" className="relative w-6 h-6 filter invert" /></button>
+                    <button data-tut="bank-deposit-backpack" onClick={() => onDepositBackpack()} className="w-10 h-10 flex items-center justify-center rounded bg-gray-700 border-2 border-gray-600 hover:bg-gray-600"><img src={getIconUrl("profit")} alt="Deposit" className="w-6 h-6 filter invert" /></button>
+                    <button data-tut="bank-deposit-equipment" onClick={() => onDepositEquipment()} className="w-10 h-10 relative flex items-center justify-center rounded bg-gray-700 border-2 border-gray-600 hover:bg-gray-600 overflow-hidden"><img src={getIconUrl("contract")} alt="" className="bank-action-bg-icon" /><img src={getIconUrl("battle-gear")} alt="Deposit" className="relative w-6 h-6 filter invert" /></button>
                 </div>
             </div>
         </div>

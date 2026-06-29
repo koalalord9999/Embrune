@@ -147,7 +147,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                     {isMinimized ? '+' : '-'}
                 </button>
             </div>
-            {!isMinimized && !isDialogueActive && (
+            {!isMinimized && (
                 <>
                     <div ref={containerRef} className="flex-grow overflow-y-auto pr-1 animate-fade-in min-h-0">
                         <div className="">
@@ -159,7 +159,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                                     {entry.type === 'chat' && ('isPM' in entry && entry.isPM) && (
                                         <span
                                             className="font-bold cursor-pointer text-pink-400"
-                                            onClick={() => setChatInput(`/pm "${entry.originalUsername || entry.username}" `)}
+                                            onClick={() => !isDialogueActive && setChatInput(`/pm "${entry.originalUsername || entry.username}" `)}
                                         >
                                             {('sender' in entry && entry.sender === username)
                                                 ? `To ${entry.recipient}: `
@@ -172,7 +172,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                                                 ? 'text-yellow-500' // Gold for me
                                                 : 'text-emerald-400' // Green for others
                                                 }`}
-                                            onClick={() => handleMessageClick(entry.originalUsername || entry.username)}
+                                            onClick={() => !isDialogueActive && handleMessageClick(entry.originalUsername || entry.username)}
                                         >
                                             {entry.username}:
                                         </span>
@@ -206,16 +206,18 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs, chatMessages, onSendMes
                     </div>
                 </>
             )}
-            {!isMinimized && !isDialogueActive && (
+            {!isMinimized && (
                 <form onSubmit={handleSendMessage} className="flex mt-1">
                     <input
                         ref={inputRef}
                         value={chatInput}
                         onChange={(e) => setChatInput(e.target.value)}
-                        className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-0 text-lg text-zinc-100"
+                        disabled={isDialogueActive}
+                        tabIndex={isDialogueActive ? -1 : undefined}
+                        className="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-0 text-lg text-zinc-100 disabled:opacity-50"
                         placeholder="Type /pm username message..."
                     />
-                    <button type="submit" className="ml-2 bg-emerald-600 px-3 py-0 rounded text-lg font-bold">Send</button>
+                    <button type="submit" disabled={isDialogueActive} className="ml-2 bg-emerald-600 px-3 py-0 rounded text-lg font-bold disabled:opacity-50">Send</button>
                 </form>
             )}
         </div>

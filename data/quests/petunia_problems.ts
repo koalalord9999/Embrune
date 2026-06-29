@@ -29,6 +29,12 @@ export const petuniaProblems: Quest = {
         { description: "Defeat the Blight Imp.", requirement: { type: 'kill', monsterId: 'blight_imp', quantity: 1 } },
         { description: "Report your success to Old Man Fitzwilliam.", requirement: { type: 'talk', poiId: 'meadowdale_square', npcName: 'Old Man Fitzwilliam' } }
     ],
+    npcDefs: {
+        blighted_soil: { npcName: 'Blighted Soil', npcIcon: 'sprout' },
+        old_man_fitzwilliam: { npcName: 'Old Man Fitzwilliam', npcIcon: 'person' },
+        herbalist_anise: { npcName: 'Herbalist Anise', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Herblore, amount: 500 }],
         coins: 1000,
@@ -44,16 +50,14 @@ export const petuniaProblems: Quest = {
     ],
     dialogue: {
         petunia_use_potion: {
-            npcName: 'Blighted Soil',
-            npcIcon: 'sprout',
+            npc: 'blighted_soil',
             text: "You pour the shimmering potion onto the blighted soil. The ground hisses and a foul-smelling creature tears its way out of the earth!",
             responses: [
                 { text: "(Face the creature!)", actions: [{ type: 'take_item', itemId: 'blight_ward_potion', quantity: 1 }, { type: 'advance_quest', questId: 'petunia_problems' }, { type: 'start_mandatory_combat', monsterId: 'blight_imp' }] }
             ]
         },
         quest_intro_petunia_problems: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "My petunias! Look at them! Wilting! Dying! I water them every day, I pull the weeds... it's not natural, I tell you. There's a darkness in the soil. A blight! I can feel it in my old bones.",
             responses: [
                 { text: "Why are these flowers so important to you?", next: 'pp_fitz_lore_1' },
@@ -61,16 +65,14 @@ export const petuniaProblems: Quest = {
             ]
         },
         pp_fitz_insult: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "A bad... gardener?! I was slaying dragons when your grandfather was still learning to walk! I know how to tend a simple flower patch! Now are you going to help or are you going to stand there making foolish accusations?",
             responses: [
                 { text: "Sorry. Tell me more about the flowers.", next: 'pp_fitz_lore_1' }
             ]
         },
         pp_fitz_lore_1: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "Important? I... I don't rightly remember. They just... are. They were... her favorite. Suzie's. At least, I think that was her name... Hmph! Doesn't matter. They're dying! And I won't have it!",
             responses: [
                 { text: "Suzie?", next: 'pp_fitz_lore_2' },
@@ -78,48 +80,42 @@ export const petuniaProblems: Quest = {
             ]
         },
         pp_fitz_lore_2: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "My wife. Fifteen years gone now. We were... adventurers. Dragon slayers, the first of our kind. We faced down wyrms that could melt castles. But the thing that took her... it wasn't a dragon. It was a creeping shadow, a thing of whispers... After that, the fire went out of me. It's all... fuzzy now. But the flowers... I must tend to the flowers.",
             responses: [
                 { text: "I'm sorry. Let me help you with the blight.", next: 'pp_fitz_task' }
             ]
         },
         pp_fitz_task: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "It's a magical problem, I'm sure of it. I'm too old to go chasing mages. But you... you look capable. Go to Oakhaven. There's an herbalist there, Anise. She knows about this sort of thing. Here, take a sample of the soil. Show it to her. But be careful... it feels wrong.",
             responses: [
                 { text: "I'll take this to Anise right away.", actions: [{ type: 'give_item', itemId: 'blighted_soil', quantity: 1 }, { type: 'start_quest', questId: 'petunia_problems' }] }
             ]
         },
         pp_fitz_lost_soil: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "You lost the soil sample? How could you be so careless? Here... let me dig some more up... Don't lose it this time, okay? *Fitz scoops up another sample of the soil*",
             responses: [
                 { text: "I'll be careful next time.", actions: [{ type: 'give_item', itemId: 'blighted_soil', quantity: 1 }] }
             ]
         },
         pp_anise_intro: {
-            npcName: 'Herbalist Anise',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npc: 'herbalist_anise',
             text: "Fitzwilliam sent you? And with a soil sample... Let me see. Hmm... yes. Just as I suspected from the rumors. This isn't a natural ailment. It's a magical blight... a faint necrotic signature. Something is hiding in that soil, poisoning it from within.",
             responses: [
                 { text: "Can you make a cure?", next: 'pp_anise_task' }
             ]
         },
         pp_anise_task: {
-            npcName: 'Herbalist Anise',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npc: 'herbalist_anise',
             text: "I can create a revealing poultice, but I'll need a catalyst that reacts to this kind of energy. Bring me some Grimy Spore Spud. It's a dreary little plant that thrives in dark, damp places... I hear the slimes in the mine depths are often covered in it. Bring me a piece.",
             responses: [
                 { text: "I'll get you the spud.", actions: [{ type: 'advance_quest', questId: 'petunia_problems' }] }
             ]
         },
         pp_anise_has_spud: {
-            npcName: 'Herbalist Anise',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npc: 'herbalist_anise',
             text: "You have the Spore Spud! Excellent. Let's see... ",
             responses: [
                 {
@@ -133,38 +129,33 @@ export const petuniaProblems: Quest = {
             ]
         },
         pp_anise_spud_is_grimy: {
-            npcName: 'Herbalist Anise',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npc: 'herbalist_anise',
             text: "Oh, dear. You brought me the grimy spore spud. I can't use it like this. You'll need to clean it first. Don't you know the first thing about Herblore? Clean your herbs before you try to brew with them!",
             responses: []
         },
         pp_anise_lost_soil: {
-            npcName: 'Herbalist Anise',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npc: 'herbalist_anise',
             text: "Oh, dear. You lost the soil sample? I can't help you without it. You'll need to go back to Fitzwilliam and get another one.",
             responses: [
                 { text: "I'll go back to Fitzwilliam." }
             ]
         },
         pp_anise_make_potion: {
-            npcName: 'Herbalist Anise',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npc: 'herbalist_anise',
             text: "Perfectly cleaned! Now, with this and the soil sample... a little grinding... a bit of simmering... there! This Blight Ward Potion should do the trick. Pour it directly onto the blighted soil. If there's a magical creature hiding there, this will force it into the open. Be ready for a fight.",
             responses: [
                 { text: "Thank you, Anise. I'll be careful.", actions: [{ type: 'take_item', itemId: 'blighted_soil', quantity: 1 }, { type: 'take_item', itemId: 'clean_spore_spud', quantity: 1 }, { type: 'give_item', itemId: 'blight_ward_potion', quantity: 1 }, { type: 'advance_quest', questId: 'petunia_problems' }] }
             ]
         },
         pp_fitz_complete: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "What's all that racket? Hmph. You're back. Did you... do something? The flowers... they do look a bit perkier. Good. Here, take this old thing. Found it while gardening years ago. It feels... important. Maybe it'll preserve something for you.",
             responses: [
                 { text: "What is it?", next: 'pp_fitz_complete_ring' }
             ]
         },
         pp_fitz_complete_ring: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "It was... hers. Suzie's. She said it kept her potions fresh on long journeys... or something like that. My memory is... foggy. Just take it. Now, shoo! I need to tend to Suzie's... er... my petunias.",
             responses: [
                 { text: "Thank you, Fitzwilliam. I will.", actions: [{ type: 'advance_quest', questId: 'petunia_problems' }] }

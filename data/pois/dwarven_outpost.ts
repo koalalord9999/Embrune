@@ -33,7 +33,7 @@ export const dwarvenOutpostPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Durin",
-                icon: "/assets/npcChatHeads/prospector_gudrun.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_dwarf_table",
                 },
@@ -210,7 +210,7 @@ export const dwarvenOutpostPois: Record<string, POI> = {
                 dialogue: {
                     durin_default: {
                         npcName: "Durin",
-                        npcIcon: "/assets/npcChatHeads/prospector_gudrun.png",
+                        npcIcon: 'person',
                         text: "If it's a pickaxe you need, you've come to the right place. Finest in the land.",
                         responses: [],
                     },

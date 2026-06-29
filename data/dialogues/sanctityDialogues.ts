@@ -22,7 +22,7 @@ export const BROTHER_THADDEUS_DIALOGUE: Record<string, DialogueNode> = {
 export const LIBRARIAN_ANYA_DIALOGUE: Record<string, DialogueNode> = {
     start: {
         npcName: 'Librarian Anya',
-        npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+        npcIcon: 'person',
         text: "Welcome to the Sanctity Library. Here, we preserve the holy texts and the history of our founders. Please, keep your voice down.",
         responses: [],
         conditionalResponses: [
@@ -34,7 +34,7 @@ export const LIBRARIAN_ANYA_DIALOGUE: Record<string, DialogueNode> = {
     },
     post_quest_start: {
         npcName: 'Librarian Anya',
-        npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+        npcIcon: 'person',
         text: "Ah, the Archmage returns! The library is significantly safer now that the weave has been... adjusted. How can I assist you today?",
         responses: [
             { text: "About that hat... purple, stars, you remember?", next: 'the_hat_joke' }
@@ -42,7 +42,7 @@ export const LIBRARIAN_ANYA_DIALOGUE: Record<string, DialogueNode> = {
     },
     the_hat_joke: {
         npcName: 'Librarian Anya',
-        npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+        npcIcon: 'person',
         text: "*Anya's expression remains deadpan.* Of course. I've spent the morning consulting the ancient scrolls of Millinery. There was a section on 'The Inherent Folly of Arcane Fashion'. It was quite comprehensive. There is no hat, Archmage. I suggest you spend your time researching something more practical. Like... gravity.",
         responses: [
             { text: "I'll keep looking for it elsewhere then." }
@@ -53,7 +53,7 @@ export const LIBRARIAN_ANYA_DIALOGUE: Record<string, DialogueNode> = {
 export const INNKEEPER_PHOEBE_DIALOGUE: Record<string, DialogueNode> = {
     start: {
         npcName: 'Innkeeper Phoebe',
-        npcIcon: '/assets/npcChatHeads/barkeep_freya.png', // Re-use
+        npcIcon: 'person', // Re-use
         text: "Welcome to The Pilgrim's Rest. We offer a quiet place for weary travelers. No spirits, I'm afraid, only milk and water. Clear mind, clear soul.",
         responses: [
             { text: "I'd like a room.", next: 'rent_room' },
@@ -62,7 +62,7 @@ export const INNKEEPER_PHOEBE_DIALOGUE: Record<string, DialogueNode> = {
     },
     rent_room: {
         npcName: 'Innkeeper Phoebe',
-        npcIcon: '/assets/npcChatHeads/barkeep_freya.png',
+        npcIcon: 'person',
         text: "A wise choice. A night of peaceful rest will cost you 12 coins. It will restore you completely.",
         responses: [
             { text: "I'll take it.", check: { requirements: [{ type: 'coins', amount: 12 }], successNode: 'rent_success', failureNode: 'rent_fail' }, actions: [{ type: 'take_coins', amount: 12 }, { type: 'heal', amount: 'full' }] },
@@ -71,13 +71,13 @@ export const INNKEEPER_PHOEBE_DIALOGUE: Record<string, DialogueNode> = {
     },
     rent_success: {
         npcName: 'Innkeeper Phoebe',
-        npcIcon: '/assets/npcChatHeads/barkeep_freya.png',
+        npcIcon: 'person',
         text: "Excellent. May your dreams be peaceful.",
         responses: []
     },
     rent_fail: {
         npcName: 'Innkeeper Phoebe',
-        npcIcon: '/assets/npcChatHeads/barkeep_freya.png',
+        npcIcon: 'person',
         text: "I'm sorry, you don't seem to have enough coin.",
         responses: []
     }
@@ -86,7 +86,7 @@ export const INNKEEPER_PHOEBE_DIALOGUE: Record<string, DialogueNode> = {
 export const ARTISAN_KAEL_DIALOGUE: Record<string, DialogueNode> = {
     start: {
         npcName: 'Artisan Kael',
-        npcIcon: '/assets/npcChatHeads/artisan.png', // Re-use
+        npcIcon: 'person', // Re-use
         text: "With faith as my guide and steel as my medium, I shape the future. These anvils ring with hymns to progress. Do you seek to create?",
         responses: []
     }
@@ -95,7 +95,7 @@ export const ARTISAN_KAEL_DIALOGUE: Record<string, DialogueNode> = {
 export const GUARD_CASSIA_DIALOGUE: Record<string, DialogueNode> = {
     start: {
         npcName: 'Guard Cassia',
-        npcIcon: '/assets/npcChatHeads/guard_captain_elara.png', // Re-use
+        npcIcon: 'person', // Re-use
         text: "The swamps are a constant threat, but our walls and our faith are strong. We keep watch so the faithful may live in peace.",
         responses: []
     }

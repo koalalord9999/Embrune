@@ -38,6 +38,7 @@ const QUEST_LOCKED_MONSTERS: Record<string, { questId: QuestId; status?: 'comple
     'greater_crystal_construct': { questId: 'the_arcane_awakening' as QuestId, stage: 8 },
     'arcane_elemental': { questId: 'the_arcane_awakening' as QuestId, stage: 8 },
     'spire_justicar': { questId: 'the_arcane_awakening' as QuestId, stage: 8 },
+    'bog_serpent': { questId: 'scales_of_the_swamp' as QuestId, stage: 3 }, // Required stage 3, as that is when you can get into the swamp
 };
 
 interface SlayerMasterConfig {

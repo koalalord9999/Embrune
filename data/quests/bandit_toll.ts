@@ -21,6 +21,10 @@ export const banditToll: Quest = {
             requirement: { type: 'talk', poiId: 'town_hall', npcName: 'Clerk Augustus' }
         }
     ],
+    npcDefs: {
+        clerk_augustus: { npcName: 'Clerk Augustus', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Strength, amount: 200 }],
         coins: 500,
@@ -33,8 +37,7 @@ export const banditToll: Quest = {
     ],
     dialogue: {
         quest_intro_bandit_toll: {
-            npcName: 'Clerk Augustus',
-            npcIcon: '/assets/npcChatHeads/clerk_augustus.png',
+            npc: 'clerk_augustus',
             text: "Work? As a matter of fact, yes! Thank the founders. I'm at my wit's end. The lifeblood of this town, our trade with Oakhaven to the south, has been severed by a pack of audacious thugs. They've set up a blockade and are calling it a 'toll'. Extortion, is what it is!",
             responses: [
                 { text: "Tell me about the trade situation.", next: 'situation_bandit_toll' },
@@ -42,24 +45,21 @@ export const banditToll: Quest = {
             ],
         },
         guards_response_augustus: {
-            npcName: 'Clerk Augustus',
-            npcIcon: '/assets/npcChatHeads/clerk_augustus.png',
+            npc: 'clerk_augustus',
             text: "The town guard is stretched thin as it is, what with the goblins in the mine and strange beasts in the woods. Their mandate is to protect the town itself, not patrol the highways. It's a frustrating piece of bureaucracy, but it means we must rely on... freelance peacekeepers such as yourself.",
             responses: [
                 { text: "I see. So what's the problem with the trade route?", next: 'situation_bandit_toll' }
             ]
         },
         situation_bandit_toll: {
-            npcName: 'Clerk Augustus',
-            npcIcon: '/assets/npcChatHeads/clerk_augustus.png',
+            npc: 'clerk_augustus',
             text: "Oakhaven is a town of artisans. We rely on their crafted goods, their fine leathers, their expert fletching supplies. In return, they need our food from the ranches and ore from the mines. These bandits aren't just robbing travelers, they're starving our economy. I need someone to send a message... a firm, sharp message.",
             responses: [
                 { text: "And you're willing to pay for this message?", next: 'job_bandit_toll' },
             ],
         },
         job_bandit_toll: {
-            npcName: 'Clerk Augustus',
-            npcIcon: '/assets/npcChatHeads/clerk_augustus.png',
+            npc: 'clerk_augustus',
             text: "Handsomely. The Meadowdale council has authorized a significant bounty. Remove five of these roadblocks—permanently—and you will be rewarded not just with coin, but with the gratitude of two towns. The road to Oakhaven simply must be reopened. Can you do this?",
             responses: [
                 { text: "Consider it done. I'll clear the road.", actions: [{ type: 'start_quest', questId: 'bandit_toll' }] },
@@ -67,22 +67,19 @@ export const banditToll: Quest = {
             ],
         },
         in_progress_bandit_toll_0: {
-            npcName: 'Clerk Augustus',
-            npcIcon: '/assets/npcChatHeads/clerk_augustus.png',
+            npc: 'clerk_augustus',
             text: "Every moment you delay, another merchant considers taking their business elsewhere. Are the roads clear yet? My ledgers are starting to look grim.",
             responses: []
         },
         in_progress_bandit_toll_1: {
-            npcName: 'Clerk Augustus',
-            npcIcon: '/assets/npcChatHeads/clerk_augustus.png',
+            npc: 'clerk_augustus',
             text: "You have? Truly? I can hear the sound of commerce returning already! You've done a great service not just to Meadowdale, but to Oakhaven as well. On behalf of the council, please accept this bounty. You've more than earned it.",
             responses: [
                 { text: "A pleasure doing business.", actions: [{ type: 'advance_quest', questId: 'bandit_toll' }] }
             ]
         },
         post_quest_bandit_toll: {
-            npcName: 'Clerk Augustus',
-            npcIcon: '/assets/npcChatHeads/clerk_augustus.png',
+            npc: 'clerk_augustus',
             text: "Thanks to you, adventurer, commerce with Oakhaven is flowing once more! The whole town is grateful. The markets are bustling again.",
             responses: []
         }

@@ -22,6 +22,10 @@ export const goblinMenace: Quest = {
             requirement: { type: 'talk', poiId: 'meadowdale_square', npcName: 'Old Man Fitzwilliam' }
         }
     ],
+    npcDefs: {
+        old_man_fitzwilliam: { npcName: 'Old Man Fitzwilliam', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Attack, amount: 100 }],
         coins: 200
@@ -33,8 +37,7 @@ export const goblinMenace: Quest = {
     ],
     dialogue: {
         quest_intro_goblin_menace: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "Troubled? I'm beyond troubled! I'm incensed! It's this dreadful racket coming from the Stonebreak Mine. Day and night, clang, clang, bash! It's an affront to civilized ears! A man can't get a moment's peace!",
             responses: [
                 { text: "What kind of racket?", next: 'situation_goblin_menace' },
@@ -42,16 +45,14 @@ export const goblinMenace: Quest = {
             ]
         },
         earplugs_response: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "Earplugs?! Don't be absurd! It's the principle of the thing! I shouldn't have to plug my own ears in my own town square because of some subterranean hooligans! Now are you going to help or are you going to offer daft suggestions?",
             responses: [
                 { text: "Alright, alright. Tell me about the racket.", next: 'situation_goblin_menace' }
             ]
         },
         situation_goblin_menace: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "It can only be one thing: goblins. They've infested the old mine again. They're probably banging rocks together and calling it music. It's scaring the birds, it's wilting my prize-winning petunias, and I haven't had a decent afternoon nap in a week!",
             responses: [
                 { text: "Why don't the guards do something?", next: 'guards_response' },
@@ -59,16 +60,14 @@ export const goblinMenace: Quest = {
             ]
         },
         guards_response: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "The guards! Hah! They're too busy... guarding! Polishing their helmets and watching the gates for threats that are already under our feet. 'Official jurisdiction,' they say. Bureaucratic nonsense! It falls to citizens of action, like you, to solve real problems.",
             responses: [
                 { text: "I see. So what's the job?", next: 'job_goblin_menace' },
             ]
         },
         job_goblin_menace: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "The job is simple: pest control. Go in there and give them a taste of their own medicine! A little 'persuasion', if you will. Silence five of those noisy little brutes, and I'll make it worth your while. My sanity is a valuable thing, you know.",
             responses: [
                 { text: "Alright, I'll restore the peace. For a price.", actions: [{ type: 'start_quest', questId: 'goblin_menace' }] },
@@ -76,22 +75,19 @@ export const goblinMenace: Quest = {
             ]
         },
         in_progress_goblin_menace_0: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "What are you waiting for? My ears are still ringing! Get over to that mine and sort out those noisy goblins!",
             responses: []
         },
         in_progress_goblin_menace_1: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "Ah, the sweet sound of... blessed silence! You've done it! My head feels clearer already. The birds are singing again! Here's your reward, well-earned.",
             responses: [
                 { text: "Glad I could help.", actions: [{ type: 'advance_quest', questId: 'goblin_menace' }] }
             ]
         },
         post_quest_goblin_menace: {
-            npcName: 'Old Man Fitzwilliam',
-            npcIcon: '/assets/npcChatHeads/old_man_fitzwilliam.png',
+            npc: 'old_man_fitzwilliam',
             text: "Ah, adventurer! It's so peaceful now, I can finally hear myself think. Thank you again for taking care of that goblin nuisance.",
             responses: []
         }

@@ -169,6 +169,21 @@ export const theSorcerersTrial: Quest = {
         { description: "Defeat the Avatar of Sorcery.", requirement: { type: 'kill', monsterId: 'avatar_of_sorcery', quantity: 1 } }, // 19
         { description: "Return to Librarian Anya.", requirement: { type: 'talk', poiId: 'sanctity_library', npcName: 'Librarian Anya' } } // 20
     ],
+    npcDefs: {
+        librarian_anya: { npcName: 'Librarian Anya', npcIcon: 'person' },
+        hermit_mage: { npcName: 'Hermit Mage', npcIcon: 'wizard-face' },
+        zafira_the_alchemist: { npcName: 'Zafira the Alchemist', npcIcon: 'person' },
+        ancient_monolith: { npcName: 'Ancient Monolith', npcIcon: 'standing-stones' },
+        astral_altar: { npcName: 'Astral Altar', npcIcon: 'star-altar' },
+        elemental_shrine: { npcName: 'Elemental Shrine', npcIcon: 'shrine' },
+        avatar_of_sorcery: { npcName: 'Avatar of Sorcery', npcIcon: 'wizard-face' },
+        vision_of_understanding: { npcName: 'Vision of Understanding', npcIcon: 'eye-shield' },
+        durin: { npcName: 'Durin', npcIcon: 'person' },
+        empty_fire_pit: { npcName: 'Empty Fire Pit', npcIcon: 'fire-pit' },
+        lit_fire_pit: { npcName: 'Lit Fire Pit', npcIcon: 'fire-lit' },
+        mystical_fire_pit: { npcName: 'Mystical Fire Pit', npcIcon: 'fire-mystical' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Magic, amount: 25000 }, { skill: SkillName.Runecrafting, amount: 5000 }],
         coins: 15000,
@@ -210,8 +225,7 @@ export const theSorcerersTrial: Quest = {
     ],
     dialogue: {
         tst_intro_eval: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Confidence is a start, but the arcane requires more than ambition. Let's see if your foundation is as strong as your words.",
             responses: [],
             conditionalResponses: [
@@ -229,8 +243,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_intro_not_ready: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Your ambition is commendable, but the Sorcerer's Trial is not for the uninitiated. To even begin the Rite of Attunement, you must have a deep understanding of the world's magic and the physical disciplines that anchor it.",
             responses: [
                 { text: "What exactly do I need?", next: 'tst_intro_requirements_list' },
@@ -238,8 +251,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_intro_requirements_list: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You must have completed the Arcane Awakening and heard the Whispers of the Divine. Furthermore, your Magic (62) and Runecrafting (60) must be exceptional, and you must have mastered the fundamentals of Mining (45) and Firemaking (45).",
             responses: [
                 { text: "That is a lot of work.", next: 'tst_intro_encouragement' },
@@ -247,16 +259,14 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_intro_encouragement: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "The path of an Archmage is not easily trodden. But for those who persevere, the rewards are beyond measure. Speak to Archmage Theron in Silverhaven; his research will provide the foundation you need.",
             responses: [
                 { text: "Thank you, Anya." }
             ]
         },
         tst_intro_start: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Ah, yes. I have been observing your progress. Brother Thaddeus's methods are... quaint. He believes faith is enough to commune with the divine. I believe in a more rigorous approach.",
             responses: [
                 { text: "A rigorous approach? I'm listening. What do you have in mind?", next: 'tst_intro_explain_trial' },
@@ -264,8 +274,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_intro_defend_thaddeus: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Not wrong, merely... incomplete. Faith is a foundation, but a true communion with the Aspect of Sorcery requires more than belief. It requires a practical thesis. A demonstration of absolute mastery.",
             responses: [
                 { text: "So, a final exam?", next: 'tst_intro_explain_trial_2' },
@@ -273,8 +282,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_intro_explain_trial: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "I have uncovered an ancient rite: The Sorcerer's Trial. It is not about prayer or offerings. It is about understanding the very grammar of magic through its three pillars: Creation, Destruction, and Transmutation. Only a true Archmage can pass.",
             responses: [
                 { text: "Ambitious. Do you really believe I'm ready to manipulate the pillars of reality?", next: 'tst_intro_ready_check' },
@@ -283,8 +291,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_intro_explain_trial_2: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Precisely. The final exam for an Archmage. It involves not just facing the divine, but constructing its very avatar and then deconstructing it. It is the ultimate test of understanding.",
             responses: [
                 { text: "Constructing an avatar? That sounds... ambitious.", next: 'tst_intro_ready_check' },
@@ -292,8 +299,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_intro_ready_check: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Your rapid growth in the arcane arts is undeniable. Whether you are 'ready' is what this trial will determine. It is a journey that will span the entire world. Are you prepared to begin?",
             responses: [
                 { text: "I am. What is the first trial?", next: 'tst_intro_creation_task' },
@@ -301,102 +307,87 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_intro_witty_response: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "*Anya gives a rare, thin smile.* A party of one, with the universe as your guest. Do not take it lightly. The forces you will manipulate are the very foundations of reality.",
             responses: [
                 { text: "I understand. What is the first trial?", next: 'tst_intro_creation_task' }
             ]
         },
         tst_intro_creation_task: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "The Trial of Creation is not to replicate, but to innovate. You will not be crafting some common rune. You will bring a new one into existence. I have this... *She presents a cracked stone tablet.* It contains a fragmented formula for a 'Rune of Attunement'.",
             responses: [
                 { text: "How do I complete it?", next: 'tst_intro_creation_task_2' }
             ]
         },
         tst_intro_creation_task_2: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Two key fragments of the formula are missing: the 'Fragment of Intent' and the 'Fragment of Shape'. One is held by an old colleague of mine, a reclusive hermit mage in the Wyrmwood Grove. He is... eccentric. The other is not written, but carved, on an ancient monolith in the Sunbright Plains. Find them. Bring them to me.",
             responses: [
                 { text: "A hermit and a monolith. It sounds like the start of a very long walk. I'll get it done.", next: 'tst_intro_accepted', actions: [{ type: 'start_quest', questId: 'the_sorcerers_trial' }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }, { type: 'give_item', itemId: 'cracked_runic_tablet', quantity: 1 }] }
             ]
         },
         tst_intro_accepted: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "May your search be fruitful. The path to mastery is walked, not read.",
             responses: []
         },
         tst_anya_hermit_hint: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "My old colleague, the hermit? He retreated deep into the Wyrmwood Grove years ago. Look for a secluded clearing, far from the main paths. He prefers the company of the ancient trees to that of men.",
             responses: [{ text: "Thank you, I'll find him." }]
         },
         tst_anya_monolith_hint: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "The ancient monolith? My research suggests it stands somewhere in the wide, open expanses of the Sunbright Plains. It's said to be a lonely spire of stone, catching the first light of dawn. I'd start my search there.",
             responses: [{ text: "I'll head to the plains then." }]
         },
         tst_anya_charge_hint: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "To charge the 'Inert Rune of Attunement', you need raw, untamed power. The heart of a storm on the Gale-Swept Peaks would suffice, as would the volatile geysers in the Volcanic Steam Vents. Use the rune when the energy peaks—lightning strikes or eruptions.",
             responses: [{ text: "Raw power. I understand." }]
         },
         tst_anya_destruction_hint: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "For the Trial of Destruction, you must seek out Zafira. She is an... unconventional alchemist in Fouthia. Her methods are chaotic, but her understanding of dismantling the Weave is unparalleled. Ask her about 'controlled demolition'.",
             responses: [{ text: "To Fouthia, then." }]
         },
         tst_anya_catalyst_hint: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You need two catalysts for Transmutation. The 'Shard of True Ice' is found in the deepest, most frigid cavern of the Frostfang Peaks. The 'Sunstone' is far more elusive; my research suggests they are only harvested from creatures that 'feed' on solar energy—rare beasts like Sunstone Scorpions or golems. Look for them in the Sunbright Plains or near the Steam Vents.",
             responses: [{ text: "Ice and light. I'll get them." }]
         },
         tst_anya_altar_hint: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "A ritual of such magnitude must be performed at a place of supreme magical confluence. The Astral Altar at the apex of the Magus Spire is the only place. Use your catalysts and the 'Superheat Ore' spell on a Runic Bar there.",
             responses: [{ text: "The Magus Spire. I'm on my way." }]
         },
         tst_anya_shrine_hint: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "The final step is the Summoning. Take all three foci—the Rune, the Core, and the Transmuted Gold—to the Elemental Shrine in the Wyrmwood Grove. Place them on the pedestals, and the Avatar will manifest.",
             responses: [{ text: "The Shrine in the Grove. I'm ready." }]
         },
         tst_intro_decline: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Very well. True mastery cannot be rushed. The library will be here when you are ready to undertake the trial.",
             responses: []
         },
 
         // --- Hermit Mage Dialogue ---
         tst_hermit_hub: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "The Hermit Mage seems deeply engrossed in a silent conversation with a large oak tree, completely ignoring your presence.",
             responses: [
                 { text: "I'm sorry to interrupt. What are the trees saying?", next: 'tst_hermit_trees_post_quest' }
             ]
         },
         tst_hermit_trees_post_quest: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "They're arguing about whether sunlight is a wave or a particle. It's been going on for centuries. Frankly, it's exhausting. Now leave us be, the ferns are starting to complain about your boots.",
             responses: []
         },
         tst_hermit_start: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Go away. The trees and I are having a very important conversation about the philosophical implications of photosynthesis.",
             responses: [
                 { text: "Anya sent me. She mentioned you were... reclusive. I see she wasn't exaggerating.", next: 'tst_hermit_anya' },
@@ -405,40 +396,35 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_hermit_trees: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "They're arguing about whether sunlight is a wave or a particle. It's been going on for centuries. Frankly, it's exhausting. Now what do you want?",
             responses: [
                 { text: "Anya sent me. She needs a fragment of a runic formula.", next: 'tst_hermit_anya' }
             ]
         },
         tst_hermit_blunt: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Is that what they're calling it these days? Hah! You can't just *find* intent, you foolish child. You have to understand it. Are you here to seek, or to understand?",
             responses: [
                 { text: "I am here to understand.", next: 'tst_hermit_begin_riddles', actions: [{ type: 'set_variable', name: 'riddleCorrectAnswers', value: 0 }] }
             ]
         },
         tst_hermit_anya: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Anya? That old book-dust collector? She still thinks magic can be found on a page. The real truths are written in the wind and the water. If she sent you, you must be on some grand, academic quest. Very well. I will help, but not for her sake. For the sake of magic itself. You must first prove you're not a simple spell-slinger.",
             responses: [
                 { text: "How do I prove that?", next: 'tst_hermit_begin_riddles', actions: [{ type: 'set_variable', name: 'riddleCorrectAnswers', value: 0 }] }
             ]
         },
         tst_hermit_begin_riddles: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "You must show me that you grasp the unseen. Answer my questions, and we shall see.",
             responses: [
                 { text: "I'm ready.", next: 'tst_hermit_riddle_1', actions: [{ type: 'set_variable', name: 'riddleCorrectAnswers', value: 0 }] }
             ]
         },
         tst_hermit_riddle_1: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "First: I am the spark before the fire, the bridge between the dream and the deed. I weigh nothing, yet I can move the mountains themselves. Without me, power is but chaos; with me, it is creation. What am I?",
             responses: [
                 { text: "A sudden intuition.", next: 'tst_hermit_riddle_2_intro' },
@@ -448,14 +434,12 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_hermit_riddle_2_intro: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Hmm. An interesting perspective. Now, consider this for your second answer...",
             responses: [{ text: "(Listen)", next: 'tst_hermit_riddle_2' }]
         },
         tst_hermit_riddle_2: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Second: I am the riverbed that guides the flood, the cup that holds the wine. Without me, the magic spills and dies; with me, it is a focused stream. I am as rigid as stone, yet as fluid as music. What am I?",
             responses: [
                 { text: "The river's mirror.", next: 'tst_hermit_riddle_3_intro' },
@@ -465,14 +449,12 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_hermit_riddle_3_intro: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "I see. You are weaving a thread of thought. Let us see if it holds. My third question...",
             responses: [{ text: "(Listen)", next: 'tst_hermit_riddle_3' }]
         },
         tst_hermit_riddle_3: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Third: I am the 'why' behind the 'how'. I am the target before the arrow is loosed, the vision before the brush hits the canvas. I give the fireball its heat, but not its light. What am I?",
             responses: [
                 { text: "The hidden intent.", next: 'tst_hermit_riddle_4_intro', actions: [{ type: 'increment_variable', name: 'riddleCorrectAnswers', amount: 1 }] },
@@ -482,14 +464,12 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_hermit_riddle_4_intro: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Almost there. One final thought to complete the concept. My last question...",
             responses: [{ text: "(Listen)", next: 'tst_hermit_riddle_4' }]
         },
         tst_hermit_riddle_4: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Fourth: I am the fuel that powers the highest tiers of the Weave. I cannot be taught, only forged in the face of doubt. I am what remains when the magic is gone and the wizard is spent. What am I?",
             responses: [
                 { text: "A master's memory.", next: 'tst_hermit_final_response' },
@@ -499,16 +479,14 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_hermit_final_response: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "The old man trails off, his gaze piercing yours. He seems to be looking not at your face, but through it, as if reading the very script of your spirit. The air around him grows heavy with the scent of ozone and ancient dust.",
             responses: [
                 { text: "(Await his judgment)", next: 'tst_hermit_final_check' }
             ]
         },
         tst_hermit_final_check: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "He closes his eyes, nodding slowly. A soft hum begins to resonate from the stone walls of the grove. Finally, he speaks...",
             responses: [],
             conditionalResponses: [
@@ -517,8 +495,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_hermit_final_fail: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "You have answers... but not understanding. I see flashes of insight, a grasp of one part or another, but the core of it... the single, unifying thought... it eludes you. You are close, but not ready. Ponder the nature of magic, and speak to me again when you truly wish to understand.",
             responses: [
                 { text: "(Try the riddles again)", next: 'tst_hermit_begin_riddles', actions: [{ type: 'set_variable', name: 'riddleCorrectAnswers', value: 0 }] },
@@ -526,38 +503,33 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_hermit_decline_later: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "As you wish. The trees and I will be here when you are ready to listen.",
             responses: []
         },
         tst_hermit_success: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "A focus... a form... an intent... a conviction. Yes! *He smiles, his eyes twinkling.* You see beyond the fire and flash. You understand the *thought* that gives magic its purpose. The blueprint before the building. Anya chose well. You may have the spark after all.",
             responses: [
                 { text: "So you'll give me the fragment?", next: 'tst_hermit_reward' }
             ]
         },
         tst_hermit_reward: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Here. This is what she sent you for. But remember this: Intent is nothing without Form. Your next piece is not found in the mind of an old man, but in the memory of the world itself. Look where the sun speaks to the stone.",
             responses: [
                 { text: "Thank you for your wisdom.", next: 'tst_hermit_farewell', actions: [{ type: 'give_item', itemId: 'fragment_of_intent', quantity: 1 }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
             ]
         },
         tst_hermit_farewell: {
-            npcName: 'Hermit Mage',
-            npcIcon: 'wizard-face',
+            npc: 'hermit_mage',
             text: "Wisdom is found, not given. Now, be on your way.",
             responses: []
         },
 
         // --- Anya Return Dialogue ---
         tst_anya_return_fragments_check: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You've returned. Let's see if you have what is needed.",
             responses: [],
             conditionalResponses: [
@@ -566,60 +538,52 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_no_fragments: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You are still missing one of the fragments. Remember, one is held by the hermit in Wyrmwood, the other is found upon the monolith in the Sunbright Plains.",
             responses: []
         },
         tst_anya_combine_fragments: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You have them! The Intent and the Shape... magnificent! Let me see. *Anya takes the fragments and the cracked tablet, laying them out on a large table. She murmurs ancient words, and the pieces glow, fitting together with a soft click.* The formula is complete. A perfect synthesis of will and form.",
             responses: [
                 { text: "What comes after the synthesis, Anya? How do we use this?", next: 'tst_anya_give_inert_rune', actions: [{ type: 'take_item', itemId: 'cracked_runic_tablet', quantity: 1 }, { type: 'take_item', itemId: 'fragment_of_intent', quantity: 1 }, { type: 'take_item', itemId: 'fragment_of_shape', quantity: 1 }, { type: 'give_item', itemId: 'inert_rune_of_attunement', quantity: 1 }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
             ]
         },
         tst_anya_give_inert_rune: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Now, the practical application. *She hands you a smooth, featureless stone rune.* This is the physical vessel for the spell, the Rune of Attunement. But as you can feel... it is inert. Cold. It has the correct shape, the correct intent, but it lacks a soul. It lacks the spark.",
             responses: [
                 { text: "A soul for a stone. Where do I find such a thing?", next: 'tst_anya_explain_charging' }
             ]
         },
         tst_anya_explain_charging: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "This is not a task for a quiet altar. An altar focuses existing magic. This rune requires *new* magic, raw and untamed. It must be present at a moment of immense natural power—a nexus where the world's raw elemental fury is unleashed.",
             responses: [
                 { text: "Raw fury. I'm guessing I won't find that in the local tavern. Where should I look?", next: 'tst_anya_charging_locations' }
             ]
         },
         tst_anya_charging_locations: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "There are several possibilities. You could climb to the highest point of the Gale-Swept Peaks and channel the heart of a lightning storm. Or, if you prefer heat, the geysers of the Volcanic Steam Vents erupt with the planet's inner fire. Some even say the crashing waves at Siren's Cove, during a fierce squall, hold similar power.",
             responses: [
                 { text: "A storm, a geyser, or a squall. It seems I'm destined to get either very wet or very burnt.", next: 'tst_anya_final_instruction' }
             ]
         },
         tst_anya_final_instruction: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Precisely. Take the inert rune to such a place and... hold on tight. When you have succeeded, the rune will be forever changed. Return to me then. Go now, and may your will be strong enough to channel the storm.",
             responses: [
                 { text: "I'll return when the rune is as restless as the storm.", next: 'tst_anya_creation_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
             ]
         },
         tst_anya_creation_farewell: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "I expect nothing less.",
             responses: []
         },
         tst_anya_return_imprinted_check: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Have you charged the rune?",
             responses: [],
             conditionalResponses: [
@@ -628,14 +592,12 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_still_inert: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "The rune is still inert. You must seek out a place of raw elemental power. A powerful storm, a volcanic eruption... something primal.",
             responses: []
         },
         tst_anya_return_imprinted_success: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Pray tell, you must have seen something incredible! What was it?",
             responses: [],
             conditionalResponses: [
@@ -645,56 +607,49 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_describe_lightning: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You were struck by lightning?! Are you alright?",
             responses: [
                 { text: "I'm fine. A bit tingly. But the rune seems to like it.", next: 'tst_anya_reaction_generic' }
             ]
         },
         tst_anya_describe_wave: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "By the tides! You could have been washed out to sea!",
             responses: [
                 { text: "I took an unscheduled, very large bath. The rune is now very clean. And very powerful.", next: 'tst_anya_reaction_generic' }
             ]
         },
         tst_anya_describe_geyser: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You stood in a superheated geyser? That's incredibly reckless!",
             responses: [
                 { text: "I was nearly boiled alive, but hey, free sauna! And the rune absorbed the geothermal energy.", next: 'tst_anya_reaction_generic' }
             ]
         },
         tst_anya_reaction_generic: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "*Anya looks momentarily concerned, then her academic curiosity takes over.* Incredible! You faced the raw chaos of nature and channeled it into a focused point of creation. You have passed the first trial. You have proven you understand that to create is not just to build, but to *will* something new into existence.",
             responses: [
                 { text: "What is the next trial?", next: 'tst_anya_intro_destruction' }
             ]
         },
         tst_anya_intro_destruction: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "But Creation is only one pillar. Any fool can make something. It takes a master to control its unmaking. Your next trial is that of Destruction. It is a concept I understand in theory, but for its practical application... you will need a different kind of teacher.",
             responses: [
                 { text: "(Continue)", next: 'tst_anya_intro_destruction_2' }
             ]
         },
         tst_anya_intro_destruction_2: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Go to the desert city of Fouthia. Find an alchemist named Zafira. She is... unorthodox, but her understanding of volatile energies is second to none. Tell her I sent you for a lesson in 'controlled demolition'.",
             responses: [
                 { text: "I will find her.", next: 'tst_anya_destruction_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
             ]
         },
         tst_anya_destruction_farewell: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Be wary. Her methods are... explosive.",
             responses: []
         },
@@ -702,7 +657,7 @@ export const theSorcerersTrial: Quest = {
         // --- Zafira Dialogue ---
         tst_zafira_intro: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Anya sent you? For 'controlled demolition'? *Zafira bursts into manic laughter, nearly dropping a bubbling flask.* HA! Controlled! That dusty old bookworm wouldn't know a real explosion if it singed her eyebrows off! Destruction isn't meant to be controlled, it's meant to be... appreciated! Glorious!",
             responses: [
                 { text: "I appreciate the enthusiasm. Will you help me with the Trial of Destruction?", next: 'tst_zafira_agree', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] },
@@ -712,7 +667,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_intro_danger: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Of course it's dangerous! That's the point! A beautiful sunset is just controlled combustion on a cosmic scale. A volcano is just the planet clearing its throat. Danger is the spice of existence! Now, are you here to cook, or are you going to complain about the heat?",
             responses: [
                 { text: "I'm here to cook. You'll help?", next: 'tst_zafira_agree' }
@@ -720,7 +675,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_intro_jest: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "*She grins, a wild look in her eyes.* Unorthodox? Is that what she calls it? I call it 'results-oriented science'. While Anya is busy alphabetizing her scrolls, I'm busy finding out what happens when you introduce a lightning bug to a jar of swamp gas. The answer, by the way, is 'pop'. So, you want my help?",
             responses: [
                 { text: "Yes, I do.", next: 'tst_zafira_agree' }
@@ -728,7 +683,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_agree: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Fine, fine! Anya's paying, so we'll play her little game. But we do it my way! First, we need a proper vessel for our beautiful chaos. Something that can handle a bit of... energetic expansion.",
             responses: [
                 { text: "What kind of vessel?", next: 'tst_zafira_task_claw' },
@@ -737,7 +692,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_agree_why_claw: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Simple alchemy, really! A Wyvern's claw is naturally attuned to violent, fiery energy. It's tough, but more importantly, it has a bit of a temper of its own. It's not just a container; it's a co-conspirator!",
             responses: [
                 { text: "A co-conspirator. Right. So, where do I find one?", next: 'tst_zafira_task_claw_short' }
@@ -745,7 +700,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_agree_blow_up: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "*She pauses and taps her chin.* Probably not. Maybe a 60/40 chance... in your favor, of course! Mostly. Now, about that vessel...",
             responses: [
                 { text: "That's... reassuring. What do you need?", next: 'tst_zafira_task_claw' }
@@ -753,7 +708,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_task_claw: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "The claw of a Wyvern! Yes! Tough, sharp, and already has a bit of a temper. They nest in the Steam Vents, north of here. Go fetch one! And try not to get eaten! Or do, that could be a fun explosion too!",
             responses: [
                 { text: "I'll get the claw.", next: 'tst_zafira_claw_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] },
@@ -762,7 +717,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_task_claw_short: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "They nest in the Steam Vents, north of here. Go fetch one! And try not to get eaten! Or do, that could be a fun explosion too!",
             responses: [
                 { text: "I'll get the claw.", next: 'tst_zafira_claw_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
@@ -770,13 +725,13 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_claw_farewell: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Good! Don't take too long, I get bored easily and might blow something up just for fun!",
             responses: []
         },
         tst_zafira_wyvern_claw_location: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "They nest in the Steam Vents, north of here. I've heard there are other dragons and wyverns in other locations as well, but I'm not sure where. They are a bit temperamental, so be careful. I 'think' one can be found at the top of the Magus Spire, if the Steam Vents are too difficult.",
             responses: [
                 { text: "I'll get the claw.", next: 'tst_zafira_claw_farewell' }
@@ -784,7 +739,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_return_claw_check: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Oh yes! That was quick! I see you didn't get eaten! Quite a shame, but I suppose I can work with this. Let's see that claw.",
             responses: [
                 { text: "(Show her the Wyvern Claw)", check: { requirements: [{ type: 'items', items: [{ itemId: 'wyvern_claw', quantity: 1 }] }], successNode: 'tst_zafira_return_claw_success', failureNode: 'tst_zafira_no_claw' } }
@@ -792,13 +747,13 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_no_claw: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "No claw? What am I supposed to do with this, my good looks? Go wrestle a Wyvern and come back when you have something for me!",
             responses: []
         },
         tst_zafira_return_claw_success: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Splendid! Look at the curve on that! It practically screams 'I want to hold a miniature star before it goes supernova!'. Give it here, I'll start shaping the inscriptions while you fetch the fuel. It needs something volatile, pungent, beautifully unstable.",
             responses: [
                 { text: "(Hand her the claw) What kind of fuel?", next: 'tst_zafira_task_brimstone', actions: [{ type: 'take_item', itemId: 'wyvern_claw', quantity: 1 }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }] },
@@ -808,7 +763,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_claw_success_supernova: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "*She waves a dismissive hand.* Oh, stop being so dramatic. It's a *miniature* star. The worst that could happen is a... localized, high-energy event. Besides, science requires sacrifice! Preferably yours, but we'll see. Give me the claw, and I'll start work. Now, about that fuel...",
             responses: [
                 { text: "(Hand her the claw) Right. 'Localized'. What fuel?", next: 'tst_zafira_task_brimstone', actions: [{ type: 'take_item', itemId: 'wyvern_claw', quantity: 1 }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
@@ -816,7 +771,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_claw_success_why_brimstone: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Smelly rock? My dear adventurer, that 'smelly rock' is crystallized fury! It's the earth's indigestion! It's the perfect catalyst. Give me that claw so I can prep the housing. Now, are you going to fetch the brimstone or not?",
             responses: [
                 { text: "(Hand her the claw) I'll fetch it.", next: 'tst_zafira_task_brimstone', actions: [{ type: 'take_item', itemId: 'wyvern_claw', quantity: 1 }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
@@ -824,7 +779,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_task_brimstone: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Brimstone! From the volcanic vents! Bring me ten pieces. The smellier, the better! Go on, chop chop! The boom-booms won't make themselves!",
             responses: [
                 { text: "I'll be back with the brimstone.", next: 'tst_zafira_brimstone_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
@@ -832,13 +787,13 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_brimstone_farewell: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Hurry! The potential for a glorious explosion awaits!",
             responses: []
         },
         tst_zafira_return_brimstone_check: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Do I smell the sweet, acrid stench of progress? Did you bring me the smelly rocks?",
             responses: [
                 { text: "(Give her the Brimstone)", check: { requirements: [{ type: 'items', items: [{ itemId: 'brimstone', quantity: 10 }] }], successNode: 'tst_zafira_return_brimstone_success', failureNode: 'tst_zafira_no_brimstone' } }
@@ -846,13 +801,13 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_no_brimstone: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "No brimstone? This claw isn't going to fill itself with explosive potential, you know! Get back to the vents!",
             responses: []
         },
         tst_zafira_return_brimstone_success: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "YES! The glorious stench of potential energy! Now, watch the master at work! *Zafira pulls the shaped Wyvern Claw from her workbench. She grinds the brimstone, mixes it with a bubbling liquid, and carefully pours the volatile slurry into the vessel, which begins to pulse with an angry red light.*",
             responses: [
                 { text: "What... is that?", next: 'tst_zafira_give_core', actions: [{ type: 'take_item', itemId: 'brimstone', quantity: 10 }, { type: 'give_item', itemId: 'unstable_core', quantity: 1 }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
@@ -860,7 +815,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_give_core: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "It's... twitchy. Like a caged badger full of fireflies. Anya would call it 'tempering'. I call it 'delaying the inevitable, glorious kaboom!'. Your job is to teach it what *not* to blow up. The core needs to feel the world's weight, its heat, and its absolute silence.",
             responses: [
                 { text: "So I'm essentially carrying a toddler's temper tantrum in a jar. Wonderful. I'll get it to settle down.", next: 'tst_zafira_core_farewell_direct', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] },
@@ -870,7 +825,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_tempering_hints: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "I mean exactly what I said! But if your brain is as slow as Anya's reading pace... well, I suppose I can be more specific. Which one is confusing you?",
             responses: [
                 { text: "Explain the 'heat'.", next: 'tst_zafira_hint_heat' },
@@ -881,25 +836,25 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_hint_heat: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Heat! The kind that bends reality. You need to find where the earth's bones are hammered into shape in the silence of the mountain's heart. Look for where the short-folk toil over the world's oldest fires.",
             responses: [{ text: "The Dwarven Forge. Got it.", next: 'tst_zafira_tempering_hints' }]
         },
         tst_zafira_hint_pressure: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Weight! The crushing embrace of the deep. Seek the deepest scar of the sea, where light cannot reach and the weight of the world is felt in every drop of water. It needs to learn that it isn't the strongest thing around.",
             responses: [{ text: "The deepest part of the ocean. Right.", next: 'tst_zafira_tempering_hints' }]
         },
         tst_zafira_hint_silence: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Silence! The white desert where sound goes to die. No wind, no life, just the salt and the stillness. If the core can't find peace there, it'll never be stable enough for what comes next.",
             responses: [{ text: "The Great Salt Flats. I understand.", next: 'tst_zafira_tempering_hints' }]
         },
         tst_zafira_give_core_how: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "By showing it what real power is! Let it feel the heat of the great forge without combusting. Let it feel the crushing pressure of the deep ocean without imploding. Let it feel the absolute stillness of the salt flats without discharging. It will learn patience by observing forces greater than its own urge to explode!",
             responses: [
                 { text: "That's... surprisingly philosophical. I'll do it.", next: 'tst_zafira_core_farewell_direct', actions: [{ type: 'take_item', itemId: 'brimstone', quantity: 10 }, { type: 'give_item', itemId: 'unstable_core', quantity: 1 }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
@@ -907,7 +862,7 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_give_core_carry: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Of course! And don't drop it. Or shake it. Or look at it funny. Or think about explosions while you're holding it. Probably. Now go!",
             responses: [
                 { text: "Right. No thinking about explosions. Got it.", next: 'tst_zafira_core_farewell', actions: [{ type: 'take_item', itemId: 'brimstone', quantity: 10 }, { type: 'give_item', itemId: 'unstable_core', quantity: 1 }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
@@ -915,13 +870,13 @@ export const theSorcerersTrial: Quest = {
         },
         tst_zafira_core_farewell_direct: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Good! Now get going before it gets any ideas!",
             responses: []
         },
         tst_zafira_core_farewell: {
             npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/herbalist_anise.png',
+            npcIcon: 'person',
             text: "Or do! Just make sure I'm not nearby. Or that I am! I can't decide! Just go!",
             responses: []
         },
@@ -929,8 +884,7 @@ export const theSorcerersTrial: Quest = {
 
         // --- Monolith Dialogue ---
         monolith_default: {
-            npcName: 'Ancient Monolith',
-            npcIcon: 'standing-stones',
+            npc: 'ancient_monolith',
             text: "", // This node is a router
             responses: [],
             conditionalResponses: [
@@ -940,59 +894,50 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         monolith_no_fire: {
-            npcName: 'Ancient Monolith',
-            npcIcon: 'standing-stones',
+            npc: 'ancient_monolith',
             text: "The stone is cold and the markings are unreadable. An inscription at its base reads: 'The stone sleeps in shadow. Wake it with the dawn's first light, born from the heart of the forest.'",
             responses: []
         },
         monolith_normal: {
-            npcName: 'Ancient Monolith',
-            npcIcon: 'standing-stones',
+            npc: 'ancient_monolith',
             text: "The fire's light reveals a faint glimmer in the stone's carvings, but they are still unreadable. A more potent flame seems to be required.",
             responses: []
         },
         monolith_oak: {
-            npcName: 'Ancient Monolith',
-            npcIcon: 'standing-stones',
+            npc: 'ancient_monolith',
             text: "The oak fire produces a stronger flame, revealing more of the inscription, but it is still incomplete. The stone requires a more potent offering.",
             responses: []
         },
         monolith_willow: {
-            npcName: 'Ancient Monolith',
-            npcIcon: 'standing-stones',
+            npc: 'ancient_monolith',
             text: "The light from the willow logs is bright and clear. The inscription is almost fully visible, but key details remain obscured in shadow.",
             responses: []
         },
         monolith_maple: {
-            npcName: 'Ancient Monolith',
-            npcIcon: 'standing-stones',
+            npc: 'ancient_monolith',
             text: "The maple fire burns hot and steady. The glyphs on the monolith are clearer than ever, but shift and blur just as you try to focus on them.",
             responses: []
         },
         monolith_yew: {
-            npcName: 'Ancient Monolith',
-            npcIcon: 'standing-stones',
+            npc: 'ancient_monolith',
             text: "The ancient wood's fire almost reveals the full shape, but a final, crucial part of the inscription remains frustratingly blurry. A deeper, more primal magic is needed.",
             responses: []
         },
         monolith_feywood: {
-            npcName: 'Ancient Monolith',
-            npcIcon: 'standing-stones',
+            npc: 'ancient_monolith',
             text: "The magical Feywood logs erupt in an ethereal, green-tinged light! The flame doesn't flicker, but burns with a steady, otherworldly intensity. The carvings on the monolith flare to life, burning a complex runic shape into your mind.",
             responses: [
                 { text: "(Copy the Fragment of Shape)", next: 'monolith_success', actions: [{ type: 'give_item', itemId: 'fragment_of_shape', quantity: 1 }] }
             ]
         },
         monolith_success: {
-            npcName: 'Ancient Monolith',
-            npcIcon: 'standing-stones',
+            npc: 'ancient_monolith',
             text: "You have copied the Fragment of Shape. The light from the monolith fades as the fire burns out.",
             responses: []
         },
 
         tst_zafira_return_core: {
-            npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/zafira.png',
+            npc: 'zafira_the_alchemist',
             text: "You're back! And you haven't exploded! *She looks almost disappointed for a second, then her eyes light up as she sees the core.* A pity, but a successful experiment nonetheless! Let me see... yes, the energy isn't screaming anymore. It's... humming. Is my little creation bored?",
             responses: [
                 { text: "It's not bored, it's disciplined. It learned what real pressure feels like.", next: 'tst_zafira_explain_tempered' },
@@ -1000,8 +945,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_zafira_what_is_it: {
-            npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/zafira.png',
+            npc: 'zafira_the_alchemist',
             text: "A heartbeat! *She claps her hands, her manic grin widening.* Perfection! You've shifted its resonance from 'chaos' to 'intent'. You ask what it is now? It's potential! It's the 'bang' without the 'oops'! It's a perfectly contained tantrum of pure magical force. It's beautiful, isn't it?",
             responses: [
                 { text: "It's either a masterpiece or a monstrosity, and I can't decide which. Either way, it's too much power for one jar. Let's finish this.", next: 'tst_zafira_explain_tempered' },
@@ -1009,16 +953,14 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_zafira_explain_tempered: {
-            npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/zafira.png',
+            npc: 'zafira_the_alchemist',
             text: "Binary thinking! I love it! Masterpiece, monstrosity, gift, curse—whatever label your little brain slaps on it, the result is the same: it won't go off unless it's *told* to. That's the difference between a firecracker and a cannon, my friend. Control! Now, give it here. Anya's 'trial' requires one final touch to the containment field.",
             responses: [
                 { text: "(Hand over the Tempered Core) Make it quick. I've had enough of 'unstable' things for one day.", next: 'tst_zafira_final_ritual' }
             ]
         },
         tst_zafira_final_ritual: {
-            npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/zafira.png',
+            npc: 'zafira_the_alchemist',
             text: "*She takes the core with a reverence that borders on obsession. She mutters a few crackling syllables, tapping the vessel with a smoking glass rod. The core's angry red pulse shifts into a steady, crystalline glow.* There. The 'Core of Controlled Destruction'. Take it back to Anya. And tell her she owes me a very expensive bottle of cactus wine for this one! Oh, and ask her if she's ever tried mixing troll sweat with imp ashes. The results are... illuminating!",
             responses: [
                 {
@@ -1031,8 +973,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_destruction_complete: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You have returned from Zafira. And I see you still have your eyebrows. A promising start. Let me see the core.",
             responses: [
                 { text: "Zafira said to ask you about mixing troll sweat and imp ashes...?", next: 'tst_anya_troll_sweat_reaction' },
@@ -1040,60 +981,52 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_troll_sweat_reaction: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "*Anya's expression flatlines. She closes her eyes and pinches the bridge of her nose.* 'Illuminating'? In the same way a volcano is illuminating, perhaps. No, we do not perform such reckless 'experiments' here. That particular combination resulted in a chemical fire that only extinguished itself after raining for three days straight. Please, let's focus on actual sorcery.",
             responses: [
                 { text: "My apologies. Let's talk about the core.", next: 'tst_anya_transmutation_intro', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
             ]
         },
         tst_anya_transmutation_intro: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Creation and Destruction. The alpha and the omega. But there is a middle path, a way to bridge the gap between what is and what could be. This is the pillar of Transmutation. To change one thing into another is to rewrite a line in the universe's own song.",
             responses: [
                 { text: "What is my final task?", next: 'tst_anya_transmutation_task' }
             ]
         },
         tst_anya_transmutation_task: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "I task you with transforming a Runic Bar—a metal so magically dense its nature is almost immutable—into pure, magically-conductive gold. Simple transmutation is insufficient. You will need an alchemical paradox: extreme heat and extreme cold applied simultaneously through two opposing catalysts.",
             responses: [
                 { text: "What catalysts do I need?", next: 'tst_anya_transmutation_explain_catalysts' }
             ]
         },
         tst_anya_transmutation_explain_catalysts: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "The Catalyst of Cold: A 'Shard of True Ice', found only in the deepest chamber of the Frostfang Peaks. It never melts and will shatter the bar's magical structure. The Catalyst of Purity: A perfectly cut 'Sunstone', representing the sun's creative fire. It will guide the molten essence to reform as gold.",
             responses: [
                 { text: "And where do I perform the ritual?", next: 'tst_anya_transmutation_location' }
             ]
         },
         tst_anya_transmutation_location: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "At the Astral Altar, at the very apex of the Magus Spire. Only there is the Weave thin enough for such a profound change. Place the bar and catalysts on the altar and cast 'Superheat Ore'. If your will is strong and your catalysts pure, you will succeed.",
             responses: [
                 { text: "I will find the catalysts and go to the spire.", next: 'tst_anya_transmutation_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] }
             ]
         },
         tst_anya_transmutation_farewell: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Go. This is the final step before your communion.",
             responses: []
         },
         tst_astral_altar_hub: {
-            npcName: 'Astral Altar',
-            npcIcon: 'star-altar',
+            npc: 'astral_altar',
             text: "The Astral Altar hums with a deep, resonant power. Ethereal light swirls around its ancient surface, waiting for the catalysts of transformation.",
             responses: []
         },
         tst_transmutation_ritual_start: {
-            npcName: 'Astral Altar',
-            npcIcon: 'star-altar',
+            npc: 'astral_altar',
             text: "You prepare to place the Runic Bar, the Shard of True Ice, and the Sunstone upon the glowing Astral Altar. Doing so will permanently bind them to the altar for this ritual.",
             responses: [
                 {
@@ -1109,24 +1042,21 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_transmutation_ritual_consumed: {
-            npcName: 'Astral Altar',
-            npcIcon: 'star-altar',
+            npc: 'astral_altar',
             text: "The materials settle into the altar, bound by its magic. The air begins to crackle with celestial energy. The Shard of True Ice radiates a bone-deep cold, while the Sunstone pulses with a blinding warmth.",
             responses: [
                 { text: "(Cast Superheat Ore)", next: 'tst_transmutation_ritual_casting' }
             ]
         },
         tst_transmutation_ritual_casting: {
-            npcName: 'Astral Altar',
-            npcIcon: 'star-altar',
+            npc: 'astral_altar',
             text: "As the spell hits the altar's materials, the metal doesn't just melt. It *unravels*. The True Ice shatters the metal's inherent resistance, turning it into a shimmering, unstructured liquid of pure potential. Simultaneously, the Sunstone catches the spell's heat, filtering it into a guiding light that pulls the liquid into a new, perfect form.",
             responses: [
                 { text: "(Reach out and grasp the final product)", next: 'tst_transmutation_ritual_success' }
             ]
         },
         tst_transmutation_ritual_success: {
-            npcName: 'Astral Altar',
-            npcIcon: 'star-altar',
+            npc: 'astral_altar',
             text: "The light fades, leaving a single bar on the altar. It is no longer dull iron, but a magnificent, glowing gold that seems to vibrate with magical resonance. You have mastered Transmutation.",
             responses: [
                 {
@@ -1152,8 +1082,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_return_gold_check: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You make it sound like balancing the fabric of reality was a simple grocery run! *Anya's eyes widen as she inspects the bar.* But the result speaks for itself. This is... transcendent. Most alchemists spend lifetimes and never achieve a tenth of this purity. You have proven yourself a master of the three pillars.",
             responses: [
                 { text: "Like I said, the ingredients were a chore, but the magic was academic. Let's move on.", next: 'tst_anya_brag_response' },
@@ -1162,26 +1091,22 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_brag_response: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Humility was never a prerequisite for high sorcery, I suppose. Regardless, your skill is undeniable. You have forged the key to your own enlightenment.",
             responses: [{ text: "What follows next?", next: 'tst_anya_final_instruction_shrine' }]
         },
         tst_anya_academic_response: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "That beauty is the resonance of the universe itself. You are learning to hear the music, not just the notes. That sensitivity will be your greatest asset—and your greatest danger—in the trial to come.",
             responses: [{ text: "I am ready. Tell me of the final trial.", next: 'tst_anya_final_instruction_shrine' }]
         },
         tst_anya_silly_hat_response: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "*Anya sighs, a sound of profound academic exhaustion.* If you survive the Avatar of Sorcery, I will personally stitch you the pointiest, most ridiculous hat in the archives. Does that satisfy your... eccentricities?",
             responses: [{ text: "Deeply. Now, about that Avatar...", next: 'tst_anya_final_instruction_shrine' }]
         },
         tst_anya_final_instruction_shrine: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Take the Imprinted Rune, the Core, and the Transmuted Gold to the Elemental Shrine in the Wyrmwood Grove. There, at the center of the world's natural Weave, you will summon and face the Avatar of Sorcery. It will be the most difficult challenge you have ever faced.",
             responses: [
                 { text: "Who exactly *is* the Avatar?", next: 'tst_anya_lore_avatar' },
@@ -1190,8 +1115,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_lore_avatar: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "It is not a 'who', but a 'what'. It is a mirror. It is the sum of your Intent, your Shape, and your understanding of Reality, given form by the shrine's ancient power. To defeat it is to master the self. To fail is... to be rewritten by your own wild magic.",
             responses: [
                 { text: "A mirror fight. Classic. Let's get this over with.", next: 'tst_anya_shrine_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] },
@@ -1199,32 +1123,27 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_lore_foci: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "They are consumed. Their physical forms are but anchors; once the Avatar manifests, the materials return to the Weave. Do not worry about the gold—the knowledge you gain will be worth more than a thousand such bars.",
             responses: [{ text: "Then I depart for the grove.", next: 'tst_anya_shrine_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] }]
         },
         tst_anya_banter_wyrmwood: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "The trees are... passionate. But the Elemental Shrine predates the forest's current temperament. It is a place of ancient stability. Even the Elder Treants bow to the energies held there. You will be safe from the flora, though perhaps not from the Avatar.",
             responses: [{ text: "Glad to hear I won't be compost. I'm off.", next: 'tst_anya_shrine_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] }]
         },
         tst_anya_brave_farewell: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "That confidence is either your shield or your shroud. We shall see which when you return. Go, candidate. Prove that the spirit is stronger than the spell.",
             responses: [{ text: "Watch the horizon, Anya.", next: 'tst_anya_shrine_farewell', actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }] }]
         },
         tst_anya_shrine_farewell: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "May the Weave be with you. You carry the hope of every scholar of the arcane.",
             responses: []
         },
         tst_shrine_ritual_start: {
-            npcName: 'Elemental Shrine',
-            npcIcon: 'shrine',
+            npc: 'elemental_shrine',
             text: "The ancient stones of the Wyrmwood Grove seem to hold their breath as you approach the three Ley Anchors. You reach into your pack, the foci vibrating with a frequency that sets your very blood humming. Creation, Destruction, and Transmutation—the three pillars are ready to be unified at this thin point in the Weave.",
             responses: [],
             conditionalResponses: [
@@ -1251,56 +1170,49 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_shrine_ritual_rune_lightning: {
-            npcName: 'Elemental Shrine',
-            npcIcon: 'shrine',
+            npc: 'elemental_shrine',
             text: "You place the sparked rune upon the left Ley Anchor. Instantly, the stone awakens, its runic carvings flaring with a jagged, electric blue light. The air pressure drops with a sharp *pop*, and the low hum of the grove is drowned out by the crackle of static electricity. The first anchor is set: Creation is realized.",
             responses: [
                 { text: "(Continue: Place the Core of Controlled Destruction on the central Ley Anchor)", next: 'tst_shrine_ritual_core', actions: [{ type: 'take_item', itemId: 'imprinted_rune_of_attunement', quantity: 1, nameOverride: 'Imprinted Rune of Attunement (Lightning)' }, { type: 'set_variable', name: 'tst_foci_placed', value: 1 }] }
             ]
         },
         tst_shrine_ritual_rune_water: {
-            npcName: 'Elemental Shrine',
-            npcIcon: 'shrine',
+            npc: 'elemental_shrine',
             text: "You place the sparked rune upon the left Ley Anchor. The stone glows with a deep, undulating azure light. Mist begins to rise from the forest floor, and condensation beads rapidly on the anchor's surface. The hum of the grove shifts into the rhythmic sound of crashing waves. The first anchor is set: Creation is realized.",
             responses: [
                 { text: "(Continue: Place the Core of Controlled Destruction on the central Ley Anchor)", next: 'tst_shrine_ritual_core', actions: [{ type: 'take_item', itemId: 'imprinted_rune_of_attunement', quantity: 1, nameOverride: 'Imprinted Rune of Attunement (Water)' }, { type: 'set_variable', name: 'tst_foci_placed', value: 1 }] }
             ]
         },
         tst_shrine_ritual_rune_fire: {
-            npcName: 'Elemental Shrine',
-            npcIcon: 'shrine',
+            npc: 'elemental_shrine',
             text: "You place the sparked rune upon the left Ley Anchor. The stone erupts into a violent orange glow, heat radiating in shimmering waves that distort the air around you. The scent of ozone and dry earth fills the grove as the anchor begins to pulse with geothermal intensity. The first anchor is set: Creation is realized.",
             responses: [
                 { text: "(Continue: Place the Core of Controlled Destruction on the central Ley Anchor)", next: 'tst_shrine_ritual_core', actions: [{ type: 'take_item', itemId: 'imprinted_rune_of_attunement', quantity: 1, nameOverride: 'Imprinted Rune of Attunement (Fire)' }, { type: 'set_variable', name: 'tst_foci_placed', value: 1 }] }
             ]
         },
         tst_shrine_ritual_core: {
-            npcName: 'Elemental Shrine',
-            npcIcon: 'shrine',
+            npc: 'elemental_shrine',
             text: "Next, you lower the Core of Controlled Destruction onto the central Ley Anchor. The moment contact is made, the rhythmic thrum of the core synchronizes with the shrine's ancient pulse. A deafening, metallic heartbeat echoes through the trees, and shockwaves of raw, contained force ripple outward, rattling the very bones of the world. The second anchor is set: Destruction is mastered.",
             responses: [
                 { text: "(Continue: Place the Bar of Transmuted Gold on the final Ley Anchor)", next: 'tst_shrine_ritual_gold', actions: [{ type: 'take_item', itemId: 'core_of_controlled_destruction', quantity: 1 }, { type: 'set_variable', name: 'tst_foci_placed', value: 2 }] }
             ]
         },
         tst_shrine_ritual_gold: {
-            npcName: 'Elemental Shrine',
-            npcIcon: 'shrine',
+            npc: 'elemental_shrine',
             text: "Finally, you lay the Bar of Transmuted Gold on the rightmost Ley Anchor. Instantly, the unbearable, vibrating frequency halts. The grove falls into a terrifying, absolute silence. A brilliant, blinding flash erupts from all three anchors, connecting them in a triangular cage of pure white light. Reality itself seems to bend and stretch towards the center, where your masterpiece is taking form. The final anchor is set: Transmutation is complete.",
             responses: [
                 { text: "(Brace yourself for the Summoning)", next: 'tst_shrine_avatar_summon', actions: [{ type: 'take_item', itemId: 'bar_of_transmuted_gold', quantity: 1 }, { type: 'advance_quest', questId: 'the_sorcerers_trial' }, { type: 'set_variable', name: 'tst_foci_placed', value: 0 }] }
             ]
         },
         tst_shrine_avatar_summon: {
-            npcName: 'Avatar of Sorcery',
-            npcIcon: 'wizard-face',
+            npc: 'avatar_of_sorcery',
             text: "The Imprinted Rune shatters into a cloud of brilliant light, forming a shimmering consciousness. The Core floats from its pedestal, beating like a hollow, metallic heart. Finally, the Transmuted Gold melts into liquid light, flowing and shaping itself into a towering, ephemeral form. The Avatar of Sorcery stands before you, a masterpiece of your own making.",
             responses: [
                 { text: "(The Avatar raises its hand)", next: 'tst_shrine_battle_start' }
             ]
         },
         tst_shrine_battle_start: {
-            npcName: 'Avatar of Sorcery',
-            npcIcon: 'wizard-face',
+            npc: 'avatar_of_sorcery',
             text: "A voice, like the merging of a thousand whispers, echoes in your mind: 'Show me what you have learned. Show me... the truth of magic.'",
             responses: [
                 { text: "I will show you the strength of my will!", actions: [{ type: 'advance_quest', questId: 'the_sorcerers_trial' }, { type: 'start_mandatory_combat', monsterId: 'avatar_of_sorcery' }] },
@@ -1309,16 +1221,14 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_shrine_avatar_resume: {
-            npcName: 'Avatar of Sorcery',
-            npcIcon: 'wizard-face',
+            npc: 'avatar_of_sorcery',
             text: "The lingering magic recombines, reforming the Avatar of Sorcery. Relentless and eternal, its eyes glow with renewed intensity. 'The trial is not yet complete. Stand and face the weave.'",
             responses: [
                 { text: "Let's try this again.", actions: [{ type: 'start_mandatory_combat', monsterId: 'avatar_of_sorcery' }] }
             ]
         },
         tst_anya_final_report: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "You... you've done it? The Avatar is deconstructed?",
             responses: [
                 { text: "It is. It dissolved into raw energy... and it showed me something.", next: 'tst_anya_final_vision' },
@@ -1326,30 +1236,26 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_hat_reminder: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "*Anya actually lets out a small, genuine laugh.* You just defeated a literal manifestation of the Weave and your first thought is millinery? You are truly a unique specimen. Fine. Purple. Stars. But first, tell me of the vision. What did you see?",
             responses: [{ text: "It was a moment of absolute clarity...", next: 'tst_anya_final_vision' }]
         },
         tst_anya_final_vision: {
-            npcName: 'Vision of Understanding',
-            npcIcon: 'eye-shield',
+            npc: 'vision_of_understanding',
             text: "As you speak, the memory of the epiphany returns. You see the 'threads' of magic that make up every spell, not as abstract forces, but as tangible patterns. You feel their texture, their rhythm. Instinctively, you understand how to weave a counter-pattern—a shield of pure understanding that can deflect any arcane assault.",
             responses: [
                 { text: "(Internalize the knowledge)", next: 'tst_anya_final_complete' }
             ]
         },
         tst_anya_final_complete: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Magnificent. You have gone beyond passing a test; you have communed with the very grammar of the universe. You are no longer just an adventurer who uses magic. You are a true Archmage, a peer to the greatest who ever lived. Take this, and know that you have my eternal respect.",
             responses: [
                 { text: "I am honored, Archmage Anya. My journey has only just begun.", actions: [{ type: 'complete_quest', questId: 'the_sorcerers_trial' }, { type: 'cleanup_quest_state', questId: 'the_sorcerers_trial' }] }
             ]
         },
         tst_anya_lost_items_menu: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Oh dear. These artifacts are not easily replaced, but the trial must continue. Which have you misplaced?",
             responses: [
                 {
@@ -1401,8 +1307,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         elemental_shrine_hub: {
-            npcName: 'Elemental Shrine',
-            npcIcon: 'shrine',
+            npc: 'elemental_shrine',
             text: "The Ley Anchors hum with latent power, their surfaces etched with ancient runes that pulse in rhythm with the forest's heartbeat.",
             responses: [],
             conditionalResponses: [
@@ -1451,8 +1356,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_shrine_inspect_hints: {
-            npcName: 'Elemental Shrine',
-            npcIcon: 'shrine',
+            npc: 'elemental_shrine',
             text: "You inspect the three Ley Anchors. They pulse with a faint, expectant light, but the ritual cannot begin without the three foci: the Imprinted Rune of Attunement, the Core of Controlled Destruction, and the Bar of Transmuted Gold.",
             responses: [
                 {
@@ -1468,21 +1372,18 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_anya_gold_lost_info: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "The Bar of Transmuted Gold was a product of a delicate alchemical ritual, not a simple conjure trick. I cannot simply hand you another. You must return to the Astral Altar at the apex of the Magus Spire and perform the transmutation again. You will need a Runic Bar, a Shard of True Ice, and a cut Sunstone.",
             responses: [{ text: "I understand. I'll get to work." }]
         },
         tst_anya_core_lost_info: {
-            npcName: 'Librarian Anya',
-            npcIcon: '/assets/npcChatHeads/librarian_elara.png',
+            npc: 'librarian_anya',
             text: "Oh dear. The core is a delicate alchemical construct. I am afraid I cannot prepare a replacement for you. You must seek out Zafira the Alchemist; she is the only one with the expertise to forge another.",
             responses: [{ text: "I'll go find her." }]
         },
         // --- Durin (Heat Trial) ---
         tst_durin_heat_intro: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Heat, eh? *He leans over the anvil, squinting at the pulsing device in your hands.* By Moradin's beard, I know that restless pulsing from anywhere. There's only one mad alchemist in Fouthia with the lack of sense to forge something so... twitchy. Zafira, right? She still trying to burn the whole world down?",
             responses: [
                 { text: "She's... eccentric. But yes, she sent me.", next: 'tst_durin_heat_zafira' },
@@ -1490,8 +1391,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_durin_heat_zafira: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Figures. She's got more nerve than a cave-in, that one. But she's right about one thing—our forge is the only place with enough steady heat to tame that monstrosity. I'll let my boys 'hammer' it for a bit to settle the energy.",
             responses: [
                 { text: "Thank you. Here is the core.", actions: [{ type: 'tst_start_heat_trial_slow' }] },
@@ -1499,8 +1399,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_durin_heat_instructions: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Hmph. Very well. If you want it tempered, we'll need to keep it under the hammers for at least two minutes. Don't worry, my smiths won't break it. Probably.",
             responses: [
                 { text: "I'll trust your expertise. (Hand over core)", actions: [{ type: 'tst_start_heat_trial_slow' }] },
@@ -1508,8 +1407,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_durin_replace_core: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Ah, the Archmage returns! Lost the core? Or just tired of waiting for the slow work of the hammers? If you want the 'Express Service'—high-quality coal and my best apprentices working double-time—it'll cost you 15,000 gold.",
             responses: [
                 { text: "I have the gold. Do it. (15,000 Gold)", actions: [{ type: 'instant_heat_temper' }] },
@@ -1517,8 +1415,7 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_zafira_lost_item_check: {
-            npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/zafira.png',
+            npc: 'zafira_the_alchemist',
             text: "Lost it? After all that work? *She sighs.* I can prepare another, but I won't do it for free. Bring me 10 pieces of Brimstone and another Wyvern Claw.",
             responses: [
                 {
@@ -1536,23 +1433,20 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_zafira_lost_item_replace: {
-            npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/zafira.png',
+            npc: 'zafira_the_alchemist',
             text: "Here. *She works quickly.* Try to hold onto this one. You'll need to re-temper it at the three sites: Heat, Pressure, and Silence.",
             responses: [
                 { text: "Thank you, Zafira.", actions: [{ type: 'take_item', itemId: 'brimstone', quantity: 10 }, { type: 'take_item', itemId: 'wyvern_claw', quantity: 1 }, { type: 'reset_destruction_trial' }] }
             ]
         },
         tst_zafira_lost_item_missing: {
-            npcName: 'Zafira the Alchemist',
-            npcIcon: '/assets/npcChatHeads/zafira.png',
+            npc: 'zafira_the_alchemist',
             text: "You don't have the materials. Don't waste my time until you do.",
             responses: [{ text: "Sorry." }]
         },
         // --- Fire Pit 1 ---
         tst_pit_1_empty: {
-            npcName: 'Empty Fire Pit',
-            npcIcon: 'fire-pit',
+            npc: 'empty_fire_pit',
             text: "A circle of stones with a pile of ashes awaits its next flame.",
             responses: [],
             conditionalResponses: [
@@ -1568,21 +1462,18 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_pit_1_lit: {
-            npcName: 'Lit Fire Pit',
-            npcIcon: 'fire-lit',
+            npc: 'lit_fire_pit',
             text: "A warm fire crackles within the stone circle.",
             responses: [{ text: "Look away." }]
         },
         tst_pit_1_mystical: {
-            npcName: 'Mystical Fire Pit',
-            npcIcon: 'fire-mystical',
+            npc: 'mystical_fire_pit',
             text: "The fire burns with an eerie, violet light. The Monolith seems to react to its presence.",
             responses: [{ text: "Look away." }]
         },
         // --- Fire Pit 2 ---
         tst_pit_2_empty: {
-            npcName: 'Empty Fire Pit',
-            npcIcon: 'fire-pit',
+            npc: 'empty_fire_pit',
             text: "A circle of stones with a pile of ashes awaits its next flame.",
             responses: [],
             conditionalResponses: [
@@ -1598,21 +1489,18 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_pit_2_lit: {
-            npcName: 'Lit Fire Pit',
-            npcIcon: 'fire-lit',
+            npc: 'lit_fire_pit',
             text: "A warm fire crackles within the stone circle.",
             responses: [{ text: "Look away." }]
         },
         tst_pit_2_mystical: {
-            npcName: 'Mystical Fire Pit',
-            npcIcon: 'fire-mystical',
+            npc: 'mystical_fire_pit',
             text: "The fire burns with an eerie, violet light. The Monolith seems to react to its presence.",
             responses: [{ text: "Look away." }]
         },
         // --- Fire Pit 3 ---
         tst_pit_3_empty: {
-            npcName: 'Empty Fire Pit',
-            npcIcon: 'fire-pit',
+            npc: 'empty_fire_pit',
             text: "A circle of stones with a pile of ashes awaits its next flame.",
             responses: [],
             conditionalResponses: [
@@ -1628,21 +1516,18 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_pit_3_lit: {
-            npcName: 'Lit Fire Pit',
-            npcIcon: 'fire-lit',
+            npc: 'lit_fire_pit',
             text: "A warm fire crackles within the stone circle.",
             responses: [{ text: "Look away." }]
         },
         tst_pit_3_mystical: {
-            npcName: 'Mystical Fire Pit',
-            npcIcon: 'fire-mystical',
+            npc: 'mystical_fire_pit',
             text: "The fire burns with an eerie, violet light. The Monolith seems to react to its presence.",
             responses: [{ text: "Look away." }]
         },
         // --- Fire Pit 4 ---
         tst_pit_4_empty: {
-            npcName: 'Empty Fire Pit',
-            npcIcon: 'fire-pit',
+            npc: 'empty_fire_pit',
             text: "A circle of stones with a pile of ashes awaits its next flame.",
             responses: [],
             conditionalResponses: [
@@ -1658,14 +1543,12 @@ export const theSorcerersTrial: Quest = {
             ]
         },
         tst_pit_4_lit: {
-            npcName: 'Lit Fire Pit',
-            npcIcon: 'fire-lit',
+            npc: 'lit_fire_pit',
             text: "A warm fire crackles within the stone circle.",
             responses: [{ text: "Look away." }]
         },
         tst_pit_4_mystical: {
-            npcName: 'Mystical Fire Pit',
-            npcIcon: 'fire-mystical',
+            npc: 'mystical_fire_pit',
             text: "The fire burns with an eerie, violet light. The Monolith seems to react to its presence.",
             responses: [{ text: "Look away." }]
         }

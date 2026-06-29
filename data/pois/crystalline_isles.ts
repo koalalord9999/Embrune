@@ -11,7 +11,7 @@ export const crystallineIslesPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Skyship Captain (isle)",
-                icon: "/assets/npcChatHeads/ferryman_silas.png",
+                icon: 'person',
                 startNode: "captain_isles_default",
                 conditionalGreetings: [
                     {

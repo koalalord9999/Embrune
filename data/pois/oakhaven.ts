@@ -29,7 +29,7 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Guard Captain Elara",
-                icon: "/assets/npcChatHeads/guard_captain_elara.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_guard_table",
                 },
@@ -37,10 +37,12 @@ export const oakhavenPois: Record<string, POI> = {
                 startNode: "elara_default",
                 questTopics: ["capitals_call", "scales_of_the_swamp"],
                 conditionalGreetings: [
-                    {
-                        text: "You're back. Did you find him? Do you have proof?",
-                        check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 2 }] }
-                    }
+                    //Scales of the Swamp
+                    { text: "You're back. Did you find him? Do you have proof?", check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 7 }] } },
+                    //Capitals Call
+
+                    { text: "You still need to talk to Finn, go find him in his workshop in the crafting district.", check: { requirements: [{ type: 'quest', questId: 'capitals_call', status: 'in_progress', stage: 2 }] } },
+                    { text: "Any news on what happened at the bridge?", check: { requirements: [{ type: 'quest', questId: 'capitals_call', status: 'in_progress', stage: 1 }] } }
                 ]
             },
             {
@@ -132,14 +134,14 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Craftsman",
-                icon: "/assets/npcChatHeads/artisan.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_craftsman_table",
                 },
                 dialogue: {
                     start: {
                         npcName: "Craftsman",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Welcome to Oakhaven, the craftiest town in the kingdom!\n\nIf you need tools or thread, the Artisan Supplies shop has the best selection.\n\nTanner Sven can turn any hide into workable leather, for a small fee of course.\n\nThe Carved Mug has the best boar stew this side of the capital.\n\nLooking for herbs? Elara's Apothecary is the place to go. She knows all the local flora.\n\nThe King's Road to the west used to be a major trade route. Now, the bridge is out and it's full of highwaymen.\n\nBronn the Retired Adventurer in the tavern has some wild stories. Half of them might even be true.\n\nThey say the harpies in the Gale-Swept Peaks have feathers sharp as steel. Might be useful for fletching.\n\nI've heard you can find yew trees high up in the mountains, but it's a dangerous climb.\n\nThe local wishing well is said to grant good fortune to those who are patient.\n\nNeed to make potions? You'll need a pestle and mortar to grind your ingredients. The supply shop has them.\n\nThe woods to the west are full of boars and bears. Good for hunting, if you're brave enough.\n\nSome say the gems found in the mines have magical properties when enchanted.\n\nI saw a strange, shimmering stag in the hills. It vanished before I could get a closer look.\n\nThe wood from the Feywood is said to be naturally magical. Bows made from it are incredibly powerful.\n\nWatch out for the swamp monsters. They're slow, but they hit like a falling rock.\n\nGuard Captain Elara is worried about the capital. Says the roads need to be secured.\n\nIf you're a ranger, you'll want to visit Oakhaven. We have the best fletching supplies.\n\nMaking your own armor from hides is a great way to save coin.\n\nThe Sunken Lands are a dangerous place. Full of horrors and ancient ruins.\n\nSome of the local fishermen talk of a hidden pond, teeming with fish, up in the hills.\n\nThe local guard are always looking for brave souls to clear out the bandit camps.\n\nYou can make your own bowstrings by spinning flax on a spinning wheel. There's one in McGregor's barn, and another in Silverhaven.\n\nA good crushing weapon is best for dealing with armored foes, like those golems I've heard about.\n\nThe local artisans can teach you a lot about crafting, for the right price.\n\nThe ruins in the Tanglewood are said to be haunted by spirits of the forest.\n\nNeed gold for jewelry? You'll have to find a gold mine. They're not common around here.\n\nThe best trout are in the clearwater streams, not the murky rivers.\n\nA retired adventurer told me a goblin king's weakness is his love for treasure. A well-placed bribe, perhaps?\n\nWatch out for the giant hornets in the western woods. Their sting is no joke.",
                         responses: [],
                     },
@@ -246,8 +248,11 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Finn the Rope-maker",
-                icon: "/assets/npcChatHeads/finn_the_rope_maker.png",
+                icon: 'person',
                 startNode: "finn_default",
+                conditionalGreetings: [
+                    { text: "Have you recovered the fibers for the supports?", check: { requirements: [{ type: 'quest', questId: 'capitals_call', status: 'in_progress', stage: 3 }] } },
+                ]
             },
         ],
         regionId: "oakhaven",
@@ -322,11 +327,11 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Herbalist Anise",
-                icon: "/assets/npcChatHeads/herbalist_anise.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Herbalist Anise",
-                        npcIcon: "/assets/npcChatHeads/herbalist_anise.png",
+                        npcIcon: 'person',
                         text: "Welcome to my little shop. If you need anything for potion-making, you've come to the right place.\n\nThe key to a good potion is properly prepared ingredients. A pestle and mortar is a must-have for any aspiring herbalist.",
                         responses: [],
                     },
@@ -356,12 +361,12 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Tanner Sven",
-                icon: "/assets/npcChatHeads/tanner_sven.png",
+                icon: 'person',
                 startNode: "start",
                 dialogue: {
                     start: {
                         npcName: "Tanner Sven",
-                        npcIcon: "/assets/npcChatHeads/tanner_sven.png",
+                        npcIcon: 'person',
                         text: "You bring the hide, I'll make it leather. For a price, of course. Got anything for me?",
                         responses: [
                             {
@@ -394,7 +399,7 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Alaric the Woodworker",
-                icon: "/assets/npcChatHeads/artisan.png",
+                icon: 'person',
                 startNode: "alaric_default",
             },
         ],
@@ -418,11 +423,11 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Barkeep Freya",
-                icon: "/assets/npcChatHeads/barkeep_freya.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Barkeep Freya",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "Welcome to The Carved Mug. We've got the best ale and the softest beds in Oakhaven. What can I get for you?",
                         responses: [
                             {
@@ -437,7 +442,7 @@ export const oakhavenPois: Record<string, POI> = {
                     },
                     buy_drink_intro: {
                         npcName: "Barkeep Freya",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "An excellent choice! Warms the soul after a long day of crafting, eh? That'll be 3 coins.",
                         responses: [
                             {
@@ -471,19 +476,19 @@ export const oakhavenPois: Record<string, POI> = {
                     },
                     buy_drink_success: {
                         npcName: "Barkeep Freya",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "Cheers!",
                         responses: [],
                     },
                     buy_drink_fail: {
                         npcName: "Barkeep Freya",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "Sorry, you don't have enough coin for that.",
                         responses: [],
                     },
                     rent_room_intro: {
                         npcName: "Barkeep Freya",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "Wise adventurer. A good night's sleep in a proper bed does wonders for your health. A room for the night is 15 coins.",
                         responses: [
                             {
@@ -516,7 +521,7 @@ export const oakhavenPois: Record<string, POI> = {
                     },
                     rent_room_success: {
                         npcName: "Barkeep Freya",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "Wonderful. Sleep well!",
                         responses: [],
                     },
@@ -526,7 +531,7 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Bronn the Retired Adventurer",
-                icon: "/assets/npcChatHeads/bronn_the_retired_adventurer.png",
+                icon: 'person',
                 startNode: "default_dialogue",
                 questTopics: ["an_echo_of_battle", "art_of_the_warhammer", "scales_of_the_swamp"],
                 conditionalGreetings: [
@@ -717,7 +722,7 @@ export const oakhavenPois: Record<string, POI> = {
                 dialogue: {
                     bronn_take_scroll: {
                         npcName: "Bronn the Retired Adventurer",
-                        npcIcon: "/assets/npcChatHeads/bronn_the_retired_adventurer.png",
+                        npcIcon: 'person',
                         text: "A scroll? Let me see that... Whoa, what an extraordinary find! I found this mace back in my heyday—it's yours if you'll let me take that scroll off your hands.",
                         responses: [
                             {
@@ -742,7 +747,7 @@ export const oakhavenPois: Record<string, POI> = {
                     },
                     default_dialogue: {
                         npcName: "Bronn the Retired Adventurer",
-                        npcIcon: "/assets/npcChatHeads/bronn_the_retired_adventurer.png",
+                        npcIcon: 'person',
                         text: "Another pint, barkeep! What's an old soldier to do but drink and remember?",
                         responses: [
                             {
@@ -781,7 +786,7 @@ export const oakhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Banker Astrid",
-                icon: "/assets/npcChatHeads/banker_astrid.png",
+                icon: 'person',
                 actions: [
                     {
                         label: "Bank",
@@ -799,7 +804,7 @@ export const oakhavenPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Banker Astrid",
-                        npcIcon: "/assets/npcChatHeads/banker_astrid.png",
+                        npcIcon: 'person',
                         text: "Bank of Embrune, Oakhaven branch. How may I assist you?",
                         responses: [
                             {
@@ -813,7 +818,7 @@ export const oakhavenPois: Record<string, POI> = {
                     },
                     access_bank: {
                         npcName: "Banker Astrid",
-                        npcIcon: "/assets/npcChatHeads/banker_astrid.png",
+                        npcIcon: 'person',
                         text: "Certainly. We offer secure storage for all your valuable items. Would you like to view your vault?",
                         responses: [
                             {

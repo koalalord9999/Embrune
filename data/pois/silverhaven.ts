@@ -32,14 +32,14 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Town Crier",
-                icon: "/assets/npcChatHeads/town_crier.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_crier_table",
                 },
                 dialogue: {
                     start: {
                         npcName: "Town Crier",
-                        npcIcon: "/assets/npcChatHeads/town_crier.png",
+                        npcIcon: 'person',
                         text: "Hear ye, hear ye! All bounties must be registered with Slayer Master Kaelen at the Spire!\n\nHear ye, hear ye! Iron prices are up, due to the troubles in the south!\n\nHear ye, hear ye! The ferry to the Isle of Whispers departs daily from the docks! Passage is at your own risk!",
                         responses: [],
                     },
@@ -208,7 +208,7 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Merchant Theron",
-                icon: "/assets/npcChatHeads/merchant_theron.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_merchant_table",
                 },
@@ -218,14 +218,14 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Historian Pallas",
-                icon: "/assets/npcChatHeads/historian_pallas.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_adventurer_table",
                 },
                 dialogue: {
                     start: {
                         npcName: "Historian Pallas",
-                        npcIcon: "/assets/npcChatHeads/historian_pallas.png",
+                        npcIcon: 'person',
                         text: "Ah, the King's Road. A marvel of engineering from the old kingdom. Paved with stones from the Gale-Swept Peaks, they say.\n\nThe Sunken Labyrinth on the Isle of Whispers? It predates the kingdom, perhaps even humanity. It was a temple to a forgotten god of the deep. Some say its builders never left.",
                         responses: [],
                     },
@@ -236,7 +236,7 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Guard",
-                icon: "/assets/npcChatHeads/guard_captain_elara.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_guard_table",
                 },
@@ -244,7 +244,7 @@ export const silverhavenPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Guard",
-                        npcIcon: "/assets/npcChatHeads/guard_captain_elara.png",
+                        npcIcon: 'person',
                         text: "Welcome to Silverhaven, the heart of the kingdom!\n\nIf you want to hunt the most dangerous beasts, you must speak with Kaelen, the Slayer Master, at the Spire.\n\nThe Grand Bank here is the most secure place in the world to store your valuables.\n\nThe Gilded Hammer Armory sells the finest plate armor, but it'll cost you a mountain of gold.\n\nThe ferry to the Isle of Whispers leaves from the docks. A one-way trip, for some.\n\nI saw a strange, lighter-than-air ship moored at the top of the Slayer's Spire. Wonder where it goes.\n\nThe trade district is the best place to sell your goods. Merchants from all over the world come here.\n\nThe city guard is always on alert. The threats from the Salt Flats and the Isle are very real.\n\nHistorian Pallas knows more about the old kingdom than any book. His office is in the trade district.\n\nThey say the Sunken Labyrinth on the Isle was a temple to a forgotten god of the deep.\n\nThe fish market at the docks has the freshest catches from the Great Sea.\n\nThe artisans in their quarter can craft almost anything, provided you have the right materials.\n\nThe Royal Castle looms over the city. I wonder what the King is like.\n\nThe Salt Flats are a desolate wasteland, but I hear they're rich in strange minerals.\n\nOnly slayers of high renown are permitted to use the blimp service. It's a fast way to travel to dangerous lands.\n\nBe careful in the residential district. Some of the nobles are... particular.\n\nI heard a merchant complaining his shipment from Oakhaven was seized by bandits on the King's Road.\n\nThe smiths here can work with the rarest metals, like Adamantite and whatever that 'runic' stuff is.\n\nThe air smells of salt and industry here. A far cry from the forests and fields.\n\nYou want to make a name for yourself? Slaying a rare beast is the quickest way to do it.\n\nThe whispers from the Isle... some say they can drive a man mad.\n\nThe Crystal Scuttlers in the Salt Flats have shells harder than steel.\n\nThe ancient sentinels in the Labyrinth are said to be indestructible.\n\nThere's an old woman in the residential district who lost a precious heirloom. She's been heartbroken for weeks.\n\nThe Town Crier always has the latest news and bounties. It pays to listen to him.\n\nIf you're looking for high-level runes, the monsters on the Isle of Whispers are your best bet.\n\nThe alchemists here are always buying rare herbs and monster parts.\n\nDon't wander into the sewers. They say something... ancient... lives down there.\n\nThe view from the top of the Slayer's Spire is breathtaking.\n\nSilverhaven is a city of opportunity, but also of great danger. Tread carefully.",
                         responses: [],
                     },
@@ -283,7 +283,7 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Banker Cassian",
-                icon: "/assets/npcChatHeads/banker_theron.png",
+                icon: 'person',
                 actions: [
                     {
                         label: "Bank",
@@ -301,7 +301,7 @@ export const silverhavenPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Banker Cassian",
-                        npcIcon: "/assets/npcChatHeads/banker_theron.png",
+                        npcIcon: 'person',
                         text: "Welcome to the Grand Bank of Embrune. How can we serve your financial needs today?",
                         responses: [
                             {
@@ -315,7 +315,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     access_bank: {
                         npcName: "Banker Cassian",
-                        npcIcon: "/assets/npcChatHeads/banker_theron.png",
+                        npcIcon: 'person',
                         text: "Of course, your vault is ready for you. Shall I open it?",
                         responses: [
                             {
@@ -375,7 +375,7 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Artisan",
-                icon: "/assets/npcChatHeads/artisan.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_yeoman_table",
                 },
@@ -383,7 +383,7 @@ export const silverhavenPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Artisan",
-                        npcIcon: "/assets/npcChatHeads/artisan.png",
+                        npcIcon: 'person',
                         text: "Strange noises echo down from the peaks on a clear night... like a hammer on an anvil, but with a clearer ring than any metal I know.\n\nSome old prospectors talk of a recluse up in the mountains, a smith who shuns cities. Probably just a story to scare off claim-jumpers.",
                         responses: [],
                     },
@@ -617,14 +617,14 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Master Smith Gideon",
-                icon: "/assets/npcChatHeads/master_smith_gideon.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_adventurer_table",
                 },
                 dialogue: {
                     start: {
                         npcName: "Master Smith Gideon",
-                        npcIcon: "/assets/npcChatHeads/master_smith_gideon.png",
+                        npcIcon: 'person',
                         text: "This city has the finest forges, but some say the greatest smith of our age isn't in a city at all.\n\nI once heard a tale of an old master named Borin Stonehand who retired to the Gale-Swept Peaks. They say he perfected the art of the warhammer, forging weapons that could shatter stone like glass.",
                         responses: [],
                     },
@@ -658,11 +658,11 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Ferryman Silas",
-                icon: "/assets/npcChatHeads/ferryman_silas.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Ferryman Silas",
-                        npcIcon: "/assets/npcChatHeads/ferryman_silas.png",
+                        npcIcon: 'person',
                         text: "Ready to leave the isle? Or perhaps venture somewhere new?",
                         responses: [
                             {
@@ -695,13 +695,13 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     travel_whispers_success: {
                         npcName: "Ferryman Silas",
-                        npcIcon: "/assets/npcChatHeads/ferryman_silas.png",
+                        npcIcon: 'person',
                         text: "All aboard for the Isle of Whispers! Don't say I didn't warn ya...",
                         responses: [],
                     },
                     travel_fail: {
                         npcName: "Ferryman Silas",
-                        npcIcon: "/assets/npcChatHeads/ferryman_silas.png",
+                        npcIcon: 'person',
                         text: "Sorry, friend. Passage ain't free. Come back when you have the coin.",
                         responses: [],
                     },
@@ -711,7 +711,7 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Skyship Captain",
-                icon: "/assets/npcChatHeads/ferryman_silas.png",
+                icon: 'person',
                 startNode: "captain_default",
                 questTopics: ["the_arcane_awakening"],
                 conditionalGreetings: [
@@ -783,7 +783,7 @@ export const silverhavenPois: Record<string, POI> = {
                 dialogue: {
                     captain_default: {
                         npcName: "Skyship Captain",
-                        npcIcon: "/assets/npcChatHeads/ferryman_silas.png",
+                        npcIcon: 'person',
                         text: "The skies call, but they're a fickle mistress. Where are you looking to go?",
                         responses: [],
                     },
@@ -852,13 +852,13 @@ export const silverhavenPois: Record<string, POI> = {
             },
             {
                 type: "npc",
-                name: "Elara",
-                icon: "/assets/npcChatHeads/elara.png",
+                name: "Elfaria",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_knight_table",
                 },
                 attackableMonsterId: "knight",
-                startNode: "elara_default_heirloom",
+                startNode: "elfaria_default_heirloom",
                 questTopics: ["lost_heirloom"],
             },
             {
@@ -902,11 +902,11 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Barkeep Sterling",
-                icon: "/assets/npcChatHeads/barkeep_freya.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Barkeep Sterling",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "Welcome to The Gilded Goblet. We serve the finest spirits in the capital. What's your pleasure?",
                         responses: [
                             {
@@ -921,7 +921,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     buy_drink_intro: {
                         npcName: "Barkeep Sterling",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "An excellent choice. This is Dragon's Breath Stout, imported from the Dwarven Outpost. Smooth, with a fiery finish. 10 coins.",
                         responses: [
                             {
@@ -955,19 +955,19 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     buy_drink_success: {
                         npcName: "Barkeep Sterling",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "Enjoy. And try not to breathe fire on the drapes.",
                         responses: [],
                     },
                     buy_drink_fail: {
                         npcName: "Barkeep Sterling",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "Perhaps a water, then? It's free.",
                         responses: [],
                     },
                     rent_room_intro: {
                         npcName: "Barkeep Sterling",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "We have the finest rooms in the city. Feather beds, clean sheets... a world away from the straw pallets in the countryside. A night's rest can cost you 50 coins.",
                         responses: [
                             {
@@ -1000,7 +1000,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     rent_room_success: {
                         npcName: "Barkeep Sterling",
-                        npcIcon: "/assets/npcChatHeads/barkeep_freya.png",
+                        npcIcon: 'person',
                         text: "Excellent. The room at the top of the stairs is yours. Sleep well.",
                         responses: [],
                     },
@@ -1010,7 +1010,7 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Retired Royal Guard",
-                icon: "/assets/npcChatHeads/bronn_the_retired_adventurer.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_knight_table",
                 },
@@ -1018,7 +1018,7 @@ export const silverhavenPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Retired Royal Guard",
-                        npcIcon: "/assets/npcChatHeads/bronn_the_retired_adventurer.png",
+                        npcIcon: 'person',
                         text: "This city isn't as safe as it looks. The walls keep out the monsters, but the real threats are often inside. Keep your wits about you.",
                         responses: [],
                     },
@@ -1028,11 +1028,11 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Merchant",
-                icon: "/assets/npcChatHeads/merchant_theron.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Merchant",
-                        npcIcon: "/assets/npcChatHeads/merchant_theron.png",
+                        npcIcon: 'person',
                         text: "Welcome to Silverhaven, the heart of the kingdom!\n\nIf you want to hunt the most dangerous beasts, you must speak with Kaelen, the Slayer Master, at the Spire.\n\nThe Grand Bank here is the most secure place in the world to store your valuables.\n\nThe Gilded Hammer Armory sells the finest plate armor, but it'll cost you a mountain of gold.\n\nThe ferry to the Isle of Whispers leaves from the docks. A one-way trip, for some.\n\nI saw a strange, lighter-than-air ship moored at the top of the Slayer's Spire. Wonder where it goes.\n\nThe trade district is the best place to sell your goods. Merchants from all over the world come here.\n\nThe city guard is always on alert. The threats from the Salt Flats and the Isle are very real.\n\nHistorian Pallas knows more about the old kingdom than any book. His office is in the trade district.\n\nThey say the Sunken Labyrinth on the Isle was a temple to a forgotten god of the deep.\n\nThe fish market at the docks has the freshest catches from the Great Sea.\n\nThe artisans in their quarter can craft almost anything, provided you have the right materials.\n\nThe Royal Castle looms over the city. I wonder what the King is like.\n\nThe Salt Flats are a desolate wasteland, but I hear they're rich in strange minerals.\n\nOnly slayers of high renown are permitted to use the blimp service. It's a fast way to travel to dangerous lands.\n\nBe careful in the residential district. Some of the nobles are... particular.\n\nI heard a merchant complaining his shipment from Oakhaven was seized by bandits on the King's Road.\n\nThe smiths here can work with the rarest metals, like Adamantite and whatever that 'runic' stuff is.\n\nThe air smells of salt and industry here. A far cry from the forests and fields.\n\nYou want to make a name for yourself? Slaying a rare beast is the quickest way to do it.\n\nThe whispers from the Isle... some say they can drive a man mad.\n\nThe Crystal Scuttlers in the Salt Flats have shells harder than steel.\n\nThe ancient sentinels in the Labyrinth are said to be indestructible.\n\nThere's an old woman in the residential district who lost a precious heirloom. She's been heartbroken for weeks.\n\nThe Town Crier always has the latest news and bounties. It pays to listen to him.\n\nIf you're looking for high-level runes, the monsters on the Isle of Whispers are your best bet.\n\nThe alchemists here are always buying rare herbs and monster parts.\n\nDon't wander into the sewers. They say something... ancient... lives down there.\n\nThe view from the top of the Slayer's Spire is breathtaking.\n\nSilverhaven is a city of opportunity, but also of great danger. Tread carefully.",
                         responses: [],
                     },
@@ -1074,7 +1074,7 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "slayer_master",
                 name: "Kaelen",
-                icon: "/assets/npcChatHeads/kaelen.png",
+                icon: 'person',
                 masterId: "kaelen",
                 actions: [
                     {
@@ -1086,7 +1086,7 @@ export const silverhavenPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "Hail, adventurer! The Spire stands as a testament to those who hunt the darkness. Are you here to join our ranks, or do you have business in the shop?",
                         responses: [
                             {
@@ -1121,7 +1121,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     reset_task_intro: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "A reset? It is a costly endeavor, adventurer. Reorienting the Spire's resources for a new hunt will require a payment of 20 Slayer Credits.",
                         responses: [
                             {
@@ -1135,7 +1135,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     reset_task_check: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "Let me check our records...",
                         responses: [
                             {
@@ -1155,7 +1155,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     reset_task_confirm: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "Are you absolutely certain? This will completely clear your current assignment. You will be free to seek a new hunt from whichever master you choose.",
                         responses: [
                             {
@@ -1174,7 +1174,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     reset_task_failed: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "The Spire doesn't work on charity, friend. Realigning our trackers is expensive business. Come back when you've actually earned the 20 credits required.",
                         responses: [
                             {
@@ -1184,7 +1184,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     check_task_status: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "Let me see...",
                         responses: [
                             {
@@ -1204,7 +1204,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     assign_task: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "I've got just the thing for someone of your standing. Ready for your assignment?",
                         responses: [
                             {
@@ -1223,7 +1223,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     has_task_check: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "Wait...",
                         responses: [
                             {
@@ -1243,7 +1243,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     task_complete: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "Excellent work! You've cleared your previous bounty. Here are your credits.",
                         responses: [
                             {
@@ -1260,7 +1260,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     kaelen_new_task_prompt: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "Ready for another?",
                         responses: [
                             {
@@ -1279,7 +1279,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     has_active_task: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "You're already on a hunt, friend.",
                         responses: [
                             {
@@ -1300,7 +1300,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     ravindra_task_too_hard: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "I see Ravindra has you running ragged in the desert. That master doesn't know the meaning of 'moderation'. If it's too much for you, I can give you something easier.",
                         responses: [
                             {
@@ -1314,7 +1314,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     confirm_easier_task: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "Are you sure? I can assign you a simpler task, but it will reset your current task streak to zero. You'll be back at square one for milestone rewards.",
                         responses: [
                             {
@@ -1333,7 +1333,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     kaelen_task_progress: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "You haven't finished your current assignment yet. Get back out there and show those monsters what a real Slayer is made of!",
                         responses: [
                             {
@@ -1347,12 +1347,12 @@ export const silverhavenPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Slayer's Blimp to Respite",
-                icon: "/assets/npcChatHeads/kaelen.png",
+                icon: 'person',
                 startNode: "blimp_intro",
                 dialogue: {
                     blimp_intro: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "The blimp is fueled and ready for the long flight to Slayer's Respite. However, maintaining such a vessel is expensive work. A contribution of 1,800 coins is required for the journey. Are you ready to depart?",
                         responses: [
                             {
@@ -1380,7 +1380,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     depart_success: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "Excellent. Secure your gear and prepare for takeoff. We'll have you at Duskwatch Landing in no time.",
                         responses: [
                             {
@@ -1397,7 +1397,7 @@ export const silverhavenPois: Record<string, POI> = {
                     },
                     depart_fail: {
                         npcName: "Kaelen",
-                        npcIcon: "/assets/npcChatHeads/kaelen.png",
+                        npcIcon: 'person',
                         text: "I'm afraid you don't meet the requirements for this journey. Ensure you have the 1,800 coins for fuel and have reached Slayer level 50.",
                         responses: [
                             {

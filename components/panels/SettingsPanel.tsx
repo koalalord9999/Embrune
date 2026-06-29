@@ -51,6 +51,14 @@ const QualitySelector: React.FC<{ value: string, onChange: (value: 'Low' | 'Medi
     </div>
 );
 
+const TextSpeedSelector: React.FC<{ value: 'slow' | 'normal' | 'fast' | 'instant', onChange: (value: 'slow' | 'normal' | 'fast' | 'instant') => void }> = ({ value, onChange }) => (
+    <div className="flex gap-1 bg-gray-900/50 p-1 rounded-md">
+        {(['slow', 'normal', 'fast', 'instant'] as const).map(speed => (
+            <button key={speed} onClick={() => onChange(speed)} className={`px-3 py-1 text-xl rounded transition-colors font-pixel-rpg capitalize ${value === speed ? 'bg-yellow-600 text-white font-bold' : 'bg-gray-700 hover:bg-gray-600'}`}>{speed}</button>
+        ))}
+    </div>
+);
+
 const FontSelector: React.FC<{ value: GameFont; onChange: (v: GameFont) => void }> = ({ value, onChange }) => {
     const [isOpen, setIsOpen] = useState(false);
     const selected = FONT_OPTIONS.find(o => o.value === value) ?? FONT_OPTIONS[0];
@@ -246,6 +254,9 @@ const SettingsView: React.FC<SettingsViewProps> = ({ onResetGame, onExportGame, 
                 <div>
                     <SettingRow label="Bank Placeholders" description="Leave a 0-stack placeholder in the bank when withdrawing all of an item.">
                         <ToggleButton enabled={bankPlaceholders} onClick={handleToggleBankPlaceholders} />
+                    </SettingRow>
+                    <SettingRow label="Text Speed" description="Adjust the scrolling speed of NPC dialogue text.">
+                        <TextSpeedSelector value={ui.textSpeed} onChange={ui.setTextSpeed} />
                     </SettingRow>
                     <SettingRow label="One-Click Mode" description="Makes single-clicks act like long-presses for context menus.">
                         <ToggleButton enabled={ui.isOneClickMode} onClick={() => ui.setIsOneClickMode(!ui.isOneClickMode)} />

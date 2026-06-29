@@ -16,6 +16,10 @@ export const lostHeirloom: Quest = {
             requirement: { type: 'talk', poiId: 'silverhaven_residential_district', npcName: 'Elara' }
         }
     ],
+    npcDefs: {
+        elara: { npcName: 'Elara', npcIcon: 'person' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Slayer, amount: 350 }],
         items: [{ itemId: 'emerald_necklace', quantity: 1}],
@@ -39,8 +43,7 @@ export const lostHeirloom: Quest = {
     ],
     dialogue: {
         elara_default_heirloom: {
-            npcName: 'Elara',
-            npcIcon: '/assets/npcChatHeads/elara.png',
+            npc: 'elara',
             text: "It's a lovely day in the capital, isn't it?",
             responses: [],
             conditionalResponses: [
@@ -48,16 +51,14 @@ export const lostHeirloom: Quest = {
             ]
         },
         item_trigger_lost_heirloom: {
-            npcName: 'Elara',
-            npcIcon: '/assets/npcChatHeads/elara.png',
+            npc: 'elara',
             text: "Is that... could it be? My heirloom necklace! I thought it was lost forever! Oh, thank you, thank you, kind stranger! I don't have much, but please, take this as a reward for your honesty.",
             responses: [
                 { text: "You're welcome. I'm glad I could return it.", actions: [{ type: 'start_quest', questId: 'lost_heirloom' }, { type: 'advance_quest', questId: 'lost_heirloom' }, { type: 'take_item', itemId: 'lost_heirloom', quantity: 1 }] },
             ]
         },
         post_quest_lost_heirloom: {
-            npcName: 'Elara',
-            npcIcon: '/assets/npcChatHeads/elara.png',
+            npc: 'elara',
             text: "It's so good to see you again! I haven't taken off my necklace since you returned it to me. Thank you forever.",
             responses: []
         }

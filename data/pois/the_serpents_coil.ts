@@ -15,7 +15,7 @@ export const theSerpentsCoilPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Venture Deeper",
-                icon: "/assets/icons/travel.png",
+                icon: "journey",
                 startNode: "venture_deeper_node",
                 questTopics: ["scales_of_the_swamp"]
             },
@@ -56,14 +56,14 @@ export const theSerpentsCoilPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Muddy Tracks",
-                icon: "/assets/icons/search.png",
+                icon: "magnifying_glass",
                 startNode: "muddy_tracks_node",
                 questTopics: ["scales_of_the_swamp"]
             },
             {
                 type: "npc",
                 name: "Bandit Scout",
-                icon: "/assets/npcChatHeads/bandit_scout.png",
+                icon: 'person',
                 startNode: "scout_encounter",
                 questTopics: ["scales_of_the_swamp"]
             },
@@ -79,6 +79,11 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         regionId: "serpents_coil",
         x: 1524,
         y: 1255,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 3,
+        },
     },
     serpent_nesting_ground: {
         id: "serpent_nesting_ground",
@@ -104,6 +109,11 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         regionId: "serpents_coil",
         x: 1499,
         y: 1225,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 3,
+        },
     },
     flooded_forest: {
         id: "flooded_forest",
@@ -114,6 +124,11 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         regionId: "serpents_coil",
         x: 1517,
         y: 1195,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 3,
+        },
     },
     murky_channel_east: {
         id: "murky_channel_east",
@@ -133,6 +148,11 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         regionId: "serpents_coil",
         x: 1595,
         y: 1259,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 3,
+        },
     },
     isolated_islet: {
         id: "isolated_islet",
@@ -164,6 +184,11 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         regionId: "serpents_coil",
         x: 1640,
         y: 1234,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 3,
+        },
     },
     shipwreck_shallows: {
         id: "shipwreck_shallows",
@@ -221,6 +246,11 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         regionId: "serpents_coil",
         x: 1600,
         y: 1209,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 3,
+        },
     },
     sunken_temple_approach: {
         id: "sunken_temple_approach",
@@ -251,6 +281,11 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         regionId: "serpents_coil",
         x: 1558,
         y: 1192,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 3,
+        },
     },
     sunken_temple_altar: {
         id: "sunken_temple_altar",
@@ -261,8 +296,8 @@ export const theSerpentsCoilPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Garath Voss",
-                icon: "/assets/npcChatHeads/garath_voss.png",
-                startNode: "voss_encounter",
+                icon: 'person',
+                startNode: "voss_default",
                 questTopics: ["scales_of_the_swamp"]
             },
             {
@@ -287,6 +322,11 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         regionId: "serpents_coil",
         x: 1569,
         y: 1171,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 3,
+        },
     },
     hex_altar: {
         id: "hex_altar",
@@ -312,5 +352,10 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         regionId: "serpents_coil",
         x: 1600,
         y: 1140,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 3,
+        },
     },
 };

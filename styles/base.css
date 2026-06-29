@@ -18,18 +18,24 @@ body,
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevents scrollbars if aspect ratio overflows a bit */
+  overflow: hidden;
+  /* Prevents scrollbars if aspect ratio overflows a bit */
 }
 
 body {
   background-color: #282c34;
   font-family: var(--game-font-family);
-  user-select: none; /* Disable text selection */
+  user-select: none;
+  /* Disable text selection */
   letter-spacing: 0.02em;
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE */
-  -webkit-touch-callout: none; /* iOS Safari - Disable long-press menu */
+  -webkit-user-select: none;
+  /* Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE */
+  -webkit-touch-callout: none;
+  /* iOS Safari - Disable long-press menu */
 }
 
 .font-pixel-rpg {
@@ -50,9 +56,17 @@ body {
 }
 
 .pixelated-image {
-  image-rendering: -moz-crisp-edges; /* Firefox */
-  image-rendering: -webkit-crisp-edges; /* Webkit */
-  image-rendering: pixelated; /* Standard */
+  image-rendering: -moz-crisp-edges;
+  /* Firefox */
+  image-rendering: -webkit-crisp-edges;
+  /* Webkit */
+  image-rendering: pixelated;
+  /* Standard */
+}
+
+.npc-icon-white {
+  filter: invert(1) var(--item-shadow);
+  opacity: 0.85;
 }
 
 .poisoned-heart-icon {

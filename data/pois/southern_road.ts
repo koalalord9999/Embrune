@@ -188,14 +188,14 @@ export const southernRoadPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Old Man Hemlock",
-                icon: "/assets/npcChatHeads/old_man_hemlock.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_farmer_table",
                 },
                 dialogue: {
                     start: {
                         npcName: "Old Man Hemlock",
-                        npcIcon: "/assets/npcChatHeads/old_man_hemlock.png",
+                        npcIcon: 'person',
                         text: "Get off my property! Unless you've got something to trade...\n\nThe swamp... it remembers. Best not to disturb what sleeps in the deep muck.\n\nHeard tell of ruins deeper in. Sunken, they are. Full of things that haven't seen the sun in a thousand years.",
                         responses: [],
                     },

@@ -42,7 +42,7 @@ export const CIVILLIAN_DIALOGUE: Record<string, string[]> = {
     meadowdale: [
         "Welcome to Meadowdale! It's a quiet town, mostly. Except for the goblins.",
         "Valerius, over at the smithy, taught me everything I know about metal. Which isn't much, but he's a great teacher.",
-        "The library has some fascinating old books. Librarian Elara knows all the local history.",
+        "The library has some fascinating old books. Librarian Alexia knows all the local history.",
         "If you're heading to the Stonebreak Mine, watch your step. The goblins have set up some crude traps.",
         "Rancher McGregor's fields to the west are a great source of wool and hides, if you're into that sort of thing.",
         "The water from the fountain is surprisingly clean. Perfect for filling up your vials.",
@@ -76,7 +76,7 @@ export const CIVILLIAN_DIALOGUE: Record<string, string[]> = {
         "If you need tools or thread, the Artisan Supplies shop has the best selection.",
         "Tanner Sven can turn any hide into workable leather, for a small fee of course.",
         "The Carved Mug has the best boar stew this side of the capital.",
-        "Looking for herbs? Elara's Apothecary is the place to go. She knows all the local flora.",
+        "Looking for herbs? Anise's Apothecary is the place to go. She knows all the local flora.",
         "The King's Road to the west used to be a major trade route. Now, the bridge is out and it's full of highwaymen.",
         "Bronn the Retired Adventurer in the tavern has some wild stories. Half of them might even be true.",
         "They say the harpies in the Gale-Swept Peaks have feathers sharp as steel. Might be useful for fletching.",

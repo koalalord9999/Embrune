@@ -15,11 +15,11 @@ export const isleOfWhispersPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Ferryman Silas",
-                icon: "/assets/npcChatHeads/ferryman_silas.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Ferryman Silas",
-                        npcIcon: "/assets/npcChatHeads/ferryman_silas.png",
+                        npcIcon: 'person',
                         text: "Ready to leave the isle? Or perhaps venture somewhere new?",
                         responses: [
                             {
@@ -52,13 +52,13 @@ export const isleOfWhispersPois: Record<string, POI> = {
                     },
                     travel_silverhaven_success: {
                         npcName: "Ferryman Silas",
-                        npcIcon: "/assets/npcChatHeads/ferryman_silas.png",
+                        npcIcon: 'person',
                         text: "All aboard for Silverhaven!",
                         responses: [],
                     },
                     travel_fail: {
                         npcName: "Ferryman Silas",
-                        npcIcon: "/assets/npcChatHeads/ferryman_silas.png",
+                        npcIcon: 'person',
                         text: "Sorry, friend. Passage ain't free. Come back when you have the coin.",
                         responses: [],
                     },
@@ -68,14 +68,14 @@ export const isleOfWhispersPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Fisherman Brody",
-                icon: "/assets/npcChatHeads/fisherman_brody.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_craftsman_table",
                 },
                 dialogue: {
                     start: {
                         npcName: "Fisherman Brody",
-                        npcIcon: "/assets/npcChatHeads/fisherman_brody.png",
+                        npcIcon: 'person',
                         text: "Welcome to the Isle of Whispers. Not much here but rocks, salt, and... crabs. Way too many crabs.",
                         responses: [],
                     },
@@ -109,14 +109,14 @@ export const isleOfWhispersPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Elder Maeve",
-                icon: "/assets/npcChatHeads/elder_maeve.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_merchant_table",
                 },
                 dialogue: {
                     start: {
                         npcName: "Elder Maeve",
-                        npcIcon: "/assets/npcChatHeads/elder_maeve.png",
+                        npcIcon: 'person',
                         text: "The island is restless, stranger. An ancient darkness stirs in the depths of the temple. Be wary.",
                         responses: [],
                     },

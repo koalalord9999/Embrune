@@ -27,7 +27,24 @@ export const useSceneInteractions = (poiId: string, deps: SceneInteractionDepend
         const allNodes: Record<string, DialogueNode> = {};
         Object.values(QUESTS).forEach(quest => {
             if (quest.dialogue) {
-                Object.assign(allNodes, quest.dialogue);
+                const resolvedDialogue: Record<string, DialogueNode> = {};
+                for (const [nodeKey, node] of Object.entries(quest.dialogue)) {
+                    let npcName = node.npcName;
+                    let npcIcon = node.npcIcon;
+                    if (node.npc && quest.npcDefs) {
+                        const def = quest.npcDefs[node.npc];
+                        if (def) {
+                            npcName = def.npcName;
+                            npcIcon = def.npcIcon;
+                        }
+                    }
+                    resolvedDialogue[nodeKey] = {
+                        ...node,
+                        npcName: npcName ?? '',
+                        npcIcon: npcIcon ?? ''
+                    };
+                }
+                Object.assign(allNodes, resolvedDialogue);
             }
         });
         if (dialogue) {

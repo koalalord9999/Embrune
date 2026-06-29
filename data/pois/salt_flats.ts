@@ -87,14 +87,14 @@ export const saltFlatsPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Old Salt",
-                icon: "/assets/npcChatHeads/old_man_hemlock.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_craftsman_table",
                 },
                 dialogue: {
                     start: {
                         npcName: "Old Salt",
-                        npcIcon: "/assets/npcChatHeads/old_man_hemlock.png",
+                        npcIcon: 'person',
                         text: "Don't stay out in the sun too long, newcomer. The flats'll bake you dry.",
                         responses: [],
                     },

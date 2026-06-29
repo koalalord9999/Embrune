@@ -3,7 +3,7 @@ import { DialogueNode } from '../../types';
 export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     start: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "Hail, adventurer! The Spire stands as a testament to those who hunt the darkness. Are you here to join our ranks, or do you have business in the shop?",
         responses: [
             { 
@@ -24,7 +24,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     reset_task_intro: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "A reset? It is a costly endeavor, adventurer. Reorienting the Spire's resources for a new hunt will require a payment of 20 Slayer Credits.",
         responses: [
             { text: "I have the credits. Please reset my task.", next: 'reset_task_check' },
@@ -33,7 +33,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     reset_task_check: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "Let me check our records...",
         responses: [
             {
@@ -48,7 +48,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     reset_task_confirm: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "Are you absolutely certain? This will completely clear your current assignment. You will be free to seek a new hunt from whichever master you choose.",
         responses: [
             { 
@@ -60,7 +60,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     reset_task_failed: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "The Spire doesn't work on charity, friend. Realigning our trackers is expensive business. Come back when you've actually earned the 20 credits required.",
         responses: [
             { text: "My apologies." }
@@ -68,7 +68,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     check_task_status: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "Let me see...",
         responses: [
             {
@@ -83,7 +83,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     assign_task: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "I've got just the thing for someone of your standing. Ready for your assignment?",
         responses: [
             { 
@@ -95,7 +95,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     has_task_check: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "Wait...",
         responses: [
             {
@@ -110,7 +110,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     task_complete: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "Excellent work! You've cleared your previous bounty. Ready for another?",
         responses: [
             { 
@@ -122,7 +122,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     has_active_task: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "You're already on a hunt, friend.",
         responses: [
             {
@@ -137,7 +137,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     ravindra_task_too_hard: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "I see Ravindra has you running ragged in the desert. That master doesn't know the meaning of 'moderation'. If it's too much for you, I can give you something easier.",
         responses: [
             { 
@@ -149,7 +149,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     confirm_easier_task: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "Are you sure? I can assign you a simpler task, but it will reset your current task streak to zero. You'll be back at square one for milestone rewards.",
         responses: [
             { 
@@ -161,7 +161,7 @@ export const KAELEN_DIALOGUE: Record<string, DialogueNode> = {
     },
     kaelen_task_progress: {
         npcName: 'Kaelen',
-        npcIcon: '/assets/npcChatHeads/kaelen.png',
+        npcIcon: 'person',
         text: "You haven't finished your current assignment yet. Get back out there and show those monsters what a real Slayer is made of!",
         responses: [
             { text: "I'm on it." }

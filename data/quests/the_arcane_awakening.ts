@@ -35,6 +35,16 @@ export const theArcaneAwakening: Quest = {
         { requirement: { type: 'kill', monsterId: 'arcane_wyvern', quantity: 1 }, description: "Defeat the source of the disturbance at the spire's apex." },
         { requirement: { type: 'talk', poiId: 'silverhaven_arcane_wares', npcName: 'Archmage Theron' }, description: "Report your success to Archmage Theron." }
     ],
+    npcDefs: {
+        archmage_theron: { npcName: 'Archmage Theron', npcIcon: 'wizard-face' },
+        skyship_captain_isle: { npcName: 'Skyship Captain (isle)', npcIcon: 'person' },
+        skyship_captain: { npcName: 'Skyship Captain', npcIcon: '' },
+        durin: { npcName: 'Durin', npcIcon: 'person' },
+        enter_the_spire: { npcName: 'Enter the Spire', npcIcon: 'rune-gate' },
+        use_resonator: { npcName: 'Use Resonator', npcIcon: 'orb-wand' },
+        arcane_resonator: { npcName: 'Arcane Resonator', npcIcon: 'orb-wand' },
+    },
+
     rewards: {
         xp: [{ skill: SkillName.Magic, amount: 10000 }],
         coins: 5125,
@@ -60,71 +70,62 @@ export const theArcaneAwakening: Quest = {
     ],
     dialogue: {
         taa_quest_intro: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "You sense it too? Grave concern is an understatement. I've detected a growing instability in the world's 'Arcane Weave'—a magical feedback loop I call the Resonance Cascade. If left unchecked, it could have catastrophic consequences.",
             responses: [
                 { text: "I'm ready to help. What is the task?", next: 'taa_task_intro' }
             ]
         },
         taa_task_intro: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "To find the source, I must triangulate its position. I've constructed this Arcane Resonator. I need you to take it to the three major runic altars—the Altar of Gusts, the Altar of the Deep, and the Altar of the Spring—and take a reading from each.",
             responses: [
                 { text: "I will handle this. The fate of the world may depend on it.", next: 'taa_task_accept' }
             ]
         },
         taa_task_accept: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "It may indeed. Be wary; awakening the altars may draw out their guardians. Go now. I will await your return.",
             responses: [
                 { text: "(Take the Arcane Resonator)", actions: [{ type: 'start_quest', questId: 'the_arcane_awakening' }, { type: 'give_item', itemId: 'arcane_resonator', quantity: 1 }] }
             ]
         },
         taa_stage_1_complete: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Let me see... By the arcane! This is worse than I feared. The readings... they don't point to anywhere on the ground. They point... up. High into the sky. To a place of legend: The Crystalline Isles.",
             responses: [
                 { text: "What are the Crystalline Isles?", next: 'taa_stage_1_2' }
             ]
         },
         taa_stage_1_2: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Floating islands of pure magic, normally shielded from our world. The Resonance Cascade must have weakened their defenses, making them accessible but dangerously unstable. The source is there. You must go. Find the Skyship Captain at the docks. He is your only way up.",
             responses: [
                 { text: "I'll speak with him at once.", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }, { type: 'take_item', itemId: 'gust_reading', quantity: 1 }, { type: 'take_item', itemId: 'stone_reading', quantity: 1 }, { type: 'take_item', itemId: 'aqua_reading', quantity: 1 }, { type: 'take_item', itemId: 'arcane_resonator', quantity: 1 }] }
             ]
         },
         taa_stage_9_complete: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Astounding! You have not just stopped the cascade but stabilized the entire world's magic. Tell me, what was the source?",
             responses: [
                 { text: "It was an elemental wyvern at the top of a magical spire.", next: 'taa_reward' }
             ]
         },
         taa_reward: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "A wyvern... remarkable. For this grand service, you have proven yourself worthy of advanced knowledge. I will teach you the secrets of Storm magic. Take this as well, a small token of my immense gratitude. You have saved us all.",
             responses: [
                 { text: "Thank you, Archmage.", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }] }
             ]
         },
         post_quest_the_arcane_awakening: {
-            npcName: 'Archmage Theron',
-            npcIcon: 'wizard-face',
+            npc: 'archmage_theron',
             text: "Thank you again for your help, hero. The Arcane Weave has been stable ever since you defeated the wyvern. The world is in your debt.",
             responses: []
         },
 
         captain_isles_default: {
-            npcName: 'Skyship Captain (isle)',
-            npcIcon: '/assets/npcChatHeads/ferryman_silas.png',
+            npc: 'skyship_captain_isle',
             text: "Breathtaking, isn't it? When you're ready to return to solid ground, just say the word.",
             responses: [
                 {
@@ -138,7 +139,7 @@ export const theArcaneAwakening: Quest = {
         },
         taa_captain_stage_2: {
             npcName: 'Skyship Captain',
-            npcIcon: '/assets/npcChatHeads/ferryman_silas.png',
+            npcIcon: 'person',
             text: "To the Isles? Are you mad? Look at the sky! The magical turbulence would tear my ship apart. My ship's Resonance Dampener is completely fried—it's nothing but a hunk of junk now.",
             responses: [
                 { text: "So there's no way to get there?", next: 'taa_captain_2_b' }
@@ -146,7 +147,7 @@ export const theArcaneAwakening: Quest = {
         },
         taa_captain_2_b: {
             npcName: 'Skyship Captain',
-            npcIcon: '/assets/npcChatHeads/ferryman_silas.png',
+            npcIcon: 'person',
             text: "Not with the gear I have. That dampener is ancient tech, beyond repair. But... there's a master dwarf I've heard tales of, Durin, out at the Dwarven Outpost. If anyone could build a *new* one from scratch, it's him. Tell him I sent you.",
             responses: [
                 { text: "Thank you, Captain. I'll find this Durin.", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }] }
@@ -154,7 +155,7 @@ export const theArcaneAwakening: Quest = {
         },
         taa_captain_stage_6: {
             npcName: 'Skyship Captain',
-            npcIcon: '/assets/npcChatHeads/ferryman_silas.png',
+            npcIcon: 'person',
             text: "By the skies, you actually got one! That old dwarf really came through! I honestly didn't think it was possible. With this... yes, with this, we can make the voyage. Prepare yourself, adventurer. The skies await!",
             responses: [
                 { text: "(Board the Skyship)", actions: [{ type: 'take_item', itemId: 'resonance_dampener', quantity: 1 }, { type: 'advance_quest', questId: 'the_arcane_awakening' }, { type: 'teleport', poiId: 'crystalline_isles_landing' }] },
@@ -163,7 +164,7 @@ export const theArcaneAwakening: Quest = {
         },
         taa_captain_free_travel_to_isles: {
             npcName: 'Skyship Captain',
-            npcIcon: '/assets/npcChatHeads/ferryman_silas.png',
+            npcIcon: 'person',
             text: "Aye, the Archmage's business is important. Hop aboard, I'll take you up.",
             responses: [
                 { text: "(Board the Skyship)", actions: [{ type: 'teleport', poiId: 'crystalline_isles_landing' }] }
@@ -171,28 +172,25 @@ export const theArcaneAwakening: Quest = {
         },
         taa_captain_travel_to_isles: {
             npcName: 'Skyship Captain',
-            npcIcon: '/assets/npcChatHeads/ferryman_silas.png',
+            npcIcon: 'person',
             text: "The Resonance Dampener is working perfectly now. Hop aboard, I'll take you up. But it will cost a little coin, a captains got bills to pay!",
             responses: [
                 { text: "(Board the Skyship - 500g)", actions: [{ type: 'take_coins', amount: 500 }, { type: 'teleport', poiId: 'crystalline_isles_landing' }] }
             ]
         },
         taa_air_not_ready: {
-            npcName: 'Skyship Captain',
-            npcIcon: '',
+            npc: 'skyship_captain',
             text: "Not a problem lad, just come back when you're ready.",
             responses: []
         },
 
         quest_intro_resonance_dampener: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "A Resonance... what? Hah! That sky-sailor sent you, didn't he? Haven't heard that term in ages! Aye, I can build one. Dwarven engineering can solve any problem. But it won't be cheap, and it won't be easy. I'll need some... particular components.",
             responses: [{ text: "What do you need?", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }], next: 'taa_durin_stage_4_no_items' }]
         },
         taa_durin_stage_4_no_items: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Right. To build this 'Resonance Dampener', I'll need three things: 5 Golem Cores, 10 Runic Bars, and one Eldritch Pearl. A strange shopping list, I know, but this is strange magic. Do you need me to explain where to find any of these?",
             responses: [
                 { text: "Where do I find Golem Cores?", next: 'taa_durin_explain_cores' },
@@ -202,32 +200,28 @@ export const theArcaneAwakening: Quest = {
             ]
         },
         taa_durin_explain_cores: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "The Stone Golems that guard the highest reaches of the Gale-Swept Peaks. They're tough buggers, made of the mountain itself. Smash 'em up and bring me their cores. You'll need five of them.",
             responses: [
                 { text: "Anything else?", next: 'taa_durin_stage_4_no_items' }
             ]
         },
         taa_durin_explain_bars: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Ten Runic Bars. That's the strongest metal we can work, and you'll have to smith them yourself. You'll need Titanium ore and a whole lot of coal. I've heard rumors, though... whispers from the deep places... that many of the denizens of the Sunken Labyrinth, are sometimes found carrying runic bars. Might be quicker than mining, if you're brave enough.",
             responses: [
                 { text: "Anything else?", next: 'taa_durin_stage_4_no_items' }
             ]
         },
         taa_durin_explain_pearl: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "The Eldritch Pearl is not a gem of the earth. They say the Shipwreck Specters that haunt the Isle of Whispers sometimes carry them... remnants of the souls they've dragged to the depths. You'll have to face the dead to get the one I need.",
             responses: [
                 { text: "Anything else?", next: 'taa_durin_stage_4_no_items' }
             ]
         },
         taa_durin_stage_5_check: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "You have them! By my father's beard, you actually have them!",
             responses: [
                 {
@@ -243,15 +237,13 @@ export const theArcaneAwakening: Quest = {
             ]
         },
         taa_durin_stage_5_has_items: {
-            npcName: 'Durin',
-            npcIcon: '/assets/npcChatHeads/prospector_gudrun.png',
+            npc: 'durin',
             text: "Alright, a deal's a deal. Stand back... this requires a delicate touch. *clang* *whirr* *clank* ...There! One Resonance Dampener, as ordered. Now get that thing to your captain before it attracts any more attention.",
             responses: [{ text: "Thank you, master dwarf.", actions: [{ type: 'take_item', itemId: 'golem_core', quantity: 5 }, { type: 'take_item', itemId: 'runic_bar', quantity: 10 }, { type: 'take_item', itemId: 'eldritch_pearl', quantity: 1 }, { type: 'give_item', itemId: 'resonance_dampener', quantity: 1 }, { type: 'advance_quest', questId: 'the_arcane_awakening' }] }]
         },
 
         enter_spire_start: {
-            npcName: 'Enter the Spire',
-            npcIcon: 'rune-gate',
+            npc: 'enter_the_spire',
             text: "The shimmering doorway hums with immense power. Stepping through it will take you into the heart of the arcane disturbance.",
             responses: [
                 { text: "(Enter the Spire)", actions: [{ type: 'advance_quest', questId: 'the_arcane_awakening' }, { type: 'teleport', poiId: 'ms_f1_landing' }] }
@@ -260,33 +252,33 @@ export const theArcaneAwakening: Quest = {
 
         // Altar Dialogues
         use_resonator_gust: {
-            npcName: 'Use Resonator', npcIcon: 'orb-wand',
+            npc: 'use_resonator',
             text: "You hold the Arcane Resonator up to the Gust Altar. It begins to vibrate violently, and a shimmering creature of pure energy coalesces before you!",
             responses: [
                 { text: "(Face the creature)", check: { requirements: [{ type: 'items', items: [{ itemId: 'arcane_resonator', quantity: 1 }] }, { type: 'items', items: [{ itemId: 'gust_reading', quantity: 0, operator: 'eq' }] }], successNode: 'trigger_combat', failureNode: 'already_have_reading' }, actions: [{ type: 'set_quest_combat_reward', itemId: 'gust_reading', quantity: 1 }, { type: 'start_mandatory_combat', monsterId: 'mana_wisp' }] }
             ]
         },
         use_resonator_stone: {
-            npcName: 'Use Resonator', npcIcon: 'orb-wand',
+            npc: 'use_resonator',
             text: "You hold the Arcane Resonator up to the Stone Altar. It begins to vibrate violently, and a shimmering creature of pure energy coalesces before you!",
             responses: [
                 { text: "(Face the creature)", check: { requirements: [{ type: 'items', items: [{ itemId: 'arcane_resonator', quantity: 1 }] }, { type: 'items', items: [{ itemId: 'stone_reading', quantity: 0, operator: 'eq' }] }], successNode: 'trigger_combat', failureNode: 'already_have_reading' }, actions: [{ type: 'set_quest_combat_reward', itemId: 'stone_reading', quantity: 1 }, { type: 'start_mandatory_combat', monsterId: 'mana_wisp' }] }
             ]
         },
         use_resonator_aqua: {
-            npcName: 'Use Resonator', npcIcon: 'orb-wand',
+            npc: 'use_resonator',
             text: "You hold the Arcane Resonator up to the Aqua Altar. It begins to vibrate violently, and a shimmering creature of pure energy coalesces before you!",
             responses: [
                 { text: "(Face the creature)", check: { requirements: [{ type: 'items', items: [{ itemId: 'arcane_resonator', quantity: 1 }] }, { type: 'items', items: [{ itemId: 'aqua_reading', quantity: 0, operator: 'eq' }] }], successNode: 'trigger_combat', failureNode: 'already_have_reading' }, actions: [{ type: 'set_quest_combat_reward', itemId: 'aqua_reading', quantity: 1 }, { type: 'start_mandatory_combat', monsterId: 'mana_wisp' }] }
             ]
         },
         trigger_combat: {
-            npcName: 'Arcane Resonator', npcIcon: 'orb-wand',
+            npc: 'arcane_resonator',
             text: "The Mana Wisp shrieks and attacks!",
             responses: [],
         },
         already_have_reading: {
-            npcName: 'Arcane Resonator', npcIcon: 'orb-wand',
+            npc: 'arcane_resonator',
             text: "You've already taken a reading from this altar.",
             responses: []
         }

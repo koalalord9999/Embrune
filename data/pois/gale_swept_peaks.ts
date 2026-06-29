@@ -333,14 +333,14 @@ export const galeSweptPeaksPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Borin Stonehand",
-                icon: "/assets/npcChatHeads/prospector_gudrun.png",
+                icon: 'person',
                 pickpocket: {
                     lootTableId: "pickpocket_dwarf_table",
                 },
                 dialogue: {
                     start: {
                         npcName: "Borin Stonehand",
-                        npcIcon: "/assets/npcChatHeads/prospector_gudrun.png",
+                        npcIcon: 'person',
                         text: "What do you want? Can't you see I'm busy?",
                         responses: [],
                         conditionalResponses: [
@@ -375,7 +375,7 @@ export const galeSweptPeaksPois: Record<string, POI> = {
                     },
                     craft_shield_intro: {
                         npcName: "Borin Stonehand",
-                        npcIcon: "/assets/npcChatHeads/prospector_gudrun.png",
+                        npcIcon: 'person',
                         text: "What's this? A Flaming Gullet... and a Fire-Resistant Shield? By my beard, you've found the components for a Dragonfire Shield! I haven't seen one of these in ages. I can combine them for you, but my expertise doesn't come cheap. It'll cost you 800,000 coins.",
                         responses: [
                             {
@@ -398,7 +398,7 @@ export const galeSweptPeaksPois: Record<string, POI> = {
                     },
                     craft_shield_success: {
                         npcName: "Borin Stonehand",
-                        npcIcon: "/assets/npcChatHeads/prospector_gudrun.png",
+                        npcIcon: 'person',
                         text: "Wise choice. *Borin takes the components and works them with masterful skill, his hammer ringing like a bell. The heat from the gullet seems to flow into the shield, which glows with an inner fire.* There. A true Dragonfire Shield. May it serve you well.",
                         responses: [
                             {
@@ -429,7 +429,7 @@ export const galeSweptPeaksPois: Record<string, POI> = {
                     },
                     craft_shield_fail: {
                         npcName: "Borin Stonehand",
-                        npcIcon: "/assets/npcChatHeads/prospector_gudrun.png",
+                        npcIcon: 'person',
                         text: "Don't waste my time. Come back when you have the coin. I'm a busy dwarf.",
                         responses: [],
                     },

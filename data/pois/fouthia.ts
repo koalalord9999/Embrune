@@ -195,11 +195,11 @@ export const fouthiaPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Merchant",
-                icon: "/assets/npcChatHeads/merchant_theron.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Merchant",
-                        npcIcon: "/assets/npcChatHeads/merchant_theron.png",
+                        npcIcon: 'person',
                         text: "Welcome to Fouthia. Keep an eye on your coin purse and an eye on your waterskin.\n\nThe Sand Serpent Inn is the only place to get a drink that isn't half sand.\n\nDon't wander out into the Salt Flats at night. The things that crawl out there... they're not natural.\n\nThe town guard does their best, but they're outnumbered by the bandits in the surrounding wastes.\n\nWater is more valuable than gold out here. Don't waste a drop.\n\nThat alchemist, Zafira, can brew a potion for just about anything. Heatstroke, scorpion venom... you name it.\n\nThe bazaar is the heart of this town. You can find anything there, if you've got the coin.\n\nI heard whispers of a great 'Sunken City' far to the west, but who'd be mad enough to look for it?\n\nThe Scorched Peaks to the north are said to be home to fire drakes and other nasty creatures.\n\nIf you're looking for trouble, you'll find it in the back alleys. Or it'll find you.\n\nThis town was built on an old oasis. The well in the square is the only reason we're still here.\n\nThe armorer, Khalid, knows how to make gear that won't cook you alive in your own armor.",
                         responses: [],
                     },
@@ -271,7 +271,7 @@ export const fouthiaPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Banker Zahra",
-                icon: "/assets/npcChatHeads/banker_astrid.png",
+                icon: 'person',
                 actions: [
                     {
                         label: "Bank",
@@ -289,7 +289,7 @@ export const fouthiaPois: Record<string, POI> = {
                 dialogue: {
                     start: {
                         npcName: "Banker Zahra",
-                        npcIcon: "/assets/npcChatHeads/banker_astrid.png",
+                        npcIcon: 'person',
                         text: "Welcome to the Bank of Embrune, Fouthia branch. Your items are safe from sand and thieves with us.",
                         responses: [
                             {
@@ -303,7 +303,7 @@ export const fouthiaPois: Record<string, POI> = {
                     },
                     access_bank: {
                         npcName: "Banker Zahra",
-                        npcIcon: "/assets/npcChatHeads/banker_astrid.png",
+                        npcIcon: 'person',
                         text: "Of course. Please, step up to the counter.",
                         responses: [
                             {
@@ -356,11 +356,11 @@ export const fouthiaPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Barkeep Zale",
-                icon: "/assets/npcChatHeads/barkeep_grimley.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Barkeep Zale",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "Welcome to The Sand Serpent. We've got the strongest cactus wine and the softest sand-beds in Fouthia. What'll it be?",
                         responses: [
                             {
@@ -375,7 +375,7 @@ export const fouthiaPois: Record<string, POI> = {
                     },
                     buy_drink_intro: {
                         npcName: "Barkeep Zale",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "An excellent choice! Knocks the dust from your throat. That'll be 5 coins.",
                         responses: [
                             {
@@ -409,19 +409,19 @@ export const fouthiaPois: Record<string, POI> = {
                     },
                     buy_drink_success: {
                         npcName: "Barkeep Zale",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "Cheers!",
                         responses: [],
                     },
                     buy_drink_fail: {
                         npcName: "Barkeep Zale",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "Sorry, you don't have enough coin for that.",
                         responses: [],
                     },
                     rent_room_intro: {
                         npcName: "Barkeep Zale",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "A wise choice. A night out of the wind does wonders for your health. A room for the night is 20 coins.",
                         responses: [
                             {
@@ -454,7 +454,7 @@ export const fouthiaPois: Record<string, POI> = {
                     },
                     rent_room_success: {
                         npcName: "Barkeep Zale",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "Wise choice. Sleep well.",
                         responses: [],
                     },
@@ -476,11 +476,11 @@ export const fouthiaPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Captain Omar",
-                icon: "/assets/npcChatHeads/guard_captain_elara.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Captain Omar",
-                        npcIcon: "/assets/npcChatHeads/guard_captain_elara.png",
+                        npcIcon: 'person',
                         text: "The Salt Flats are unforgiving, and the bandits are relentless. We do what we can to keep this town safe, but we're always looking for capable hands. Check the quest board if you're looking for work.",
                         responses: [],
                     },
@@ -782,11 +782,11 @@ export const fouthiaPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Khalid the Armorer",
-                icon: "/assets/npcChatHeads/valerius_the_master_smith.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Khalid the Armorer",
-                        npcIcon: "/assets/npcChatHeads/valerius_the_master_smith.png",
+                        npcIcon: 'person',
                         text: "Need armor that won't cook you in your own skin? You've come to the right forge. Heavy plate is for the fools in the green lands. Here, we value lightness and breathability.",
                         responses: [],
                     },
@@ -812,11 +812,11 @@ export const fouthiaPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Zafira the Alchemist",
-                icon: "/assets/npcChatHeads/herbalist_anise.png",
+                icon: 'person',
                 dialogue: {
                     start: {
                         npcName: "Zafira the Alchemist",
-                        npcIcon: "/assets/npcChatHeads/herbalist_anise.png",
+                        npcIcon: 'person',
                         text: "*Zafira cackles, stirring a bubbling, purple concoction.* Careful where you step! Some of my experiments are a bit... energetic. Looking for a potion? Or perhaps something with a bit more... KABOOM?",
                         responses: [
                             {
@@ -831,13 +831,13 @@ export const fouthiaPois: Record<string, POI> = {
                     },
                     browse: {
                         npcName: "Zafira the Alchemist",
-                        npcIcon: "/assets/npcChatHeads/herbalist_anise.png",
+                        npcIcon: 'person',
                         text: "Suit yourself! Just don't touch anything. Or do! Spontaneous combustion is a leading cause of scientific discovery, you know!",
                         responses: [],
                     },
                     making: {
                         npcName: "Zafira the Alchemist",
-                        npcIcon: "/assets/npcChatHeads/herbalist_anise.png",
+                        npcIcon: 'person',
                         text: "This? Oh, this is just a little something to help the guards' arrows go... farther. And louder. And brighter! It's mostly brimstone and wishful thinking.",
                         responses: [],
                     },

@@ -228,6 +228,7 @@ const useUIStateInternal = () => {
     const [keybindings, setKeybindings] = createPersistentState<Keybindings>('settings_keybindings', DEFAULT_KEYBINDINGS);
     const [gameFont, setGameFont] = createPersistentState<GameFont>('settings_gameFont', 'VT323');
     const [gameFontScale, setGameFontScale] = createPersistentState<number>('settings_gameFontScale', 1);
+    const [textSpeed, setTextSpeed] = createPersistentState<'slow' | 'normal' | 'fast' | 'instant'>('settings_textSpeed', 'normal');
 
     // Sync chosen font and scale to CSS custom properties whenever they change
     useEffect(() => {
@@ -401,6 +402,7 @@ const useUIStateInternal = () => {
         keybindings, setKeybindings,
         gameFont, setGameFont,
         gameFontScale, setGameFontScale,
+        textSpeed, setTextSpeed,
         activeWithdrawMode, setActiveWithdrawMode,
         customWithdrawAmount, setCustomWithdrawAmount,
         xpMultiplier, setXpMultiplier,

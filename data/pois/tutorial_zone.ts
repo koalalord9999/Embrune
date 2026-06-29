@@ -11,7 +11,7 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Leo the Guide",
-                icon: "/assets/npcChatHeads/leo_the_guide.png",
+                icon: 'person',
                 startNode: "leo_default",
                 questTopics: ["embrune_101"],
                 conditionalGreetings: [
@@ -84,7 +84,7 @@ export const tutorialZonePois: Record<string, POI> = {
                 dialogue: {
                     leo_default: {
                         npcName: "Leo the Guide",
-                        npcIcon: "/assets/npcChatHeads/leo_the_guide.png",
+                        npcIcon: 'person',
                         text: "Welcome to Embrune! Ready to start your adventure?",
                         responses: [],
                     },
@@ -109,7 +109,7 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Survival Guide",
-                icon: "/assets/npcChatHeads/survival_guide.png",
+                icon: 'person',
                 startNode: "survival_default",
                 questTopics: ["embrune_101"],
                 conditionalGreetings: [
@@ -143,7 +143,7 @@ export const tutorialZonePois: Record<string, POI> = {
                 dialogue: {
                     survival_default: {
                         npcName: "Survival Guide",
-                        npcIcon: "/assets/npcChatHeads/survival_guide.png",
+                        npcIcon: 'person',
                         text: "Learning to live off the land is the first step to becoming a true adventurer.",
                         responses: [],
                     },
@@ -209,7 +209,7 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Baker",
-                icon: "/assets/npcChatHeads/baker.png",
+                icon: 'person',
                 startNode: "baker_default",
                 questTopics: ["embrune_101"],
                 conditionalGreetings: [
@@ -243,7 +243,7 @@ export const tutorialZonePois: Record<string, POI> = {
                 dialogue: {
                     baker_default: {
                         npcName: "Baker",
-                        npcIcon: "/assets/npcChatHeads/baker.png",
+                        npcIcon: 'person',
                         text: "Nothing warms the soul like a fresh loaf of bread!",
                         responses: [],
                     },
@@ -298,13 +298,13 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Information Guide",
-                icon: "/assets/npcChatHeads/information_guide.png",
+                icon: 'person',
                 startNode: "info_default",
                 questTopics: ["embrune_101"],
                 dialogue: {
                     info_default: {
                         npcName: "Information Guide",
-                        npcIcon: "/assets/npcChatHeads/information_guide.png",
+                        npcIcon: 'person',
                         text: "Pay attention to your interface. Knowing where your skills and quests are is half the battle.",
                         responses: [],
                     },
@@ -363,7 +363,7 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Mining Guide",
-                icon: "/assets/npcChatHeads/mining_guide.png",
+                icon: 'person',
                 startNode: "mining_default",
                 questTopics: ["embrune_101"],
                 conditionalGreetings: [
@@ -423,7 +423,7 @@ export const tutorialZonePois: Record<string, POI> = {
                 dialogue: {
                     mining_default: {
                         npcName: "Mining Guide",
-                        npcIcon: "/assets/npcChatHeads/mining_guide.png",
+                        npcIcon: 'person',
                         text: "The ring of a hammer, the heat of the forge... that's the life for me.",
                         responses: [],
                     },
@@ -528,7 +528,7 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Weapon Guide",
-                icon: "/assets/npcChatHeads/weapon_guide.png",
+                icon: 'person',
                 startNode: "weapon_default",
                 questTopics: ["embrune_101"],
                 conditionalGreetings: [
@@ -588,7 +588,7 @@ export const tutorialZonePois: Record<string, POI> = {
                 dialogue: {
                     weapon_default: {
                         npcName: "Weapon Guide",
-                        npcIcon: "/assets/npcChatHeads/weapon_guide.png",
+                        npcIcon: 'person',
                         text: "A sharp blade and a steady hand are an adventurer's best friends.",
                         responses: [],
                     },
@@ -621,7 +621,7 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Banker",
-                icon: "/assets/npcChatHeads/banker.png",
+                icon: 'person',
                 startNode: "default_dialogue",
                 questTopics: ["embrune_101"],
                 conditionalGreetings: [
@@ -642,7 +642,7 @@ export const tutorialZonePois: Record<string, POI> = {
                 dialogue: {
                     default_dialogue: {
                         npcName: "Banker",
-                        npcIcon: "/assets/npcChatHeads/banker.png",
+                        npcIcon: 'person',
                         text: "Your items are safe with us. Would you like to access your bank?",
                         responses: [],
                         conditionalResponses: [
@@ -715,13 +715,13 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Money Guide",
-                icon: "/assets/npcChatHeads/money_guide.png",
+                icon: 'person',
                 startNode: "money_default",
                 questTopics: ["embrune_101"],
                 dialogue: {
                     money_default: {
                         npcName: "Money Guide",
-                        npcIcon: "/assets/npcChatHeads/money_guide.png",
+                        npcIcon: 'person',
                         text: "A full coin purse is a happy coin purse.",
                         responses: [],
                     },
@@ -746,7 +746,7 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Prayer Guide",
-                icon: "/assets/npcChatHeads/prayer_guide.png",
+                icon: 'person',
                 startNode: "prayer_default",
                 questTopics: ["embrune_101"],
                 conditionalGreetings: [
@@ -780,7 +780,7 @@ export const tutorialZonePois: Record<string, POI> = {
                 dialogue: {
                     prayer_default: {
                         npcName: "Prayer Guide",
-                        npcIcon: "/assets/npcChatHeads/prayer_guide.png",
+                        npcIcon: 'person',
                         text: "May you walk in the light.",
                         responses: [],
                     },
@@ -831,7 +831,7 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Tavern Manager",
-                icon: "/assets/npcChatHeads/barkeep_grimley.png",
+                icon: 'person',
                 startNode: "tavern_default",
                 questTopics: ["embrune_101"],
                 conditionalGreetings: [
@@ -891,7 +891,7 @@ export const tutorialZonePois: Record<string, POI> = {
                 dialogue: {
                     tavern_default: {
                         npcName: "Tavern Manager",
-                        npcIcon: "/assets/npcChatHeads/barkeep_grimley.png",
+                        npcIcon: 'person',
                         text: "Welcome! Looking for work or a drink?",
                         responses: [],
                     },
@@ -900,7 +900,7 @@ export const tutorialZonePois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Magic Guide",
-                icon: "/assets/npcChatHeads/wizard_elmsworth.png",
+                icon: 'person',
                 startNode: "magic_default",
                 questTopics: ["embrune_101"],
                 questCondition: {
@@ -964,7 +964,7 @@ export const tutorialZonePois: Record<string, POI> = {
                 dialogue: {
                     magic_default: {
                         npcName: "Magic Guide",
-                        npcIcon: "/assets/npcChatHeads/wizard_elmsworth.png",
+                        npcIcon: 'person',
                         text: "Magic is a powerful tool, if you have the will to master it.",
                         responses: [],
                     },
