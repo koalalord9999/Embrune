@@ -218,26 +218,7 @@ export const useItemActions = (props: UseItemActionsProps) => {
 
         if (!itemData.consumable) return;
 
-        if (itemId === 'swamp_ward_bundle') {
-            if (!hasItems([{ itemId: 'tinderbox', quantity: 1 }])) {
-                addLog("You need a tinderbox to burn the Swamp Ward Bundle.");
-                return;
-            }
-            setInventory(prevInv => {
-                const newInv = [...prevInv];
-                newInv[inventoryIndex] = null;
-                return newInv;
-            });
-            setWorldState(prev => ({
-                ...prev,
-                questVariables: {
-                    ...(prev.questVariables || {}),
-                    swamp_ward_burned: 1
-                }
-            }));
-            addLog("You burn the Swamp Ward Bundle. A thick, sweet-smelling smoke surrounds you, parting the miasma.");
-            return;
-        }
+
 
         if (itemData.consumable.curesPoison) {
             curePoison();

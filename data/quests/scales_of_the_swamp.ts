@@ -6,7 +6,6 @@ export const scalesOfTheSwamp: Quest = {
     name: "Scales of the Swamp",
     description: "Captain Elara has uncovered more about the Serpent Bandits and their leader, the Coilmaster. Journey into the murky depths of the Serpent's Coil to find him.",
     startHint: "Speak to Guard Captain Elara at the Oakhaven West Gate.",
-    isHidden: true,
     playerStagePerspectives: [
         "Elara wants me to find the Coilmaster. I should speak to Bronn at The Carved Mug to learn what I'm up against.",
         "Bronn warned me about the swamp's ecology. I need to visit Herbalist Anise to get supplies before I enter.",
@@ -58,8 +57,8 @@ export const scalesOfTheSwamp: Quest = {
         herbalist_anise: { npcName: 'Herbalist Anise', npcIcon: 'person' },
         bandit_scout: { npcName: 'Bandit Scout', npcIcon: 'person' },
         garath_voss: { npcName: 'Garath Voss', npcIcon: 'person' },
-        venture_deeper: { npcName: 'Venture Deeper', npcIcon: 'person' },
-        muddy_tracks: { npcName: 'Muddy Tracks', npcIcon: 'person' },
+        venture_deeper: { npcName: 'Venture Deeper', npcIcon: 'magnifying-glass' },
+        muddy_tracks: { npcName: 'Muddy Tracks', npcIcon: 'magnifying-glass' },
         submerged_causeway: { npcName: 'Submerged Causeway', npcIcon: 'person' },
     },
 
@@ -75,6 +74,7 @@ export const scalesOfTheSwamp: Quest = {
         ],
         notes: ["Bring Antipoison or prepare for high-damage environments.", "High agility will help bypass traps in the swamp."]
     },
+    cleanupQuestVariables: ['scout_path', 'scales_resolution', 'swamp_ward_burned'],
     dialogueEntryPoints: [
         {
             npcName: 'Guard Captain Elara',
@@ -115,37 +115,13 @@ export const scalesOfTheSwamp: Quest = {
             npcName: 'Venture Deeper',
             response: {
                 text: "(Enter the murky delta)",
-                check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 2 }, { type: 'variable', name: 'swamp_ward_burned', value: 1, operator: 'eq' }], successNode: 'venture_deeper_node', failureNode: 'venture_deeper_no_burn' }
+                check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 2 }, { type: 'variable', name: 'swamp_ward_burned', value: 1, operator: 'eq' }], successNode: 'venture_deeper_node', failureNode: 'venture_deeper_no_burn_var' }
             }
         },
-        {
-            npcName: 'Muddy Tracks',
-            response: {
-                text: "(Inspect the tracks)",
-                check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 3 }], successNode: 'muddy_tracks_node', failureNode: '' }
-            }
-        },
-        {
-            npcName: 'Bandit Scout',
-            response: {
-                text: "(Approach the Scout)",
-                check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 4 }], successNode: 'scout_encounter', failureNode: '' }
-            }
-        },
-        {
-            npcName: 'Submerged Causeway',
-            response: {
-                text: "(Follow the causeway)",
-                check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 5 }], successNode: 'causeway_node', failureNode: '' }
-            }
-        },
-        {
-            npcName: 'Garath Voss',
-            response: {
-                text: "(Approach Garath Voss)",
-                check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 6 }], successNode: 'voss_encounter', failureNode: '' }
-            }
-        }
+
+
+
+
     ],
     // The dialog nodes handle the heavy narrative lifting.
     dialogue: {
@@ -263,9 +239,33 @@ export const scalesOfTheSwamp: Quest = {
         },
 
         // Stage 2: Venture Deeper
+        venture_deeper_start: {
+            npc: 'venture_deeper',
+            text: "(As you step closer to the swamp entrance, a putrid smell erupts from the gasses. A thick miasma is covering the swamp, Anise mentioned that the Swamp Ward Bundle after being burned, will clear up this foul miasma.)",
+            responses: [
+                {
+                    text: "(Burn the Swamp Ward Bundle)",
+                    check: {
+                        requirements: [
+                            { type: 'items', items: [{ itemId: 'tinderbox', quantity: 1 }, { itemId: 'swamp_ward_bundle', quantity: 1 }] }
+                        ],
+                        successNode: 'venture_deeper_node',
+                        failureNode: 'venture_deeper_no_burn'
+                    }
+                },
+                { text: "(Step back)" }
+            ]
+        },
         venture_deeper_no_burn: {
             npc: 'venture_deeper',
-            text: "(The miasma is too thick to see through. You need to burn the Swamp Ward Bundle before entering.)",
+            text: "(You lack either a Swamp Ward Bundle or a tinderbox to light it.)",
+            responses: [
+                { text: "(Continue)" }
+            ]
+        },
+        venture_deeper_no_burn_var: {
+            npc: 'venture_deeper',
+            text: "(The foul miasma's stench is unbearable, it pushes you back and you do not continue.)",
             responses: [
                 { text: "(Continue)" }
             ]
@@ -274,7 +274,14 @@ export const scalesOfTheSwamp: Quest = {
             npc: 'venture_deeper',
             text: "(The burnt Swamp Ward Bundle's smoke parts the miasma perfectly. You step forward into the deeper swamp.)",
             responses: [
-                { text: "(Enter the Swamp)", actions: [{ type: 'advance_quest', questId: 'scales_of_the_swamp' as any }] }
+                {
+                    text: "(Continue)",
+                    actions: [
+                        { type: 'take_item', itemId: 'swamp_ward_bundle', quantity: 1 },
+                        { type: 'set_variable', name: 'swamp_ward_burned', value: 1 },
+                        { type: 'advance_quest', questId: 'scales_of_the_swamp' as any }
+                    ]
+                }
             ]
         },
 
@@ -283,39 +290,70 @@ export const scalesOfTheSwamp: Quest = {
             npc: 'muddy_tracks',
             text: "(You find deep, fresh footprints in the mud. They are organized, not the chaotic scatter of animals. They lead toward the Nesting Ground.)",
             responses: [
-                { text: "(Follow the tracks)", actions: [{ type: 'advance_quest', questId: 'scales_of_the_swamp' as any }] }
+                { text: "(Follow the tracks)", actions: [{ type: 'advance_quest', questId: 'scales_of_the_swamp' as any }, { type: 'teleport', poiId: 'serpent_nesting_ground' }] }
             ]
         },
 
         // The Scout Encounter
         scout_encounter: {
             npc: 'bandit_scout',
-            text: "(The scout is perfectly still. He does not draw his weapon, but he watches you intensely.)",
+            text: "(You spot a figure perched perfectly still in the mangrove canopy. His hand rests lightly on a bone horn. One breath and he could alert the entire swamp. He watches you, waiting for your move.)",
             responses: [
-                { text: "[Interrogate] I'm here for the Coilmaster.", next: 'scout_interrogate_1' },
-                { text: "[Release] (Slowly step back and take the long way around.)", next: 'scout_release_1' }
+                { text: "[Intimidate] Blow that horn and you won't live to hear it. I'm here for the Coilmaster.", next: 'scout_intimidate' },
+                {
+                    text: "[Bribe - 500 Coins] We don't need to make this bloody. Take this and forget you saw me.",
+                    check: {
+                        requirements: [{ type: 'coins', amount: 500 }],
+                        successNode: 'scout_bribe',
+                        failureNode: 'scout_bribe_fail'
+                    }
+                },
+                { text: "[Withdraw] (Slowly back away into the fog and find a different route.)", next: 'scout_withdraw' }
             ]
         },
-        scout_interrogate_1: {
+        scout_intimidate: {
             npc: 'bandit_scout',
-            text: "That name is not used here... but we both know who you mean. Follow the submerged causeway to the Sunken Temple. Do not step off it. He will know you are coming.",
+            text: "(The scout's eyes narrow. He gauges your stance, your weapons, and the coldness in your voice. He slowly lowers his hand from the horn.)\n\nThat name is forbidden. But... I was told someone like you might come. Follow the submerged causeway to the Sunken Temple. Do not step off the path, or the swamp will take you.",
             responses: [
                 {
-                    text: "Understood.", actions: [
-                        { type: 'set_variable', name: 'scout_path', value: 'interrogated' },
-                        { type: 'advance_quest', questId: 'scales_of_the_swamp' as any }
+                    text: "(Continue)", actions: [
+                        { type: 'set_variable', name: 'scout_path', value: 'intimidated' },
+                        { type: 'advance_quest', questId: 'scales_of_the_swamp' as any },
+                        { type: 'teleport', poiId: 'sunken_temple_approach' }
                     ]
                 }
             ]
         },
-        scout_release_1: {
+        scout_bribe: {
             npc: 'bandit_scout',
-            text: "(The scout acknowledges your withdrawal. You take the long way around, costing time but avoiding a fight.)",
+            text: "(The scout glances at the coin purse. A small smirk breaks his stoic expression as he catches it. He points a finger eastward.)\n\nThe Sunken Temple. Follow the submerged causeway. And friend... keep your weapons sheathed when you arrive.",
             responses: [
                 {
-                    text: "(Leave)", actions: [
+                    text: "(Continue)", actions: [
+                        { type: 'take_coins', amount: 500 },
+                        { type: 'set_variable', name: 'scout_path', value: 'bribed' },
+                        { type: 'advance_quest', questId: 'scales_of_the_swamp' as any },
+                        { type: 'teleport', poiId: 'sunken_temple_approach' }
+                    ]
+                }
+            ]
+        },
+        scout_bribe_fail: {
+            npc: 'bandit_scout',
+            text: "(You reach for your purse, but realize you don't have enough coin. The scout's hand tightens on the horn.)\n\nEmpty promises. Leave now, or I sound the alarm.",
+            responses: [
+                { text: "(Step back)", next: 'scout_encounter' }
+            ]
+        },
+        scout_withdraw: {
+            npc: 'bandit_scout',
+            text: "(You keep your hands visible and slowly step back into the thick mist. The scout doesn't move, but his eyes track you until you vanish. Hours pass as you wade through the treacherous deep mud, taking the long way around. Eventually, you emerge at the submerged causeway—the stone path leading toward the Sunken Temple is visible ahead.)",
+            responses: [
+                {
+                    text: "(Follow the causeway)", actions: [
                         { type: 'set_variable', name: 'scout_path', value: 'avoided' },
-                        { type: 'advance_quest', questId: 'scales_of_the_swamp' as any }
+                        { type: 'advance_quest', questId: 'scales_of_the_swamp' as any },
+                        { type: 'teleport', poiId: 'sunken_temple_approach' }
                     ]
                 }
             ]
@@ -341,56 +379,268 @@ export const scalesOfTheSwamp: Quest = {
             text: "The swamp does not welcome visitors, yet here you are.",
             responses: []
         },
-
-        // Garath Voss (Coilmaster) Encounter
-        voss_encounter: {
+        voss_altar_stage6_greeting: {
             npc: 'garath_voss',
-            text: "You are the one from Oakhaven. My scout said you moved with intelligence. My name is Garath Voss. The outside world calls me the Coilmaster. Come inside.",
-            responses: [
-                { text: "Why are you attacking the roads?", next: 'voss_explain_roads' },
-                { text: "You run the Serpent Bandits.", next: 'voss_explain_bandits' },
-                { text: "(Follow him)", next: 'voss_dialogue_1' }
+            text: "The swamp has many eyes, traveler. I knew when you entered the mangroves, and I know why you are here. But this altar is too exposed. Let's talk in private.",
+            responses: [],
+            conditionalResponses: [
+                {
+                    text: "(Approach)",
+                    check: { requirements: [{ type: 'variable', name: 'scout_path', value: 'intimidated', operator: 'eq' }] },
+                    next: 'voss_encounter_intimidated'
+                },
+                {
+                    text: "(Approach)",
+                    check: { requirements: [{ type: 'variable', name: 'scout_path', value: 'bribed', operator: 'eq' }] },
+                    next: 'voss_encounter_bribed'
+                },
+                {
+                    text: "(Approach)",
+                    check: { requirements: [{ type: 'variable', name: 'scout_path', value: 'avoided', operator: 'eq' }] },
+                    next: 'voss_encounter_avoided'
+                }
             ]
         },
-        voss_explain_roads: {
+        voss_interior_leave: {
+            npc: 'garath_voss',
+            text: "(Voss gestures toward the passage back to the altar.)\n\nI'll be here when you're ready to talk further. The altar is just back through the passage.",
+            responses: [
+                { text: "(Return to the Temple Altar)", actions: [{ type: 'teleport', poiId: 'sunken_temple_altar' }] }
+            ]
+        },
+        voss_interior_reenter: {
+            npc: 'garath_voss',
+            text: "(You squeeze back through the flooded gap in the temple wall, returning to Voss's private chamber.)",
+            responses: [
+                { text: "(Continue)", actions: [{ type: 'teleport', poiId: 'sunken_temple_interior' }] }
+            ]
+        },
+        voss_stage7_retrieve: {
+            npc: 'garath_voss',
+            text: "You're back. Did you lose the proof I gave you? The swamp is unforgiving, but we cannot afford to lose that evidence.",
+            responses: [],
+            conditionalResponses: [
+                {
+                    text: "I lost the sealed convoy document.",
+                    check: {
+                        requirements: [
+                            { type: 'variable', name: 'scales_resolution', value: 'evidence', operator: 'eq' },
+                            { type: 'items', items: [{ itemId: 'sealed_convoy_document', quantity: 1, operator: 'lt' }] }
+                        ]
+                    },
+                    next: 'voss_reissue_evidence'
+                },
+                {
+                    text: "I lost your signed testimony.",
+                    check: {
+                        requirements: [
+                            { type: 'variable', name: 'scales_resolution', value: 'confrontation', operator: 'eq' },
+                            { type: 'items', items: [{ itemId: 'voss_signed_testimony', quantity: 1, operator: 'lt' }] }
+                        ]
+                    },
+                    next: 'voss_reissue_testimony'
+                },
+                {
+                    text: "I lost the bandit iron badge.",
+                    check: {
+                        requirements: [
+                            { type: 'variable', name: 'scales_resolution', value: 'confrontation', operator: 'eq' },
+                            { type: 'items', items: [{ itemId: 'bandit_iron_badge', quantity: 1, operator: 'lt' }] }
+                        ]
+                    },
+                    next: 'voss_reissue_badge'
+                },
+                {
+                    text: "No, I still have it.",
+                    check: {
+                        requirements: [
+                            { type: 'variable', name: 'scales_resolution', value: 'evidence', operator: 'eq' },
+                            { type: 'items', items: [{ itemId: 'sealed_convoy_document', quantity: 1, operator: 'gte' }] }
+                        ]
+                    },
+                    next: 'voss_stage7_still_have'
+                },
+                {
+                    text: "No, I still have it.",
+                    check: {
+                        requirements: [
+                            { type: 'variable', name: 'scales_resolution', value: 'confrontation', operator: 'eq' },
+                            {
+                                type: 'items', items: [
+                                    { itemId: 'voss_signed_testimony', quantity: 1, operator: 'gte' },
+                                    { itemId: 'bandit_iron_badge', quantity: 1, operator: 'gte' }
+                                ]
+                            }
+                        ]
+                    },
+                    next: 'voss_stage7_still_have'
+                }
+            ]
+        },
+        voss_stage7_still_have: {
+            npc: 'garath_voss',
+            text: "Then why did you crawl back through the mud? The Royal Council is moving secret cargo right under Oakhaven's nose, and you're treating my hideout like a traveler's inn. Take the evidence to Captain Elara, now, before it's too late.",
+            responses: [
+                { text: "(Return to the Temple Altar)", actions: [{ type: 'teleport', poiId: 'sunken_temple_altar' }] }
+            ]
+        },
+        voss_reissue_evidence: {
+            npc: 'garath_voss',
+            text: "Here is another copy of the convoy document. Keep it safe this time—our future depends on it getting to Elara.",
+            responses: [
+                {
+                    text: "Thank you.",
+                    actions: [
+                        { type: 'give_item', itemId: 'sealed_convoy_document', quantity: 1 }
+                    ],
+                    next: 'voss_interior_leave'
+                }
+            ]
+        },
+        voss_reissue_testimony: {
+            npc: 'garath_voss',
+            text: "Here is another copy of my signed testimony. Keep it safe—it is the only proof of my cooperation.",
+            responses: [
+                {
+                    text: "(Continue)",
+                    actions: [
+                        { type: 'give_item', itemId: 'voss_signed_testimony', quantity: 1 }
+                    ],
+                    next: 'voss_interior_leave'
+                }
+            ]
+        },
+        voss_reissue_badge: {
+            npc: 'garath_voss',
+            text: "Here is another scout badge. Keep it hidden—if Oakhaven's guards see you carrying it without my seal, you'll be treated as one of us.",
+            responses: [
+                {
+                    text: "(Continue)",
+                    actions: [
+                        { type: 'give_item', itemId: 'bandit_iron_badge', quantity: 1 }
+                    ],
+                    next: 'voss_interior_leave'
+                }
+            ]
+        },
+
+
+        voss_encounter_intimidated: {
+            npc: 'garath_voss',
+            text: "My scout told me you put a blade in front of his horn without breaking stride. A blunt instrument, but an effective one. You are direct. I respect that more than you might think. My name is Garath Voss. The outside world calls me the Coilmaster. But we shouldn't speak out in the open like this. Come inside.",
+            responses: [
+                { text: "I don't trust you.", next: 'voss_not_trust_intimidated' },
+                { text: "(Follow him)", actions: [{ type: 'teleport', poiId: 'sunken_temple_interior' }] }
+            ]
+        },
+        voss_not_trust_intimidated: {
+            npc: 'garath_voss',
+            text: "Do you think I care about your trust? Walk away if you want, or follow me. If you want answers about the bandits and the road blocks, they are inside.",
+            responses: [
+                { text: "(Follow him)", actions: [{ type: 'teleport', poiId: 'sunken_temple_interior' }] }
+            ]
+        },
+        voss_encounter_bribed: {
+            npc: 'garath_voss',
+            text: "My scout sends his regards—and his coin, I suspect, is already spent. You chose the path of least resistance. Practical. My name is Garath Voss. The outside world calls me the Coilmaster. But we shouldn't speak out in the open like this. Come inside.",
+            responses: [
+                { text: "I don't trust you.", next: 'voss_not_trust_bribed' },
+                { text: "(Follow him)", actions: [{ type: 'teleport', poiId: 'sunken_temple_interior' }] }
+            ]
+        },
+        voss_not_trust_bribed: {
+            npc: 'garath_voss',
+            text: "You trusted my scout enough to buy your way in. Why change your tune now? Follow me, or leave. The choice is yours.",
+            responses: [
+                { text: "(Follow him)", actions: [{ type: 'teleport', poiId: 'sunken_temple_interior' }] }
+            ]
+        },
+        voss_encounter_avoided: {
+            npc: 'garath_voss',
+            text: "My scout tells me you saw him and chose to walk away. To take the long route through the deep mud rather than confront the unknown. Caution or wisdom—I haven't decided which yet. My name is Garath Voss. The outside world calls me the Coilmaster. But we shouldn't speak out in the open like this. Come inside.",
+            responses: [
+                { text: "I don't trust you.", next: 'voss_not_trust_avoided' },
+                { text: "(Follow him)", actions: [{ type: 'teleport', poiId: 'sunken_temple_interior' }] }
+            ]
+        },
+        voss_not_trust_avoided: {
+            npc: 'garath_voss',
+            text: "You waded through miles of deep swamp to get here. It would be a waste to turn back now. I have no ill will toward you. Let us speak in private inside.",
+            responses: [
+                { text: "(Follow him)", actions: [{ type: 'teleport', poiId: 'sunken_temple_interior' }] }
+            ]
+        },
+        voss_explain_roads_interior: {
             npc: 'garath_voss',
             text: "We do not 'attack' the roads. We regulate them. The kingdom's reach ends where the swamp begins. We provide passage for those who cannot navigate the Coil themselves, and we charge a toll for that service. It is a necessary friction.",
             responses: [
-                { text: "You run the Serpent Bandits.", next: 'voss_explain_bandits' },
-                { text: "(Follow him)", next: 'voss_dialogue_1' }
+                { text: "You run the Serpent Bandits.", next: 'voss_explain_bandits_interior' },
+                { text: "Let's talk about the convoy.", next: 'voss_dialogue_hub' },
+                { text: "(Leave)", next: 'voss_interior_leave' }
             ]
         },
-        voss_explain_bandits: {
+        voss_explain_bandits_interior: {
             npc: 'garath_voss',
             text: "We are not bandits. We are the stewards of the Coil. This swamp is lethal, and it swallows armies. My people know its currents, its poisons, and its paths. We are organized because survival here demands absolute discipline.",
             responses: [
-                { text: "Why are you attacking the roads?", next: 'voss_explain_roads' },
-                { text: "(Follow him)", next: 'voss_dialogue_1' }
+                { text: "Why are you attacking the roads?", next: 'voss_explain_roads_interior' },
+                { text: "Let's talk about the convoy.", next: 'voss_dialogue_hub' },
+                { text: "(Leave)", next: 'voss_interior_leave' }
             ]
         },
         voss_dialogue_1: {
             npc: 'garath_voss',
-            text: "The bridge was sabotaged on my order. But what Elara didn't find was the reason. Three nights prior, an unmarked, armored convoy moved across it at midnight. Sixteen carts. Moving prisoners or contraband for the King, completely off the books.",
+            text: "Watch your head, the ceiling is low. We have much to discuss, but little time.",
             responses: [
-                { text: "Are you sure it was the King?", next: 'voss_explain_king' },
-                { text: "What was in the carts?", next: 'voss_explain_carts' },
-                { text: "You still extort merchants.", next: 'voss_dialogue_2' }
+                { text: "Elara wants your head. You'd better have a good explanation.", next: 'voss_dialogue_hub' },
+                { text: "Why are you attacking the roads?", next: 'voss_explain_roads_interior' },
+                { text: "You run the Serpent Bandits.", next: 'voss_explain_bandits_interior' },
+                { text: "(Leave)", next: 'voss_interior_leave' }
             ]
         },
-        voss_explain_king: {
+        voss_dialogue_hub: {
             npc: 'garath_voss',
-            text: "Only someone with royal authority can move sixteen unmarked carts across a guarded bridge without a single record appearing in the road captain's log. My people in Silverhaven confirmed it. It was sanctioned from the very top.",
+            text: "That convoy is the reason we're sitting in this damp tomb. Elara doesn't see the shadow moving behind the border she guards. The sabotage was to stop what was crossing it.",
             responses: [
-                { text: "What was in the carts?", next: 'voss_explain_carts' },
-                { text: "You still extort merchants.", next: 'voss_dialogue_2' }
+                { text: "What shadow?", next: 'voss_dialogue_shadow' },
+                { text: "Why are you attacking the roads?", next: 'voss_explain_roads_interior' },
+                { text: "You run the Serpent Bandits.", next: 'voss_explain_bandits_interior' },
+                { text: "(Leave)", next: 'voss_interior_leave' }
             ]
         },
-        voss_explain_carts: {
+        voss_dialogue_shadow: {
             npc: 'garath_voss',
-            text: "I do not know, and that is what worries me. Carts of that size, moving under maximum security and total secrecy... it is the kind of transport used for human beings who are not traveling voluntarily. Or weapons that shouldn't exist.",
+            text: "Three nights ago, an unmarked, armored convoy crossed that bridge at midnight. Sixteen heavy carts. No flags, no royal colors. But they moved with high-level military escort.",
             responses: [
-                { text: "Are you sure it was the King?", next: 'voss_explain_king' },
-                { text: "You still extort merchants.", next: 'voss_dialogue_2' }
+                { text: "How do you know it wasn't just common smugglers?", next: 'voss_dialogue_smugglers' },
+                { text: "What was in those carts?", next: 'voss_dialogue_reason' },
+                { text: "(Leave)", next: 'voss_interior_leave' }
+            ]
+        },
+        voss_dialogue_smugglers: {
+            npc: 'garath_voss',
+            text: "Smugglers don't have the codes to pass Oakhaven's border guards without a log entry. I have informants in Silverhaven's administrative chambers—they confirmed the transport was signed off from the very top. The Royal Council itself.",
+            responses: [
+                { text: "What was in those carts?", next: 'voss_dialogue_reason' },
+                { text: "So you sabotaged the bridge to stop them?", next: 'voss_dialogue_sabotage' },
+                { text: "(Leave)", next: 'voss_interior_leave' }
+            ]
+        },
+        voss_dialogue_reason: {
+            npc: 'garath_voss',
+            text: "That is the question. Sixteen carts of that size, heavily reinforced. My contact says they were moving prisoners or weapons that don't officially exist. If they wanted to hide it from the regional barons, they'd use the night roads.",
+            responses: [
+                { text: "How do you know it wasn't just common smugglers?", next: 'voss_dialogue_smugglers' },
+                { text: "So you sabotaged the bridge to stop them?", next: 'voss_dialogue_sabotage' },
+                { text: "(Leave)", next: 'voss_interior_leave' }
+            ]
+        },
+        voss_dialogue_sabotage: {
+            npc: 'garath_voss',
+            text: "Precisely. It forced them to reroute, giving my scouts time to watch their path. But it also drew Oakhaven's attention. Now, we are both caught in the middle of a shadow war.",
+            responses: [
+                { text: "You still extort merchants to fund this.", next: 'voss_dialogue_2' },
+                { text: "(Leave)", next: 'voss_interior_leave' }
             ]
         },
         voss_dialogue_2: {
@@ -460,18 +710,33 @@ export const scalesOfTheSwamp: Quest = {
         // Return to Elara
         elara_scales_return: {
             npc: 'guard_captain_elara',
-            text: "You're back. Did you find him?",
+            text: "Good, I hope you brought his head with you... Or something else that can prove his innocence.",
             responses: [],
             conditionalResponses: [
                 {
-                    text: "I have a sealed document from Garath Voss.",
-                    check: { requirements: [{ type: 'variable', name: 'scales_resolution', value: 'evidence', operator: 'eq' }] },
+                    text: "He gave me this sealed document?",
+                    check: { requirements: [{ type: 'variable', name: 'scales_resolution', value: 'evidence', operator: 'eq' }, { type: 'items', items: [{ itemId: 'sealed_convoy_document', quantity: 1, operator: 'gte' }] }] },
                     next: 'elara_scales_evidence_resolution'
                 },
                 {
                     text: "I have his signed testimony and a scout's badge.",
-                    check: { requirements: [{ type: 'variable', name: 'scales_resolution', value: 'confrontation', operator: 'eq' }] },
+                    check: { requirements: [{ type: 'variable', name: 'scales_resolution', value: 'confrontation', operator: 'eq' }, { type: 'items', items: [{ itemId: 'voss_signed_testimony', quantity: 1, operator: 'gte' }, { itemId: 'bandit_iron_badge', quantity: 1, operator: 'gte' }] }] },
                     next: 'elara_scales_confrontation_resolution'
+                },
+                {   //Confrontation no items
+                    text: "Not quite his head... but I have these (rummages through bag) Oh... I seem to have lost them.",
+                    check: { requirements: [{ type: 'variable', name: 'scales_resolution', value: 'confrontation', operator: 'eq' }, { type: 'items', items: [{ itemId: 'voss_signed_testimony', quantity: 1, operator: 'lt' }] }] },
+                    next: 'elara_scales_evidence_lost'
+                },
+                {   //Confrontation no badge
+                    text: "Not quite his head... but I have these (rummages through bag) Oh... I seem to have lost them.",
+                    check: { requirements: [{ type: 'variable', name: 'scales_resolution', value: 'confrontation', operator: 'eq' }, { type: 'items', items: [{ itemId: 'bandit_iron_badge', quantity: 1, operator: 'lt' }] }] },
+                    next: 'elara_scales_evidence_lost'
+                },
+                {   //Evidence no items
+                    text: "He gave me a sealed document. (Rustles through bag) I think... I think I lost it.",
+                    check: { requirements: [{ type: 'variable', name: 'scales_resolution', value: 'evidence', operator: 'eq' }, { type: 'items', items: [{ itemId: 'sealed_convoy_document', quantity: 1, operator: 'lt' }] }] },
+                    next: 'elara_scales_evidence_lost'
                 }
             ]
         },
@@ -481,6 +746,13 @@ export const scalesOfTheSwamp: Quest = {
             responses: [
                 { text: "Have you heard anything about these convoys?", next: 'elara_evidence_convoys' },
                 { text: "He wants a negotiated settlement.", next: 'elara_evidence_negotiate' }
+            ]
+        },
+        elara_scales_evidence_lost: {
+            npc: 'guard_captain_elara',
+            text: "Lost them? (Elara sighs deeply) The merchants will think you were careless. Or worse, complicit. You should not have taken a risk like that.",
+            responses: [
+                { text: "I swear I just had the items... let me go find them.", next: 'elara_scales_restart' }
             ]
         },
         elara_evidence_convoys: {

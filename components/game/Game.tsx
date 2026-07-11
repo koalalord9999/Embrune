@@ -126,6 +126,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
     const containerRef = useRef<HTMLDivElement>(null);
     const isBusy = ui.isBusy || isTraveling || !!ui.activeSingleAction;
     const [worldState, setWorldState] = useState<WorldState>(initialState.worldState);
+    const [bookmarks, setBookmarks] = useState<string[]>(initialState.bookmarks || []);
 
     // Music System Integration
     const currentRegionId = useMemo(() => {
@@ -573,6 +574,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         slayerCredits: slayerCredits,
         slayerTaskStreak: slayerTaskStreak,
         worldState: worldState,
+        bookmarks: bookmarks,
         autocastSpell: char.autocastSpell,
         settings: {
             showTooltips: ui.showTooltips,
@@ -602,7 +604,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         inv.inventory, inv.coins, inv.equipment, bank, session.currentPoiId, quests.playerQuests, quests.lockedPois, clearedSkillObstacles,
         skilling.resourceNodeStates, monsterRespawnTimers, allGroundItems, repeatableQuests, slayer.slayerTask, slayerCredits, slayerTaskStreak, worldState,
         ui.showTooltips, ui.showXpDrops, ui.confirmValuableDrops, ui.valuableDropThreshold, ui.showMinimapHealth, ui.showCombatPlayerHealth, ui.showCombatEnemyHealth, ui.showHitsplats, ui.isOneClickMode,
-        devMode.xpMultiplier, devMode.combatSpeedMultiplier, devMode.isPlayerInvisible, devMode.isAutoBankOn, devMode.isGodModeOn
+        devMode.xpMultiplier, devMode.combatSpeedMultiplier, devMode.isPlayerInvisible, devMode.isAutoBankOn, devMode.isGodModeOn, bookmarks
     ]);
 
     useEffect(() => {
@@ -1645,6 +1647,8 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         setIsGodModeOn: devMode.setIsGodModeOn,
         ui,
         slayer,
+        questVariables: worldState.questVariables || {},
+        deleteQuestVariable: questLogic.deleteQuestVariable,
     }), [
         inv, ui, devMode.devPanelState, devMode.updateDevPanelState, devMode.combatSpeedMultiplier, devMode.setCombatSpeedMultiplier,
         devMode.isInstantRespawnOn, devMode.setIsInstantRespawnOn, devMode.instantRespawnCounter, devMode.setInstantRespawnCounter,
@@ -1654,7 +1658,8 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
         devMode.showAllPois, devMode.setShowAllPois, navigation.handleForcedNavigate,
         devMode.xpMultiplier, devMode.setXpMultiplier, devMode.isGodModeOn, devMode.setIsGodModeOn,
         handleHealPlayer, handleKillMonster, handleAddCoins, handleSetSkillLevel, handleMaxCharacter, handleResetQuest, handleAdjustQuestStage,
-        handleTrialTestBoost, repeatableQuests.resetBoards, thievingPilfering.resetPilferingTimers, slayer
+        handleTrialTestBoost, repeatableQuests.resetBoards, thievingPilfering.resetPilferingTimers, slayer,
+        worldState.questVariables, questLogic.deleteQuestVariable
     ]);
 
     // Centralized death check
@@ -1677,7 +1682,7 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                             />
                         </div>
                     )}
-                    <MainViewController combatAttackType={combatAttackType} stylesByWeaponType={stylesByWeaponType} setStylesByWeaponType={setStylesByWeaponType} setCombatAttackType={setCombatAttackType} onFastTravel={handleFastTravel} {...{
+                    <MainViewController combatAttackType={combatAttackType} stylesByWeaponType={stylesByWeaponType} setStylesByWeaponType={setStylesByWeaponType} setCombatAttackType={setCombatAttackType} onFastTravel={handleFastTravel} bookmarks={bookmarks} setBookmarks={setBookmarks} playerType={initialState.playerType} {...{
                         char: { ...char, setCombatStance },
                         itemActions, inv, quests, bank, bankLogic, shops, crafting, repeatableQuests, navigation, worldActions, slayer, questLogic, skilling, interactQuest, session, clearedSkillObstacles, monsterRespawnTimers, handlePlayerDeath: () => handlePlayerDeath(gameState), handleKill, onWinCombat, onFleeSuccess: onFleeFromCombat, onResponse, handleDialogueCheck, combatSpeedMultiplier: devMode.combatSpeedMultiplier, activeCombatStyleHighlight: null, isTouchSimulationEnabled: devMode.isTouchSimulationEnabled, addLog, ui, initialState, showAllPois: devMode.showAllPois, groundItemsForCurrentPoi, onPickUpItem: handlePickUpItem, onTakeAllLoot: handleTakeAllLoot, onItemDropped, isAutoBankOn: devMode.isAutoBankOn, handleCombatXpGain: char.addXp, poiImmunityTimeLeft, killTrigger, bankPlaceholders: worldState.bankPlaceholders ?? false, handleToggleBankPlaceholders, bonfires: bonfires.filter(b => b.uniqueId.startsWith(session.currentPoiId)), onStokeBonfire: crafting.handleStokeBonfire, isStunned: char.isStunned, addBuff: char.addBuff, isDevMode: devMode.isDevMode, onToggleDevPanel: handleToggleDevPanel, onToggleTouchSimulation: devMode.onToggleTouchSimulation, onDepositEquipment: () => bankLogic.handleDepositEquipment(ui.activeBankTabId), deathMarker: worldState.deathMarker, activeRepeatableQuest: repeatableQuests.activePlayerQuest, onActivity: handleActivityClickWrapper, onResetGame, onImportGame, onExportGame, isOneClickMode: ui.isOneClickMode, poi, thievingContainerStates: thieving.containerStates, onPickpocket: thieving.handlePickpocket, onLockpick: thieving.handleLockpick, onPilfer: thievingPilfering.handlePilfer, onStealFromStall: thieving.handleStealFromStall, worldState, onStartCombat: onStartSingleCombat, onEncounterWin: handleEncounterWin, activePrayers: prayer.activePrayers, onJewelryCraft: crafting.handleJewelryCrafting, setEquipment: inv.setEquipment, poisonEvent, runEnergy: char.runEnergy, setRunEnergy: char.setRunEnergy, playerCombatLevel: char.combatLevel, addXp: char.addXp, setCurrentHp: char.setCurrentHp, agility, setActivePrayers: prayer.setActivePrayers
                     }} />
@@ -1774,6 +1779,10 @@ const Game: React.FC<GameProps> = ({ initialState, slotId, onReturnToMenu, ui, a
                     activeMapRegionId={ui.activeMapRegionId}
                     setActiveMapRegionId={ui.setActiveMapRegionId}
                     deathMarker={worldState.deathMarker}
+                    bookmarks={bookmarks}
+                    setBookmarks={setBookmarks}
+                    playerType={initialState.playerType}
+                    setContextMenu={ui.setContextMenu}
                 />
             )}
             {ui.activeSkillGuide && <SkillGuideView activeSkill={ui.activeSkillGuide} setActiveSkill={ui.setActiveSkillGuide} onClose={ui.closeSkillGuide} playerSkills={char.skills} />}

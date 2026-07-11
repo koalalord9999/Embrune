@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useUIState } from './hooks/useUIState';
+import FPSCounter from './components/common/FPSCounter';
 import { useSaveSlotManager } from './hooks/useSaveSlotManager';
 import { useSoundEngine } from './hooks/useSoundEngine';
 import { useMusicEngine, resetMusicEngine } from './hooks/useMusicEngine';
@@ -250,10 +251,11 @@ const App: React.FC = () => {
             <div className="w-full h-full md:max-w-[177.77vh] md:max-h-[100vh] md:aspect-[16/9] relative">
                 {renderAppContent()}
                 {GAME_VERSION && (
-                    <span className="absolute bottom-2 right-2 text-xs text-gray-500 z-10 pointer-events-none">
-                        v{GAME_VERSION}
-                    </span>
-                )}
+    <div className="absolute bottom-2 right-2 flex items-center text-xs text-gray-500 z-10 pointer-events-none">
+        <span>v{GAME_VERSION}</span>
+        {ui.showFPS && <FPSCounter className="ml-2" />}
+    </div>
+)}
             </div>
 
             {ui.showTooltips && ui.tooltip && <Tooltip tooltipState={ui.tooltip} isCtrlPressed={isCtrlPressed} />}

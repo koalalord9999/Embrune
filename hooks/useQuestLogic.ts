@@ -350,7 +350,23 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
             setClearedSkillObstacles(prev => [...new Set([...prev, 'broken_bridge-kings_road_west_2'])]);
             addLog("With the supplies delivered, the Oakhaven guard repairs the bridge. The path to Silverhaven is open!");
         }
-    }, [setPlayerQuests, addLog, modifyItem, addXp, setLockedPois, setClearedSkillObstacles]);
+
+        // Automatically remove any variables listed in cleanupQuestVariables on the quest definition.
+        if (questData.cleanupQuestVariables?.length) {
+            setWorldState((prev: any) => {
+                const nextVars = { ...(prev.questVariables || {}) };
+                let changed = false;
+                questData.cleanupQuestVariables!.forEach((varName: string) => {
+                    if (varName in nextVars) {
+                        delete nextVars[varName];
+                        changed = true;
+                    }
+                });
+                if (!changed) return prev;
+                return { ...prev, questVariables: nextVars };
+            });
+        }
+    }, [setPlayerQuests, addLog, modifyItem, addXp, setLockedPois, setClearedSkillObstacles, setWorldState]);
 
     const getQuestVariable = useCallback((name: string) => {
         return worldState.questVariables?.[name] ?? 0;
@@ -374,6 +390,17 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
                 [name]: (prev.questVariables?.[name] ?? 0) + amount
             }
         }));
+    }, [setWorldState]);
+
+    const deleteQuestVariable = useCallback((name: string) => {
+        setWorldState((prev: any) => {
+            const nextVariables = { ...prev.questVariables };
+            delete nextVariables[name];
+            return {
+                ...prev,
+                questVariables: nextVariables
+            };
+        });
     }, [setWorldState]);
 
     const cleanupQuestState = useCallback((questId: string) => {
@@ -420,6 +447,7 @@ export const useQuestLogic = (props: UseQuestLogicProps) => {
         getQuestVariable,
         setQuestVariable,
         incrementQuestVariable,
+        deleteQuestVariable,
         cleanupQuestState,
     };
 }

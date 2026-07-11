@@ -541,7 +541,7 @@ const SlayerManagerComponent: React.FC<{ slayer: any }> = ({ slayer }) => {
 interface DevPanelProps {
     inv: ReturnType<typeof useInventory>;
     devPanelState: {
-        activeTab: 'cheats' | 'items' | 'teleport' | 'game-manager' | 'monsters' | 'slayer' | 'map-manager';
+        activeTab: 'cheats' | 'items' | 'teleport' | 'game-manager' | 'monsters' | 'slayer' | 'map-manager' | 'variables';
         itemSearchTerm: string;
         selectedItemId: string | null;
         spawnQuantity: number;
@@ -592,6 +592,10 @@ interface DevPanelProps {
     onResetPilferingHouses: () => void;
     onTrialTestBoost: () => void;
     onUnlockAllMusic: () => void;
+
+    // Variables Props
+    questVariables: Record<string, number>;
+    deleteQuestVariable: (name: string) => void;
 }
 
 const DevPanel: React.FC<DevPanelProps> = (props) => {
@@ -617,6 +621,7 @@ const DevPanel: React.FC<DevPanelProps> = (props) => {
                 <button onClick={() => setActiveTab('cheats')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'cheats' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Cheats</button>
                 <button onClick={() => setActiveTab('items')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'items' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Items</button>
                 <button onClick={() => setActiveTab('game-manager')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'game-manager' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Game</button>
+                <button onClick={() => setActiveTab('variables')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'variables' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Vars</button>
                 <button onClick={() => setActiveTab('teleport')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'teleport' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Teleport</button>
                 <button onClick={() => setActiveTab('slayer')} className={`flex-1 py-1 text-base font-semibold rounded-t-md transition-colors ${activeTab === 'slayer' ? 'bg-gray-700 text-yellow-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>Slayer</button>
                 {hasMapManager && (
@@ -661,6 +666,32 @@ const DevPanel: React.FC<DevPanelProps> = (props) => {
                     <Suspense fallback={<div className="p-4 text-center text-gray-400">Loading Map Editor...</div>}>
                         <MapManagerComponent />
                     </Suspense>
+                )}
+                {activeTab === 'variables' && (
+                    <div className="flex flex-col gap-2 p-2">
+                        <label className="block text-lg font-semibold mb-1">Quest Variables</label>
+                        {Object.keys(props.questVariables || {}).length === 0 ? (
+                            <div className="text-gray-400">No quest variables saved.</div>
+                        ) : (
+                            <div className="flex flex-col gap-2">
+                                {Object.entries(props.questVariables || {}).map(([key, value]) => (
+                                    <div key={key} className="flex justify-between items-center bg-gray-800 p-2 rounded border border-gray-700">
+                                        <div className="flex flex-col">
+                                            <span className="text-yellow-400 font-bold">{key}</span>
+                                            <span className="text-gray-300">Value: {value}</span>
+                                        </div>
+                                        <Button 
+                                            variant="secondary" 
+                                            size="sm" 
+                                            onClick={() => props.deleteQuestVariable(key)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

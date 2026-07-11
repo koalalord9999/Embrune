@@ -94,7 +94,7 @@ export const misc_two: Item[] = [
     { id: 'slayer_task_shrink', name: 'Task Shrink', description: 'Sets your current slayer task count to 5. Can only be used if your task progress is 0.', stackable: false, value: 0, iconUrl: 'contract', hidden: true },
 
     // Scales of the Swamp Quest Items
-    { id: 'swamp_ward_bundle', itemNum: 795, name: 'Swamp Ward Bundle', description: 'A waxy bundle prepared by Anise. Burn it to counteract the Coil\'s miasma.', stackable: false, value: 0, iconUrl: 'bindle', consumable: {} },
+    { id: 'swamp_ward_bundle', itemNum: 795, name: 'Swamp Ward Bundle', description: 'A waxy bundle prepared by Anise. Burn it to counteract the Coil\'s miasma.', stackable: false, value: 0, iconUrl: 'bindle' },
     { id: 'sealed_convoy_document', itemNum: 796, name: 'Sealed Convoy Document', description: 'A sealed document containing records of unmarked royal convoys on the King\'s Road.', stackable: false, value: 0, iconUrl: 'scroll-unfurled' },
     { id: 'voss_signed_testimony', itemNum: 797, name: 'Signed Testimony', description: 'A written confession and testimony signed by Garath Voss, the Coilmaster.', stackable: false, value: 0, iconUrl: 'tied-scroll' },
     { id: 'bandit_iron_badge', itemNum: 798, name: 'Bandit Iron Badge', description: 'An iron badge worn by the Serpent Bandits\' scouts.', stackable: false, value: 0, iconUrl: 'metal-scale' },

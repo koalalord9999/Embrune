@@ -41,14 +41,18 @@ export const PRAYERS: Prayer[] = [
 ];
 
 export const getPrayerShadowColor = (prayer: Prayer) => {
-    if (prayer.type === PrayerType.PROTECTION) return '#a855f7'; // Purple (per user request)
+    // All protection prayers get a purple border - contrasts well now that icons are no longer purple
+    if (prayer.id === 'protect_from_magic') return '#a855f7';
+    if (prayer.id === 'protect_from_ranged') return '#a855f7';
+    if (prayer.id === 'protect_from_melee') return '#a855f7';
+    if (prayer.type === PrayerType.PROTECTION) return '#a855f7'; // includes protect_item
     if (prayer.type === PrayerType.HEALTH) return '#22c55e'; // Green
     if (prayer.id === 'protect_item') return '#915233'; // Bronze/Brown
 
     // Tiered boosts
     if (prayer.boost) {
         if (prayer.boost.percent >= 20) return '#00aaff'; // Blue (Tier 4)
-        if (prayer.boost.percent >= 15) return '#ba55d3'; // Purple (Tier 3)
+        if (prayer.boost.percent >= 15) return '#f0c0ff'; // Light lavender - contrasts against purple icon (Tier 3)
         if (prayer.boost.percent >= 10) return '#ff0000'; // Red (Tier 2)
         return '#915233'; // Bronze/Brown (Tier 1)
     }
@@ -57,8 +61,12 @@ export const getPrayerShadowColor = (prayer: Prayer) => {
 };
 
 export const getPrayerIconColor = (prayer: Prayer) => {
-    if (prayer.type === PrayerType.PROTECTION) return '#963c9eff';
-    if (prayer.id === 'protect_item') return '#92400e';
+    // Per-prayer protection icon colors
+    if (prayer.id === 'protect_item') return '#92400e';      // leathery brown
+    if (prayer.id === 'protect_from_magic') return '#e8632a'; // ember orange
+    if (prayer.id === 'protect_from_ranged') return '#1a5c1a'; // dark forest green
+    if (prayer.id === 'protect_from_melee') return '#9aa3ad';  // sword metal gray
+    if (prayer.type === PrayerType.PROTECTION) return '#92400e'; // fallback brown for any future protection prayers
     if (prayer.type === PrayerType.HEALTH) return '#ffb07c';
 
     if (prayer.boost) {

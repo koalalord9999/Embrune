@@ -128,7 +128,10 @@ export const useDialogueActions = (deps: DialogueActionDependencies) => {
                             return !playerQuest;
                         case 'in_progress':
                             let inProgressCheck = !!playerQuest && !playerQuest.isComplete;
-                            if (req.stage !== undefined) {
+                            if (req.stages !== undefined) {
+                                // stages array: visible if currentStage is any of the listed values
+                                inProgressCheck = inProgressCheck && req.stages.includes(playerQuest.currentStage);
+                            } else if (req.stage !== undefined) {
                                 // --- FIX: Support gte/lt/eq operators for quest stage comparisons in dialogue ---
                                 const op = req.operator ?? 'eq';
                                 if (op === 'gte') inProgressCheck = inProgressCheck && playerQuest.currentStage >= req.stage;

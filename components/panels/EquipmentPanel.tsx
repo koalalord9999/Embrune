@@ -160,7 +160,7 @@ const EquipmentSlotDisplay: React.FC<EquipmentSlotDisplayProps> = ({ slotKey, it
                     )}
                 </>
             ) : (
-                <img src={getIconUrl(SLOT_PLACEHOLDERS[slotKey])} alt={slotKey} className="w-8 h-8 opacity-20 filter invert" />
+                <img src={getIconUrl(SLOT_PLACEHOLDERS[slotKey])} alt={slotKey} className="w-1/2 h-1/2 opacity-20 filter invert" />
             )}
         </div>
     );
@@ -183,9 +183,9 @@ const EquipmentPanel: React.FC<EquipmentPanelProps> = (props) => {
     };
 
     return (
-        <div className="flex flex-col h-full text-gray-300 pt-2">
-            <div className="flex flex-col justify-center items-center">
-                <div className="grid grid-cols-3 gap-2 w-full max-w-[180px]">
+        <div className="flex flex-col h-full text-gray-300 pt-1 justify-between gap-3">
+            <div className="flex-grow flex items-center justify-center min-h-0 w-full py-1">
+                <div className="grid grid-cols-3 gap-2 w-auto h-full max-h-full max-w-full aspect-[3/5]">
                     <EmptySlot />
                     <EquipmentSlotDisplay {...equipmentSlotDisplayProps} slotKey="head" itemSlot={equipment.head} />
                     <EmptySlot />
@@ -208,7 +208,7 @@ const EquipmentPanel: React.FC<EquipmentPanelProps> = (props) => {
                 </div>
             </div>
             
-            <div className="mt-auto pt-2 p-1 bg-gray-900 rounded-md border border-gray-600 grid grid-cols-3 gap-1 font-pixel-rpg">
+            <div className="mt-auto pt-2 p-1 bg-gray-900 rounded-md border border-gray-600 grid grid-cols-3 gap-1 font-pixel-rpg flex-shrink-0">
                 <button 
                     onClick={() => ui.setIsEquipmentStatsViewOpen(true)} 
                     onMouseEnter={(e) => setTooltip({ content: <p className="font-bold text-yellow-300">Equipment Stats</p>, position: { x: e.clientX, y: e.clientY } })}

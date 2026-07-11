@@ -6,6 +6,24 @@ import { CombatStance, PlayerSlayerTask, GeneratedRepeatableQuest, InventorySlot
 import { useUIState } from './useUIState';
 import { inflateGameState } from '../utils/saveInflater';
 import { minifyGameState } from '../utils/saveMinifier';
+import { isFestivalActive } from '../utils/festivalDates';
+
+/**
+ * Quest variable keys that are exclusive to the Oakhaven Lantern Festival.
+ * These are purged from the save on login when the festival is not active,
+ * since daily-cooldown and minigame state from a prior year is meaningless.
+ */
+const FESTIVAL_QUEST_VARIABLE_KEYS = [
+    'last_played_trivia',
+    'last_played_lantern',
+    'last_played_gourd',
+    'trivia_question_index',
+    'trivia_answered',
+    'lantern_thermal_draft',
+    'gourd_smash_result',
+    'ring_toss_peg',
+    'ring_toss_rings_left',
+];
 
 type GameState = typeof defaultState;
 
@@ -61,6 +79,7 @@ const defaultState = {
         return true;
     }),
     clearedSkillObstacles: [],
+    bookmarks: [] as string[],
     resourceNodeStates: {},
     monsterRespawnTimers: {},
     groundItems: {},
@@ -98,6 +117,15 @@ const hydrateGameState = (loadedState: any): GameState => {
     // Restores pruned data (skill levels, repeatable quest metadata, inventory padding, etc.)
     // Safe to call on old-format saves — it detects and passes through existing fields.
     inflateGameState(loadedState);
+
+    // --- FESTIVAL VARIABLE CLEANUP ---
+    // When the Oakhaven Lantern Festival is not active, strip all festival-specific
+    // quest variables so stale cooldown/minigame state from prior years doesn't persist.
+    if (!isFestivalActive() && loadedState.worldState?.questVariables) {
+        FESTIVAL_QUEST_VARIABLE_KEYS.forEach(k => {
+            delete loadedState.worldState.questVariables[k];
+        });
+    }
 
     // --- MIGRATION LOGIC FOR BURNT FOOD ---
     const defunctBurntItems = new Set([
@@ -176,7 +204,7 @@ const hydrateGameState = (loadedState: any): GameState => {
     // Ensure array properties are arrays, falling back to default if they're missing or not arrays.
     const arrayKeys: (keyof GameState)[] = [
         'skills', 'inventory', 'bank', 'playerQuests', 'lockedPois', 
-        'clearedSkillObstacles', 'statModifiers', 'activeBuffs', 'activePrayers'
+        'clearedSkillObstacles', 'statModifiers', 'activeBuffs', 'activePrayers', 'bookmarks'
     ];
     arrayKeys.forEach(key => {
         const loadedValue = loadedState[key];

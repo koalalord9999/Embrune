@@ -16,8 +16,9 @@ export const theSerpentsCoilPois: Record<string, POI> = {
                 type: "npc",
                 name: "Venture Deeper",
                 icon: "journey",
-                startNode: "venture_deeper_node",
-                questTopics: ["scales_of_the_swamp"]
+                startNode: "venture_deeper_start",
+                questTopics: ["scales_of_the_swamp"],
+                visibilityCheck: [{ type: 'variable', name: 'swamp_ward_burned', value: 1, operator: 'lt' }]
             },
             {
                 type: "agility_shortcut",
@@ -56,16 +57,10 @@ export const theSerpentsCoilPois: Record<string, POI> = {
             {
                 type: "npc",
                 name: "Muddy Tracks",
-                icon: "magnifying_glass",
+                icon: "magnifying-glass",
                 startNode: "muddy_tracks_node",
-                questTopics: ["scales_of_the_swamp"]
-            },
-            {
-                type: "npc",
-                name: "Bandit Scout",
-                icon: 'person',
-                startNode: "scout_encounter",
-                questTopics: ["scales_of_the_swamp"]
+                questTopics: ["scales_of_the_swamp"],
+                visibilityCheck: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 3 }]
             },
             {
                 type: "combat",
@@ -91,6 +86,14 @@ export const theSerpentsCoilPois: Record<string, POI> = {
         description: "A muddy island littered with large, leathery egg fragments. This area is swarming with serpents.",
         connections: ["mangrove_thicket_west", "flooded_forest"],
         activities: [
+            {
+                type: "npc",
+                name: "Bandit Scout",
+                icon: 'person',
+                startNode: "scout_encounter",
+                questTopics: ["scales_of_the_swamp"],
+                visibilityCheck: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 4 }]
+            },
             {
                 type: "combat",
                 monsterId: "bog_serpent",
@@ -267,7 +270,8 @@ export const theSerpentsCoilPois: Record<string, POI> = {
                 name: "Submerged Causeway",
                 icon: "/assets/icons/search.png",
                 startNode: "causeway_node",
-                questTopics: ["scales_of_the_swamp"]
+                questTopics: ["scales_of_the_swamp"],
+                visibilityCheck: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 5 }]
             },
             {
                 type: "combat",
@@ -297,8 +301,17 @@ export const theSerpentsCoilPois: Record<string, POI> = {
                 type: "npc",
                 name: "Garath Voss",
                 icon: 'person',
-                startNode: "voss_default",
-                questTopics: ["scales_of_the_swamp"]
+                startNode: "voss_altar_stage6_greeting",
+                questTopics: ["scales_of_the_swamp"],
+                visibilityCheck: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 6 }]
+            },
+            {
+                type: "npc",
+                name: "(Enter Temple Crevice)",
+                icon: "journey",
+                startNode: "voss_interior_reenter",
+                questTopics: ["scales_of_the_swamp"],
+                visibilityCheck: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 7 }]
             },
             {
                 type: "combat",
@@ -326,6 +339,46 @@ export const theSerpentsCoilPois: Record<string, POI> = {
             type: "quest",
             questId: "scales_of_the_swamp",
             stage: 3,
+        },
+    },
+    sunken_temple_interior: {
+        id: "sunken_temple_interior",
+        name: "Sunken Temple Interior",
+        description: "A dry chamber preserved above the waterline within the sunken temple. Old shelves line the walls, stacked with journals and sealed crates. Candlelight flickers from a dozen burnt-down stubs.",
+        connections: ["sunken_temple_altar"],
+        activities: [
+            {
+                type: "npc",
+                name: "Garath Voss",
+                icon: 'person',
+                startNode: "voss_dialogue_1",
+                questTopics: ["scales_of_the_swamp"],
+                visibilityCheck: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 6 }]
+            },
+            {
+                type: "npc",
+                name: "Garath Voss",
+                icon: 'person',
+                startNode: "voss_stage7_retrieve",
+                questTopics: ["scales_of_the_swamp"],
+                visibilityCheck: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 7 }]
+            },
+            {
+                type: "npc",
+                name: "(Return to the Temple Altar)",
+                icon: "journey",
+                startNode: "voss_interior_leave",
+                questTopics: ["scales_of_the_swamp"],
+                visibilityCheck: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stages: [6, 7] }]
+            },
+        ],
+        regionId: "serpents_coil",
+        x: 1545,
+        y: 1171,
+        unlockRequirement: {
+            type: "quest",
+            questId: "scales_of_the_swamp",
+            stage: 6,
         },
     },
     hex_altar: {

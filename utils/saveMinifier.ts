@@ -257,6 +257,7 @@ export function minifyGameState(state: any): any {
     // 6b. Progression
     if (Array.isArray(state.lockedPois)) mini.lp = state.lockedPois;
     if (Array.isArray(state.clearedSkillObstacles)) mini.cso = state.clearedSkillObstacles;
+    if (Array.isArray(state.bookmarks)) mini.bm = state.bookmarks;
     if (state.groundItems) {
         const gi: Record<string, any[]> = {};
         for (const [poiId, items] of Object.entries(state.groundItems as Record<string, any[]>)) {

@@ -126,6 +126,9 @@ interface MainViewControllerProps {
     setCombatAttackType: React.Dispatch<React.SetStateAction<'stab' | 'slash' | 'crush'>>;
     stylesByWeaponType: Partial<Record<WeaponType, number>>;
     setStylesByWeaponType: React.Dispatch<React.SetStateAction<Partial<Record<WeaponType, number>>>>;
+    bookmarks: string[];
+    setBookmarks: React.Dispatch<React.SetStateAction<string[]>>;
+    playerType: PlayerType;
 }
 
 const MainViewController: React.FC<MainViewControllerProps> = (props) => {
@@ -160,6 +163,9 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
         agility,
         onFastTravel,
         setActivePrayers,
+        bookmarks,
+        setBookmarks,
+        playerType,
     } = props;
 
     const handleTeleport = useCallback((toBoardId: string) => {
@@ -183,6 +189,10 @@ const MainViewController: React.FC<MainViewControllerProps> = (props) => {
                 activeMapRegionId={ui.activeMapRegionId}
                 setActiveMapRegionId={ui.setActiveMapRegionId}
                 deathMarker={deathMarker}
+                bookmarks={bookmarks}
+                setBookmarks={setBookmarks}
+                playerType={playerType}
+                setContextMenu={ui.setContextMenu}
             />
         }
         if (agility.agilityState.activeCourseId) {

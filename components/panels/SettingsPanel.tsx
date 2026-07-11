@@ -185,8 +185,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({ onResetGame, onExportGame, 
                     <SettingRow label="Player Health in Combat" description="Show player's HP numbers in the combat view.">
                         <ToggleButton enabled={ui.showCombatPlayerHealth} onClick={() => ui.setShowCombatPlayerHealth(!ui.showCombatPlayerHealth)} />
                     </SettingRow>
-                    <SettingRow label="Enemy Health in Combat" description="Show enemy's HP numbers in the combat view.">
-                        <ToggleButton enabled={ui.showCombatEnemyHealth} onClick={() => ui.setShowCombatEnemyHealth(!ui.showCombatEnemyHealth)} />
+                    <SettingRow label="Show FPS Counter" description="Display real‑time frames‑per‑second in the UI.">
+                        <ToggleButton enabled={ui.showFPS} onClick={() => ui.setShowFPS(!ui.showFPS)} />
                     </SettingRow>
                     <SettingRow label="Player Health on Minimap" description="Show player's HP numbers on the minimap orb.">
                         <ToggleButton enabled={ui.showMinimapHealth} onClick={() => ui.setShowMinimapHealth(!ui.showMinimapHealth)} />

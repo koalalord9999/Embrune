@@ -219,6 +219,7 @@ const useUIStateInternal = () => {
     const [showCombatPlayerHealth, setShowCombatPlayerHealth] = createPersistentState<boolean>('settings_showCombatPlayerHealth', false);
     const [showCombatEnemyHealth, setShowCombatEnemyHealth] = createPersistentState<boolean>('settings_showCombatEnemyHealth', false);
     const [showHitsplats, setShowHitsplats] = createPersistentState<boolean>('settings_showHitsplats', true);
+const [showFPS, setShowFPS] = createPersistentState<boolean>('settings_showFPS', false);
     const [isOneClickMode, setIsOneClickMode] = createPersistentState<boolean>('settings_isOneClickMode', false);
     const [masterVolume, setMasterVolume] = createPersistentState<number>('settings_masterVolume', 1);
     const [musicVolume, setMusicVolume] = createPersistentState<number>('settings_musicVolume', 1);
@@ -393,6 +394,7 @@ const useUIStateInternal = () => {
         showCombatPlayerHealth, setShowCombatPlayerHealth,
         showCombatEnemyHealth, setShowCombatEnemyHealth,
         showHitsplats, setShowHitsplats,
+        showFPS, setShowFPS,
         isOneClickMode, setIsOneClickMode,
         masterVolume, setMasterVolume,
         musicVolume, setMusicVolume,

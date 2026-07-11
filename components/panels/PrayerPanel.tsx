@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { PlayerSkill, SkillName, Prayer, PlayerQuestState, PrayerType } from '../../types';
-import {  PRAYERS, QUESTS, getPrayerIconColor, getPrayerShadowColor, getIconUrl  } from '../../constants';
+import { PRAYERS, QUESTS, getPrayerIconColor, getPrayerShadowColor, getIconUrl } from '../../constants';
 import { TooltipState } from '../../hooks/useUIState';
 
 interface PrayerPanelProps {
@@ -30,12 +30,22 @@ const PrayerDisplay: React.FC<{
 
     const hasLevel = prayerLevel >= prayer.level;
     const canActivate = hasLevel && !isLockedByQuest;
-    const iconColor = getPrayerIconColor(prayer);
-    const shadowColor = getPrayerShadowColor(prayer);
+    const iconColor = useMemo(() => getPrayerIconColor(prayer), [prayer]);
+    const shadowColor = useMemo(() => getPrayerShadowColor(prayer), [prayer]);
 
-    const handleMouseEnter = (e: React.MouseEvent) => {
+    // Border color on the button itself - no filter interaction with the icon
+    const borderColor = useMemo(() => canActivate ? shadowColor : 'transparent', [canActivate, shadowColor]);
+
+    // Only used for the disabled/locked state - no longer affects the border
+    const iconFilter = useMemo(() => {
+        if (!canActivate) return 'grayscale(1) brightness(0.2)';
+        return 'none';
+    }, [canActivate]);
+
+    // Pre-computed so handleMouseEnter does zero JSX allocation work at event time
+    const tooltipContent = useMemo(() => {
         const levelColor = hasLevel ? 'text-green-400' : 'text-red-400';
-        const tooltipContent = (
+        return (
             <div className="text-left w-64 font-pixel-rpg">
                 <p className="font-bold text-yellow-300 text-xl">{prayer.name}</p>
                 <p className={`text-lg italic mb-1 ${levelColor}`}>Lvl {prayer.level} Prayer</p>
@@ -44,19 +54,26 @@ const PrayerDisplay: React.FC<{
                 {isLockedByQuest && <p className="text-lg text-red-400 mt-1">Unlocked: {QUESTS[prayer.questId!].name}</p>}
             </div>
         );
+    }, [hasLevel, isLockedByQuest, prayer]);
 
-        setTooltip({
-            content: tooltipContent,
-            position: { x: e.clientX, y: e.clientY }
-        });
-    };
+    const handleMouseEnter = useCallback((e: React.MouseEvent) => {
+        setTooltip({ content: tooltipContent, position: { x: e.clientX, y: e.clientY } });
+    }, [tooltipContent, setTooltip]);
+
+    const handleClick = useCallback(() => {
+        if (canActivate) onTogglePrayer(prayer.id);
+        setTooltip(null);
+    }, [canActivate, onTogglePrayer, prayer.id, setTooltip]);
+
+    const handleMouseLeave = useCallback(() => setTooltip(null), [setTooltip]);
 
     return (
         <button
-            onClick={() => { if (canActivate) onTogglePrayer(prayer.id); setTooltip(null); }}
+            onClick={handleClick}
             onMouseEnter={handleMouseEnter}
-            onMouseLeave={() => setTooltip(null)}
-            className={`w-full aspect-square rounded-md transition-colors flex items-center justify-center text-center hover:bg-gray-700/20 relative isolate border-2 border-transparent`}
+            onMouseLeave={handleMouseLeave}
+            className={`w-full aspect-square rounded-md transition-colors flex items-center justify-center text-center hover:bg-gray-700/20 relative isolate border-2`}
+            style={{ borderColor }}
         >
             {isActive && (
                 <span
@@ -77,14 +94,10 @@ const PrayerDisplay: React.FC<{
             )}
             <div
                 className="w-full h-full flex items-center justify-center"
-                style={{
-                    filter: !canActivate
-                        ? 'grayscale(1) brightness(0.2)'
-                        : `drop-shadow(1px 1px 0px black) drop-shadow(-1px -1px 0px black) drop-shadow(1px -1px 0px black) drop-shadow(-1px 1px 0px black) drop-shadow(0 0 2px ${shadowColor}) drop-shadow(0 0 2px ${shadowColor})`,
-                }}
+                style={{ filter: iconFilter, willChange: 'filter', transform: 'translateZ(0)' }}
             >
                 <div
-                    className="w-full h-full p-2 transition-all"
+                    className="w-full h-full p-2"
                     style={{
                         backgroundColor: iconColor,
                         maskImage: `url(${getIconUrl(prayer.iconUrl)})`,
@@ -103,6 +116,7 @@ const PrayerDisplay: React.FC<{
 
 };
 
+const MemoizedPrayerDisplay = React.memo(PrayerDisplay);
 
 const PrayerPanel: React.FC<PrayerPanelProps> = ({ skills, activePrayers, onTogglePrayer, setTooltip, playerQuests }) => {
     const prayerLevel = skills.find(s => s.name === SkillName.Prayer)?.level ?? 1;
@@ -116,7 +130,7 @@ const PrayerPanel: React.FC<PrayerPanelProps> = ({ skills, activePrayers, onTogg
             <div className="flex-grow overflow-y-auto pr-1">
                 <div className="grid grid-cols-5 gap-1">
                     {sortedPrayers.map(prayer => (
-                        <PrayerDisplay
+                        <MemoizedPrayerDisplay
                             key={prayer.id}
                             prayer={prayer}
                             prayerLevel={prayerLevel}
@@ -132,4 +146,4 @@ const PrayerPanel: React.FC<PrayerPanelProps> = ({ skills, activePrayers, onTogg
     );
 };
 
-export default PrayerPanel;
+export default React.memo(PrayerPanel);

@@ -1,10 +1,11 @@
 import React, { useMemo, useState, useRef, useEffect, useCallback } from 'react';
-import { POI, Region, WorldState } from '../../types';
+import { POI, Region, WorldState, PlayerType } from '../../types';
 import { TooltipState } from '../../hooks/useUIState';
-import {  REGIONS, MAP_FEATURES, getIconUrl  } from '../../constants';
+import { REGIONS, MAP_FEATURES, getIconUrl } from '../../constants';
 import { POIS } from '../../data/pois';
-import {  MAP_DIMENSIONS, CITY_MAP_DIMENSIONS, MAP_CONFIGS  } from '../../constants';
+import { MAP_DIMENSIONS, CITY_MAP_DIMENSIONS, MAP_CONFIGS } from '../../constants';
 import Button from '../common/Button';
+import { ContextMenuOption } from '../common/ContextMenu';
 
 interface ExpandedMapViewProps {
     currentPoiId: string;
@@ -18,6 +19,10 @@ interface ExpandedMapViewProps {
     activeMapRegionId: string;
     setActiveMapRegionId: (regionId: string) => void;
     deathMarker: WorldState['deathMarker'];
+    bookmarks: string[];
+    setBookmarks: React.Dispatch<React.SetStateAction<string[]>>;
+    playerType: PlayerType;
+    setContextMenu: (menu: any) => void;
 }
 
 const formatTime = (ms: number) => {
@@ -27,7 +32,23 @@ const formatTime = (ms: number) => {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
-const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlockedPois, onFastTravel, onNavigate, onClose, setTooltip, addLog, showAllPois, activeMapRegionId, setActiveMapRegionId, deathMarker }) => {
+const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({
+    currentPoiId,
+    unlockedPois,
+    onFastTravel,
+    onNavigate,
+    onClose,
+    setTooltip,
+    addLog,
+    showAllPois,
+    activeMapRegionId,
+    setActiveMapRegionId,
+    deathMarker,
+    bookmarks,
+    setBookmarks,
+    playerType,
+    setContextMenu,
+}) => {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const [view, setView] = useState({ x: 0, y: 0, zoom: 1 });
     const [isDragging, setIsDragging] = useState(false);
@@ -37,30 +58,35 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
 
     const isWorldView = activeMapRegionId === 'world';
     const allPois = useMemo(() => POIS, []);
-    
+
     const currentMapId = useMemo(() => {
         const region = REGIONS[allPois[currentPoiId]?.regionId];
         return region?.worldMapId || 'mainland';
     }, [currentPoiId, allPois]);
 
-    const activeMapConfig = MAP_CONFIGS[currentMapId] || MAP_CONFIGS.mainland;
+    // Continent / island map selection
+    const [displayedMapId, setDisplayedMapId] = useState(currentMapId);
+
+    useEffect(() => {
+        setDisplayedMapId(currentMapId);
+    }, [currentMapId]);
+
+    const activeMapConfig = MAP_CONFIGS[displayedMapId] || MAP_CONFIGS.mainland;
 
     const mapDimensions = isWorldView ? activeMapConfig.dimensions : CITY_MAP_DIMENSIONS;
 
-
-    
     const centerOnCurrentLocation = useCallback(() => {
         const poi = allPois[currentPoiId];
         const container = mapContainerRef.current;
         if (!poi || !container) return;
-    
+
         let targetX, targetY, zoomLevel;
-        
+
         if (isWorldView) {
             const region = REGIONS[poi.regionId];
             const isDungeon = region?.type === 'dungeon' || region?.type === 'underground';
             const isCity = region?.type === 'city';
-            
+
             let effectivePoi;
             if (isDungeon && region.entryPoiId) {
                 const entryPoi = allPois[region.entryPoiId];
@@ -84,7 +110,7 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
             }
             zoomLevel = 1.5;
         }
-    
+
         setView({
             zoom: zoomLevel,
             x: -targetX * zoomLevel + container.offsetWidth / 2,
@@ -96,9 +122,9 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
         const poi = allPois[currentPoiId];
         const container = mapContainerRef.current;
         if (!poi || !container) return;
-    
+
         let targetX, targetY;
-        
+
         if (isWorldView) {
             const region = REGIONS[poi.regionId];
             const isDungeon = region?.type === 'dungeon' || region?.type === 'underground';
@@ -125,14 +151,14 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
                 targetY = cityEntryPoi?.cityMapY ?? CITY_MAP_DIMENSIONS.height / 2;
             }
         }
-    
+
         setView(v => ({
             ...v,
             x: -targetX * v.zoom + container.offsetWidth / 2,
             y: -targetY * v.zoom + container.offsetHeight / 2,
         }));
     }, [allPois, currentPoiId, isWorldView, activeMapRegionId]);
-    
+
     useEffect(() => {
         const hasMapChanged = prevMapRegionId.current !== activeMapRegionId;
 
@@ -184,19 +210,16 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
         const newY = mouseY - mapY * clampedZoom;
         setView({ x: newX, y: newY, zoom: clampedZoom });
     };
-    
+
     const onMapMouseDown = (e: React.MouseEvent) => {
         setIsDragging(true);
         dragStart.current = { x: e.clientX - view.x, y: e.clientY - view.y };
         if (e.currentTarget instanceof HTMLElement) e.currentTarget.style.cursor = 'grabbing';
     };
-    
-    // --- TOUCH HANDLING ---
+
     const onTouchStart = (e: React.TouchEvent) => {
-        // Prevent default to stop page scrolling while dragging map
-        // e.preventDefault(); // Removed to allow pinch zoom if implemented later, checking target
         if (e.target instanceof HTMLElement && e.target.closest('[data-draggable="true"]')) return;
-        
+
         setIsDragging(true);
         const touch = e.touches[0];
         dragStart.current = { x: touch.clientX - view.x, y: touch.clientY - view.y };
@@ -204,30 +227,30 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
 
     const onTouchMove = (e: React.TouchEvent) => {
         if (isDragging) {
-            e.preventDefault(); // Stop scrolling
+            e.preventDefault();
             const touch = e.touches[0];
             setView(v => ({ ...v, x: touch.clientX - dragStart.current.x, y: touch.clientY - dragStart.current.y }));
         }
     };
 
     const onMouseUpOrLeave = (e: React.MouseEvent | React.TouchEvent) => {
-        if(isDragging) {
+        if (isDragging) {
             setIsDragging(false);
             if (e.currentTarget instanceof HTMLElement) {
                 e.currentTarget.style.cursor = 'grab';
             }
         }
     };
-    
+
     const zoomIn = () => setView(v => ({ ...v, zoom: Math.min(16, v.zoom * 1.5) }));
     const zoomOut = () => setView(v => ({ ...v, zoom: Math.max(0.25, v.zoom / 1.5) }));
-    
+
     const { poisToDisplay, regionsToDisplay, dungeonsToDisplay, phantomExits, mapTitle } = useMemo(() => {
         if (isWorldView) {
             return {
                 poisToDisplay: Object.values(allPois).filter(p => {
                     const region = REGIONS[p.regionId];
-                    if (!region || (region.worldMapId || 'mainland') !== currentMapId) return false;
+                    if (!region || (region.worldMapId || 'mainland') !== displayedMapId) return false;
 
                     if (p.type === 'internal') {
                         return p.eX !== undefined && p.eY !== undefined;
@@ -237,8 +260,8 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
                     }
                     return true;
                 }),
-                regionsToDisplay: Object.values(REGIONS).filter(r => r.type === 'city' && (r.worldMapId || 'mainland') === currentMapId),
-                dungeonsToDisplay: Object.values(REGIONS).filter(r => (r.type === 'dungeon' || r.type === 'underground') && (r.worldMapId || 'mainland') === currentMapId),
+                regionsToDisplay: Object.values(REGIONS).filter(r => r.type === 'city' && (r.worldMapId || 'mainland') === displayedMapId),
+                dungeonsToDisplay: Object.values(REGIONS).filter(r => (r.type === 'dungeon' || r.type === 'underground') && (r.worldMapId || 'mainland') === displayedMapId),
                 phantomExits: [],
                 mapTitle: activeMapConfig.title
             };
@@ -262,7 +285,7 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
             });
         });
         return { poisToDisplay: cityPois, regionsToDisplay: [], dungeonsToDisplay: [], phantomExits: exits, mapTitle: `${REGIONS[activeMapRegionId]?.name || 'Region'} Map` };
-    }, [isWorldView, activeMapRegionId, allPois]);
+    }, [isWorldView, activeMapRegionId, allPois, displayedMapId, activeMapConfig]);
 
     const handleMouseEnter = (e: React.MouseEvent, item: POI | Region | { name: string, description?: string }) => {
         const tooltipContent = (
@@ -273,278 +296,420 @@ const ExpandedMapView: React.FC<ExpandedMapViewProps> = ({ currentPoiId, unlocke
         );
         setTooltip({ content: tooltipContent, position: { x: e.clientX, y: e.clientY } });
     };
-    
+
     const currentPlayerPoi = allPois[currentPoiId];
-    
+
     const getPoiWorldCoords = useCallback((poi: POI): { x: number; y: number } | null => {
         const region = REGIONS[poi.regionId];
-        if (!region || (region.worldMapId || 'mainland') !== currentMapId) {
+        if (!region || (region.worldMapId || 'mainland') !== displayedMapId) {
             return null;
         }
 
-        // Favor explicit external coordinates if provided (Silverhaven style)
         if (poi.eX !== undefined && poi.eY !== undefined) {
             return { x: poi.eX, y: poi.eY };
         }
 
         if (poi.type === 'internal') {
-            return null; // Internal POIs without eX/eY are hidden on world map
+            return null;
         }
-        
+
         if (region && (region.type === 'city' || region.type === 'dungeon' || region.type === 'underground')) {
             if (poi.id === region.entryPoiId || poi.id.includes('_gate')) {
-                // Return region center to make roads connect directly to the city icon
                 return { x: region.x, y: region.y };
             }
-            return null; // Hide all other internal contents of cities/underground
+            return null;
         }
-        
-        return { x: poi.x, y: poi.y }; // Show all other POIs as they are
-    }, [allPois, currentMapId]);
+
+        return { x: poi.x, y: poi.y };
+    }, [allPois, displayedMapId]);
+
+    // Locate function for bookmarked POIs
+    const handleLocatePoi = useCallback((poi: POI) => {
+        const region = REGIONS[poi.regionId];
+        if (!region) return;
+
+        const isDungeon = region.type === 'dungeon' || region.type === 'underground';
+        const targetRegionId = isDungeon ? region.id : 'world';
+
+        // Switch to the target view/region
+        if (activeMapRegionId !== targetRegionId) {
+            setActiveMapRegionId(targetRegionId);
+        }
+
+        // Switch to correct continent / world map if applicable
+        if (targetRegionId === 'world') {
+            const destMapId = region.worldMapId || 'mainland';
+            setDisplayedMapId(destMapId);
+        }
+
+        // Center on the POI coordinates
+        const container = mapContainerRef.current;
+        if (!container) return;
+
+        let targetX = poi.x;
+        let targetY = poi.y;
+        let zoomLevel = 2.5; // Slightly zoom in to focus on it
+
+        if (targetRegionId === 'world') {
+            if (region.type === 'city') {
+                targetX = region.x;
+                targetY = region.y;
+            } else if (poi.eX !== undefined && poi.eY !== undefined) {
+                targetX = poi.eX;
+                targetY = poi.eY;
+            }
+        }
+
+        setView({
+            zoom: zoomLevel,
+            x: -targetX * zoomLevel + container.offsetWidth / 2,
+            y: -targetY * zoomLevel + container.offsetHeight / 2,
+        });
+    }, [activeMapRegionId, setActiveMapRegionId, allPois]);
+
+    // Handle context menu triggers on POI nodes
+    const handlePoiContextMenu = useCallback((e: React.MouseEvent, poi: POI) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isBookmarked = bookmarks.includes(poi.id);
+        const options: ContextMenuOption[] = [];
+
+        if (isBookmarked) {
+            options.push({
+                label: 'Remove Bookmark',
+                onClick: () => {
+                    setBookmarks(prev => prev.filter(id => id !== poi.id));
+                    addLog(`Removed bookmark for ${poi.name}.`);
+                }
+            });
+        } else {
+            options.push({
+                label: 'Bookmark',
+                onClick: () => {
+                    setBookmarks(prev => [...prev, poi.id]);
+                    addLog(`Bookmarked ${poi.name}.`);
+                }
+            });
+        }
+
+        if (playerType === PlayerType.Cheats) {
+            options.push({
+                label: 'Teleport to POI',
+                onClick: () => {
+                    onFastTravel(poi.id);
+                }
+            });
+        }
+
+        setContextMenu({
+            options,
+            triggerEvent: e,
+            isTouchInteraction: false,
+            title: poi.name
+        });
+    }, [bookmarks, setBookmarks, playerType, onFastTravel, setContextMenu, addLog]);
+
+    const hasBookmarks = bookmarks.length > 0;
 
     return (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={onClose}>
-            <div 
+            <div
                 className="bg-gray-800 border-4 border-gray-600 rounded-lg shadow-xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center p-4 bg-gray-900/50 border-b-2 border-gray-600">
                     <h1 className="text-3xl font-bold text-yellow-400">{mapTitle}</h1>
-                    <div>
-                        {!isWorldView && <Button onClick={() => setActiveMapRegionId('world')} size="sm" className="mr-4">World Map</Button>}
+                    <div className="flex items-center gap-4">
+                        {!isWorldView && <Button onClick={() => setActiveMapRegionId('world')} size="sm">World Map</Button>}
                         <Button onClick={onClose} size="sm">Close</Button>
                     </div>
                 </div>
-                
-                <div 
-                    ref={mapContainerRef}
-                    className="flex-grow bg-slate-900 relative overflow-hidden cursor-grab"
-                    onWheel={onWheel}
-                    onMouseDown={onMapMouseDown}
-                    onMouseUp={onMouseUpOrLeave}
-                    onMouseLeave={onMouseUpOrLeave}
-                    // Mobile drag support
-                    onTouchStart={onTouchStart}
-                    onTouchMove={onTouchMove}
-                    onTouchEnd={onMouseUpOrLeave}
-                >
-                    <div className="absolute inset-0 bg-black/50" />
 
-                    <div className="relative" style={{
-                        width: `${mapDimensions.width}px`,
-                        height: `${mapDimensions.height}px`,
-                        transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
-                        transformOrigin: '0 0',
-                        willChange: 'transform',
-                    }}>
-                        <svg className="absolute top-0 left-0 pointer-events-none" width={mapDimensions.width} height={mapDimensions.height} style={{ overflow: 'visible' }}>
-                            {isWorldView && MAP_FEATURES.map(feature => (
-                                <path
-                                    key={feature.id}
-                                    d={feature.path}
-                                    stroke={feature.strokeColor}
-                                    strokeWidth={feature.strokeWidth / view.zoom}
-                                    fill="none"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                />
-                            ))}
-                            {Object.values(allPois).map(startPoi => {
-                                const connections = startPoi.connections;
-                                return connections?.map(connId => {
-                                    const endPoi = allPois[connId];
-                                    if (!endPoi || startPoi.id > endPoi.id) return null;
-                        
-                                    let startCoords, endCoords;
-                        
-                                    if (isWorldView) {
-                                        startCoords = getPoiWorldCoords(startPoi);
-                                        endCoords = getPoiWorldCoords(endPoi);
-                                    } else { // City/Dungeon View
-                                        if (startPoi.regionId === activeMapRegionId) {
-                                            startCoords = startPoi;
+                <div className="flex flex-row flex-grow overflow-hidden">
+                    <div
+                        ref={mapContainerRef}
+                        className="flex-grow bg-slate-900 relative overflow-hidden cursor-grab"
+                        onWheel={onWheel}
+                        onMouseDown={onMapMouseDown}
+                        onMouseUp={onMouseUpOrLeave}
+                        onMouseLeave={onMouseUpOrLeave}
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onMouseUpOrLeave}
+                    >
+                        <div className="absolute inset-0 bg-black/50" />
+
+                        <div className="relative" style={{
+                            width: `${mapDimensions.width}px`,
+                            height: `${mapDimensions.height}px`,
+                            transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})`,
+                            transformOrigin: '0 0',
+                            willChange: 'transform',
+                        }}>
+                            <svg className="absolute top-0 left-0 pointer-events-none" width={mapDimensions.width} height={mapDimensions.height} style={{ overflow: 'visible' }}>
+                                {isWorldView && MAP_FEATURES.map(feature => (
+                                    <path
+                                        key={feature.id}
+                                        d={feature.path}
+                                        stroke={feature.strokeColor}
+                                        strokeWidth={feature.strokeWidth / view.zoom}
+                                        fill="none"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                ))}
+                                {Object.values(allPois).map(startPoi => {
+                                    const connections = startPoi.connections;
+                                    return connections?.map(connId => {
+                                        const endPoi = allPois[connId];
+                                        if (!endPoi || startPoi.id > endPoi.id) return null;
+
+                                        let startCoords, endCoords;
+
+                                        if (isWorldView) {
+                                            startCoords = getPoiWorldCoords(startPoi);
+                                            endCoords = getPoiWorldCoords(endPoi);
                                         } else {
-                                            startCoords = null;
+                                            if (startPoi.regionId === activeMapRegionId) {
+                                                startCoords = startPoi;
+                                            } else {
+                                                startCoords = null;
+                                            }
+
+                                            if (endPoi.regionId === activeMapRegionId) {
+                                                endCoords = endPoi;
+                                            } else {
+                                                const phantom = phantomExits.find(p => p.navigationId === endPoi.id);
+                                                endCoords = phantom ? { x: phantom.x, y: phantom.y } : null;
+                                            }
                                         }
-                        
-                                        if (endPoi.regionId === activeMapRegionId) {
-                                            endCoords = endPoi;
-                                        } else {
-                                            const phantom = phantomExits.find(p => p.navigationId === endPoi.id);
-                                            endCoords = phantom ? { x: phantom.x, y: phantom.y } : null;
+
+                                        if (!startCoords || !endCoords || (startCoords.x === endCoords.x && startCoords.y === endCoords.y)) {
+                                            return null;
                                         }
-                                    }
-                        
-                                    if (!startCoords || !endCoords || (startCoords.x === endCoords.x && startCoords.y === endCoords.y)) {
-                                        return null;
-                                    }
-                        
-                                    const isUnlocked = showAllPois || (unlockedPois.includes(startPoi.id) && unlockedPois.includes(endPoi.id));
-                                    
-                                    return (
-                                        <line 
-                                            key={`${startPoi.id}-${endPoi.id}`}
-                                            x1={startCoords.x} y1={startCoords.y}
-                                            x2={endCoords.x} y2={endCoords.y}
-                                            stroke={isUnlocked ? 'rgba(200, 200, 200, 0.4)' : 'rgba(100, 100, 100, 0.4)'} 
-                                            strokeWidth={2 / view.zoom}
-                                            strokeDasharray={isUnlocked ? 'none' : `${6 / view.zoom} ${4 / view.zoom}`}
-                                        />
-                                    );
-                                });
+
+                                        const isUnlocked = showAllPois || (unlockedPois.includes(startPoi.id) && unlockedPois.includes(endPoi.id));
+
+                                        return (
+                                            <line
+                                                key={`${startPoi.id}-${endPoi.id}`}
+                                                x1={startCoords.x} y1={startCoords.y}
+                                                x2={endCoords.x} y2={endCoords.y}
+                                                stroke={isUnlocked ? 'rgba(200, 200, 200, 0.4)' : 'rgba(100, 100, 100, 0.4)'}
+                                                strokeWidth={2 / view.zoom}
+                                                strokeDasharray={isUnlocked ? 'none' : `${6 / view.zoom} ${4 / view.zoom}`}
+                                            />
+                                        );
+                                    });
+                                })}
+                            </svg>
+
+                            {regionsToDisplay.map(region => {
+                                const isCurrent = allPois[currentPoiId]?.regionId === region.id;
+                                const isUnlocked = showAllPois || unlockedPois.includes(region.entryPoiId);
+                                const coords = region;
+                                if (!coords) return null;
+                                const canClick = isUnlocked;
+                                const cursorClass = canClick ? 'cursor-pointer' : 'cursor-default';
+
+                                return (
+                                    <div
+                                        key={region.id}
+                                        className={`absolute transform -translate-x-1/2 -translate-y-1/2 group ${cursorClass}`}
+                                        style={{ top: `${coords.y}px`, left: `${coords.x}px`, zIndex: 10 }}
+                                        onClick={(e) => {
+                                            setTooltip(null);
+                                            if (canClick) setActiveMapRegionId(region.id);
+                                        }}
+                                        onMouseEnter={(e) => handleMouseEnter(e, region)}
+                                        onMouseLeave={() => setTooltip(null)}
+                                    >
+                                        <img src={getIconUrl("capitol")} alt={region.name} className={`filter invert transition-opacity ${isUnlocked ? 'opacity-100' : 'opacity-30'}`} style={{ width: `${40 / view.zoom}px`, height: `${40 / view.zoom}px` }} />
+                                        {isCurrent && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-full border-2 border-yellow-400 animate-pulse" style={{ width: `${50 / view.zoom}px`, height: `${50 / view.zoom}px` }}></div>}
+                                    </div>
+                                );
                             })}
-                        </svg>
 
-                        {regionsToDisplay.map(region => {
-                            const isCurrent = allPois[currentPoiId]?.regionId === region.id;
-                            const isUnlocked = showAllPois || unlockedPois.includes(region.entryPoiId);
-                            const coords = region;
-                            if (!coords) return null;
-                            const canClick = isUnlocked;
-                            const cursorClass = canClick ? 'cursor-pointer' : 'cursor-default';
+                            {dungeonsToDisplay.map(dungeon => {
+                                const entryPoi = allPois[dungeon.entryPoiId];
+                                if (!entryPoi) return null;
+                                const isUnlocked = showAllPois || unlockedPois.includes(entryPoi.id);
+                                const coords = (dungeon.x !== 0 || dungeon.y !== 0) ? dungeon : entryPoi;
+                                if (!coords) return null;
+                                const canClick = isUnlocked;
+                                const cursorClass = canClick ? 'cursor-pointer' : 'cursor-default';
 
-                            return (
-                                 <div
-                                    key={region.id}
-                                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 group ${cursorClass}`}
-                                    style={{ top: `${coords.y}px`, left: `${coords.x}px`, zIndex: 10 }}
-                                    onMouseDown={(e) => {
-                                        // nodeDragStart.current = { x: e.clientX, y: e.clientY };
-                                    }}
-                                    onClick={(e) => {
-                                        setTooltip(null);
-                                        if (canClick) setActiveMapRegionId(region.id);
-                                    }} 
-                                    onMouseEnter={(e) => handleMouseEnter(e, region)}
-                                    onMouseLeave={() => setTooltip(null)}
-                                >
-                                    <img src={getIconUrl("capitol")} alt={region.name} className={`filter invert transition-opacity ${isUnlocked ? 'opacity-100' : 'opacity-30'}`} style={{width: `${40 / view.zoom}px`, height: `${40 / view.zoom}px`}} />
-                                    {isCurrent && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-full border-2 border-yellow-400 animate-pulse" style={{width: `${50/view.zoom}px`, height: `${50/view.zoom}px`}}></div>}
+                                return (
+                                    <div
+                                        key={dungeon.id}
+                                        className={`absolute transform -translate-x-1/2 -translate-y-1/2 group ${cursorClass}`}
+                                        style={{ top: `${coords.y}px`, left: `${coords.x}px`, zIndex: 10 }}
+                                        onMouseEnter={(e) => handleMouseEnter(e, { ...entryPoi, name: dungeon.name })}
+                                        onMouseLeave={() => setTooltip(null)}
+                                    >
+                                        <img src={getIconUrl("cave-entrance")} alt={dungeon.name} className={`filter invert transition-opacity ${isUnlocked ? 'opacity-100' : 'opacity-30'}`} style={{ width: `${40 / view.zoom}px`, height: `${40 / view.zoom}px` }} />
+                                    </div>
+                                );
+                            })}
+
+                            {poisToDisplay.map(poi => {
+                                const isCurrent = poi.id === currentPoiId;
+                                const isUnlocked = showAllPois || unlockedPois.includes(poi.id);
+                                const dotColorClass = isCurrent ? "bg-yellow-400" : (isUnlocked ? "bg-green-400" : "bg-gray-600");
+
+                                const coords = isWorldView ? getPoiWorldCoords(poi) : { x: poi.x, y: poi.y };
+
+                                if (!coords) return null;
+                                const canClick = isUnlocked;
+
+                                const isBookmarked = bookmarks.includes(poi.id);
+                                const isUnderground = REGIONS[poi.regionId]?.type === 'underground' || REGIONS[poi.regionId]?.type === 'dungeon';
+                                const showBookmarkStyle = isBookmarked && (!isUnderground || activeMapRegionId === poi.regionId);
+                                const size = showBookmarkStyle ? 16 : 12;
+
+                                return (
+                                    <div key={poi.id} className="absolute transform -translate-x-1/2 -translate-y-1/2" style={{ top: `${coords.y}px`, left: `${coords.x}px` }} >
+                                        <div
+                                            className={`relative rounded-full hover:scale-150 ${canClick ? 'cursor-pointer' : ''} transition-all duration-200`}
+                                            style={{ width: `${size / view.zoom}px`, height: `${size / view.zoom}px` }}
+                                            onClick={() => { if (canClick) { onFastTravel(poi.id); setTooltip(null); } }}
+                                            onContextMenu={(e) => handlePoiContextMenu(e, poi)}
+                                            onMouseEnter={(e) => handleMouseEnter(e, poi)}
+                                            onMouseLeave={() => setTooltip(null)}
+                                        >
+                                            {showBookmarkStyle ? (
+                                                <div className="w-full h-full rounded-full bg-purple-600 border border-purple-800 flex items-center justify-center text-yellow-400 font-bold" style={{ fontSize: `${10 / view.zoom}px`, textShadow: '0 0 1px black' }}>
+                                                    ★
+                                                </div>
+                                            ) : (
+                                                <div className={`w-full h-full rounded-full ${dotColorClass}`}></div>
+                                            )}
+                                            {isCurrent && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-full border-2 border-yellow-400 animate-pulse" style={{ width: `${(size + 8) / view.zoom}px`, height: `${(size + 8) / view.zoom}px` }}></div>}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                            {phantomExits.map(exit => (
+                                <div key={`exit-${exit.navigationId}`} className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group" style={{ top: `${exit.y}px`, left: `${exit.x}px` }} onClick={() => { onNavigate(exit.navigationId); setTooltip(null); }} onMouseEnter={(e) => handleMouseEnter(e, { name: exit.gateName, description: `Exit to world map. Leads towards ${exit.displayName}.` })} onMouseLeave={() => setTooltip(null)} >
+                                    <img src={getIconUrl("exit-door")} alt={`To ${exit.displayName}`} className="filter invert opacity-80 group-hover:opacity-100 transition-opacity" style={{ width: `${32 / view.zoom}px`, height: `${32 / view.zoom}px` }} />
                                 </div>
-                            )
-                        })}
-                        
-                        {dungeonsToDisplay.map(dungeon => {
-                            const entryPoi = allPois[dungeon.entryPoiId];
-                            if (!entryPoi) return null;
-                            const isUnlocked = showAllPois || unlockedPois.includes(entryPoi.id);
-                            const coords = (dungeon.x !== 0 || dungeon.y !== 0) ? dungeon : entryPoi;
-                            if (!coords) return null;
-                            const canClick = isUnlocked;
-                            const cursorClass = canClick ? 'cursor-pointer' : 'cursor-default';
-                            
-                            return (
-                                 <div
-                                    key={dungeon.id}
-                                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 group ${cursorClass}`}
-                                    style={{ top: `${coords.y}px`, left: `${coords.x}px`, zIndex: 10 }}
-                                    onMouseDown={(e) => {
-                                        // nodeDragStart.current = { x: e.clientX, y: e.clientY };
+                            ))}
+                            {currentPlayerPoi && (
+                                <div
+                                    key="current-player-location"
+                                    className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                                    style={{
+                                        top: `${(isWorldView ? (() => {
+                                            const region = REGIONS[currentPlayerPoi.regionId];
+                                            if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
+                                                const entryPoi = allPois[region.entryPoiId];
+                                                return entryPoi?.eY ?? entryPoi?.y ?? 0;
+                                            }
+                                            return (currentPlayerPoi.eY ?? currentPlayerPoi.y);
+                                        })() : (currentPlayerPoi.y)) ?? 0}px`,
+                                        left: `${(isWorldView ? (() => {
+                                            const region = REGIONS[currentPlayerPoi.regionId];
+                                            if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
+                                                const entryPoi = allPois[region.entryPoiId];
+                                                return entryPoi?.eX ?? entryPoi?.x ?? 0;
+                                            }
+                                            return (currentPlayerPoi.eX ?? currentPlayerPoi.x);
+                                        })() : (currentPlayerPoi.x)) ?? 0}px`,
+                                        zIndex: 20
                                     }}
-                                    onClick={(e) => {
-                                        setTooltip(null);
-                                    }}
-                                    onMouseEnter={(e) => handleMouseEnter(e, { ...entryPoi, name: dungeon.name })}
-                                    onMouseLeave={() => setTooltip(null)}
                                 >
-                                    <img src={getIconUrl("cave-entrance")} alt={dungeon.name} className={`filter invert transition-opacity ${isUnlocked ? 'opacity-100' : 'opacity-30'}`} style={{width: `${40 / view.zoom}px`, height: `${40 / view.zoom}px`}} />
-                                </div>
-                            )
-                        })}
-
-                        {poisToDisplay.map(poi => {
-                            const isCurrent = poi.id === currentPoiId;
-                            const isUnlocked = showAllPois || unlockedPois.includes(poi.id);
-                            const dotColorClass = isCurrent ? "bg-yellow-400" : (isUnlocked ? "bg-green-400" : "bg-gray-600");
-                            
-                            const coords = isWorldView ? getPoiWorldCoords(poi) : { x: poi.x, y: poi.y };
-
-                            if (!coords) return null;
-                            const canClick = isUnlocked;
-                            return (
-                                <div key={poi.id} className="absolute transform -translate-x-1/2 -translate-y-1/2" style={{ top: `${coords.y}px`, left: `${coords.x}px` }} >
-                                    <div className={`relative rounded-full hover:scale-150 ${canClick ? 'cursor-pointer' : ''} transition-transform duration-200`} style={{ width: `${12 / view.zoom}px`, height: `${12 / view.zoom}px` }} onClick={() => {if (canClick) { onFastTravel(poi.id); setTooltip(null); }}} onMouseEnter={(e) => handleMouseEnter(e, poi)} onMouseLeave={() => setTooltip(null)} >
-                                        <div className={`w-full h-full rounded-full ${dotColorClass}`}></div>
-                                        {isCurrent && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-full border-2 border-yellow-400 animate-pulse" style={{width: `${20/view.zoom}px`, height: `${20/view.zoom}px`}}></div>}
+                                    <div className="relative rounded-full" style={{ width: `${12 / view.zoom}px`, height: `${12 / view.zoom}px` }}>
+                                        <div className="w-full h-full rounded-full bg-yellow-400"></div>
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-full border-2 border-yellow-400 animate-pulse" style={{ width: `${20 / view.zoom}px`, height: `${20 / view.zoom}px` }}></div>
                                     </div>
                                 </div>
-                            );
-                        })}
-                        
-                         {phantomExits.map(exit => (
-                            <div key={`exit-${exit.navigationId}`} className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group" style={{ top: `${exit.y}px`, left: `${exit.x}px` }} onClick={() => { onNavigate(exit.navigationId); setTooltip(null); }} onMouseEnter={(e) => handleMouseEnter(e, { name: exit.gateName, description: `Exit to world map. Leads towards ${exit.displayName}.` })} onMouseLeave={() => setTooltip(null)} >
-                                <img src={getIconUrl("exit-door")} alt={`To ${exit.displayName}`} className="filter invert opacity-80 group-hover:opacity-100 transition-opacity" style={{width: `${32 / view.zoom}px`, height: `${32 / view.zoom}px`}} />
-                            </div>
-                        ))}
-                        {currentPlayerPoi && (
-                             <div
-                                key="current-player-location"
-                                className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                                 style={{
-                                    top: `${(isWorldView ? (() => {
-                                        const region = REGIONS[currentPlayerPoi.regionId];
-                                        if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
-                                            const entryPoi = allPois[region.entryPoiId];
-                                            return entryPoi?.eY ?? entryPoi?.y ?? 0;
-                                        }
-                                        return (currentPlayerPoi.eY ?? currentPlayerPoi.y);
-                                    })() : (currentPlayerPoi.y)) ?? 0}px`,
-                                    left: `${(isWorldView ? (() => {
-                                        const region = REGIONS[currentPlayerPoi.regionId];
-                                        if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
-                                            const entryPoi = allPois[region.entryPoiId];
-                                            return entryPoi?.eX ?? entryPoi?.x ?? 0;
-                                        }
-                                        return (currentPlayerPoi.eX ?? currentPlayerPoi.x);
-                                    })() : (currentPlayerPoi.x)) ?? 0}px`,
-                                    zIndex: 20
-                                }}
-                            >
-                                <div className="relative rounded-full" style={{ width: `${12 / view.zoom}px`, height: `${12 / view.zoom}px` }}>
-                                    <div className="w-full h-full rounded-full bg-yellow-400"></div>
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full rounded-full border-2 border-yellow-400 animate-pulse" style={{width: `${20/view.zoom}px`, height: `${20/view.zoom}px`}}></div>
+                            )}
+
+                            {deathMarker && allPois[deathMarker.poiId] && (
+                                <div
+                                    key="death-marker"
+                                    className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
+                                    style={{
+                                        top: `${(isWorldView ? (() => {
+                                            const poi = allPois[deathMarker.poiId];
+                                            const region = REGIONS[poi?.regionId];
+                                            if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
+                                                const entryPoi = allPois[region.entryPoiId];
+                                                return entryPoi?.eY ?? entryPoi?.y ?? 0;
+                                            }
+                                            return (allPois[deathMarker.poiId].eY ?? allPois[deathMarker.poiId].y);
+                                        })() : (allPois[deathMarker.poiId].y)) ?? 0}px`,
+                                        left: `${(isWorldView ? (() => {
+                                            const poi = allPois[deathMarker.poiId];
+                                            const region = REGIONS[poi?.regionId];
+                                            if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
+                                                const entryPoi = allPois[region.entryPoiId];
+                                                return entryPoi?.eX ?? entryPoi?.x ?? 0;
+                                            }
+                                            return (allPois[deathMarker.poiId].eX ?? allPois[deathMarker.poiId].x);
+                                        })() : (allPois[deathMarker.poiId].x)) ?? 0}px`,
+                                        zIndex: 20
+                                    }}
+                                >
+                                    <img src={getIconUrl("tombstone")} alt="Death Location" className="filter invert opacity-90" style={{ width: `${32 / view.zoom}px`, height: `${32 / view.zoom}px` }} />
+                                    <span className="text-xs font-bold text-white bg-black/50 px-1 rounded whitespace-nowrap" style={{ transform: `scale(${1 / view.zoom}) translateY(-${4 / view.zoom}px)` }} >
+                                        {formatTime(deathMarker.timeRemaining)}
+                                    </span>
                                 </div>
-                            </div>
-                        )}
-                        
-                        {deathMarker && allPois[deathMarker.poiId] && (
-                            <div
-                                key="death-marker"
-                                className="absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none"
-                                 style={{
-                                    top: `${(isWorldView ? (() => {
-                                        const poi = allPois[deathMarker.poiId];
-                                        const region = REGIONS[poi?.regionId];
-                                        if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
-                                            const entryPoi = allPois[region.entryPoiId];
-                                            return entryPoi?.eY ?? entryPoi?.y ?? 0;
-                                        }
-                                        return (allPois[deathMarker.poiId].eY ?? allPois[deathMarker.poiId].y);
-                                    })() : (allPois[deathMarker.poiId].y)) ?? 0}px`,
-                                    left: `${(isWorldView ? (() => {
-                                        const poi = allPois[deathMarker.poiId];
-                                        const region = REGIONS[poi?.regionId];
-                                        if (region && (region.type === 'dungeon' || region.type === 'underground') && region.entryPoiId) {
-                                            const entryPoi = allPois[region.entryPoiId];
-                                            return entryPoi?.eX ?? entryPoi?.x ?? 0;
-                                        }
-                                        return (allPois[deathMarker.poiId].eX ?? allPois[deathMarker.poiId].x);
-                                    })() : (allPois[deathMarker.poiId].x)) ?? 0}px`,
-                                    zIndex: 20
-                                }}
-                            >
-                                <img src={getIconUrl("tombstone")} alt="Death Location" className="filter invert opacity-90" style={{ width: `${32 / view.zoom}px`, height: `${32 / view.zoom}px` }} />
-                                <span className="text-xs font-bold text-white bg-black/50 px-1 rounded whitespace-nowrap" style={{ transform: `scale(${1 / view.zoom}) translateY(-${4 / view.zoom}px)` }} >
-                                    {formatTime(deathMarker.timeRemaining)}
-                                </span>
-                            </div>
-                        )}
+                            )}
+                        </div>
+                        <div className="absolute bottom-2 left-2 flex flex-col gap-1 z-10">
+                            <Button onClick={zoomIn} size="sm" className="w-8 h-8 text-lg">+</Button>
+                            <Button onClick={zoomOut} size="sm" className="w-8 h-8 text-lg">-</Button>
+                            <Button onClick={centerOnCurrentLocation} size="sm" className="w-8 h-8 text-xs">Center</Button>
+                        </div>
                     </div>
-                    <div className="absolute bottom-2 right-2 flex flex-col gap-1 z-10">
-                        <Button onClick={zoomIn} size="sm" className="w-8 h-8 text-lg">+</Button>
-                        <Button onClick={zoomOut} size="sm" className="w-8 h-8 text-lg">-</Button>
-                        <Button onClick={centerOnCurrentLocation} size="sm" className="w-8 h-8 text-xs">Center</Button>
-                    </div>
+
+                    {hasBookmarks && (
+                        <div className="w-80 bg-gray-900 border-l-2 border-gray-600 p-4 flex flex-col overflow-y-auto font-pixel-rpg text-white select-none">
+                            <h2 className="text-xl font-bold text-yellow-400 mb-4 border-b border-gray-700 pb-2">Bookmarks</h2>
+                            <div className="flex flex-col gap-2">
+                                {bookmarks.map(poiId => {
+                                    const poi = allPois[poiId];
+                                    if (!poi) return null;
+                                    return (
+                                        <div key={poiId} className="bg-gray-800 border border-gray-700 rounded p-3 flex flex-col gap-2">
+                                            <div className="flex justify-between items-start gap-1">
+                                                <span className="font-bold text-yellow-300 text-sm break-all leading-tight">{poi.name}</span>
+                                                <button
+                                                    onClick={() => {
+                                                        setBookmarks(prev => prev.filter(id => id !== poiId));
+                                                        addLog(`Removed bookmark for ${poi.name}.`);
+                                                    }}
+                                                    className="text-red-400 hover:text-red-500 text-xs shrink-0 font-sans"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                            <div className="flex gap-2 mt-1">
+                                                <button
+                                                    onClick={() => handleLocatePoi(poi)}
+                                                    className="flex-1 bg-blue-700 hover:bg-blue-600 text-white text-xs py-1 px-2 rounded font-sans transition-colors"
+                                                >
+                                                    Locate
+                                                </button>
+                                                {playerType === PlayerType.Cheats && (
+                                                    <button
+                                                        onClick={() => onFastTravel(poi.id)}
+                                                        className="flex-1 bg-purple-700 hover:bg-purple-600 text-white text-xs py-1 px-2 rounded font-sans transition-colors"
+                                                    >
+                                                        Teleport
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

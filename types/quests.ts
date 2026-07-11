@@ -94,7 +94,7 @@ export type DialogueCheckRequirement =
   | { type: 'skill'; skill: SkillName; level: number }
   | { type: 'world_state'; property: 'windmillFlour' | 'monolithFire' | 'monolithFires' | 'monolithLogType' | 'monolith_pit_1' | 'monolith_pit_2' | 'monolith_pit_3' | 'monolith_pit_4' | 'destructionTrialProgress'; value: any; operator?: 'gte' | 'eq' }
   // FIX: Added 'operator' to quest check requirement to support flexible stage comparisons ---
-  | { type: 'quest'; questId: QuestId; status: 'not_started' | 'in_progress' | 'completed'; stage?: number; operator?: 'gte' | 'lt' | 'eq' }
+  | { type: 'quest'; questId: QuestId; status: 'not_started' | 'in_progress' | 'completed'; stage?: number; stages?: number[]; operator?: 'gte' | 'lt' | 'eq' }
   // FIX: Added new check type for quest-specific variables.
   | { type: 'variable'; name: string; value: any; operator: 'eq' | 'lt' | 'gte' }
   | { type: 'quest_requirements'; questId: QuestId }

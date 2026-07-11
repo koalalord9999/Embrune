@@ -38,7 +38,7 @@ export const oakhavenPois: Record<string, POI> = {
                 questTopics: ["capitals_call", "scales_of_the_swamp"],
                 conditionalGreetings: [
                     //Scales of the Swamp
-                    { text: "You're back. Did you find him? Do you have proof?", check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 7 }] } },
+                    { text: "Ah, you've returned finally... have you gathered any information?", check: { requirements: [{ type: 'quest', questId: 'scales_of_the_swamp', status: 'in_progress', stage: 7 }] } },
                     //Capitals Call
 
                     { text: "You still need to talk to Finn, go find him in his workshop in the crafting district.", check: { requirements: [{ type: 'quest', questId: 'capitals_call', status: 'in_progress', stage: 2 }] } },

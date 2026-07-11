@@ -255,6 +255,7 @@ export function inflateGameState(state: any): any {
         // 6b. Progression
         if (Array.isArray(state.lp)) full.lockedPois = state.lp;
         if (Array.isArray(state.cso)) full.clearedSkillObstacles = state.cso;
+        if (Array.isArray(state.bm)) full.bookmarks = state.bm;
 
         // 7. Resource Nodes
         full.resourceNodeStates = {};
